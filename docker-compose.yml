@@ -12,10 +12,6 @@ services:
       URI_USERS: service-users
       URI_NOTES: service-notes
       URI_FILES: service-files
-      GOOGLE_ID: 109855722560-7kr48r6l7sun66b4hju5d7hsh95p707s.apps.googleusercontent.com
-      GOOGLE_SECRET: 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
-      AUTH_SECRET: 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
-      AUTH_TRUST_HOST: true
     ports: 
       - 3000:3000
 
