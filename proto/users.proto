@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package proto;
+
+enum UserRole {
+  ROLE_USER = 0;
+  ROLE_ADMIN = 1;
+}
+
+message User {
+  string id = 1;
+  string created = 2;
+  string updated = 3;
+  optional string deleted = 4;
+
+  string email = 5;
+  string role = 6;
+
+  string providerId = 7;
+}
+
