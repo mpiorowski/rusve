@@ -22,7 +22,11 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 rand = "0.7"
 
-sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "migrate", "postgres", "uuid"] }
+sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "migrate", "postgres", "uuid", "time"] }
+time = "0.3.17"
+once_cell = "1.17.0"
+lazy_static = "1.4.0"
+async_once = "0.2.6"
 
 [build-dependencies]
 tonic-build = "0.8"

@@ -24,15 +24,12 @@ services:
       - db-notes
     working_dir: /app/server
     volumes:
-      - .:/app
+      - ./server:/app/server
     command: "cargo run"
     environment:
+      DATABASE_URL: "postgres://postgres:12345@db-notes/notes"
       ENV: development
       PORT: 443
-      DB_USER: postgres
-      DB_PASS: 12345
-      DB_HOST: db-notes
-      DB_NAME: notes
 
   db-notes:
     container_name: grpc-db-notes
@@ -41,3 +38,5 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
       POSTGRES_DB: notes
+    ports: 
+      - 5432:5432

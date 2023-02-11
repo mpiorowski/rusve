@@ -3,17 +3,19 @@ FROM rust:1.67
 RUN apt-get update && apt-get install -y \
     && apt-get install -y protobuf-compiler libprotobuf-dev
 
-WORKDIR /app
-
-COPY proto ./proto
-COPY server/Cargo.toml ./server/Cargo.toml
-COPY server/Cargo.lock ./server/Cargo.lock
-COPY server/build.rs ./server/build.rs
-COPY server/src ./server/src
-
 WORKDIR /app/server
 
+COPY ./server/Cargo.toml /app/server/Cargo.toml
+COPY ./server/Cargo.lock /app/server/Cargo.lock
 
-RUN cargo build
+RUN cargo fetch
+
+COPY ./proto /app/proto
+
+# COPY server/build.rs ./server/build.rs
+# COPY server/src ./server/src
+# 
+# 
+# RUN cargo build
 
 # CMD ["app"]
