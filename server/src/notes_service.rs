@@ -1,3 +1,4 @@
+use crate::POOL;
 use anyhow::Context;
 use anyhow::Result;
 use futures::TryStreamExt;
@@ -61,7 +62,7 @@ impl NotesService for MyNotes {
         tokio::spawn(async move {
             let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1")
                 .bind(uuid)
-                .fetch(&pool);
+                .fetch(POOL.get().await);
 
             // while let Some(row) = notes_stream.try_next().await.unwrap() {
             //     if let Ok(note) = map_note(row) {
@@ -95,13 +96,13 @@ impl NotesService for MyNotes {
 
     async fn create_note(&self, request: Request<Note>) -> Result<Response<Note>, Status> {
         println!("CreateNote = {:?}", request);
-        let pool = connect_db()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
 
         let note = request.into_inner();
         let user_id =
             Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
+        let pool = connect_db()
+            .await
+            .or_else(|e| Err(Status::internal(e.to_string())))?;
 
         let row =
             query("INSERT INTO notes (title, content, \"userId\") VALUES ($1, $2, $3) RETURNING *")

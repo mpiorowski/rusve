@@ -26,7 +26,7 @@ impl IntoStatus for sqlx::Error {
 
 lazy_static! {
     static ref POOL: AsyncOnce<PgPool> = AsyncOnce::new(async {
-        let database_url = "postgres://postgres:12345@db-notes:5432/notes";
+        let database_url = "postgres://postgres:12345@db-notes/notes";
         PgPoolOptions::new()
             .max_connections(20)
             .connect(database_url)
