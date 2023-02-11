@@ -51,9 +51,11 @@ impl NotesService for MyNotes {
     ) -> Result<Response<Self::GetNotesStream>, Status> {
         println!("GetNotes = {:?}", request);
 
-        let pool = connect_db()
-            .await
-            .or_else(|e| Err(Status::internal(e.to_string())))?;
+        let self_pool = self.pool.clone();
+
+        // let pool = connect_db()
+        //     .await
+        //     .or_else(|e| Err(Status::internal(e.to_string())))?;
         let (tx, rx) = mpsc::channel(4);
 
         let user_id = request.into_inner().user_id;
@@ -62,7 +64,7 @@ impl NotesService for MyNotes {
         tokio::spawn(async move {
             let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1")
                 .bind(uuid)
-                .fetch(POOL.get().await);
+                .fetch(&self_pool);
 
             // while let Some(row) = notes_stream.try_next().await.unwrap() {
             //     if let Ok(note) = map_note(row) {
@@ -100,16 +102,14 @@ impl NotesService for MyNotes {
         let note = request.into_inner();
         let user_id =
             Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
-        let pool = connect_db()
-            .await
-            .or_else(|e| Err(Status::internal(e.to_string())))?;
+        let self_pool = self.pool.clone();
 
         let row =
             query("INSERT INTO notes (title, content, \"userId\") VALUES ($1, $2, $3) RETURNING *")
                 .bind(note.title)
                 .bind(note.content)
                 .bind(user_id)
-                .fetch_one(&pool)
+                .fetch_one(&self_pool)
                 .await
                 .map_err(|e| Status::internal(e.to_string()))?;
 

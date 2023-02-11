@@ -11,8 +11,10 @@ use sqlx::{postgres::PgPoolOptions, PgPool};
 use tonic::{transport::Server, Status};
 use utils::check_env;
 
-#[derive(Debug, Default)]
-pub struct MyNotes {}
+#[derive(Debug)]
+pub struct MyNotes {
+    pool: PgPool,
+}
 
 trait IntoStatus {
     fn into_status(self) -> Status;
@@ -39,6 +41,13 @@ lazy_static! {
 async fn main() -> Result<()> {
     println!("Starting server...");
 
+    let database_url = check_env("DATABASE_URL")?;
+    let pool = PgPoolOptions::new()
+        .max_connections(20)
+        .connect(&database_url)
+        .await
+        .unwrap();
+
     sqlx::migrate!("./migrations")
         .run(POOL.get().await)
         .await
@@ -47,7 +56,7 @@ async fn main() -> Result<()> {
 
     let port = check_env("PORT")?;
     let addr = ("0.0.0.0:".to_owned() + &port).parse()?;
-    let notes = MyNotes::default();
+    let notes = MyNotes { pool };
 
     println!("Server started on port: {}", port);
     Server::builder()
