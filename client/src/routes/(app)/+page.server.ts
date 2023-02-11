@@ -7,7 +7,7 @@ import type { NoteId } from "../proto/proto/NoteId";
 
 export const load = (async ({ locals }) => {
     try {
-        const userId = "9bdecd2c-da28-4aeb-989d-87c4ee790175";
+        const userId = locals.userId;
         const request: UserId = { userId: userId };
         const stream = notesClient.getNotes(request, metadata);
         const notes: Note__Output[] = [];
@@ -49,7 +49,7 @@ export const actions = {
             const note: Note = {
                 title: title as string,
                 content: content as string,
-                userId: "9bdecd2c-da28-4aeb-989d-87c4ee790175",
+                userId: locals.userId,
             };
 
             const promise = new Promise<Note__Output>((resolve, reject) => {
@@ -66,7 +66,7 @@ export const actions = {
             throw error(500, "Could not create note");
         }
     },
-    delete: async ({ locals, request }) => {
+    deleteNote: async ({ locals, request }) => {
         const form = await request.formData();
         const id = form.get("id");
 
@@ -80,14 +80,14 @@ export const actions = {
                 userId: locals.userId,
             };
 
-            const promise = new Promise<Note__Output>((resolve, reject) => {
+            const promise = await new Promise<Note__Output>((resolve, reject) => {
                 notesClient.deleteNote(request, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });
 
             return {
-                note: await promise,
+                note: promise,
             };
         } catch (err) {
             console.error(err);

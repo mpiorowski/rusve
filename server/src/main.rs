@@ -2,9 +2,6 @@ mod notes_service;
 mod proto;
 mod utils;
 
-use async_once::AsyncOnce;
-use lazy_static::lazy_static;
-
 use anyhow::Result;
 use proto::notes_service_server::NotesServiceServer;
 use sqlx::{postgres::PgPoolOptions, PgPool};
@@ -26,17 +23,6 @@ impl IntoStatus for sqlx::Error {
     }
 }
 
-lazy_static! {
-    static ref POOL: AsyncOnce<PgPool> = AsyncOnce::new(async {
-        let database_url = "postgres://postgres:12345@db-notes/notes";
-        PgPoolOptions::new()
-            .max_connections(20)
-            .connect(database_url)
-            .await
-            .unwrap()
-    });
-}
-
 #[tokio::main]
 async fn main() -> Result<()> {
     println!("Starting server...");
@@ -49,7 +35,7 @@ async fn main() -> Result<()> {
         .unwrap();
 
     sqlx::migrate!("./migrations")
-        .run(POOL.get().await)
+        .run(&pool)
         .await
         .expect("Failed to run migrations");
     println!("Migrations ran successfully");

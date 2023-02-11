@@ -2,11 +2,11 @@
 
 
 export interface AuthRequest {
-  'providerId'?: (string);
+  'sub'?: (string);
   'email'?: (string);
 }
 
 export interface AuthRequest__Output {
-  'providerId': (string);
+  'sub': (string);
   'email': (string);
 }

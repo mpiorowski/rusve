@@ -21,7 +21,7 @@ service UsersService {
 }
 
 message AuthRequest {
-    string providerId = 1;
+    string sub = 1;
     string email = 2;
 }
 
