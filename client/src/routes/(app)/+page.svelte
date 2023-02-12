@@ -1,11 +1,17 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
+    import { signOut } from "@auth/sveltekit/client";
     import type { PageData } from "./$types";
 
     export let data: PageData;
+
+    async function onSignOut() {
+        await signOut();
+    }
 </script>
 
 <h1>Welcome to SvelteKit</h1>
+<button on:click={onSignOut}>Sign Out</button>
 
 <form action="?/createNote" method="post" use:enhance>
     <input type="text" name="title" placeholder="Title" />
