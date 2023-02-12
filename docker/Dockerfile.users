@@ -1,4 +1,4 @@
-FROM rust:1.67
+FROM rust:1.67 as dev
 
 RUN apt-get update && apt-get install -y \
     && apt-get install -y protobuf-compiler libprotobuf-dev
@@ -22,3 +22,18 @@ COPY ./server/service-users/build.rs /app/server/service-users/build.rs
 COPY ./server/service-users/migrations /app/server/service-users/migrations
 
 CMD ["cargo", "run"]
+
+# Production build
+FROM rust:1.67 as build
+COPY --from=dev /app /app
+
+RUN apt-get update && apt-get install -y \
+    && apt-get install -y protobuf-compiler libprotobuf-dev
+WORKDIR /app/server/service-users
+RUN cargo build --release
+
+# Production image
+FROM debian:buster-slim AS app
+COPY --from=build /app/server/service-users/target/release /app
+
+CMD ["/app/rust-grpc-users"]
