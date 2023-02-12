@@ -12,12 +12,6 @@ message UserId {
 
 service UsersService {
     rpc Auth(AuthRequest) returns (User) {}
-
-    rpc GetUsers(Empty) returns (stream User) {}
-    rpc GetUser(UserId) returns (User) {}
-    rpc GetUsersByIds(stream UserId) returns (stream User) {}
-    rpc CreateUser(stream User) returns (stream User) {}
-    rpc DeleteUser(User) returns (User) {}
 }
 
 message AuthRequest {

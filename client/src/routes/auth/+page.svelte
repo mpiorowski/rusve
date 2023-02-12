@@ -1,6 +1,5 @@
 <script lang="ts">
     import { signIn } from "@auth/sveltekit/client";
-    import logo from "$lib/images/icons-home-512.png";
     import Gmail from "$lib/icons/gmail.svelte";
 
     let isEmail = false;
@@ -14,9 +13,6 @@
 <div
     class="h-screen w-screen flex flex-col items-center justify-center max-w-lg m-auto px-6"
 >
-    <div class="w-40 h-40 flex flex-col items-center mb-4">
-        <img src={logo} alt="logo" />
-    </div>
     {#if !isSend && !isEmail}
         <button
             on:click={onSignInUsingGoogle}

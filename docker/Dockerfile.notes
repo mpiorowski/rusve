@@ -1,0 +1,24 @@
+FROM rust:1.67
+
+RUN apt-get update && apt-get install -y \
+    && apt-get install -y protobuf-compiler libprotobuf-dev
+
+WORKDIR /app/server/service-notes
+
+COPY ./server/service-notes/Cargo.toml /app/server/service-notes/Cargo.toml
+COPY ./server/service-notes/Cargo.lock /app/server/service-notes/Cargo.lock
+COPY ./proto /app/proto
+
+# dummy file to make cargo build
+RUN mkdir -p /app/server/service-notes/src
+RUN touch /app/server/service-notes/src/main.rs
+RUN echo "fn main() {}" > ./src/main.rs
+
+RUN cargo build
+
+RUN rm -rf /app/server/service-notes/src
+COPY ./server/service-notes/src /app/server/service-notes/src
+COPY ./server/service-notes/build.rs /app/server/service-notes/build.rs
+COPY ./server/service-notes/migrations /app/server/service-notes/migrations
+
+CMD ["cargo", "run"]

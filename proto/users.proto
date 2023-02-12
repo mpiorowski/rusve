@@ -15,7 +15,6 @@ message User {
 
   string email = 5;
   string role = 6;
-
-  string providerId = 7;
+  string sub = 7;
 }
 
