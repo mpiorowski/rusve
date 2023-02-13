@@ -7,9 +7,14 @@ edition = "2021"
 name = "rust-grpc-users"
 path = "src/main.rs"
 
+[[bin]]
+name = "proto"
+path = "src/build.rs"
+
 [dependencies]
 prost = "0.11.6"
 tonic = "0.8.3"
+tonic-build = "0.8"
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "sync", "time"] }
 tokio-stream = "0.1"
 futures = "0.3"
@@ -19,6 +24,3 @@ futures-util = "0.3"
 anyhow = "1.0.69"
 sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "migrate", "postgres", "uuid", "time"] }
 time = "0.3.17"
-
-[build-dependencies]
-tonic-build = "0.8"
