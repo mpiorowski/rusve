@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "proto": "proto-loader-gen-types --longs=String --enums=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=../client/src/proto ./*.proto"
+        "proto": "proto-loader-gen-types --longs=String --enums=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=../client/src/proto ./*.proto && cp ./*.proto ../client/src/proto/"
     },
     "dependencies": {
         "@grpc/grpc-js": "^1.8.4",

@@ -2,16 +2,11 @@ mod notes_service;
 mod proto;
 mod utils;
 
-use anyhow::Result;
+use anyhow::{Result, Context};
 use proto::notes_service_server::NotesServiceServer;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tonic::{transport::Server, Status};
 use utils::check_env;
-
-#[derive(Debug)]
-pub struct MyNotes {
-    pool: PgPool,
-}
 
 trait IntoStatus {
     fn into_status(self) -> Status;
@@ -23,6 +18,11 @@ impl IntoStatus for sqlx::Error {
     }
 }
 
+#[derive(Debug)]
+pub struct MyService {
+    pool: PgPool,
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     println!("Starting server...");
@@ -32,21 +32,21 @@ async fn main() -> Result<()> {
         .max_connections(20)
         .connect(&database_url)
         .await
-        .unwrap();
+        .with_context(|| format!("Failed to connect to database: {}", database_url))?;
 
     sqlx::migrate!("./migrations")
         .run(&pool)
         .await
-        .expect("Failed to run migrations");
+        .context("Failed to run migrations")?;
     println!("Migrations ran successfully");
 
     let port = check_env("PORT")?;
     let addr = ("0.0.0.0:".to_owned() + &port).parse()?;
-    let notes = MyNotes { pool };
+    let service = MyService { pool };
 
     println!("Server started on port: {}", port);
     Server::builder()
-        .add_service(NotesServiceServer::new(notes))
+        .add_service(NotesServiceServer::new(service))
         .serve(addr)
         .await?;
 

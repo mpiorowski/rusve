@@ -1,24 +1,22 @@
 version: '3'
 services:
   client: 
-    container_name: grpc-client
-    image: node:19-alpine
-    working_dir: /client
+    container_name: rust-grpc-client
+    working_dir: /app
+    build:
+      context: ./client/
+      target: dev
     volumes:
-      - ./client:/client
-      - ./proto:/proto
-    command: npm run dev
-    environment:
-      URI_USERS: service-users
-      URI_NOTES: service-notes
+      - ./client:/app
     ports: 
       - 3000:3000
 
   service-users:
-    container_name: grpc-service-users
+    container_name: rust-grpc-service-users
+    working_dir: /app
     build:
-      context: .
-      dockerfile: ./docker/Dockerfile.users
+      context: ./service-users/
+      target: dev
     depends_on:
       - db-users
     environment:
@@ -27,7 +25,7 @@ services:
       PORT: 443
 
   db-users:
-    container_name: grpc-db-users
+    container_name: rust-grpc-db-users
     image: postgres:15.1
     environment:
       POSTGRES_USER: postgres
@@ -35,10 +33,11 @@ services:
       POSTGRES_DB: users
 
   service-notes:
-    container_name: grpc-service-notes
+    container_name: rust-grpc-service-notes
+    working_dir: /app
     build:
-      context: .
-      dockerfile: ./docker/Dockerfile.notes
+      context: ./service-notes/
+      target: dev
     depends_on:
       - db-notes
     environment:
@@ -47,7 +46,7 @@ services:
       PORT: 443
 
   db-notes:
-    container_name: grpc-db-notes
+    container_name: rust-grpc-db-notes
     image: postgres:15.1
     environment:
       POSTGRES_USER: postgres

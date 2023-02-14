@@ -1,13 +1,12 @@
-mod users_service;
 mod proto;
+mod users_service;
 mod utils;
 
-use anyhow::Result;
+use crate::proto::users_service_server::UsersServiceServer;
+use anyhow::{Context, Result};
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tonic::{transport::Server, Status};
 use utils::check_env;
-
-use crate::proto::users_service_server::UsersServiceServer;
 
 trait IntoStatus {
     fn into_status(self) -> Status;
@@ -32,12 +31,14 @@ async fn main() -> Result<()> {
     let pool = PgPoolOptions::new()
         .max_connections(20)
         .connect(&database_url)
-        .await?;
+        .await
+        .with_context(|| format!("Failed to connect to database: {}", database_url))?;
 
     sqlx::migrate!("./migrations")
         .run(&pool)
         .await
-        .expect("Failed to run migrations");
+        .context("Failed to run migrations")?;
+
     println!("Migrations ran successfully");
 
     let port = check_env("PORT")?;

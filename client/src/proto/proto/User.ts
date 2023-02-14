@@ -8,7 +8,7 @@ export interface User {
   'deleted'?: (string);
   'email'?: (string);
   'role'?: (string);
-  'providerId'?: (string);
+  'sub'?: (string);
   '_deleted'?: "deleted";
 }
 
@@ -19,6 +19,6 @@ export interface User__Output {
   'deleted'?: (string);
   'email': (string);
   'role': (string);
-  'providerId': (string);
+  'sub': (string);
   '_deleted': "deleted";
 }
