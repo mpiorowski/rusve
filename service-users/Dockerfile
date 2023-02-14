@@ -17,7 +17,7 @@ RUN rm -rf /app/src
 COPY ./src /app/src
 COPY ./migrations /app/migrations
 
-CMD ["cargo", "run"]
+CMD ["cargo", "run", "--bin", "main"]
 
 # Production build
 FROM rust:1.67 as build
@@ -26,7 +26,7 @@ WORKDIR /app
 RUN cargo build --release
 
 # Production image
-FROM debian:buster-slim AS app
+FROM debian:buster-slim AS prod
 COPY --from=build /app/target/release /app
 
 CMD ["/app/rust-grpc-users"]

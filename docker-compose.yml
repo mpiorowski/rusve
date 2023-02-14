@@ -1,55 +1,54 @@
 version: '3'
 services:
   client: 
-    container_name: grpc-client
+    container_name: rust-grpc-client
+    working_dir: /app
     build:
       context: ./client/
       target: dev
-    working_dir: /app
     volumes:
       - ./client:/app
-    environment:
-      URI_USERS: service-users
-      URI_NOTES: service-notes
     ports: 
       - 3000:3000
 
-        # service-users:
-        #   container_name: grpc-service-users
-        #   build:
-        #     context: .
-        #     dockerfile: ./docker/Dockerfile.users
-        #   depends_on:
-        #     - db-users
-        #   environment:
-        #     DATABASE_URL: "postgres://postgres:12345@db-users/users"
-        #     ENV: development
-        #     PORT: 443
+  service-users:
+    container_name: rust-grpc-service-users
+    working_dir: /app
+    build:
+      context: ./service-users/
+      target: dev
+    depends_on:
+      - db-users
+    environment:
+      DATABASE_URL: "postgres://postgres:12345@db-users/users"
+      ENV: development
+      PORT: 443
 
-        # db-users:
-        #   container_name: grpc-db-users
-        #   image: postgres:15.1
-        #   environment:
-        #     POSTGRES_USER: postgres
-        #     POSTGRES_PASSWORD: 12345
-        #     POSTGRES_DB: users
+  db-users:
+    container_name: rust-grpc-db-users
+    image: postgres:15.1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: users
 
-        # service-notes:
-        #   container_name: grpc-service-notes
-        #   build:
-        #     context: .
-        #     dockerfile: ./docker/Dockerfile.notes
-        #   depends_on:
-        #     - db-notes
-        #   environment:
-        #     DATABASE_URL: "postgres://postgres:12345@db-notes/notes"
-        #     ENV: development
-        #     PORT: 443
+  service-notes:
+    container_name: rust-grpc-service-notes
+    working_dir: /app
+    build:
+      context: ./service-notes/
+      target: dev
+    depends_on:
+      - db-notes
+    environment:
+      DATABASE_URL: "postgres://postgres:12345@db-notes/notes"
+      ENV: development
+      PORT: 443
 
-        # db-notes:
-        #   container_name: grpc-db-notes
-        #   image: postgres:15.1
-        #   environment:
-        #     POSTGRES_USER: postgres
-        #     POSTGRES_PASSWORD: 12345
-        #     POSTGRES_DB: notes
+  db-notes:
+    container_name: rust-grpc-db-notes
+    image: postgres:15.1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: notes

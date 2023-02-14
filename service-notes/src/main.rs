@@ -2,7 +2,7 @@ mod notes_service;
 mod proto;
 mod utils;
 
-use anyhow::Result;
+use anyhow::{Result, Context};
 use proto::notes_service_server::NotesServiceServer;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tonic::{transport::Server, Status};
@@ -27,17 +27,17 @@ pub struct MyService {
 async fn main() -> Result<()> {
     println!("Starting server...");
 
-    let database_url = check_env("DATABASE_URL")? + "/notes";
+    let database_url = check_env("DATABASE_URL")?;
     let pool = PgPoolOptions::new()
         .max_connections(20)
         .connect(&database_url)
         .await
-        .expect("Failed to connect to database");
+        .with_context(|| format!("Failed to connect to database: {}", database_url))?;
 
     sqlx::migrate!("./migrations")
         .run(&pool)
         .await
-        .expect("Failed to run migrations");
+        .context("Failed to run migrations")?;
     println!("Migrations ran successfully");
 
     let port = check_env("PORT")?;
