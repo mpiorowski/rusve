@@ -29,4 +29,5 @@ RUN cargo build --release
 FROM debian:buster-slim AS app
 COPY --from=build /app/target/release /app
 
-CMD ["/app/rust-grpc-users"]
+CMD ["/app/rust-grpc-notes"]
+

@@ -1,13 +1,12 @@
-mod users_service;
 mod proto;
+mod users_service;
 mod utils;
 
+use crate::proto::users_service_server::UsersServiceServer;
 use anyhow::Result;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tonic::{transport::Server, Status};
 use utils::check_env;
-
-use crate::proto::users_service_server::UsersServiceServer;
 
 trait IntoStatus {
     fn into_status(self) -> Status;
@@ -28,11 +27,12 @@ pub struct MyService {
 async fn main() -> Result<()> {
     println!("Starting server...");
 
-    let database_url = check_env("DATABASE_URL")?;
+    let database_url = check_env("DATABASE_URL")? + "/users";
     let pool = PgPoolOptions::new()
         .max_connections(20)
         .connect(&database_url)
-        .await?;
+        .await
+        .expect("Failed to connect to database");
 
     sqlx::migrate!("./migrations")
         .run(&pool)

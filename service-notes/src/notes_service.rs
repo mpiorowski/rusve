@@ -9,7 +9,7 @@ use tonic::{Request, Response, Status};
 
 use crate::{
     proto::{notes_service_server::NotesService, Note, NoteId, UserId},
-    MyNotes,
+    MyService,
 };
 
 fn map_note(row: Option<PgRow>) -> Result<Note> {
@@ -40,7 +40,7 @@ fn map_note(row: Option<PgRow>) -> Result<Note> {
 }
 
 #[tonic::async_trait]
-impl NotesService for MyNotes {
+impl NotesService for MyService {
     type GetNotesStream = ReceiverStream<Result<Note, Status>>;
 
     async fn get_notes(
