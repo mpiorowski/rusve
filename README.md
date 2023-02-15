@@ -10,7 +10,7 @@ If You have any questions, feel free to ask them in Discussions or Issues. I hop
 - Gateway to services and service to service communication using gRPC
 - So yeah, everything works on gRPC, either as streams or unary, IT IS FAST, locally request can be as fast as 3-10 ms
 
-Check my others similar projects:
+Check my other similar projects:
 - [Go with SvelteKit using gRPC](https://github.com/mpiorowski/go-svelte-grpc)
 - [NodeJs with SvelteKit using GraphQL](https://github.com/mpiorowski/microservices-ts-fastify-svelte)
 
