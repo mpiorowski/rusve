@@ -15,3 +15,9 @@ Check my others similar projects:
 - [NodeJs with SvelteKit using GraphQL](https://github.com/mpiorowski/microservices-ts-fastify-svelte)
 
 In development: Files and Async Email
+
+## Fast dev deployment (without files and email)
+```
+npm i --prefix client/
+docker-compose up
+```
