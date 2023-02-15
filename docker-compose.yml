@@ -20,7 +20,7 @@ services:
     depends_on:
       - db-users
     environment:
-      DATABASE_URL: postgres://postgres:xloabzLz1JYBactX@db.jgmvevoghuzjsotolvsp.supabase.co/users
+      DATABASE_URL: postgresql://postgres:12345@db-users/users
       PORT: 443
 
   db-users:
@@ -39,8 +39,9 @@ services:
       target: dev
     depends_on:
       - db-notes
+      - service-users
     environment:
-      DATABASE_URL: postgres://postgres:12345@db-notes/notes
+      DATABASE_URL: postgresql://postgres:12345@db-notes/notes
       URI_USERS: http://service-users:443
       PORT: 443
 
