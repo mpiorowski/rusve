@@ -16,8 +16,7 @@ Check my others similar projects:
 
 In development: Files and Async Email
 
-## Fast dev deployment (without files and email)
+## Dev deployment 
 ```
-npm i --prefix client/
 docker-compose up
 ```
