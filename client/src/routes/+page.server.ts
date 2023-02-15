@@ -1,13 +1,15 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import type { UserId } from "../../proto/proto/UserId";
-import { metadata, notesClient } from "../../grpc";
-import type { Note, Note__Output } from "../../proto/proto/Note";
-import type { NoteId } from "../../proto/proto/NoteId";
+import type { UserId } from "../proto/proto/UserId";
+import { metadata, notesClient } from "../grpc";
+import type { Note, Note__Output } from "../proto/proto/Note";
+import type { NoteId } from "../proto/proto/NoteId";
+import { performanceLogger } from "$lib/utils/logging.util";
 
 export const load = (async ({ locals }) => {
     try {
         const start = performance.now();
+        const end = performanceLogger("getNotes");
         const userId = locals.userId;
         const request: UserId = { userId: userId };
         const stream = notesClient.getNotes(request, metadata);
@@ -27,11 +29,12 @@ export const load = (async ({ locals }) => {
             });
         });
 
-        const end = performance.now();
-        console.log(`Loaded notes in ${end - start}ms`);
+        end();
+        const end2 = performance.now();
 
         return {
             notes: notes,
+            duration: end2 - start,
         };
     } catch (err) {
         console.error(err);
@@ -41,6 +44,9 @@ export const load = (async ({ locals }) => {
 
 export const actions = {
     createNote: async ({ locals, request }) => {
+        const start = performance.now();
+        const end = performanceLogger("createNote");
+
         const form = await request.formData();
         const title = form.get("title");
         const content = form.get("content");
@@ -62,8 +68,11 @@ export const actions = {
                 );
             });
 
+            end();
+            const end2 = performance.now();
             return {
                 note: await promise,
+                duration: end2 - start,
             };
         } catch (err) {
             console.error(err);
@@ -71,27 +80,35 @@ export const actions = {
         }
     },
     deleteNote: async ({ locals, request }) => {
+        const start = performance.now();
+        const end = performanceLogger("deleteNote");
+
         const form = await request.formData();
         const id = form.get("id");
 
         if (!id) {
             throw error(400, "Missing id");
         }
-
         try {
             const request: NoteId = {
                 noteId: id as string,
                 userId: locals.userId,
             };
 
-            const promise = await new Promise<Note__Output>((resolve, reject) => {
-                notesClient.deleteNote(request, metadata, (err, response) =>
-                    err || !response ? reject(err) : resolve(response),
-                );
-            });
+            const promise = new Promise<Note__Output>(
+                (resolve, reject) => {
+                    notesClient.deleteNote(request, metadata, (err, response) =>
+                        err || !response ? reject(err) : resolve(response),
+                    );
+                },
+            );
+
+            end();
+            const end2 = performance.now();
 
             return {
-                note: promise,
+                note: await promise,
+                duration: end2 - start,
             };
         } catch (err) {
             console.error(err);

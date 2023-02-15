@@ -5,4 +5,3 @@ node_modules
 /package
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
-.env

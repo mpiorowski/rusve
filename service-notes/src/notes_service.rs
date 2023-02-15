@@ -134,12 +134,7 @@ impl NotesService for MyService {
         println!("DeleteNote = {:?}", request);
         let start = std::time::Instant::now();
 
-        let mut conn = self
-            .pool
-            .acquire()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?
-            .leak();
+        let pool = self.pool.clone();
 
         let request = request.into_inner();
         let note_uuid =
@@ -151,7 +146,7 @@ impl NotesService for MyService {
             query("UPDATE notes SET deleted = NOW() WHERE id = $1 AND \"userId\" = $2 RETURNING *")
                 .bind(note_uuid)
                 .bind(user_uuid)
-                .fetch_one(&mut conn)
+                .fetch_one(&pool)
                 .await
                 .map_err(|e| Status::not_found(e.to_string()))?;
 
