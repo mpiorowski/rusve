@@ -7,6 +7,7 @@ import type { NoteId } from "../../proto/proto/NoteId";
 
 export const load = (async ({ locals }) => {
     try {
+        const start = performance.now();
         const userId = locals.userId;
         const request: UserId = { userId: userId };
         const stream = notesClient.getNotes(request, metadata);
@@ -25,6 +26,9 @@ export const load = (async ({ locals }) => {
                 reject(err);
             });
         });
+
+        const end = performance.now();
+        console.log(`Loaded notes in ${end - start}ms`);
 
         return {
             notes: notes,

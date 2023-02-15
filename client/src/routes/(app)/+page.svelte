@@ -23,6 +23,8 @@
     <form class="content" action="?/deleteNote" method="post" use:enhance>
         <h2>{note.title}</h2>
         <p>{note.content}</p>
+        <p>{note.user?.email}</p>
+        <p>{note.user?.sub}</p>
         <input type="hidden" name="id" value={note.id} />
         <button type="submit">Delete Note</button>
     </form>

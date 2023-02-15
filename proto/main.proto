@@ -12,6 +12,7 @@ message UserId {
 
 service UsersService {
     rpc Auth(AuthRequest) returns (User) {}
+    rpc GetUser(UserId) returns (User) {}
 }
 
 message AuthRequest {
