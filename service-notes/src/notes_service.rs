@@ -1,3 +1,7 @@
+use crate::{
+    proto::{notes_service_server::NotesService, Note, NoteId, UserId},
+    MyService,
+};
 use anyhow::Context;
 use anyhow::Result;
 use futures::TryStreamExt;
@@ -6,11 +10,6 @@ use sqlx::{postgres::PgRow, query, types::Uuid, Row};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
-
-use crate::{
-    proto::{notes_service_server::NotesService, Note, NoteId, UserId},
-    MyService,
-};
 
 fn map_note(row: Option<PgRow>) -> Result<Note> {
     match row {
@@ -47,18 +46,22 @@ impl NotesService for MyService {
         &self,
         request: Request<UserId>,
     ) -> Result<Response<Self::GetNotesStream>, Status> {
+        #[cfg(debug_assertions)]
         println!("GetNotes = {:?}", request);
         let start = std::time::Instant::now();
 
-        let mut conn = self.pool.acquire().await.map_err(|e| Status::internal(e.to_string()))?.leak();
+        let pool = self.pool.clone();
+        let mut users_conn = self.users_conn.clone();
+
         let (tx, rx) = mpsc::channel(4);
         let user_id = request.into_inner().user_id;
         let uuid = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
+
         tokio::spawn(async move {
             let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
                 .bind(uuid)
-                .fetch(&mut conn);
+                .fetch(&pool);
 
             loop {
                 match notes_stream.try_next().await {
@@ -68,8 +71,29 @@ impl NotesService for MyService {
                         break;
                     }
                     Ok(note) => {
-                        let note = map_note(note).unwrap();
-                        tx.send(Ok(note)).await.unwrap();
+                        let note = map_note(note);
+                        if let Err(note) = note {
+                            tx.send(Err(Status::internal(note.to_string())))
+                                .await
+                                .unwrap();
+                            break;
+                        } else {
+                            let note = note.unwrap();
+
+                            let request = tonic::Request::new(UserId {
+                                user_id: user_id.to_owned(),
+                            });
+                            let response = users_conn.get_user(request).await;
+                            if let Err(e) = response {
+                                tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                                break;
+                            }
+                            let response = response.unwrap();
+                            let user = response.into_inner();
+                            let mut note = note;
+                            note.user = Some(user);
+                            tx.send(Ok(note)).await.unwrap();
+                        }
                     }
                     Err(e) => {
                         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
@@ -82,20 +106,22 @@ impl NotesService for MyService {
     }
 
     async fn create_note(&self, request: Request<Note>) -> Result<Response<Note>, Status> {
+        #[cfg(debug_assertions)]
         println!("CreateNote = {:?}", request);
         let start = std::time::Instant::now();
+
+        let pool = self.pool.clone();
 
         let note = request.into_inner();
         let user_id =
             Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
-        let mut conn = self.pool.acquire().await.map_err(|e| Status::internal(e.to_string()))?.leak();
 
         let row =
             query("INSERT INTO notes (title, content, \"userId\") VALUES ($1, $2, $3) RETURNING *")
                 .bind(note.title)
                 .bind(note.content)
                 .bind(user_id)
-                .fetch_one(&mut conn)
+                .fetch_one(&pool)
                 .await
                 .map_err(|e| Status::internal(e.to_string()))?;
 
@@ -108,7 +134,7 @@ impl NotesService for MyService {
         println!("DeleteNote = {:?}", request);
         let start = std::time::Instant::now();
 
-        let mut conn = self.pool.acquire().await.map_err(|e| Status::internal(e.to_string()))?.leak();
+        let pool = self.pool.clone();
 
         let request = request.into_inner();
         let note_uuid =
@@ -120,7 +146,7 @@ impl NotesService for MyService {
             query("UPDATE notes SET deleted = NOW() WHERE id = $1 AND \"userId\" = $2 RETURNING *")
                 .bind(note_uuid)
                 .bind(user_uuid)
-                .fetch_one(&mut conn)
+                .fetch_one(&pool)
                 .await
                 .map_err(|e| Status::not_found(e.to_string()))?;
 

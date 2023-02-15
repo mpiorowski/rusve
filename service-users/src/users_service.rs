@@ -4,9 +4,9 @@ use sqlx::{postgres::PgRow, query, types::Uuid, Row};
 use tonic::{Request, Response, Status};
 
 use crate::proto::users_service_server::UsersService;
-use crate::proto::UserRole;
 use crate::proto::{AuthRequest, User};
-use crate::MyService;
+use crate::proto::{UserId, UserRole};
+use crate::{users_service, MyService};
 
 fn map_user(row: Option<PgRow>) -> Result<User> {
     match row {
@@ -32,12 +32,26 @@ fn map_user(row: Option<PgRow>) -> Result<User> {
     }
 }
 
+trait TryInto<U> {
+    type Error;
+    fn try_into(self) -> Result<U>;
+}
+
+impl TryInto<Uuid> for String {
+    type Error = anyhow::Error;
+
+    fn try_into(self) -> Result<Uuid> {
+        Uuid::parse_str(&self).map_err(|e| anyhow::anyhow!(e))
+    }
+}
+
 #[tonic::async_trait]
 impl UsersService for MyService {
     async fn auth(&self, request: Request<AuthRequest>) -> Result<Response<User>, Status> {
+        #[cfg(debug_assertions)]
         println!("Auth: {:?}", request);
         let start = std::time::Instant::now();
-        let self_pool = self.pool.clone();
+        let pool = self.pool.clone();
 
         let request = request.into_inner();
         let email = request.email;
@@ -47,7 +61,7 @@ impl UsersService for MyService {
             query("update users set updated = now() where email = $1 and sub = $2 returning *")
                 .bind(&email)
                 .bind(&sub)
-                .fetch_optional(&self_pool)
+                .fetch_optional(&pool)
                 .await
                 .map_err(|e| Status::internal(e.to_string()))?;
 
@@ -63,7 +77,7 @@ impl UsersService for MyService {
                         .bind(&email)
                         .bind(&sub)
                         .bind(UserRole::as_str_name(&UserRole::RoleUser))
-                        .fetch_one(&self_pool)
+                        .fetch_one(&pool)
                         .await
                         .map_err(|e| Status::internal(e.to_string()))?;
 
@@ -72,5 +86,27 @@ impl UsersService for MyService {
                 Ok(Response::new(user))
             }
         }
+    }
+
+    async fn get_user(&self, request: Request<UserId>) -> Result<Response<User>, Status> {
+        #[cfg(debug_assertions)]
+        println!("GetUser: {:?}", request);
+        let start = std::time::Instant::now();
+
+        let pool = self.pool.clone();
+
+        let request = request.into_inner();
+        let uuid: Uuid = users_service::TryInto::try_into(request.user_id)
+            .map_err(|e| Status::internal(e.to_string()))?;
+
+        let row = query("select * from users where id = $1")
+            .bind(&uuid)
+            .fetch_optional(&pool)
+            .await
+            .map_err(|e| Status::not_found(e.to_string()))?;
+
+        let user = map_user(row).map_err(|e| Status::internal(e.to_string()))?;
+        println!("Elapsed: {:?}", start.elapsed());
+        Ok(Response::new(user))
     }
 }

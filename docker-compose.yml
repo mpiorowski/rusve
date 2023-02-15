@@ -20,8 +20,7 @@ services:
     depends_on:
       - db-users
     environment:
-      DATABASE_URL: "postgres://postgres:12345@db-users/users"
-      ENV: development
+      DATABASE_URL: postgres://postgres:12345@db-users/users
       PORT: 443
 
   db-users:
@@ -41,8 +40,8 @@ services:
     depends_on:
       - db-notes
     environment:
-      DATABASE_URL: "postgres://postgres:12345@db-notes/notes"
-      ENV: development
+      DATABASE_URL: postgres://postgres:12345@db-notes/notes
+      URI_USERS: http://service-users:443
       PORT: 443
 
   db-notes:

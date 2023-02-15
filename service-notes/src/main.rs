@@ -2,11 +2,13 @@ mod notes_service;
 mod proto;
 mod utils;
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use proto::notes_service_server::NotesServiceServer;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tonic::{transport::Server, Status};
 use utils::check_env;
+
+use crate::proto::users_service_client::UsersServiceClient;
 
 trait IntoStatus {
     fn into_status(self) -> Status;
@@ -21,6 +23,7 @@ impl IntoStatus for sqlx::Error {
 #[derive(Debug)]
 pub struct MyService {
     pool: PgPool,
+    users_conn: UsersServiceClient<tonic::transport::Channel>,
 }
 
 #[tokio::main]
@@ -42,7 +45,13 @@ async fn main() -> Result<()> {
 
     let port = check_env("PORT")?;
     let addr = ("0.0.0.0:".to_owned() + &port).parse()?;
-    let service = MyService { pool };
+
+    let uri_users = check_env("URI_USERS")?;
+    let users_conn = UsersServiceClient::connect(uri_users)
+        .await
+        .context("Failed to connect to users service")?;
+
+    let service = MyService { pool, users_conn };
 
     println!("Server started on port: {}", port);
     Server::builder()
