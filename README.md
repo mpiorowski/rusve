@@ -18,5 +18,6 @@ In development: Files and Async Email
 
 ## Dev deployment 
 ```
+npm i --prefix client/
 docker-compose up
 ```
