@@ -20,7 +20,7 @@ services:
     depends_on:
       - db-users
     environment:
-      DATABASE_URL: postgres://postgres:12345@db-users/users
+      DATABASE_URL: postgres://postgres:xloabzLz1JYBactX@db.jgmvevoghuzjsotolvsp.supabase.co/users
       PORT: 443
 
   db-users:
