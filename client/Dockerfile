@@ -14,7 +14,7 @@ CMD ["npm", "run", "dev"]
 FROM node:19-alpine as prod
 WORKDIR /app
 COPY --from=dev /app /app
-COPY .env /app/.env
+COPY .env.prod /app/.env
 RUN npm run build
 
 CMD ["node", "build"]
