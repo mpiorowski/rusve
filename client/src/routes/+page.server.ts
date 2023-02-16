@@ -1,10 +1,11 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import type { UserId } from "../proto/proto/UserId";
-import { metadata, notesClient } from "../grpc";
+import { fetchToken, notesClient } from "../grpc";
 import type { Note, Note__Output } from "../proto/proto/Note";
 import type { NoteId } from "../proto/proto/NoteId";
 import { performanceLogger } from "$lib/utils/logging.util";
+import { URI_NOTES } from "$env/static/private";
 
 export const load = (async ({ locals }) => {
     try {
@@ -12,6 +13,8 @@ export const load = (async ({ locals }) => {
         const end = performanceLogger("getNotes");
         const userId = locals.userId;
         const request: UserId = { userId: userId };
+
+        const metadata = await fetchToken(URI_NOTES);
         const stream = notesClient.getNotes(request, metadata);
         const notes: Note__Output[] = [];
 
@@ -62,6 +65,7 @@ export const actions = {
                 userId: locals.userId,
             };
 
+            const metadata = await fetchToken(URI_NOTES);
             const promise = new Promise<Note__Output>((resolve, reject) => {
                 notesClient.createNote(note, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
@@ -95,13 +99,12 @@ export const actions = {
                 userId: locals.userId,
             };
 
-            const promise = new Promise<Note__Output>(
-                (resolve, reject) => {
-                    notesClient.deleteNote(request, metadata, (err, response) =>
-                        err || !response ? reject(err) : resolve(response),
-                    );
-                },
-            );
+            const metadata = await fetchToken(URI_NOTES);
+            const promise = new Promise<Note__Output>((resolve, reject) => {
+                notesClient.deleteNote(request, metadata, (err, response) =>
+                    err || !response ? reject(err) : resolve(response),
+                );
+            });
 
             end();
             const end2 = performance.now();
