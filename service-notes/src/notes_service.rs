@@ -14,19 +14,18 @@ use tonic::{Request, Response, Status};
 fn map_note(row: Option<PgRow>) -> Result<Note> {
     match row {
         Some(row) => {
-            let id: Uuid = row.try_get("id").context("Failed to get id")?;
-            let user_id: Uuid = row.try_get("userId").context("Failed to get userId")?;
-            let created: OffsetDateTime =
-                row.try_get("created").context("Failed to get created")?;
-            let updated: OffsetDateTime =
-                row.try_get("updated").context("Failed to get updated")?;
-            let deleted: Option<OffsetDateTime> =
-                row.try_get("deleted").context("Failed to get deleted")?;
+            let id: Uuid = row.try_get("id")?;
+            let user_id: Uuid = row.try_get("userId")?;
+            let created: OffsetDateTime = row.try_get("created")?;
+            let updated: OffsetDateTime = row.try_get("updated")?;
+            let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
+            let title = row.try_get("title")?;
+            let content = row.try_get("content")?;
             let note = Note {
                 id: id.to_string(),
                 user_id: user_id.to_string(),
-                title: row.try_get("title").context("Failed to get title")?,
-                content: row.try_get("content").context("Failed to get content")?,
+                title,
+                content,
                 created: created.to_string(),
                 updated: updated.to_string(),
                 deleted: deleted.map(|d| d.to_string()),
@@ -56,7 +55,6 @@ impl NotesService for MyService {
         let (tx, rx) = mpsc::channel(4);
         let user_id = request.into_inner().user_id;
         let uuid = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
-
 
         tokio::spawn(async move {
             let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
