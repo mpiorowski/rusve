@@ -1,15 +1,15 @@
 use crate::{
     proto::{notes_service_server::NotesService, Note, NoteId, UserId},
+    utils::{check_env, fetch_auth_token},
     MyService,
 };
-use anyhow::Context;
 use anyhow::Result;
 use futures::TryStreamExt;
 use sqlx::types::time::OffsetDateTime;
 use sqlx::{postgres::PgRow, query, types::Uuid, Row};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
-use tonic::{Request, Response, Status};
+use tonic::{metadata::MetadataMap, Request, Response, Status};
 
 fn map_note(row: Option<PgRow>) -> Result<Note> {
     match row {
@@ -78,9 +78,15 @@ impl NotesService for MyService {
                         } else {
                             let note = note.unwrap();
 
-                            let request = tonic::Request::new(UserId {
+                            let uri_users = check_env("URI_USERS").unwrap();
+                            let token = fetch_auth_token(&uri_users).await.unwrap();
+                            let mut metadata = MetadataMap::new();
+                            metadata.insert("authorization", token.parse().unwrap());
+
+                            let request = Request::new(UserId {
                                 user_id: user_id.to_owned(),
                             });
+
                             let response = users_conn.get_user(request).await;
                             if let Err(e) = response {
                                 tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
