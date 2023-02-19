@@ -82,6 +82,7 @@ impl NotesService for MyService {
                             let mut metadata = MetadataMap::new();
                             let uri_users = check_env("URI_USERS").unwrap();
                             let token = fetch_auth_token(&uri_users).await.unwrap();
+                            println!("Token: {}", token);
                             metadata.insert("authorization", token.parse().unwrap());
 
                             // Get user
