@@ -14,7 +14,7 @@ pub fn check_env(env_str: &str) -> Result<String> {
 pub async fn fetch_auth_token(service_uri: &str) -> Result<String> {
     let client = reqwest::Client::new();
     let res = client
-        .get("http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?audience=https://".to_owned() + service_uri)
+        .get("http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?audience=".to_owned() + service_uri)
         .header("Metadata-Flavor", "Google")
         .send()
         .await?;

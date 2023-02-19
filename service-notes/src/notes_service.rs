@@ -45,6 +45,7 @@ impl NotesService for MyService {
         &self,
         request: Request<UserId>,
     ) -> Result<Response<Self::GetNotesStream>, Status> {
+
         #[cfg(debug_assertions)]
         println!("GetNotes = {:?}", request);
         let start = std::time::Instant::now();
@@ -78,15 +79,16 @@ impl NotesService for MyService {
                         } else {
                             let note = note.unwrap();
 
+                            // Generate auth token
                             let uri_users = check_env("URI_USERS").unwrap();
                             let token = fetch_auth_token(&uri_users).await.unwrap();
                             let mut metadata = MetadataMap::new();
                             metadata.insert("authorization", token.parse().unwrap());
 
+                            // Get user
                             let request = Request::new(UserId {
                                 user_id: user_id.to_owned(),
                             });
-
                             let response = users_conn.get_user(request).await;
                             if let Err(e) = response {
                                 tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
