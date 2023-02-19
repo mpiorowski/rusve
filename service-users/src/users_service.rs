@@ -48,7 +48,7 @@ impl TryInto<Uuid> for String {
 #[tonic::async_trait]
 impl UsersService for MyService {
     async fn auth(&self, request: Request<AuthRequest>) -> Result<Response<User>, Status> {
-        #[cfg(debug_assertions)]
+        // #[cfg(debug_assertions)]
         println!("Auth: {:?}", request);
         let start = std::time::Instant::now();
         let pool = self.pool.clone();
@@ -89,7 +89,7 @@ impl UsersService for MyService {
     }
 
     async fn get_user(&self, request: Request<UserId>) -> Result<Response<User>, Status> {
-        #[cfg(debug_assertions)]
+        // #[cfg(debug_assertions)]
         println!("GetUser: {:?}", request);
         let start = std::time::Instant::now();
 
