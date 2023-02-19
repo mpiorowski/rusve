@@ -1,5 +1,8 @@
 use crate::{
-    proto::{notes_service_server::NotesService, Note, NoteId, UserId},
+    proto::{
+        notes_service_server::NotesService, users_service_client::UsersServiceClient, Note, NoteId,
+        UserId,
+    },
     utils::{check_env, fetch_auth_token},
     MyService,
 };
@@ -52,6 +55,9 @@ impl NotesService for MyService {
         let pool = self.pool.clone();
         let mut users_conn = self.users_conn.clone();
 
+        let uri_users = check_env("URI_USERS").unwrap();
+        let mut users_conn = UsersServiceClient::connect(uri_users).await.unwrap();
+
         let (tx, rx) = mpsc::channel(4);
         let user_id = request.into_inner().user_id;
         let uuid = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
@@ -83,7 +89,7 @@ impl NotesService for MyService {
                             let uri_users = check_env("URI_USERS").unwrap();
                             let token = fetch_auth_token(&uri_users).await.unwrap();
                             println!("Token: {}", token);
-                            metadata.append("authorization", token.parse().unwrap());
+                            metadata.insert("authorization", token.parse().unwrap());
 
                             // Get user
                             let request = Request::from_parts(
@@ -96,7 +102,6 @@ impl NotesService for MyService {
 
                             let response = users_conn.get_user(request).await;
                             if let Err(e) = response {
-                                println!("Error: {}", e);
                                 tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
                                 break;
                             }
