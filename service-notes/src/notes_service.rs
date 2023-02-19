@@ -1,8 +1,5 @@
 use crate::{
-    proto::{
-        notes_service_server::NotesService, users_service_client::UsersServiceClient, Note, NoteId,
-        UserId,
-    },
+    proto::{notes_service_server::NotesService, Note, NoteId, UserId},
     utils::{check_env, fetch_auth_token},
     MyService,
 };
@@ -53,20 +50,18 @@ impl NotesService for MyService {
         let start = std::time::Instant::now();
 
         let pool = self.pool.clone();
-        let mut users_conn = self.users_conn.clone();
-
-        let uri_users = check_env("URI_USERS").unwrap();
-        let mut users_conn = UsersServiceClient::connect(uri_users).await.unwrap();
 
         let (tx, rx) = mpsc::channel(4);
         let user_id = request.into_inner().user_id;
         let uuid = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        // Generate auth token
+        // User service
+        let mut users_conn = self.users_conn.clone();
         let mut metadata = MetadataMap::new();
         let uri_users = check_env("URI_USERS").unwrap();
         let token = fetch_auth_token(&uri_users).await.unwrap();
         metadata.insert("authorization", token.parse().unwrap());
+        println!("Metadata: {:?}", metadata);
 
         tokio::spawn(async move {
             let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
@@ -89,8 +84,6 @@ impl NotesService for MyService {
                             break;
                         } else {
                             let note = note.unwrap();
-
-                            println!("Token: {}", token);
 
                             // Get user
                             let request = Request::from_parts(

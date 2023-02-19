@@ -11,7 +11,7 @@ RUN touch /app/src/main.rs
 RUN echo "fn main() {}" > /app/src/main.rs
 RUN echo "fn main() {}" > /app/src/build.rs
 
-RUN cargo build
+# RUN cargo build
 
 RUN rm -rf /app/src
 COPY ./src /app/src
