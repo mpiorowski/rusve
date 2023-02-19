@@ -78,16 +78,20 @@ impl NotesService for MyService {
                         } else {
                             let note = note.unwrap();
 
-                            // Get user
-                            let mut request = Request::new(UserId {
-                                user_id: user_id.to_owned(),
-                            });
-                            let metadata: &mut MetadataMap = request.metadata_mut();
-
                             // Generate auth token
+                            let mut metadata = MetadataMap::new();
                             let uri_users = check_env("URI_USERS").unwrap();
                             let token = fetch_auth_token(&uri_users).await.unwrap();
                             metadata.insert("authorization", token.parse().unwrap());
+
+                            // Get user
+                            let request = Request::from_parts(
+                                metadata,
+                                Default::default(),
+                                UserId {
+                                    user_id: note.user_id.to_owned(),
+                                },
+                            );
 
                             let response = users_conn.get_user(request).await;
                             if let Err(e) = response {
