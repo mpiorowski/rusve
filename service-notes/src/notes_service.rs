@@ -62,6 +62,12 @@ impl NotesService for MyService {
         let user_id = request.into_inner().user_id;
         let uuid = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
+        // Generate auth token
+        let mut metadata = MetadataMap::new();
+        let uri_users = check_env("URI_USERS").unwrap();
+        let token = fetch_auth_token(&uri_users).await.unwrap();
+        metadata.insert("authorization", token.parse().unwrap());
+
         tokio::spawn(async move {
             let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
                 .bind(uuid)
@@ -84,16 +90,11 @@ impl NotesService for MyService {
                         } else {
                             let note = note.unwrap();
 
-                            // Generate auth token
-                            let mut metadata = MetadataMap::new();
-                            let uri_users = check_env("URI_USERS").unwrap();
-                            let token = fetch_auth_token(&uri_users).await.unwrap();
                             println!("Token: {}", token);
-                            metadata.insert("authorization", token.parse().unwrap());
 
                             // Get user
                             let request = Request::from_parts(
-                                metadata,
+                                metadata.clone(),
                                 Default::default(),
                                 UserId {
                                     user_id: note.user_id.to_owned(),
@@ -102,6 +103,7 @@ impl NotesService for MyService {
 
                             let response = users_conn.get_user(request).await;
                             if let Err(e) = response {
+                                println!("Error: {}", e);
                                 tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
                                 break;
                             }
