@@ -83,7 +83,7 @@ impl NotesService for MyService {
                             let uri_users = check_env("URI_USERS").unwrap();
                             let token = fetch_auth_token(&uri_users).await.unwrap();
                             println!("Token: {}", token);
-                            metadata.insert("authorization", token.parse().unwrap());
+                            metadata.append("authorization", token.parse().unwrap());
 
                             // Get user
                             let request = Request::from_parts(
@@ -96,6 +96,7 @@ impl NotesService for MyService {
 
                             let response = users_conn.get_user(request).await;
                             if let Err(e) = response {
+                                println!("Error: {}", e);
                                 tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
                                 break;
                             }
