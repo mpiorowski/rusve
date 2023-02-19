@@ -29,5 +29,8 @@ RUN cargo build --release
 FROM debian:buster-slim AS prod
 COPY --from=build /app/target/release /app
 
+# Add openssl
+RUN apt-get update && apt-get install -y openssl
+
 CMD ["/app/main"]
 
