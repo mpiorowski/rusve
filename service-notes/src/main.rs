@@ -5,7 +5,10 @@ mod utils;
 use anyhow::{Context, Result};
 use proto::notes_service_server::NotesServiceServer;
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use tonic::{transport::Server, Status};
+use tonic::{
+    transport::{Channel, Server},
+    Status,
+};
 use utils::check_env;
 
 use crate::proto::users_service_client::UsersServiceClient;
@@ -49,16 +52,8 @@ async fn main() -> Result<()> {
     let addr = ("0.0.0.0:".to_owned() + &port).parse()?;
 
     // Users service
-    let uri_users = check_env("URI_USERS")?;
-    let channel_users = tonic::transport::Channel::from_shared(uri_users.to_owned())
-        .context("Failed to create channel to users service")?;
-    let channel_users = channel_users
-        .tls_config(tonic::transport::ClientTlsConfig::new())
-        .context("Failed to create tls config to users service")?
-        .connect()
-        .await
-        .context("Failed to connect to users service")?;
-    let users_conn = UsersServiceClient::new(channel_users);
+    let channel = create_user_channel().await?;
+    let users_conn = UsersServiceClient::new(channel);
 
     let service = MyService { pool, users_conn };
 
@@ -69,4 +64,25 @@ async fn main() -> Result<()> {
         .await?;
 
     Ok(())
+}
+
+async fn create_user_channel() -> Result<Channel> {
+    let uri_users = check_env("URI_USERS")?;
+    let channel_users = tonic::transport::Channel::from_shared(uri_users.to_owned())
+        .context("Failed to create channel to users service")?;
+    if check_env("ENV")? == "development" {
+        let channel = channel_users
+            .connect()
+            .await
+            .context("Failed to connect to users service")?;
+        Ok(channel)
+    } else {
+        let channel = channel_users
+            .tls_config(tonic::transport::ClientTlsConfig::new())
+            .context("Failed to create tls config to users service")?
+            .connect()
+            .await
+            .context("Failed to connect to users service")?;
+        Ok(channel)
+    }
 }
