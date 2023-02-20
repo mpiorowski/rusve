@@ -20,8 +20,9 @@ services:
     depends_on:
       - db-users
     environment:
-      DATABASE_URL: postgresql://postgres:12345@db-users/users
       PORT: 443
+      ENV: development
+      DATABASE_URL: postgresql://postgres:12345@db-users/users
 
   db-users:
     container_name: rust-grpc-db-users
@@ -41,9 +42,10 @@ services:
       - db-notes
       - service-users
     environment:
+      ENV: development
+      PORT: 443
       DATABASE_URL: postgresql://postgres:12345@db-notes/notes
       URI_USERS: http://service-users:443
-      PORT: 443
 
   db-notes:
     container_name: rust-grpc-db-notes
