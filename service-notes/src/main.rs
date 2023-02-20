@@ -5,13 +5,10 @@ mod utils;
 use anyhow::{Context, Result};
 use proto::notes_service_server::NotesServiceServer;
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use tonic::{
-    transport::{Channel, Server},
-    Request, Status,
-};
+use tonic::{transport::Server, Status};
 use utils::check_env;
 
-use crate::{proto::users_service_client::UsersServiceClient, utils::fetch_auth_token};
+use crate::proto::users_service_client::UsersServiceClient;
 
 trait IntoStatus {
     fn into_status(self) -> Status;
@@ -26,6 +23,7 @@ impl IntoStatus for sqlx::Error {
 #[derive(Debug)]
 pub struct MyService {
     pool: PgPool,
+    users_conn: UsersServiceClient<tonic::transport::Channel>,
 }
 
 #[tokio::main]
@@ -52,21 +50,9 @@ async fn main() -> Result<()> {
 
     // Users service
     let uri_users = check_env("URI_USERS")?;
-    let token = fetch_auth_token(&uri_users).await.unwrap();
-    let channel = Channel::from_shared(uri_users);
-    if let Err(e) = channel {
-        panic!("Failed to connect to users service: {}", e);
-    }
-    let channel = channel.unwrap().connect().await.unwrap();
+    let users_conn = UsersServiceClient::connect(uri_users).await.context("Failed to connect to users service")?;
 
-    let mut users_conn =
-        UsersServiceClient::with_interceptor(channel, move |mut req: Request<()>| {
-            req.metadata_mut()
-                .insert("authorization", token.parse().unwrap());
-            Ok(req)
-        });
-
-    let service = MyService { pool };
+    let service = MyService { pool, users_conn };
 
     println!("Server started on port: {}", port);
     Server::builder()
