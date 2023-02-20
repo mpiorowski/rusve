@@ -50,7 +50,15 @@ async fn main() -> Result<()> {
 
     // Users service
     let uri_users = check_env("URI_USERS")?;
-    let users_conn = UsersServiceClient::connect(uri_users).await.context("Failed to connect to users service")?;
+    let channel_users = tonic::transport::Channel::from_shared(uri_users.to_owned())
+        .context("Failed to create channel to users service")?;
+    let channel_users = channel_users
+        .tls_config(tonic::transport::ClientTlsConfig::new())
+        .context("Failed to create tls config to users service")?
+        .connect()
+        .await
+        .context("Failed to connect to users service")?;
+    let users_conn = UsersServiceClient::new(channel_users);
 
     let service = MyService { pool, users_conn };
 
