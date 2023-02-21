@@ -80,7 +80,7 @@ async fn create_user_channel() -> Result<Channel> {
     } else {
         // TODO - env
         let subject_alt_names = vec![
-            "rust-grpc-notes-jtq3bgjqeq-lz.a.run.app".to_string(),
+            "xxx".to_string(),
             "localhost".to_string(),
         ];
         let cert = generate_simple_self_signed(subject_alt_names)
@@ -91,10 +91,10 @@ async fn create_user_channel() -> Result<Channel> {
         let tonic_cert = Certificate::from_pem(server_cert);
         let tls = ClientTlsConfig::new()
             .ca_certificate(tonic_cert)
-            .domain_name("rust-grpc-notes-jtq3bgjqeq-lz.a.run.app");
+            .domain_name("xxxx");
         let channel = channel_users
-            .tls_config(tls)
-            .context("Failed to create tls config to users service")?
+            // .tls_config(tls)
+            // .context("Failed to create tls config to users service")?
             .connect()
             .await
             .context("Failed to connect to users service")?;
