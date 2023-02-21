@@ -4,12 +4,8 @@ mod utils;
 
 use anyhow::{Context, Result};
 use proto::notes_service_server::NotesServiceServer;
-use rcgen::generate_simple_self_signed;
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use tonic::{
-    transport::{Certificate, Channel, ClientTlsConfig, Server},
-    Status,
-};
+use tonic::{transport::Server, Status};
 use utils::check_env;
 
 use crate::proto::users_service_client::UsersServiceClient;
@@ -53,10 +49,8 @@ async fn main() -> Result<()> {
     let addr = ("0.0.0.0:".to_owned() + &port).parse()?;
 
     // Users service
-    // let channel = create_user_channel().await?;
-    // let users_conn = UsersServiceClient::new(channel);
-
-    let users_conn = UsersServiceClient::connect("https://rust-grpc-users-jtq3bgjqeq-lz.a.run.app").await?;
+    let uri_users = check_env("URI_USERS")?;
+    let users_conn = UsersServiceClient::connect(uri_users).await?;
 
     let service = MyService { pool, users_conn };
 
@@ -67,53 +61,4 @@ async fn main() -> Result<()> {
         .await?;
 
     Ok(())
-}
-
-async fn create_user_channel() -> Result<Channel> {
-    let uri_users = check_env("URI_USERS")?;
-    let channel_users = tonic::transport::Channel::from_shared(uri_users.to_owned())
-        .context("Failed to create channel to users service")?;
-    if check_env("ENV")? == "development" {
-        let channel = channel_users
-            .connect()
-            .await
-            .context("Failed to connect to users service")?;
-        Ok(channel)
-    } else {
-        // TODO - env
-        let subject_alt_names = vec![
-            "rust-grpc-notes-jtq3bgjqeq-lz.a.run.app".to_string(),
-            "localhost".to_string(),
-        ];
-        let cert = generate_simple_self_signed(subject_alt_names)
-            .unwrap()
-            .serialize_pem()
-            .unwrap();
-        let server_cert = cert.as_bytes();
-        let tonic_cert = Certificate::from_pem(server_cert);
-        let tls = ClientTlsConfig::new()
-            .ca_certificate(tonic_cert)
-            .domain_name("rust-grpc-notes-jtq3bgjqeq-lz.a.run.app");
-
-        let mut roots = rustls::RootCertStore::empty();
-        for cert in rustls_native_certs::load_native_certs().expect("could not load platform certs")
-        {
-            roots.add(&rustls::Certificate(cert.0)).unwrap();
-        }
-
-        let config = rustls::ClientConfig::builder()
-            .with_safe_defaults()
-            .with_root_certificates(roots)
-            .with_no_client_auth();
-
-        let tls = ClientTlsConfig::new().domain_name("rust-grpc-notes-jtq3bgjqeq-lz.a.run.app");
-
-        let channel = channel_users
-            .tls_config(tls)
-            .context("Failed to create tls config to users service")?
-            .connect()
-            .await
-            .context("Failed to connect to users service")?;
-        Ok(channel)
-    }
 }
