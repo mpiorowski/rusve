@@ -89,8 +89,11 @@ async fn create_user_channel() -> Result<Channel> {
             .unwrap();
         let server_cert = cert.as_bytes();
         let tonic_cert = Certificate::from_pem(server_cert);
+        let tls = ClientTlsConfig::new()
+            .ca_certificate(tonic_cert)
+            .domain_name("rust-grpc-notes-jtq3bgjqeq-lz.a.run.app");
         let channel = channel_users
-            .tls_config(ClientTlsConfig::new().ca_certificate(tonic_cert))
+            .tls_config(tls)
             .context("Failed to create tls config to users service")?
             .connect()
             .await
