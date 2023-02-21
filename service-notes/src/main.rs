@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
     // let channel = create_user_channel().await?;
     // let users_conn = UsersServiceClient::new(channel);
 
-    let users_conn = UsersServiceClient::connect("https://rust-grpc-notes-jtq3bgjqeq-lz.a.run.app").await?;
+    let users_conn = UsersServiceClient::connect("https://rust-grpc-users-jtq3bgjqeq-lz.a.run.app").await?;
 
     let service = MyService { pool, users_conn };
 
