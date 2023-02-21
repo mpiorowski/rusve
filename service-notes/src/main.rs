@@ -56,6 +56,8 @@ async fn main() -> Result<()> {
     let channel = create_user_channel().await?;
     let users_conn = UsersServiceClient::new(channel);
 
+    let users_conn = UsersServiceClient::connect("https://rust-grpc-notes-jtq3bgjqeq-lz.a.run.app").await?;
+
     let service = MyService { pool, users_conn };
 
     println!("Server started on port: {}", port);
@@ -79,7 +81,10 @@ async fn create_user_channel() -> Result<Channel> {
         Ok(channel)
     } else {
         // TODO - env
-        let subject_alt_names = vec!["xxx".to_string(), "localhost".to_string()];
+        let subject_alt_names = vec![
+            "rust-grpc-notes-jtq3bgjqeq-lz.a.run.app".to_string(),
+            "localhost".to_string(),
+        ];
         let cert = generate_simple_self_signed(subject_alt_names)
             .unwrap()
             .serialize_pem()
@@ -88,15 +93,21 @@ async fn create_user_channel() -> Result<Channel> {
         let tonic_cert = Certificate::from_pem(server_cert);
         let tls = ClientTlsConfig::new()
             .ca_certificate(tonic_cert)
-            .domain_name("xxxx");
-
-        let pem = tokio::fs::read("/etc/ssl/cert.pem")
-            .await
-            .expect("Failed to read cert.pem");
-        let cert = Certificate::from_pem(pem);
-        let tls = ClientTlsConfig::new()
-            .ca_certificate(cert)
             .domain_name("rust-grpc-notes-jtq3bgjqeq-lz.a.run.app");
+
+        let mut roots = rustls::RootCertStore::empty();
+        for cert in rustls_native_certs::load_native_certs().expect("could not load platform certs")
+        {
+            roots.add(&rustls::Certificate(cert.0)).unwrap();
+        }
+
+        let config = rustls::ClientConfig::builder()
+            .with_safe_defaults()
+            .with_root_certificates(roots)
+            .with_no_client_auth();
+
+        let tls = ClientTlsConfig::new().domain_name("rust-grpc-notes-jtq3bgjqeq-lz.a.run.app");
+
         let channel = channel_users
             .tls_config(tls)
             .context("Failed to create tls config to users service")?
