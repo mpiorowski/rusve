@@ -70,7 +70,7 @@ async fn create_user_channel() -> Result<Channel> {
     let uri_users = check_env("URI_USERS")?;
     let channel_users = tonic::transport::Channel::from_shared(uri_users.to_owned())
         .context("Failed to create channel to users service")?;
-    if check_env("ENV")? == "development" {
+    if check_env("ENV")? == "production" {
         let channel = channel_users
             .connect()
             .await
