@@ -4,9 +4,10 @@ mod utils;
 
 use anyhow::{Context, Result};
 use proto::notes_service_server::NotesServiceServer;
+use rcgen::generate_simple_self_signed;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tonic::{
-    transport::{Channel, Server},
+    transport::{Certificate, Channel, ClientTlsConfig, Server},
     Status,
 };
 use utils::check_env;
@@ -70,15 +71,26 @@ async fn create_user_channel() -> Result<Channel> {
     let uri_users = check_env("URI_USERS")?;
     let channel_users = tonic::transport::Channel::from_shared(uri_users.to_owned())
         .context("Failed to create channel to users service")?;
-    if check_env("ENV")? == "production" {
+    if check_env("ENV")? == "development" {
         let channel = channel_users
             .connect()
             .await
             .context("Failed to connect to users service")?;
         Ok(channel)
     } else {
+        // TODO - env
+        let subject_alt_names = vec![
+            "rust-grpc-notes-jtq3bgjqeq-lz.a.run.app".to_string(),
+            "localhost".to_string(),
+        ];
+        let cert = generate_simple_self_signed(subject_alt_names)
+            .unwrap()
+            .serialize_pem()
+            .unwrap();
+        let server_cert = cert.as_bytes();
+        let tonic_cert = Certificate::from_pem(server_cert);
         let channel = channel_users
-            .tls_config(tonic::transport::ClientTlsConfig::new())
+            .tls_config(ClientTlsConfig::new().ca_certificate(tonic_cert))
             .context("Failed to create tls config to users service")?
             .connect()
             .await

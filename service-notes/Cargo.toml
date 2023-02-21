@@ -26,3 +26,4 @@ sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "migrate", "postg
 time = "0.3.17"
 reqwest = "0.11.14"
 rustls = "0.20.8"
+rcgen = "0.10.0"
