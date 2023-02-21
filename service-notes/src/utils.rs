@@ -1,4 +1,7 @@
+use crate::CachedToken;
 use anyhow::Result;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use tonic::metadata::MetadataMap;
 
 pub fn check_env(env_str: &str) -> Result<String> {
@@ -12,10 +15,20 @@ pub fn check_env(env_str: &str) -> Result<String> {
     }
 }
 
-pub async fn fetch_auth_metadata(service_uri: &str) -> Result<MetadataMap> {
+pub async fn fetch_auth_metadata(
+    cached_token: Arc<Mutex<CachedToken>>,
+    service_uri: &str,
+) -> Result<MetadataMap> {
     let mut metadata = MetadataMap::new();
     let env = check_env("ENV")?;
     if env != "production" {
+        return Ok(metadata);
+    }
+    // check if token is expired
+    let mut cached_token = cached_token.lock().await;
+    if cached_token.expires > time::OffsetDateTime::now_utc() {
+        println!("Using cached token");
+        metadata.insert("authorization", cached_token.token.parse().unwrap());
         return Ok(metadata);
     }
     let client = reqwest::Client::new();
@@ -26,8 +39,9 @@ pub async fn fetch_auth_metadata(service_uri: &str) -> Result<MetadataMap> {
         .await?;
 
     let token = res.text().await?;
+    cached_token.token = token.clone();
+    cached_token.expires = time::OffsetDateTime::now_utc() + time::Duration::hours(1);
     let token = "Bearer ".to_owned() + &token;
-
     metadata.insert("authorization", token.parse().unwrap());
     println!("Metadata: {:?}", metadata);
 

@@ -1,15 +1,26 @@
 use crate::{
     proto::{notes_service_server::NotesService, Note, NoteId, UserId},
     utils::{check_env, fetch_auth_metadata},
-    MyService,
+    CachedToken, MyService,
 };
 use anyhow::Result;
 use futures::TryStreamExt;
 use sqlx::types::time::OffsetDateTime;
 use sqlx::{postgres::PgRow, query, types::Uuid, Row};
-use tokio::sync::mpsc;
+use std::sync::Arc;
+use tokio::sync::{mpsc, Mutex};
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
+
+trait IntoStatus {
+    fn into_status(self) -> Status;
+}
+
+impl IntoStatus for sqlx::Error {
+    fn into_status(self: sqlx::Error) -> Status {
+        Status::internal(self.to_string())
+    }
+}
 
 fn map_note(row: Option<PgRow>) -> Result<Note> {
     match row {
@@ -57,8 +68,9 @@ impl NotesService for MyService {
 
         // User service
         let mut users_conn = self.users_conn.clone();
+        let cached_token: Arc<Mutex<CachedToken>> = self.cached_token.clone();
         let uri_users = check_env("URI_USERS").unwrap();
-        let metadata = fetch_auth_metadata(&uri_users).await.unwrap();
+        let metadata = fetch_auth_metadata(cached_token, &uri_users).await.unwrap();
 
         tokio::spawn(async move {
             let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
