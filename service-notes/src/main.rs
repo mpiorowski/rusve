@@ -53,8 +53,8 @@ async fn main() -> Result<()> {
     let addr = ("0.0.0.0:".to_owned() + &port).parse()?;
 
     // Users service
-    let channel = create_user_channel().await?;
-    let users_conn = UsersServiceClient::new(channel);
+    // let channel = create_user_channel().await?;
+    // let users_conn = UsersServiceClient::new(channel);
 
     let users_conn = UsersServiceClient::connect("https://rust-grpc-notes-jtq3bgjqeq-lz.a.run.app").await?;
 
