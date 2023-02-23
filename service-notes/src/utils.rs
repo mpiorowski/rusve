@@ -28,7 +28,8 @@ pub async fn fetch_auth_metadata(
     let mut cached_token = cached_token.lock().await;
     if cached_token.expires > time::OffsetDateTime::now_utc() {
         println!("Using cached token");
-        metadata.insert("authorization", cached_token.token.parse().unwrap());
+        let token = "Bearer ".to_owned() + &cached_token.token;
+        metadata.insert("authorization", token.parse().unwrap());
         return Ok(metadata);
     }
     let client = reqwest::Client::new();
