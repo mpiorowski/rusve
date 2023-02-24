@@ -26,12 +26,14 @@
         type="text"
         name="title"
         placeholder="Title"
+        value="My Note"
     />
     <input
         class="bg-gray-800 p-3 rounded ring-2 ring-gray-800 hover:ring-teal-700 transition"
         type="text"
         name="content"
         placeholder="Content"
+        value="This is my note"
     />
     <button
         class="bg-teal-700 p-3 rounded hover:bg-teal-600 transition"

@@ -11,7 +11,7 @@ export function performanceLogger(name: string): () => void | void {
     function end() {
         const end = performance.now();
         const duration = end - start;
-        console.log(`${name} took ${duration}ms`);
+        console.info(`${name} took ${duration}ms`);
     }
 
     return end;

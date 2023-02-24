@@ -50,7 +50,9 @@ async fn main() -> Result<()> {
 
     // Users service
     let uri_users = check_env("URI_USERS")?;
-    let users_conn = UsersServiceClient::connect(uri_users).await?;
+    let users_conn = UsersServiceClient::connect(uri_users)
+        .await
+        .context("Failed to connect to users service")?;
 
     let service = MyService {
         pool,

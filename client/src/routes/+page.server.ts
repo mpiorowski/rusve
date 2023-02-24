@@ -4,13 +4,11 @@ import type { UserId } from "../proto/proto/UserId";
 import { fetchToken, notesClient } from "../grpc";
 import type { Note, Note__Output } from "../proto/proto/Note";
 import type { NoteId } from "../proto/proto/NoteId";
-import { performanceLogger } from "$lib/utils/logging.util";
 import { URI_NOTES } from "$env/static/private";
 
 export const load = (async ({ locals }) => {
     try {
         const start = performance.now();
-        const end = performanceLogger("getNotes");
         const userId = locals.userId;
         const request: UserId = { userId: userId };
 
@@ -32,12 +30,10 @@ export const load = (async ({ locals }) => {
             });
         });
 
-        end();
-        const end2 = performance.now();
-
+        const end = performance.now();
         return {
             notes: notes,
-            duration: end2 - start,
+            duration: end - start,
         };
     } catch (err) {
         console.error(err);
@@ -48,7 +44,6 @@ export const load = (async ({ locals }) => {
 export const actions = {
     createNote: async ({ locals, request }) => {
         const start = performance.now();
-        const end = performanceLogger("createNote");
 
         const form = await request.formData();
         const title = form.get("title");
@@ -59,24 +54,23 @@ export const actions = {
         }
 
         try {
-            const note: Note = {
+            const data: Note = {
                 title: title as string,
                 content: content as string,
                 userId: locals.userId,
             };
 
             const metadata = await fetchToken(URI_NOTES);
-            const promise = new Promise<Note__Output>((resolve, reject) => {
-                notesClient.createNote(note, metadata, (err, response) =>
+            const note = await new Promise<Note__Output>((resolve, reject) => {
+                notesClient.createNote(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });
 
-            end();
-            const end2 = performance.now();
+            const end = performance.now();
             return {
-                note: await promise,
-                duration: end2 - start,
+                note: note,
+                duration: end - start,
             };
         } catch (err) {
             console.error(err);
@@ -85,7 +79,6 @@ export const actions = {
     },
     deleteNote: async ({ locals, request }) => {
         const start = performance.now();
-        const end = performanceLogger("deleteNote");
 
         const form = await request.formData();
         const id = form.get("id");
@@ -94,24 +87,22 @@ export const actions = {
             throw error(400, "Missing id");
         }
         try {
-            const request: NoteId = {
+            const data: NoteId = {
                 noteId: id as string,
                 userId: locals.userId,
             };
 
             const metadata = await fetchToken(URI_NOTES);
-            const promise = new Promise<Note__Output>((resolve, reject) => {
-                notesClient.deleteNote(request, metadata, (err, response) =>
+            const note = await new Promise<Note__Output>((resolve, reject) => {
+                notesClient.deleteNote(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });
 
-            end();
-            const end2 = performance.now();
-
+            const end = performance.now();
             return {
-                note: await promise,
-                duration: end2 - start,
+                note: note,
+                duration: end - start,
             };
         } catch (err) {
             console.error(err);
