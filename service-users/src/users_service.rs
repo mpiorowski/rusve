@@ -8,6 +8,19 @@ use crate::proto::{AuthRequest, User};
 use crate::proto::{UserId, UserRole};
 use crate::{users_service, MyService};
 
+trait TryInto<U> {
+    type Error;
+    fn try_into(self) -> Result<U>;
+}
+
+impl TryInto<Uuid> for String {
+    type Error = anyhow::Error;
+
+    fn try_into(self) -> Result<Uuid> {
+        Uuid::parse_str(&self).map_err(|e| anyhow::anyhow!(e))
+    }
+}
+
 fn map_user(row: Option<PgRow>) -> Result<User> {
     match row {
         Some(row) => {
@@ -32,35 +45,19 @@ fn map_user(row: Option<PgRow>) -> Result<User> {
     }
 }
 
-trait TryInto<U> {
-    type Error;
-    fn try_into(self) -> Result<U>;
-}
-
-impl TryInto<Uuid> for String {
-    type Error = anyhow::Error;
-
-    fn try_into(self) -> Result<Uuid> {
-        Uuid::parse_str(&self).map_err(|e| anyhow::anyhow!(e))
-    }
-}
-
 #[tonic::async_trait]
 impl UsersService for MyService {
     async fn auth(&self, request: Request<AuthRequest>) -> Result<Response<User>, Status> {
-        // #[cfg(debug_assertions)]
+        #[cfg(debug_assertions)]
         println!("Auth: {:?}", request);
         let start = std::time::Instant::now();
         let pool = self.pool.clone();
 
         let request = request.into_inner();
-        let email = request.email;
-        let sub = request.sub;
-
         let row =
             query("update users set updated = now() where email = $1 and sub = $2 returning *")
-                .bind(&email)
-                .bind(&sub)
+                .bind(&request.email)
+                .bind(&request.sub)
                 .fetch_optional(&pool)
                 .await
                 .map_err(|e| Status::internal(e.to_string()))?;
@@ -74,8 +71,8 @@ impl UsersService for MyService {
             None => {
                 let row =
                     query("insert into users (email, sub, role) values ($1, $2, $3) returning *")
-                        .bind(&email)
-                        .bind(&sub)
+                        .bind(&request.email)
+                        .bind(&request.sub)
                         .bind(UserRole::as_str_name(&UserRole::RoleUser))
                         .fetch_one(&pool)
                         .await
@@ -89,7 +86,7 @@ impl UsersService for MyService {
     }
 
     async fn get_user(&self, request: Request<UserId>) -> Result<Response<User>, Status> {
-        // #[cfg(debug_assertions)]
+        #[cfg(debug_assertions)]
         println!("GetUser: {:?}", request);
         let start = std::time::Instant::now();
 

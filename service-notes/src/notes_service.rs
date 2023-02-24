@@ -12,16 +12,6 @@ use tokio::sync::{mpsc, Mutex};
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 
-trait IntoStatus {
-    fn into_status(self) -> Status;
-}
-
-impl IntoStatus for sqlx::Error {
-    fn into_status(self: sqlx::Error) -> Status {
-        Status::internal(self.to_string())
-    }
-}
-
 fn map_note(row: Option<PgRow>) -> Result<Note> {
     match row {
         Some(row) => {
@@ -56,7 +46,7 @@ impl NotesService for MyService {
         &self,
         request: Request<UserId>,
     ) -> Result<Response<Self::GetNotesStream>, Status> {
-        // #[cfg(debug_assertions)]
+        #[cfg(debug_assertions)]
         println!("GetNotes = {:?}", request);
         let start = std::time::Instant::now();
 
@@ -69,8 +59,12 @@ impl NotesService for MyService {
         // User service
         let mut users_conn = self.users_conn.clone();
         let cached_token: Arc<Mutex<CachedToken>> = self.cached_token.clone();
-        let uri_users = check_env("URI_USERS").unwrap();
-        let metadata = fetch_auth_metadata(cached_token, &uri_users).await.unwrap();
+        let uri_users = check_env("URI_USERS").map_err(|e| Status::internal(e.to_string()))?;
+        let metadata = fetch_auth_metadata(cached_token, &uri_users)
+            .await
+            .map_err(|e| {
+                Status::internal(format!("Error fetching auth metadata: {}", e.to_string()))
+            })?;
 
         tokio::spawn(async move {
             let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
@@ -152,6 +146,7 @@ impl NotesService for MyService {
         println!("Elapsed: {:.2?}", elapsed);
         return Ok(Response::new(note));
     }
+
     async fn delete_note(&self, request: Request<NoteId>) -> Result<Response<Note>, Status> {
         println!("DeleteNote = {:?}", request);
         let start = std::time::Instant::now();
