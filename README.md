@@ -1,4 +1,4 @@
-# Rust microservices with SvelteKit using gRPC 
+# Rust microservices with SvelteKit using gRPC deployed on GCP
 If You have any questions, feel free to ask them in Discussions or Issues. I hope this will be helpful :).
 
 ## Demo
@@ -12,6 +12,7 @@ https://rust-grpc-client-kzsw3jnnrq-lz.a.run.app
 - SvelteKit server for gateway and page protection, nothing is exposed to client, can work without any Javascript
 - Gateway to services and service to service communication using gRPC
 - So yeah, everything works on gRPC, either as streams or unary, IT IS FAST, locally request can be as fast as 3-10 ms
+- Deployed on GCP using Google Cloud Run
 
 Check my other similar projects:
 - [Go with SvelteKit using gRPC](https://github.com/mpiorowski/go-svelte-grpc)
