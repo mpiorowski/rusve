@@ -4,6 +4,9 @@
 
     export let data: PageData;
     export let form: ActionData;
+
+    let title = "Notes";
+    let content = "This is my note";
 </script>
 
 <h2 class="text-center">
@@ -19,21 +22,20 @@
     class="flex flex-col max-w-xl p-4 gap-4"
     action="?/createNote"
     method="post"
-    use:enhance
 >
     <input
         class="bg-gray-800 p-3 rounded ring-2 ring-gray-800 hover:ring-teal-700 transition"
         type="text"
         name="title"
         placeholder="Title"
-        value="My Note"
+        bind:value={title}
     />
     <input
         class="bg-gray-800 p-3 rounded ring-2 ring-gray-800 hover:ring-teal-700 transition"
         type="text"
         name="content"
         placeholder="Content"
-        value="This is my note"
+        bind:value={content}
     />
     <button
         class="bg-teal-700 p-3 rounded hover:bg-teal-600 transition"

@@ -1,6 +1,9 @@
 # Rust microservices with SvelteKit using gRPC 
 If You have any questions, feel free to ask them in Discussions or Issues. I hope this will be helpful :).
 
+## Demo
+https://rust-grpc-client-kzsw3jnnrq-lz.a.run.app
+
 ## Architecture
 ![image](https://user-images.githubusercontent.com/26543876/219150457-70499de3-dbe4-426d-8836-1e7a5889e2d4.png)
 
