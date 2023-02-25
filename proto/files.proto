@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package proto;
+
+enum FileType {
+    DOCUMENT = 0;
+}
+
+message TargetId {
+    string targetId = 1;
+}
+
+message FileId {
+    string fileId = 1;
+    string targetId = 2;
+}
+
+message File {
+    string id = 1;
+    string created = 2;
+    string updated = 3;
+    optional string deleted = 4;
+
+    string targetId = 5;
+    string name = 6;
+    FileType type = 7;
+}
