@@ -1,6 +1,6 @@
-mod utils_service;
 mod proto;
 mod utils;
+mod files_service;
 
 use anyhow::{Context, Result};
 use sqlx::{postgres::PgPoolOptions, PgPool};
@@ -10,7 +10,7 @@ use tokio::sync::Mutex;
 use tonic::transport::Server;
 use utils::check_env;
 
-use crate::proto::{users_service_client::UsersServiceClient, files_service_server::FilesServiceServer};
+use crate::proto::files_service_server::FilesServiceServer;
 
 #[derive(Debug)]
 pub struct CachedToken {
@@ -46,12 +46,6 @@ async fn main() -> Result<()> {
     let port = check_env("PORT")?;
     let addr = ("0.0.0.0:".to_owned() + &port).parse()?;
 
-    // Users service
-    let uri_users = check_env("URI_USERS")?;
-    let users_conn = UsersServiceClient::connect(uri_users)
-        .await
-        .context("Failed to connect to users service")?;
-
     let service = MyService {
         pool,
         cached_token: Arc::new(Mutex::new(CachedToken {
@@ -68,4 +62,3 @@ async fn main() -> Result<()> {
 
     Ok(())
 }
-

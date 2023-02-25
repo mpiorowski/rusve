@@ -33,7 +33,7 @@
 	"dependencies": {
 		"@grpc/grpc-js": "^1.8.8",
 		"@grpc/proto-loader": "^0.7.4",
-		"@mpiorowski/svelte-init": "^2.1.1",
-		"@sveltejs/adapter-node": "^1.2.0"
+		"@sveltejs/adapter-node": "^1.2.0",
+		"zod": "^3.20.6"
 	}
 }

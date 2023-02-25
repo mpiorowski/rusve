@@ -81,6 +81,8 @@ pub struct File {
     pub name: ::prost::alloc::string::String,
     #[prost(enumeration = "FileType", tag = "7")]
     pub r#type: i32,
+    #[prost(bytes = "vec", tag = "8")]
+    pub data: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]

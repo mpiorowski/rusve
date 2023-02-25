@@ -24,4 +24,6 @@ message File {
     string targetId = 5;
     string name = 6;
     FileType type = 7;
+
+    bytes data = 8;
 }
