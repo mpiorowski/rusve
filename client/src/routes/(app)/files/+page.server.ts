@@ -32,8 +32,18 @@ export const load = (async ({ locals }) => {
         });
 
         const end = performance.now();
+        const mapped = files.map((file) => {
+            // create base64 string
+            const base64 = Buffer.from(file.data).toString("base64");
+            return {
+                id: file.id,
+                name: file.name,
+                type: file.type,
+                data: base64,
+            };
+        });
         return {
-            files: files,
+            files: mapped,
             duration: end - start,
         };
     } catch (err) {
@@ -44,6 +54,8 @@ export const load = (async ({ locals }) => {
 
 export const actions = {
     createFile: async ({ request }) => {
+        const start = performance.now();
+
         const form = await request.formData();
         const targetId = form.get("targetId");
         const type = form.get("type");
@@ -82,9 +94,12 @@ export const actions = {
             );
         });
 
-        return { success: true };
+        const end = performance.now();
+        return { duration: end - start };
     },
     deleteFile: async ({ request }) => {
+        const start = performance.now();
+
         const form = await request.formData();
         const fileId = form.get("fileId");
         const targetId = form.get("targetId");
@@ -111,6 +126,7 @@ export const actions = {
             );
         });
 
-        return { success: true };
+        const end = performance.now();
+        return { duration: end - start };
     },
 } satisfies Actions;

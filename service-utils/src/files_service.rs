@@ -54,9 +54,9 @@ impl UtilsService for MyService {
         let pool = self.pool.clone();
 
         let (tx, rx) = mpsc::channel(4);
-        let target_id = request.into_inner();
+        let request = request.into_inner();
         let uuid =
-            Uuid::parse_str(&target_id.target_id).map_err(|e| Status::internal(e.to_string()))?;
+            Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
 
         tokio::spawn(async move {
             let mut files_stream = query("SELECT * FROM files WHERE \"targetId\" = $1 and deleted is null order by created desc")
@@ -72,11 +72,15 @@ impl UtilsService for MyService {
                     }
                     Ok(file) => {
                         let file = map_file(file);
+
                         if let Err(e) = file {
                             tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
                             break;
                         } else {
-                            let file = file.unwrap();
+                            let mut file = file.unwrap();
+                            let file_path = format!("/app/files/{}", &file.name);
+                            let data = std::fs::read(file_path).unwrap();
+                            file.data = data;
                             tx.send(Ok(file)).await.unwrap();
                         }
                     }
@@ -100,7 +104,7 @@ impl UtilsService for MyService {
         let file_data = file.data;
 
         // save file to disk
-        let file_path = format!("/app/tmp/{}", file.name);
+        let file_path = format!("/app/files/{}", file.name);
         let mut new_file = tokio::fs::File::create(file_path).await?;
         new_file.write_all(&file_data).await?;
 

@@ -7,9 +7,13 @@
 </script>
 
 <h1>Files</h1>
-
+<h2 class="text-center">
+    Files loaded in {data.duration.toFixed(4)}ms
+</h2>
 {#if form}
-    <h2>Uploaded {form.file}</h2>
+    <h2 class="text-center">
+        Files created or deleted in {form.duration.toFixed(4)}ms
+    </h2>
 {/if}
 
 <form
@@ -35,11 +39,12 @@
             <li class="flex flex-row gap-2 items-center">
                 <div>{file.name}</div>
                 <form
-                    action="?/downloadFile"
+                    action="/api"
                     method="post"
                     class="flex flex-row gap-2"
                 >
-                    <input type="hidden" name="id" value={file.id} />
+                    <input type="hidden" name="base64" value={file.data} />
+                    <input type="hidden" name="name" value={file.name} />
                     <button
                         type="submit"
                         class="bg-green-700 p-3 rounded hover:bg-green-600 transition"

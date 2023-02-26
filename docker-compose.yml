@@ -18,7 +18,7 @@ services:
       context: ./service-utils/
       target: dev
     volumes:
-      - ./tmp:/app/tmp
+      - ./files:/app/files
     depends_on:
       - db-utils
     environment:
