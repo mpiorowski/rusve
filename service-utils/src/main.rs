@@ -4,24 +4,15 @@ mod files_service;
 
 use anyhow::{Context, Result};
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use std::sync::Arc;
-use time::OffsetDateTime;
-use tokio::sync::Mutex;
 use tonic::transport::Server;
 use utils::check_env;
 
-use crate::proto::files_service_server::FilesServiceServer;
+use crate::proto::utils_service_server::UtilsServiceServer;
 
-#[derive(Debug)]
-pub struct CachedToken {
-    token: String,
-    expires: OffsetDateTime,
-}
 
 #[derive(Debug)]
 pub struct MyService {
     pool: PgPool,
-    cached_token: Arc<Mutex<CachedToken>>,
 }
 
 #[tokio::main]
@@ -48,15 +39,11 @@ async fn main() -> Result<()> {
 
     let service = MyService {
         pool,
-        cached_token: Arc::new(Mutex::new(CachedToken {
-            token: "".to_string(),
-            expires: OffsetDateTime::now_utc(),
-        })),
     };
 
     println!("Server started on port: {}", port);
     Server::builder()
-        .add_service(FilesServiceServer::new(service))
+        .add_service(UtilsServiceServer::new(service))
         .serve(addr)
         .await?;
 

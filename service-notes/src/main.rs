@@ -2,6 +2,7 @@ mod notes_service;
 mod proto;
 mod utils;
 
+use crate::proto::users_service_client::UsersServiceClient;
 use anyhow::{Context, Result};
 use proto::notes_service_server::NotesServiceServer;
 use sqlx::{postgres::PgPoolOptions, PgPool};
@@ -10,8 +11,6 @@ use time::OffsetDateTime;
 use tokio::sync::Mutex;
 use tonic::transport::Server;
 use utils::check_env;
-
-use crate::proto::users_service_client::UsersServiceClient;
 
 #[derive(Debug)]
 pub struct CachedToken {

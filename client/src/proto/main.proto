@@ -3,6 +3,7 @@ syntax = "proto3";
 package proto;
 
 import "users.proto";
+import "files.proto";
 import "notes.proto";
 
 message Empty {}
@@ -12,20 +13,18 @@ message UserId {
 
 service UsersService {
     rpc Auth(AuthRequest) returns (User) {}
+    rpc GetUser(UserId) returns (User) {}
 }
 
-message AuthRequest {
-    string sub = 1;
-    string email = 2;
+service UtilsService {
+    rpc GetFiles(TargetId) returns (stream File) {}
+    rpc CreateFile(File) returns (File) {}
+    rpc DeleteFile(FileId) returns (File) {}
 }
-
 
 service NotesService {
     rpc GetNotes(UserId) returns (stream Note) {}
     rpc CreateNote(Note) returns (Note) {}
     rpc DeleteNote(NoteId) returns (Note) {}
 }
-message NoteId {
-    string noteId = 1;
-    string userId = 2;
-}
+

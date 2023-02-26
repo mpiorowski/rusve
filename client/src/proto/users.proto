@@ -7,6 +7,11 @@ enum UserRole {
   ROLE_ADMIN = 1;
 }
 
+message AuthRequest {
+    string sub = 1;
+    string email = 2;
+}
+
 message User {
   string id = 1;
   string created = 2;
@@ -14,7 +19,7 @@ message User {
   optional string deleted = 4;
 
   string email = 5;
-  string role = 6;
+  UserRole role = 6;
   string sub = 7;
 }
 

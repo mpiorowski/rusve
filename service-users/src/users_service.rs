@@ -1,12 +1,11 @@
-use anyhow::Result;
-use sqlx::types::time::OffsetDateTime;
-use sqlx::{postgres::PgRow, query, types::Uuid, Row};
-use tonic::{Request, Response, Status};
-
 use crate::proto::users_service_server::UsersService;
 use crate::proto::{AuthRequest, User};
 use crate::proto::{UserId, UserRole};
 use crate::{users_service, MyService};
+use anyhow::Result;
+use sqlx::types::time::OffsetDateTime;
+use sqlx::{postgres::PgRow, query, types::Uuid, Row};
+use tonic::{Request, Response, Status};
 
 trait TryInto<U> {
     type Error;

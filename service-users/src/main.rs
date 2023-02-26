@@ -42,14 +42,17 @@ async fn main() -> Result<()> {
     println!("Migrations ran successfully");
 
     let port = check_env("PORT")?;
-    let addr = ("0.0.0.0:".to_owned() + &port).parse()?;
-    let service = MyService { pool };
+    let addr = ("0.0.0.0:".to_owned() + &port)
+        .parse()
+        .context("Failed to parse address")?;
 
+    let service = MyService { pool };
     println!("Server started on port: {}", port);
     Server::builder()
         .add_service(UsersServiceServer::new(service))
         .serve(addr)
-        .await?;
+        .await
+        .context("Failed to start server")?;
 
     Ok(())
 }

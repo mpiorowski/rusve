@@ -16,14 +16,15 @@ service UsersService {
     rpc GetUser(UserId) returns (User) {}
 }
 
+service UtilsService {
+    rpc GetFiles(TargetId) returns (stream File) {}
+    rpc CreateFile(File) returns (File) {}
+    rpc DeleteFile(FileId) returns (File) {}
+}
+
 service NotesService {
     rpc GetNotes(UserId) returns (stream Note) {}
     rpc CreateNote(Note) returns (Note) {}
     rpc DeleteNote(NoteId) returns (Note) {}
 }
 
-service FilesService {
-    rpc GetFiles(TargetId) returns (stream File) {}
-    rpc CreateFile(File) returns (File) {}
-    rpc DeleteFile(FileId) returns (File) {}
-}

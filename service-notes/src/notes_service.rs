@@ -4,7 +4,7 @@ use crate::{
     CachedToken, MyService,
 };
 use anyhow::Result;
-use futures::TryStreamExt;
+use futures_util::TryStreamExt;
 use sqlx::types::time::OffsetDateTime;
 use sqlx::{postgres::PgRow, query, types::Uuid, Row};
 use std::sync::Arc;
