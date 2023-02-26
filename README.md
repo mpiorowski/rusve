@@ -19,7 +19,7 @@ https://rust-grpc-client-kzsw3jnnrq-lz.a.run.app
 - The same Protocol Buffers are used by both Rust and Typescript services, which means that the types are shared! Amazing end-to-end typesafe.
 - Using proto enums to ensure consistency between frontend / backend.
 - Rust using shared sql connection pool throught the service.
-- Sqlx connection work using transactions, which means that no database entry will be saved when an error occur.
+- Sqlx connection works using transactions, which means that no database entry will be saved when an error occur.
 - Files send as bytes, on development environment they are stored in /files folder, on production environment in Google Cloud Storage. Client send base64 string to Node server using SvelteKit api, which then creates a file and respond with a download header.
 - Each Rust error is mapped and safetly returned.
 
