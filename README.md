@@ -15,7 +15,7 @@ https://rust-grpc-client-kzsw3jnnrq-lz.a.run.app
 - Deployed on GCP using Google Cloud Run
 
 ## Features
-- Data selecting works on gRPC streams, inserting / updating / deleting on unary
+- Data fetching using gRPC streams. Inserting / updating / deleting using unary
 - The same Protocol Buffers are used by both Rust and Typescript services, which means that the types are shared! Amazing end-to-end typesafe.
 - Using proto enums to ensure consistency between frontend / backend.
 - Rust using shared sql connection pool throught the service.
