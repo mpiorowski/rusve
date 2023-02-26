@@ -1,7 +1,7 @@
 import protoLoader from "@grpc/proto-loader";
 import { credentials, loadPackageDefinition, Metadata } from "@grpc/grpc-js";
 import type { ProtoGrpcType } from "./proto/main";
-import { URI_USERS, URI_NOTES, ENV } from "$env/static/private";
+import { URI_USERS, URI_NOTES, ENV, URI_UTILS } from "$env/static/private";
 
 const cacheToken = new Map<
     string,
@@ -60,6 +60,13 @@ export const usersClient = new proto.proto.UsersService(
 
 export const notesClient = new proto.proto.NotesService(
     URI_NOTES,
+    ENV === "production"
+        ? credentials.createSsl()
+        : credentials.createInsecure(),
+);
+
+export const utilsClient = new proto.proto.UtilsService(
+    URI_UTILS,
     ENV === "production"
         ? credentials.createSsl()
         : credentials.createInsecure(),

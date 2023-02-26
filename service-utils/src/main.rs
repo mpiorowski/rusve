@@ -1,28 +1,18 @@
-mod notes_service;
 mod proto;
 mod utils;
+mod files_service;
 
-use crate::proto::users_service_client::UsersServiceClient;
 use anyhow::{Context, Result};
-use proto::notes_service_server::NotesServiceServer;
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use std::sync::Arc;
-use time::OffsetDateTime;
-use tokio::sync::Mutex;
 use tonic::transport::Server;
 use utils::check_env;
 
-#[derive(Debug)]
-pub struct CachedToken {
-    token: String,
-    expires: OffsetDateTime,
-}
+use crate::proto::utils_service_server::UtilsServiceServer;
+
 
 #[derive(Debug)]
 pub struct MyService {
     pool: PgPool,
-    users_conn: UsersServiceClient<tonic::transport::Channel>,
-    cached_token: Arc<Mutex<CachedToken>>,
 }
 
 #[tokio::main]
@@ -47,24 +37,13 @@ async fn main() -> Result<()> {
     let port = check_env("PORT")?;
     let addr = ("0.0.0.0:".to_owned() + &port).parse()?;
 
-    // Users service
-    let uri_users = check_env("URI_USERS")?;
-    let users_conn = UsersServiceClient::connect(uri_users)
-        .await
-        .context("Failed to connect to users service")?;
-
     let service = MyService {
         pool,
-        users_conn,
-        cached_token: Arc::new(Mutex::new(CachedToken {
-            token: "".to_string(),
-            expires: OffsetDateTime::now_utc(),
-        })),
     };
 
     println!("Server started on port: {}", port);
     Server::builder()
-        .add_service(NotesServiceServer::new(service))
+        .add_service(UtilsServiceServer::new(service))
         .serve(addr)
         .await?;
 

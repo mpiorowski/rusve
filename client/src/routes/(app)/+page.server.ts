@@ -1,10 +1,11 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import type { UserId } from "../proto/proto/UserId";
-import { fetchToken, notesClient } from "../grpc";
-import type { Note, Note__Output } from "../proto/proto/Note";
-import type { NoteId } from "../proto/proto/NoteId";
+import type { UserId } from "../../proto/proto/UserId";
+import { fetchToken, notesClient } from "../../grpc";
+import type { Note__Output } from "../../proto/proto/Note";
+import type { NoteId } from "../../proto/proto/NoteId";
 import { URI_NOTES } from "$env/static/private";
+import { z } from "zod";
 
 export const load = (async ({ locals }) => {
     try {
@@ -18,6 +19,7 @@ export const load = (async ({ locals }) => {
 
         await new Promise<Note__Output[]>((resolve, reject) => {
             stream.on("data", (note) => {
+                console.log(note);
                 notes.push(note);
             });
 
@@ -49,20 +51,28 @@ export const actions = {
         const title = form.get("title");
         const content = form.get("content");
 
-        if (!title || !content) {
-            throw error(400, "Missing title or content");
+        const data = {
+            title: title,
+            content: content,
+            userId: locals.userId,
+        };
+
+        const schema = z
+            .object({
+                userId: z.string().uuid(),
+                title: z.string().min(1),
+                content: z.string().min(1),
+            })
+            .safeParse(data);
+
+        if (!schema.success) {
+            throw error(400, "Invalid request");
         }
 
         try {
-            const data: Note = {
-                title: title as string,
-                content: content as string,
-                userId: locals.userId,
-            };
-
             const metadata = await fetchToken(URI_NOTES);
             const note = await new Promise<Note__Output>((resolve, reject) => {
-                notesClient.createNote(data, metadata, (err, response) =>
+                notesClient.createNote(schema.data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });

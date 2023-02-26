@@ -1,12 +1,11 @@
-use anyhow::Result;
-use sqlx::types::time::OffsetDateTime;
-use sqlx::{postgres::PgRow, query, types::Uuid, Row};
-use tonic::{Request, Response, Status};
-
 use crate::proto::users_service_server::UsersService;
 use crate::proto::{AuthRequest, User};
 use crate::proto::{UserId, UserRole};
 use crate::{users_service, MyService};
+use anyhow::Result;
+use sqlx::types::time::OffsetDateTime;
+use sqlx::{postgres::PgRow, query, types::Uuid, Row};
+use tonic::{Request, Response, Status};
 
 trait TryInto<U> {
     type Error;
@@ -21,6 +20,27 @@ impl TryInto<Uuid> for String {
     }
 }
 
+trait SqlxError {
+    fn into_status(self) -> Status;
+}
+
+impl SqlxError for sqlx::Error {
+    fn into_status(self) -> Status {
+        match self {
+            sqlx::Error::Database(e) => Status::internal(e.message()),
+            sqlx::Error::RowNotFound => Status::not_found("Note not found"),
+            sqlx::Error::ColumnNotFound(_) => Status::not_found("Note not found"),
+            _ => Status::internal("Unknown error"),
+        }
+    }
+}
+
+impl SqlxError for anyhow::Error {
+    fn into_status(self) -> Status {
+        Status::internal(self.to_string())
+    }
+}
+
 fn map_user(row: Option<PgRow>) -> Result<User> {
     match row {
         Some(row) => {
@@ -30,10 +50,12 @@ fn map_user(row: Option<PgRow>) -> Result<User> {
             let created: OffsetDateTime = row.try_get("created")?;
             let updated: OffsetDateTime = row.try_get("updated")?;
             let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
+            let role: String = row.try_get("role")?;
+            let role = UserRole::from_str_name(&role).ok_or(anyhow::anyhow!("Invalid role"))?;
 
             Ok(User {
                 id: id.to_string(),
-                role: UserRole::as_str_name(&UserRole::RoleUser).to_string(),
+                role: role.into(),
                 sub,
                 email,
                 created: created.to_string(),
@@ -51,20 +73,24 @@ impl UsersService for MyService {
         #[cfg(debug_assertions)]
         println!("Auth: {:?}", request);
         let start = std::time::Instant::now();
+
+        // Start transaction
         let pool = self.pool.clone();
+        let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
 
         let request = request.into_inner();
         let row =
             query("update users set updated = now() where email = $1 and sub = $2 returning *")
                 .bind(&request.email)
                 .bind(&request.sub)
-                .fetch_optional(&pool)
+                .fetch_optional(&mut tx)
                 .await
-                .map_err(|e| Status::internal(e.to_string()))?;
+                .map_err(sqlx::Error::into_status)?;
 
         match row {
             Some(row) => {
-                let user = map_user(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+                let user = map_user(Some(row)).map_err(anyhow::Error::into_status)?;
+                tx.commit().await.map_err(sqlx::Error::into_status)?;
                 println!("Elapsed: {:?}", start.elapsed());
                 Ok(Response::new(user))
             }
@@ -74,11 +100,12 @@ impl UsersService for MyService {
                         .bind(&request.email)
                         .bind(&request.sub)
                         .bind(UserRole::as_str_name(&UserRole::RoleUser))
-                        .fetch_one(&pool)
+                        .fetch_one(&mut tx)
                         .await
-                        .map_err(|e| Status::internal(e.to_string()))?;
+                        .map_err(sqlx::Error::into_status)?;
 
-                let user = map_user(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+                let user = map_user(Some(row)).map_err(anyhow::Error::into_status)?;
+                tx.commit().await.map_err(sqlx::Error::into_status)?;
                 println!("Elapsed: {:?}", start.elapsed());
                 Ok(Response::new(user))
             }
@@ -91,7 +118,6 @@ impl UsersService for MyService {
         let start = std::time::Instant::now();
 
         let pool = self.pool.clone();
-
         let request = request.into_inner();
         let uuid: Uuid = users_service::TryInto::try_into(request.user_id)
             .map_err(|e| Status::internal(e.to_string()))?;
@@ -100,9 +126,9 @@ impl UsersService for MyService {
             .bind(&uuid)
             .fetch_optional(&pool)
             .await
-            .map_err(|e| Status::not_found(e.to_string()))?;
+            .map_err(sqlx::Error::into_status)?;
 
-        let user = map_user(row).map_err(|e| Status::internal(e.to_string()))?;
+        let user = map_user(row).map_err(anyhow::Error::into_status)?;
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(user))
     }

@@ -1,4 +1,4 @@
-// Original file: main.proto
+// Original file: users.proto
 
 
 export interface AuthRequest {

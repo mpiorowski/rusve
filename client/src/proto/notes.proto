@@ -4,6 +4,11 @@ package proto;
 
 import "users.proto";
 
+message NoteId {
+    string noteId = 1;
+    string userId = 2;
+}
+
 message Note {
   string id = 1;
   string created = 2;

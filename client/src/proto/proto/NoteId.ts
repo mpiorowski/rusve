@@ -1,4 +1,4 @@
-// Original file: main.proto
+// Original file: notes.proto
 
 
 export interface NoteId {

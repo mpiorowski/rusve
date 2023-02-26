@@ -11,6 +11,31 @@ services:
     ports: 
       - 3000:3000
 
+  service-utils:
+    container_name: rust-grpc-service-utils
+    working_dir: /app
+    build:
+      context: ./service-utils/
+      target: dev
+    volumes:
+      - ./files:/app/files
+    depends_on:
+      - db-utils
+    environment:
+      PORT: 443
+      ENV: development
+      DATABASE_URL: postgresql://?host=db-utils&user=postgres&password=12345&dbname=utils
+
+  db-utils:
+    container_name: rust-grpc-db-utils
+    image: postgres:15.1
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: utils
+
   service-users:
     container_name: rust-grpc-service-users
     working_dir: /app
