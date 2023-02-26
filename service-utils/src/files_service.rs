@@ -50,10 +50,9 @@ impl UtilsService for MyService {
     ) -> Result<Response<Self::GetFilesStream>, Status> {
         #[cfg(debug_assertions)]
         println!("GetFiles = {:?}", request);
-
         let start = std::time::Instant::now();
-        let pool = self.pool.clone();
 
+        let pool = self.pool.clone();
         let (tx, rx) = mpsc::channel(4);
         let request = request.into_inner();
         let uuid =

@@ -50,10 +50,12 @@ fn map_user(row: Option<PgRow>) -> Result<User> {
             let created: OffsetDateTime = row.try_get("created")?;
             let updated: OffsetDateTime = row.try_get("updated")?;
             let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
+            let role: String = row.try_get("role")?;
+            let role = UserRole::from_str_name(&role).ok_or(anyhow::anyhow!("Invalid role"))?;
 
             Ok(User {
                 id: id.to_string(),
-                role: UserRole::as_str_name(&UserRole::RoleUser).to_string(),
+                role: role.into(),
                 sub,
                 email,
                 created: created.to_string(),
@@ -88,6 +90,7 @@ impl UsersService for MyService {
         match row {
             Some(row) => {
                 let user = map_user(Some(row)).map_err(anyhow::Error::into_status)?;
+                tx.commit().await.map_err(sqlx::Error::into_status)?;
                 println!("Elapsed: {:?}", start.elapsed());
                 Ok(Response::new(user))
             }
@@ -102,6 +105,7 @@ impl UsersService for MyService {
                         .map_err(sqlx::Error::into_status)?;
 
                 let user = map_user(Some(row)).map_err(anyhow::Error::into_status)?;
+                tx.commit().await.map_err(sqlx::Error::into_status)?;
                 println!("Elapsed: {:?}", start.elapsed());
                 Ok(Response::new(user))
             }

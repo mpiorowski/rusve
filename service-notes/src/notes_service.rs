@@ -116,7 +116,7 @@ impl NotesService for MyService {
                                 .unwrap();
                             break;
                         } else {
-                            let note = note.unwrap();
+                            let mut note = note.unwrap();
 
                             // Get user
                             let request = Request::from_parts(
@@ -126,22 +126,20 @@ impl NotesService for MyService {
                                     user_id: note.user_id.to_owned(),
                                 },
                             );
-                            println!("Request: {:?}", request);
-
                             let response = users_conn.get_user(request).await;
                             if let Err(e) = response {
-                                println!("Error: {}", e);
                                 tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
                                 break;
                             }
                             let response = response.unwrap();
                             let user = response.into_inner();
-                            let mut note = note;
                             note.user = Some(user);
+                            println!("note = {:?}", note);
                             tx.send(Ok(note)).await.unwrap();
                         }
                     }
                     Err(e) => {
+                        println!("Error: {:?}", e);
                         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
                         break;
                     }

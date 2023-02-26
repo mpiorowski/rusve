@@ -19,6 +19,7 @@ export const load = (async ({ locals }) => {
 
         await new Promise<Note__Output[]>((resolve, reject) => {
             stream.on("data", (note) => {
+                console.log(note);
                 notes.push(note);
             });
 
