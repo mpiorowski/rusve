@@ -1,5 +1,6 @@
 use crate::proto::utils_service_server::UtilsService;
 use crate::proto::{File, FileId, FileType, TargetId};
+use crate::utils::check_env;
 use crate::MyService;
 use anyhow::Result;
 use futures_util::TryStreamExt;
@@ -78,7 +79,7 @@ impl UtilsService for MyService {
                             break;
                         } else {
                             let mut file = file.unwrap();
-                            let file_path = format!("/app/files/{}", &file.name);
+                            let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
                             let data = std::fs::read(file_path).unwrap();
                             file.data = data;
                             tx.send(Ok(file)).await.unwrap();
@@ -96,35 +97,48 @@ impl UtilsService for MyService {
 
     async fn create_file(&self, request: Request<File>) -> Result<Response<File>, Status> {
         #[cfg(debug_assertions)]
-        println!("CreateFile = {:?}", request);
+        println!("CreateFile");
         let start = std::time::Instant::now();
 
+        // start transaction
         let pool = self.pool.clone();
+        let mut tx = pool
+            .begin()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+
         let file = request.into_inner();
         let file_data = file.data;
 
-        // save file to disk
-        let file_path = format!("/app/files/{}", file.name);
-        let mut new_file = tokio::fs::File::create(file_path).await?;
-        new_file.write_all(&file_data).await?;
-
-        // TODO - text to uuid
+        // save file to db
         let uuid = Uuid::parse_str(&file.target_id).map_err(|e| Status::internal(e.to_string()))?;
         let r#type = FileType::from_i32(file.r#type)
             .ok_or(anyhow::anyhow!("Invalid file type"))
             .map_err(|e| Status::internal(e.to_string()))?
             .as_str_name();
-
         let row =
             query("INSERT INTO files (\"targetId\", name, type) VALUES ($1, $2, $3) RETURNING *")
                 .bind(&uuid)
                 .bind(&file.name)
                 .bind(&r#type)
-                .fetch_one(&pool)
+                .fetch_one(&mut tx)
                 .await
                 .map_err(|e| Status::internal(e.to_string()))?;
-
         let file = map_file(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+
+        // save file to disk
+        let env = check_env("ENV").map_err(|e| Status::internal(e.to_string()))?;
+        if env == "development" {
+            let file_path = format!("/app/files/{}/{}", file.id, file.name);
+            tokio::fs::create_dir_all(format!("/app/files/{}", file.id)).await?;
+            let mut new_file = tokio::fs::File::create(file_path).await?;
+            new_file.write_all(&file_data).await?;
+        }
+
+        // commit transaction
+        tx.commit()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
         let elapsed = start.elapsed();
         println!("Elapsed: {:.2?}", elapsed);
         return Ok(Response::new(file));
@@ -134,7 +148,12 @@ impl UtilsService for MyService {
         println!("DeleteFile = {:?}", request);
         let start = std::time::Instant::now();
 
+        // start transaction
         let pool = self.pool.clone();
+        let mut tx = pool
+            .begin()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
         let file_id =
@@ -146,11 +165,16 @@ impl UtilsService for MyService {
         )
         .bind(&file_id)
         .bind(&target_id)
-        .fetch_one(&pool)
+        .fetch_one(&mut tx)
         .await
         .map_err(|e| Status::not_found(e.to_string()))?;
 
         let file = map_file(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+
+        // commit transaction
+        tx.commit()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
         let elapsed = start.elapsed();
         println!("Elapsed: {:.2?}", elapsed);
         return Ok(Response::new(file));

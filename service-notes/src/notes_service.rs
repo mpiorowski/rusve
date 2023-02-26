@@ -12,6 +12,36 @@ use tokio::sync::{mpsc, Mutex};
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 
+trait SqlxError {
+    fn into_status(self) -> Status;
+}
+
+impl SqlxError for sqlx::Error {
+    fn into_status(self) -> Status {
+        match self {
+            sqlx::Error::Database(e) => Status::internal(e.message()),
+            sqlx::Error::RowNotFound => Status::not_found("Note not found"),
+            sqlx::Error::ColumnNotFound(_) => Status::not_found("Note not found"),
+            _ => Status::internal("Unknown error"),
+        }
+    }
+}
+
+// TODO - find a way to use it automatically with ? operator
+trait From<T> {
+    fn from(e: T) -> Status;
+}
+impl From<sqlx::Error> for Status {
+    fn from(e: sqlx::Error) -> Status {
+        e.into_status()
+    }
+}
+impl From<std::io::Error> for Status {
+    fn from(e: std::io::Error) -> Status {
+        Status::internal(e.to_string())
+    }
+}
+
 fn map_note(row: Option<PgRow>) -> Result<Note> {
     match row {
         Some(row) => {
@@ -51,10 +81,7 @@ impl NotesService for MyService {
         let start = std::time::Instant::now();
 
         let pool = self.pool.clone();
-
         let (tx, rx) = mpsc::channel(4);
-        let user_id = request.into_inner().user_id;
-        let uuid = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         // User service
         let mut users_conn = self.users_conn.clone();
@@ -65,6 +92,9 @@ impl NotesService for MyService {
             .map_err(|e| {
                 Status::internal(format!("Error fetching auth metadata: {}", e.to_string()))
             })?;
+
+        let user_id = request.into_inner().user_id;
+        let uuid = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         tokio::spawn(async move {
             let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
@@ -126,7 +156,9 @@ impl NotesService for MyService {
         println!("CreateNote = {:?}", request);
         let start = std::time::Instant::now();
 
+        // start transaction
         let pool = self.pool.clone();
+        let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
 
         let note = request.into_inner();
         let user_id =
@@ -137,11 +169,15 @@ impl NotesService for MyService {
                 .bind(note.title)
                 .bind(note.content)
                 .bind(user_id)
-                .fetch_one(&pool)
+                .fetch_one(&mut tx)
                 .await
-                .map_err(|e| Status::internal(e.to_string()))?;
+                .map_err(sqlx::Error::into_status)?;
 
         let note = map_note(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+
+        // commit transaction
+        tx.commit().await.map_err(sqlx::Error::into_status)?;
+
         let elapsed = start.elapsed();
         println!("Elapsed: {:.2?}", elapsed);
         return Ok(Response::new(note));
@@ -151,7 +187,9 @@ impl NotesService for MyService {
         println!("DeleteNote = {:?}", request);
         let start = std::time::Instant::now();
 
+        // start transaction
         let pool = self.pool.clone();
+        let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
 
         let request = request.into_inner();
         let note_uuid =
@@ -163,11 +201,15 @@ impl NotesService for MyService {
             query("UPDATE notes SET deleted = NOW() WHERE id = $1 AND \"userId\" = $2 RETURNING *")
                 .bind(note_uuid)
                 .bind(user_uuid)
-                .fetch_one(&pool)
+                .fetch_one(&mut tx)
                 .await
-                .map_err(|e| Status::not_found(e.to_string()))?;
+                .map_err(sqlx::Error::into_status)?;
 
         let note = map_note(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+
+        // commit transaction
+        tx.commit().await.map_err(sqlx::Error::into_status)?;
+
         let elapsed = start.elapsed();
         println!("Elapsed: {:.2?}", elapsed);
         return Ok(Response::new(note));

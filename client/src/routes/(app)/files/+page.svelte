@@ -6,7 +6,6 @@
     export let form: ActionData;
 </script>
 
-<h1>Files</h1>
 <h2 class="text-center">
     Files loaded in {data.duration.toFixed(4)}ms
 </h2>
@@ -20,7 +19,7 @@
     action="?/createFile"
     method="post"
     enctype="multipart/form-data"
-    class="flex flex-col gap-2"
+    class="flex flex-col gap-2 p-4"
 >
     <input class="bg-gray-800 p-3 rounded" type="file" name="file" />
     <input type="hidden" name="type" value={FileType.DOCUMENT} />
