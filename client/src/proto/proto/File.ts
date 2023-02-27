@@ -1,4 +1,4 @@
-// Original file: files.proto
+// Original file: ../proto/files.proto
 
 import type { FileType as _proto_FileType, FileType__Output as _proto_FileType__Output } from '../proto/FileType';
 

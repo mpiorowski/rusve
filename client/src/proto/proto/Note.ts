@@ -1,4 +1,4 @@
-// Original file: notes.proto
+// Original file: ../proto/notes.proto
 
 import type { User as _proto_User, User__Output as _proto_User__Output } from '../proto/User';
 

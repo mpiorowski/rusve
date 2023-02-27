@@ -1,4 +1,4 @@
-// Original file: files.proto
+// Original file: ../proto/files.proto
 
 export const FileType = {
   DOCUMENT: 'DOCUMENT',

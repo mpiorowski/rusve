@@ -1,4 +1,4 @@
-// Original file: users.proto
+// Original file: ../proto/users.proto
 
 import type { UserRole as _proto_UserRole, UserRole__Output as _proto_UserRole__Output } from '../proto/UserRole';
 

@@ -1,4 +1,4 @@
-// Original file: main.proto
+// Original file: ../proto/main.proto
 
 
 export interface Empty {
