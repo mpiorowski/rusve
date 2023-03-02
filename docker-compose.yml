@@ -16,7 +16,7 @@ services:
     working_dir: /app
     build:
       context: ./service-utils/
-      target: dev
+      dockerfile: Dockerfile.dev
     volumes:
       - ./files:/app/files
     depends_on:
@@ -41,7 +41,7 @@ services:
     working_dir: /app
     build:
       context: ./service-users/
-      target: dev
+      dockerfile: Dockerfile.dev
     depends_on:
       - db-users
     environment:
@@ -62,7 +62,7 @@ services:
     working_dir: /app
     build:
       context: ./service-notes/
-      target: dev
+      dockerfile: Dockerfile.dev
     depends_on:
       - db-notes
       - service-users
