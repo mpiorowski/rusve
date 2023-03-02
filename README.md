@@ -34,3 +34,15 @@ In development: Files and Async Email
 npm i --prefix client
 docker-compose up
 ```
+
+## Proto generation
+
+```
+# ./client
+npm run proto
+```
+
+```
+# ./service-******
+cargo run --bin proto
+```
