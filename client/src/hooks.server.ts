@@ -1,6 +1,9 @@
+import { URI_USERS } from "$env/static/private";
 import type { Handle, HandleServerError } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
-import { UserRole } from "./proto/proto/UserRole";
+import { fetchToken, usersClient } from "./grpc";
+import type { User__Output } from "./proto/proto/User";
+import type { UserId } from "./proto/proto/UserId";
 
 export const handleError: HandleServerError = ({ error }) => {
     console.error("Error: %s", error);
@@ -17,9 +20,17 @@ export const handleError: HandleServerError = ({ error }) => {
 };
 
 export const authorization = (async ({ event, resolve }) => {
-    event.locals.userId = "123e4567-e89b-12d3-a456-426655440000";
-    event.locals.role = UserRole.ROLE_USER;
-    event.locals.email = "test@gmail.com";
+    const request: UserId = { userId: "123e4567-e89b-12d3-a456-426655440000" };
+    const metadata = await fetchToken(URI_USERS);
+    const user = await new Promise<User__Output>((resolve, reject) => {
+        usersClient.getUser(request, metadata, (err, response) =>
+            err || !response ? reject(err) : resolve(response),
+        );
+    });
+
+    event.locals.role = user.role;
+    event.locals.email = user.email;
+    event.locals.userId = user.id;
 
     // If the request is still here, just proceed as normally
     const result = await resolve(event, {

@@ -3,8 +3,9 @@ syntax = "proto3";
 package proto;
 
 enum UserRole {
-  ROLE_USER = 0;
-  ROLE_ADMIN = 1;
+    UNSET = 0;
+    ROLE_USER = 1;
+    ROLE_ADMIN = 2;
 }
 
 message AuthRequest {
@@ -13,13 +14,13 @@ message AuthRequest {
 }
 
 message User {
-  string id = 1;
-  string created = 2;
-  string updated = 3;
-  optional string deleted = 4;
+    string id = 1;
+    string created = 2;
+    string updated = 3;
+    optional string deleted = 4;
 
-  string email = 5;
-  UserRole role = 6;
-  string sub = 7;
+    string email = 5;
+    UserRole role = 6;
+    string sub = 7;
 }
 
