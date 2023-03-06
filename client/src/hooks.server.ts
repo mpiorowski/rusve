@@ -20,6 +20,8 @@ export const handleError: HandleServerError = ({ error }) => {
 };
 
 export const authorization = (async ({ event, resolve }) => {
+    console.log("Authorization");
+    console.log(URI_USERS);
     const request: UserId = { userId: "123e4567-e89b-12d3-a456-426655440000" };
     const metadata = await fetchToken(URI_USERS);
     const user = await new Promise<User__Output>((resolve, reject) => {

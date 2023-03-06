@@ -1,16 +1,14 @@
 use crate::{
     proto::{notes_service_server::NotesService, Note, NoteId, UserId},
-    utils::{check_env, fetch_auth_metadata},
-    CachedToken, MyService,
+    MyService,
 };
 use anyhow::Result;
 use futures_util::TryStreamExt;
 use sqlx::types::time::OffsetDateTime;
 use sqlx::{postgres::PgRow, query, types::Uuid, Row};
-use std::sync::Arc;
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
-use tonic::{Request, Response, Status};
+use tonic::{metadata::MetadataMap, Request, Response, Status};
 
 trait SqlxError {
     fn into_status(self) -> Status;
@@ -85,13 +83,13 @@ impl NotesService for MyService {
 
         // User service
         let mut users_conn = self.users_conn.clone();
-        let cached_token: Arc<Mutex<CachedToken>> = self.cached_token.clone();
-        let uri_users = check_env("URI_USERS").map_err(|e| Status::internal(e.to_string()))?;
-        let metadata = fetch_auth_metadata(cached_token, &uri_users)
-            .await
-            .map_err(|e| {
-                Status::internal(format!("Error fetching auth metadata: {}", e.to_string()))
-            })?;
+        // let cached_token: Arc<Mutex<CachedToken>> = self.cached_token.clone();
+        // let uri_users = check_env("URI_USERS").map_err(|e| Status::internal(e.to_string()))?;
+        // let metadata = fetch_auth_metadata(cached_token, &uri_users)
+        //     .await
+        //     .map_err(|e| {
+        //         Status::internal(format!("Error fetching auth metadata: {}", e.to_string()))
+        //     })?;
 
         let user_id = request.into_inner().user_id;
         let uuid = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
@@ -120,7 +118,7 @@ impl NotesService for MyService {
 
                             // Get user
                             let request = Request::from_parts(
-                                metadata.clone(),
+                                MetadataMap::new(),
                                 Default::default(),
                                 UserId {
                                     user_id: note.user_id.to_owned(),

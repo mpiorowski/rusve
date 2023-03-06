@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
     println!("Migrations ran successfully");
 
     let port = check_env("PORT")?;
-    let addr = ("0.0.0.0:".to_owned() + &port)
+    let addr = ("[::]:".to_owned() + &port)
         .parse()
         .context("Failed to parse address")?;
 
