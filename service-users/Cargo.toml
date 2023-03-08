@@ -23,3 +23,4 @@ futures-util = "0.3"
 anyhow = "1.0.69"
 sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "migrate", "postgres", "uuid", "time"] }
 time = "0.3.17"
+jsonwebtoken = "8.2.0"

@@ -8,7 +8,7 @@ processes = []
 [env]
   PORT = 443
   ENV = "production"
-  URI_USERS = "https://rust-grpc-users.fly.dev"
+  URI_USERS = "https://rust-grpc-users.fly.dev:443"
 
 [experimental]
   allowed_public_ports = []
@@ -27,10 +27,10 @@ processes = []
     soft_limit = 20
     type = "connections"
 
-  #[[services.ports]]
-  #  force_https = true
-  #  handlers = ["http"]
-  #  port = 80
+  [[services.ports]]
+    force_https = true
+    handlers = ["http"]
+    port = 80
 
   [[services.ports]]
     handlers = ["tls"]

@@ -1,10 +1,23 @@
 import protoLoader from "@grpc/proto-loader";
 import { credentials, loadPackageDefinition, Metadata } from "@grpc/grpc-js";
 import type { ProtoGrpcType } from "./proto/main";
-import { URI_USERS, URI_NOTES, ENV, URI_UTILS } from "$env/static/private";
+import {
+    URI_USERS,
+    URI_NOTES,
+    ENV,
+    URI_UTILS,
+    SECRET,
+} from "$env/static/private";
+import { createHmac } from "crypto";
 
 export const fetchToken = async (serviceUrl: string) => {
-    return new Metadata();
+    const timestamp = Date.now().toString();
+    const hmac = createHmac("sha256", SECRET);
+    hmac.update(timestamp);
+    const token = `${timestamp}.${hmac.digest("hex")}`;
+    const metadata = new Metadata();
+    metadata.set("authorization", `Bearer ${token}`);
+    return metadata;
 };
 
 export const packageDefinition = protoLoader.loadSync("./src/proto/main.proto");
