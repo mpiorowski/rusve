@@ -4,10 +4,10 @@ mod utils;
 
 use crate::proto::users_service_server::UsersServiceServer;
 use anyhow::{Context, Result};
-use hmac::Hmac;
-use sha2::Sha256;
+use jsonwebtoken::{DecodingKey, Validation};
+use serde::Deserialize;
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use tonic::{metadata::MetadataValue, transport::Server, Request, Status};
+use tonic::{transport::Server, Request, Status};
 use utils::check_env;
 
 trait IntoStatus {
@@ -23,6 +23,10 @@ impl IntoStatus for sqlx::Error {
 #[derive(Debug)]
 pub struct MyService {
     pool: PgPool,
+}
+
+pub struct Extension {
+    user_id: String,
 }
 
 #[tokio::main]
@@ -61,24 +65,32 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-fn check_auth(req: Request<()>) -> Result<Request<()>, Status> {
-    let token: MetadataValue<_> = "Bearer some-secret-token".parse().unwrap();
-
-    let key: Hmac<Sha256> = Hmac::new_from_slice(b"my-secret-key")?;
-
-    match req.metadata().get("authorization") {
+fn check_auth(mut req: Request<()>) -> Result<Request<()>, Status> {
+    match req.metadata().get("Authorization") {
         Some(t) => {
-            validate_token(t.to_str()?, key.as_ref())?;
-            Ok(req)
+            let token = t
+                .to_str()
+                .map_err(|_| Status::unauthenticated("Invalid auth token"))?;
+            let token = token.trim_start_matches("Bearer ");
+            let secret =
+                check_env("SECRET").map_err(|_| Status::unauthenticated("Missing auth secret"))?;
+            let user_id = validate_token(token, secret.as_bytes())
+                .map_err(|_| Status::unauthenticated("Validation failed for auth token"))?;
+            req.extensions_mut().insert(Extension { user_id });
+            return Ok(req);
         }
         _ => Err(Status::unauthenticated("No valid auth token")),
     }
 }
 
-fn validate_token(token: &str, secret: &[u8]) -> Result<(), jsonwebtoken::errors::Error> {
-    let validation = Validation::default();
-    let decoding_key = DecodingKey::from_secret(secret);
+#[derive(Debug, Deserialize)]
+struct Token {
+    user_id: String,
+}
 
-    decode::<serde_json::Value>(token, &decoding_key, &validation)?;
-    Ok(())
+fn validate_token(token: &str, secret: &[u8]) -> Result<String, jsonwebtoken::errors::Error> {
+    let validation = Validation::new(jsonwebtoken::Algorithm::HS256);
+    let decoding_key = DecodingKey::from_secret(secret);
+    let token_data = jsonwebtoken::decode::<Token>(token, &decoding_key, &validation)?;
+    Ok(token_data.claims.user_id)
 }

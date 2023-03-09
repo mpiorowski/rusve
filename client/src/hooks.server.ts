@@ -1,9 +1,7 @@
-import { URI_USERS } from "$env/static/private";
 import type { Handle, HandleServerError } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { fetchToken, usersClient } from "./grpc";
 import type { User__Output } from "./proto/proto/User";
-import type { UserId } from "./proto/proto/UserId";
 
 export const handleError: HandleServerError = ({ error }) => {
     console.error("Error: %s", error);
@@ -20,10 +18,8 @@ export const handleError: HandleServerError = ({ error }) => {
 };
 
 export const authorization = (async ({ event, resolve }) => {
-    console.log("Authorization");
-    console.log(URI_USERS);
-    const request: UserId = { userId: "123e4567-e89b-12d3-a456-426655440000" };
-    const metadata = await fetchToken(URI_USERS);
+    const request = { userId: "123e4567-e89b-12d3-a456-426655440000" };
+    const metadata = await fetchToken(request.userId);
     const user = await new Promise<User__Output>((resolve, reject) => {
         usersClient.getUser(request, metadata, (err, response) =>
             err || !response ? reject(err) : resolve(response),

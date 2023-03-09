@@ -48,6 +48,7 @@ services:
       PORT: 443
       ENV: development
       DATABASE_URL: postgresql://postgres:12345@db-users/users
+      SECRET: my-secret-key
 
   db-users:
     container_name: rust-grpc-db-users

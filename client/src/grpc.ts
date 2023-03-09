@@ -8,15 +8,15 @@ import {
     URI_UTILS,
     SECRET,
 } from "$env/static/private";
-import { createHmac } from "crypto";
+import jwt from "jsonwebtoken";
 
-export const fetchToken = async (serviceUrl: string) => {
-    const timestamp = Date.now().toString();
-    const hmac = createHmac("sha256", SECRET);
-    hmac.update(timestamp);
-    const token = `${timestamp}.${hmac.digest("hex")}`;
+export const fetchToken = async (userId: string) => {
     const metadata = new Metadata();
-    metadata.set("authorization", `Bearer ${token}`);
+    const token = jwt.sign({ user_id: userId }, SECRET, {
+        expiresIn: 3600,
+        algorithm: "HS256",
+    });
+    metadata.set("Authorization", `Bearer ${token}`);
     return metadata;
 };
 

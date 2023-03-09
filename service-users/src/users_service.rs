@@ -52,7 +52,6 @@ fn map_user(row: Option<PgRow>) -> Result<User> {
             let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
             let role: String = row.try_get("role")?;
             let role = UserRole::from_str_name(&role).ok_or(anyhow::anyhow!("Invalid role"))?;
-            println!("Role: {:?}", role);
 
             Ok(User {
                 id: id.to_string(),
@@ -130,7 +129,6 @@ impl UsersService for MyService {
             .map_err(sqlx::Error::into_status)?;
 
         let user = map_user(row).map_err(anyhow::Error::into_status)?;
-        println!("User: {:?}", user);
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(user))
     }
