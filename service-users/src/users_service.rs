@@ -117,13 +117,25 @@ impl UsersService for MyService {
         println!("GetUser: {:?}", request);
         let start = std::time::Instant::now();
 
+        let user_id_metadata = request
+            .metadata()
+            .get("user_id")
+            .ok_or_else(|| Status::unauthenticated("Missing user_id metadata"))?
+            .to_owned();
+
         let pool = self.pool.clone();
         let request = request.into_inner();
-        let uuid: Uuid = users_service::TryInto::try_into(request.user_id)
+        let user_id = request.user_id;
+
+        if user_id != user_id_metadata.to_str().unwrap() {
+            return Err(Status::unauthenticated("Invalid user_id"));
+        }
+
+        let user_id: Uuid = users_service::TryInto::try_into(user_id)
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let row = query("select * from users where id = $1")
-            .bind(&uuid)
+            .bind(&user_id)
             .fetch_optional(&pool)
             .await
             .map_err(sqlx::Error::into_status)?;

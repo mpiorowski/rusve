@@ -76,7 +76,12 @@ fn check_auth(mut req: Request<()>) -> Result<Request<()>, Status> {
                 check_env("SECRET").map_err(|_| Status::unauthenticated("Missing auth secret"))?;
             let user_id = validate_token(token, secret.as_bytes())
                 .map_err(|_| Status::unauthenticated("Validation failed for auth token"))?;
-            req.extensions_mut().insert(Extension { user_id });
+            req.metadata_mut().insert(
+                "user_id",
+                user_id
+                    .parse()
+                    .map_err(|_| Status::unauthenticated("Invalid user id"))?,
+            );
             return Ok(req);
         }
         _ => Err(Status::unauthenticated("No valid auth token")),
