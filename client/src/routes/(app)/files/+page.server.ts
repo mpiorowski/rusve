@@ -1,7 +1,7 @@
 import { URI_UTILS } from "$env/static/private";
 import { error } from "@sveltejs/kit";
 import { z } from "zod";
-import { fetchToken, utilsClient } from "../../../grpc";
+import { createAuthMetadata, utilsClient } from "../../../grpc";
 import type { File__Output } from "../../../proto/proto/File";
 import { FileType } from "../../../proto/proto/FileType";
 import type { TargetId } from "../../../proto/proto/TargetId";
@@ -13,7 +13,7 @@ export const load = (async ({ locals }) => {
         const userId = locals.userId;
         const request: TargetId = { targetId: userId };
 
-        const metadata = await fetchToken(URI_UTILS);
+        const metadata = await createAuthMetadata(URI_UTILS);
         const stream = utilsClient.getFiles(request, metadata);
         const files: File__Output[] = [];
 
@@ -87,7 +87,7 @@ export const actions = {
             throw error(400, "Invalid request");
         }
 
-        const metadata = await fetchToken(URI_UTILS);
+        const metadata = await createAuthMetadata(URI_UTILS);
         await new Promise<File__Output>((resolve, reject) => {
             utilsClient.createFile(schema.data, metadata, (err, response) =>
                 err || !response ? reject(err) : resolve(response),
@@ -119,7 +119,7 @@ export const actions = {
             throw error(400, "Invalid request");
         }
 
-        const metadata = await fetchToken(URI_UTILS);
+        const metadata = await createAuthMetadata(URI_UTILS);
         await new Promise<File__Output>((resolve, reject) => {
             utilsClient.deleteFile(schema.data, metadata, (err, response) =>
                 err || !response ? reject(err) : resolve(response),

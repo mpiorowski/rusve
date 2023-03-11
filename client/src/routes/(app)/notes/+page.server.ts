@@ -1,7 +1,7 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import type { UserId } from "../../../proto/proto/UserId";
-import { fetchToken, notesClient } from "../../../grpc";
+import { createAuthMetadata, notesClient } from "../../../grpc";
 import type { Note__Output } from "../../../proto/proto/Note";
 import type { NoteId } from "../../../proto/proto/NoteId";
 import { URI_NOTES } from "$env/static/private";
@@ -13,7 +13,7 @@ export const load = (async ({ locals }) => {
         const userId = locals.userId;
         const request: UserId = { userId: userId };
 
-        const metadata = await fetchToken(URI_NOTES);
+        const metadata = await createAuthMetadata(URI_NOTES);
         const stream = notesClient.getNotes(request, metadata);
         const notes: Note__Output[] = [];
 
@@ -70,7 +70,7 @@ export const actions = {
         }
 
         try {
-            const metadata = await fetchToken(URI_NOTES);
+            const metadata = await createAuthMetadata(URI_NOTES);
             const note = await new Promise<Note__Output>((resolve, reject) => {
                 notesClient.createNote(schema.data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
@@ -102,7 +102,7 @@ export const actions = {
                 userId: locals.userId,
             };
 
-            const metadata = await fetchToken(URI_NOTES);
+            const metadata = await createAuthMetadata(URI_NOTES);
             const note = await new Promise<Note__Output>((resolve, reject) => {
                 notesClient.deleteNote(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),

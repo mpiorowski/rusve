@@ -1,6 +1,6 @@
 import { SvelteKitAuth } from "@auth/sveltekit";
 import { redirect, type Handle, type HandleServerError } from "@sveltejs/kit";
-import { fetchToken, usersClient } from "./grpc";
+import { createAuthMetadata, usersClient } from "./grpc";
 import type { User__Output } from "./proto/proto/User";
 import Google from "@auth/core/providers/google";
 import { AUTH_SECRET, GOOGLE_ID, GOOGLE_SECRET } from "$env/static/private";
@@ -35,7 +35,7 @@ export const authorization = (async ({ event, resolve }) => {
             sub: session.user.sub,
             email: session.user.email,
         };
-        const metadata = await fetchToken(session.user.sub);
+        const metadata = await createAuthMetadata(session.user.sub);
         const user = await new Promise<User__Output>((resolve, reject) => {
             usersClient.Auth(request, metadata, (err, response) =>
                 err || !response ? reject(err) : resolve(response),

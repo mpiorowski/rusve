@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { signOut } from "@auth/sveltekit/client";
 </script>
 
 <navigation
@@ -23,5 +24,6 @@
     >
         Files
     </a>
+    <button on:click={() => signOut()}>Logout</button>
 </navigation>
 <slot />

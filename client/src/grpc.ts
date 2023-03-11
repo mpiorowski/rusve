@@ -4,13 +4,13 @@ import type { ProtoGrpcType } from "./proto/main";
 import {
     URI_USERS,
     URI_NOTES,
-    ENV,
     URI_UTILS,
+    ENV,
     SECRET,
 } from "$env/static/private";
 import jwt from "jsonwebtoken";
 
-export const fetchToken = async (userId: string) => {
+export const createAuthMetadata = async (userId: string) => {
     const metadata = new Metadata();
     const token = jwt.sign({ user_id: userId }, SECRET, {
         expiresIn: 3600,
