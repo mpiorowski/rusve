@@ -1,8 +1,7 @@
-use crate::CachedToken;
 use anyhow::Result;
-use std::sync::Arc;
-use tokio::sync::Mutex;
-use tonic::metadata::MetadataMap;
+use jsonwebtoken::{encode, EncodingKey, Header};
+use serde::{Deserialize, Serialize};
+use tonic::metadata::{MetadataMap, MetadataValue};
 
 pub fn check_env(env_str: &str) -> Result<String> {
     let env = std::env::var(env_str);
@@ -15,36 +14,30 @@ pub fn check_env(env_str: &str) -> Result<String> {
     }
 }
 
-pub async fn fetch_auth_metadata(
-    cached_token: Arc<Mutex<CachedToken>>,
-    service_uri: &str,
-) -> Result<MetadataMap> {
+pub fn create_auth_metadata(user_id: &String) -> Result<MetadataMap> {
+    let secret = check_env("SECRET")?;
+    let token = encode_token(user_id, secret.as_ref())?;
+    let metadata_value = MetadataValue::try_from("Bearer ".to_owned() + &token)?;
     let mut metadata = MetadataMap::new();
-    let env = check_env("ENV")?;
-    if env != "production" {
-        return Ok(metadata);
-    }
-    // check if token is expired
-    let mut cached_token = cached_token.lock().await;
-    if cached_token.expires > time::OffsetDateTime::now_utc() {
-        println!("Using cached token");
-        let token = "Bearer ".to_owned() + &cached_token.token;
-        metadata.insert("authorization", token.parse().unwrap());
-        return Ok(metadata);
-    }
-    let client = reqwest::Client::new();
-    let res = client
-        .get("http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?audience=".to_owned() + service_uri)
-        .header("Metadata-Flavor", "Google")
-        .send()
-        .await?;
-
-    let token = res.text().await?;
-    cached_token.token = token.clone();
-    cached_token.expires = time::OffsetDateTime::now_utc() + time::Duration::hours(1);
-    let token = "Bearer ".to_owned() + &token;
-    metadata.insert("authorization", token.parse().unwrap());
-    println!("Metadata: {:?}", metadata);
-
+    metadata.insert("authorization", metadata_value);
     Ok(metadata)
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct Claims {
+    user_id: String,
+    exp: usize,
+}
+pub fn encode_token(user_id: &String, secret: &[u8]) -> Result<String> {
+    let current_time = time::OffsetDateTime::now_utc();
+    let claims = Claims {
+        user_id: user_id.to_string(),
+        exp: (current_time + time::Duration::hours(1)).unix_timestamp() as usize,
+    };
+    let token = encode(
+        &Header::new(jsonwebtoken::Algorithm::HS256),
+        &claims,
+        &EncodingKey::from_secret(secret),
+    )?;
+    Ok(token)
 }

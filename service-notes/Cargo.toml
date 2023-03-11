@@ -3,6 +3,9 @@ name = "rust-grpc-notes"
 version = "0.1.0"
 edition = "2021"
 
+[registries.crates-io]
+protocol = "sparse"
+
 [[bin]]
 name = "main"
 path = "src/main.rs"
@@ -24,3 +27,5 @@ anyhow = "1.0.69"
 sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "migrate", "postgres", "uuid", "time"] }
 time = "0.3.17"
 reqwest = "0.11.14"
+jsonwebtoken = "8.2.0"
+serde = "1.0.154"

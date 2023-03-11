@@ -9,6 +9,7 @@ processes = []
 
 [experimental]
   auto_rollback = true
+  private_network = true
 
 [[services]]
   http_checks = []

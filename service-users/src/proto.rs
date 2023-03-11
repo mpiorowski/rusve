@@ -27,8 +27,9 @@ pub struct User {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum UserRole {
-    RoleUser = 0,
-    RoleAdmin = 1,
+    Unset = 0,
+    RoleUser = 1,
+    RoleAdmin = 2,
 }
 impl UserRole {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -37,6 +38,7 @@ impl UserRole {
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
+            UserRole::Unset => "UNSET",
             UserRole::RoleUser => "ROLE_USER",
             UserRole::RoleAdmin => "ROLE_ADMIN",
         }
@@ -44,6 +46,7 @@ impl UserRole {
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
+            "UNSET" => Some(Self::Unset),
             "ROLE_USER" => Some(Self::RoleUser),
             "ROLE_ADMIN" => Some(Self::RoleAdmin),
             _ => None,

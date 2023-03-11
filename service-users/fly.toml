@@ -6,10 +6,14 @@ kill_timeout = 5
 processes = []
 
 [env]
-    PORT= 443
+  PORT = 443
+  ENV = "production"
+  SECRET = "my-secret-key"
 
 [experimental]
+  allowed_public_ports = []
   auto_rollback = true
+  private_network = true
 
 [[services]]
   http_checks = []
@@ -17,6 +21,7 @@ processes = []
   processes = ["app"]
   protocol = "tcp"
   script_checks = []
+
   [services.concurrency]
     hard_limit = 25
     soft_limit = 20
@@ -28,8 +33,9 @@ processes = []
     port = 80
 
   [[services.ports]]
-    handlers = ["tls", "http"]
+    handlers = ["tls"]
     port = 443
+    tls_options = { "alpn" = ["h2"] }
 
   [[services.tcp_checks]]
     grace_period = "1s"

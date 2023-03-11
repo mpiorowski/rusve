@@ -75,7 +75,7 @@ export const apiRequest = async <T>({ url, method, body, cookies }: Options): Pr
     const headers = new Headers();
     headers.append('Cookie', `sessionCookie=${cookies?.get('next-auth.session-token')}`);
 
-    // const token = await fetchToken(API_URL);
+    // const token = await createAuthMetadata(API_URL);
     // headers.append('Authorization', `Bearer ${token}`);
 
     console.time(`apiRequest: ${method} ${url}`);

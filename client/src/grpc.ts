@@ -1,48 +1,22 @@
 import protoLoader from "@grpc/proto-loader";
 import { credentials, loadPackageDefinition, Metadata } from "@grpc/grpc-js";
 import type { ProtoGrpcType } from "./proto/main";
-import { URI_USERS, URI_NOTES, ENV, URI_UTILS } from "$env/static/private";
+import {
+    URI_USERS,
+    URI_NOTES,
+    URI_UTILS,
+    ENV,
+    SECRET,
+} from "$env/static/private";
+import jwt from "jsonwebtoken";
 
-const cacheToken = new Map<
-    string,
-    {
-        expires: Date;
-        metadata: Metadata;
-    }
->();
-
-export const fetchToken = async (serviceUrl: string) => {
-    if (ENV === "development") {
-        return new Metadata();
-    }
-
-    // check cache for token
-    const cached = cacheToken.get(serviceUrl);
-    if (cached && cached.expires > new Date()) {
-        console.info("Using cached token");
-        return cached.metadata;
-    }
-
-    console.info("Fetching token");
-    const tokenFetch = await fetch(
-        `http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?audience=https://${serviceUrl}`,
-        {
-            method: "GET",
-            headers: {
-                "Metadata-Flavor": "Google",
-            },
-        },
-    );
-    const token = await tokenFetch.text();
+export const createAuthMetadata = async (userId: string) => {
     const metadata = new Metadata();
-    metadata.add("authorization", `Bearer ${token}`);
-
-    // cache token for 1 hour
-    cacheToken.set(serviceUrl, {
-        expires: new Date(Date.now() + 3600000),
-        metadata,
+    const token = jwt.sign({ user_id: userId }, SECRET, {
+        expiresIn: 3600,
+        algorithm: "HS256",
     });
-
+    metadata.set("authorization", `Bearer ${token}`);
     return metadata;
 };
 
