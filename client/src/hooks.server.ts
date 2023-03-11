@@ -1,7 +1,12 @@
-import type { Handle, HandleServerError } from "@sveltejs/kit";
-import { sequence } from "@sveltejs/kit/hooks";
+import { SvelteKitAuth } from "@auth/sveltekit";
+import { redirect, type Handle, type HandleServerError } from "@sveltejs/kit";
 import { fetchToken, usersClient } from "./grpc";
 import type { User__Output } from "./proto/proto/User";
+import Google from "@auth/core/providers/google";
+import { AUTH_SECRET, GOOGLE_ID, GOOGLE_SECRET } from "$env/static/private";
+import type { AuthRequest } from "./proto/proto/AuthRequest";
+import { sequence } from "@sveltejs/kit/hooks";
+import type { Provider } from "@auth/core/providers";
 
 export const handleError: HandleServerError = ({ error }) => {
     console.error("Error: %s", error);
@@ -18,17 +23,39 @@ export const handleError: HandleServerError = ({ error }) => {
 };
 
 export const authorization = (async ({ event, resolve }) => {
-    const request = { userId: "123e4567-e89b-12d3-a456-426655440000" };
-    const metadata = await fetchToken(request.userId);
-    const user = await new Promise<User__Output>((resolve, reject) => {
-        usersClient.getUser(request, metadata, (err, response) =>
-            err || !response ? reject(err) : resolve(response),
-        );
-    });
+    try {
+        const session = (await event.locals.getSession()) as {
+            user: { sub: string; role: string; email: string };
+            expires: string;
+        };
+        if (!session?.user?.email || !session?.user?.sub) {
+            throw new Error("No user session");
+        }
+        const request: AuthRequest = {
+            sub: session.user.sub,
+            email: session.user.email,
+        };
+        const metadata = await fetchToken(session.user.sub);
+        const user = await new Promise<User__Output>((resolve, reject) => {
+            usersClient.Auth(request, metadata, (err, response) =>
+                err || !response ? reject(err) : resolve(response),
+            );
+        });
+        event.locals.role = user.role;
+        event.locals.email = user.email;
+        event.locals.userId = user.id;
+    } catch (err) {
+        console.error("User not authorized: %s", err);
+        event.locals.userId = "";
+        event.locals.role = "";
+        event.locals.email = "";
+    }
 
-    event.locals.role = user.role;
-    event.locals.email = user.email;
-    event.locals.userId = user.id;
+    if (!event.locals.userId && !event.url.pathname.startsWith("/auth")) {
+        throw redirect(303, "/auth");
+    } else if (event.url.pathname.startsWith("/auth") && event.locals.userId) {
+        throw redirect(303, "/");
+    }
 
     // If the request is still here, just proceed as normally
     const result = await resolve(event, {
@@ -37,7 +64,27 @@ export const authorization = (async ({ event, resolve }) => {
     return result;
 }) satisfies Handle;
 
-// First handle authentication, then authorization
-// Each function acts as a middleware, receiving the request handle
-// And returning a handle which gets passed to the next function
-export const handle: Handle = sequence(authorization);
+export const handle = sequence(
+    SvelteKitAuth({
+        providers: [
+            Google({
+                clientId: GOOGLE_ID,
+                clientSecret: GOOGLE_SECRET,
+            }) as Provider,
+        ],
+        secret: AUTH_SECRET,
+        trustHost: true,
+        callbacks: {
+            async session({ session, token }) {
+                return {
+                    user: {
+                        ...session.user,
+                        sub: token.sub,
+                    },
+                    expires: session.expires,
+                };
+            },
+        },
+    }),
+    authorization,
+) satisfies Handle;
