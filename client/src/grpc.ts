@@ -16,7 +16,7 @@ export const fetchToken = async (userId: string) => {
         expiresIn: 3600,
         algorithm: "HS256",
     });
-    metadata.set("Authorization", `Bearer ${token}`);
+    metadata.set("authorization", `Bearer ${token}`);
     return metadata;
 };
 

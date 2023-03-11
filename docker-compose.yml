@@ -72,6 +72,8 @@ services:
       PORT: 443
       DATABASE_URL: postgresql://postgres:12345@db-notes/notes
       URI_USERS: http://service-users:443
+      SECRET: my-secret-key
+      RUST_BACKTRACE: 1
 
   db-notes:
     container_name: rust-grpc-db-notes

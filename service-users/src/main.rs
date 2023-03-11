@@ -25,10 +25,6 @@ pub struct MyService {
     pool: PgPool,
 }
 
-pub struct Extension {
-    user_id: String,
-}
-
 #[tokio::main]
 async fn main() -> Result<()> {
     println!("Starting server...");
@@ -66,16 +62,16 @@ async fn main() -> Result<()> {
 }
 
 fn check_auth(mut req: Request<()>) -> Result<Request<()>, Status> {
-    match req.metadata().get("Authorization") {
+    match req.metadata().get("authorization") {
         Some(t) => {
             let token = t
                 .to_str()
                 .map_err(|_| Status::unauthenticated("Invalid auth token"))?;
-            let token = token.trim_start_matches("Bearer ");
             let secret =
                 check_env("SECRET").map_err(|_| Status::unauthenticated("Missing auth secret"))?;
-            let user_id = validate_token(token, secret.as_bytes())
-                .map_err(|_| Status::unauthenticated("Validation failed for auth token"))?;
+            let token = token.trim_start_matches("Bearer ");
+            let user_id = decode_token(token, secret.as_ref())
+                .map_err(|_| Status::unauthenticated("Invalid auth token"))?;
             req.metadata_mut().insert(
                 "user_id",
                 user_id
@@ -89,13 +85,13 @@ fn check_auth(mut req: Request<()>) -> Result<Request<()>, Status> {
 }
 
 #[derive(Debug, Deserialize)]
-struct Token {
+struct Claims {
     user_id: String,
 }
 
-fn validate_token(token: &str, secret: &[u8]) -> Result<String, jsonwebtoken::errors::Error> {
+fn decode_token(token: &str, secret: &[u8]) -> Result<String, jsonwebtoken::errors::Error> {
     let validation = Validation::new(jsonwebtoken::Algorithm::HS256);
     let decoding_key = DecodingKey::from_secret(secret);
-    let token_data = jsonwebtoken::decode::<Token>(token, &decoding_key, &validation)?;
+    let token_data = jsonwebtoken::decode::<Claims>(token, &decoding_key, &validation)?;
     Ok(token_data.claims.user_id)
 }

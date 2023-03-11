@@ -9,6 +9,7 @@ processes = []
   PORT = 443
   ENV = "production"
   URI_USERS = "https://rust-grpc-users.fly.dev:443"
+  SECRET = "my-secret-key"
 
 [experimental]
   allowed_public_ports = []

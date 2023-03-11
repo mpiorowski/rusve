@@ -1,5 +1,6 @@
 use crate::{
     proto::{notes_service_server::NotesService, Note, NoteId, UserId},
+    utils::create_auth_metadata,
     MyService,
 };
 use anyhow::Result;
@@ -8,7 +9,7 @@ use sqlx::types::time::OffsetDateTime;
 use sqlx::{postgres::PgRow, query, types::Uuid, Row};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
-use tonic::{metadata::MetadataMap, Request, Response, Status};
+use tonic::{Request, Response, Status};
 
 trait SqlxError {
     fn into_status(self) -> Status;
@@ -83,20 +84,13 @@ impl NotesService for MyService {
 
         // User service
         let mut users_conn = self.users_conn.clone();
-        // let cached_token: Arc<Mutex<CachedToken>> = self.cached_token.clone();
-        // let uri_users = check_env("URI_USERS").map_err(|e| Status::internal(e.to_string()))?;
-        // let metadata = fetch_auth_metadata(cached_token, &uri_users)
-        //     .await
-        //     .map_err(|e| {
-        //         Status::internal(format!("Error fetching auth metadata: {}", e.to_string()))
-        //     })?;
 
         let user_id = request.into_inner().user_id;
-        let uuid = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
+        let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         tokio::spawn(async move {
             let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
-                .bind(uuid)
+                .bind(user_id)
                 .fetch(&pool);
 
             loop {
@@ -117,8 +111,15 @@ impl NotesService for MyService {
                             let mut note = note.unwrap();
 
                             // Get user
+                            let auth_metadata = create_auth_metadata(&note.user_id);
+                            println!("auth_metadata = {:?}", auth_metadata);
+                            if let Err(e) = auth_metadata {
+                                println!("Error: {:?}", e);
+                                tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                                break;
+                            }
                             let request = Request::from_parts(
-                                MetadataMap::new(),
+                                auth_metadata.unwrap(),
                                 Default::default(),
                                 UserId {
                                     user_id: note.user_id.to_owned(),
