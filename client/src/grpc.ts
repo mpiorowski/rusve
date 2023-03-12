@@ -6,13 +6,13 @@ import {
     URI_NOTES,
     URI_UTILS,
     ENV,
-    SECRET,
+    JWT_SECRET,
 } from "$env/static/private";
 import jwt from "jsonwebtoken";
 
 export const createAuthMetadata = async (userId: string) => {
     const metadata = new Metadata();
-    const token = jwt.sign({ user_id: userId }, SECRET, {
+    const token = jwt.sign({ user_id: userId }, JWT_SECRET, {
         expiresIn: 3600,
         algorithm: "HS256",
     });
