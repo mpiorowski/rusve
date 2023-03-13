@@ -30,6 +30,11 @@ export interface NotesServiceClient extends grpc.Client {
   getNotes(argument: _proto_UserId, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Note__Output>;
   getNotes(argument: _proto_UserId, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Note__Output>;
   
+  GetOnlyNotes(argument: _proto_UserId, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Note__Output>;
+  GetOnlyNotes(argument: _proto_UserId, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Note__Output>;
+  getOnlyNotes(argument: _proto_UserId, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Note__Output>;
+  getOnlyNotes(argument: _proto_UserId, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Note__Output>;
+  
 }
 
 export interface NotesServiceHandlers extends grpc.UntypedServiceImplementation {
@@ -39,10 +44,13 @@ export interface NotesServiceHandlers extends grpc.UntypedServiceImplementation 
   
   GetNotes: grpc.handleServerStreamingCall<_proto_UserId__Output, _proto_Note>;
   
+  GetOnlyNotes: grpc.handleServerStreamingCall<_proto_UserId__Output, _proto_Note>;
+  
 }
 
 export interface NotesServiceDefinition extends grpc.ServiceDefinition {
   CreateNote: MethodDefinition<_proto_Note, _proto_Note, _proto_Note__Output, _proto_Note__Output>
   DeleteNote: MethodDefinition<_proto_NoteId, _proto_Note, _proto_NoteId__Output, _proto_Note__Output>
   GetNotes: MethodDefinition<_proto_UserId, _proto_Note, _proto_UserId__Output, _proto_Note__Output>
+  GetOnlyNotes: MethodDefinition<_proto_UserId, _proto_Note, _proto_UserId__Output, _proto_Note__Output>
 }

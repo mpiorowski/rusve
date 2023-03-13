@@ -1,10 +1,13 @@
 use crate::proto::users_service_server::UsersService;
-use crate::proto::{AuthRequest, User};
+use crate::proto::{AuthRequest, User, UserIds};
 use crate::proto::{UserId, UserRole};
 use crate::{users_service, MyService};
 use anyhow::Result;
 use sqlx::types::time::OffsetDateTime;
 use sqlx::{postgres::PgRow, query, types::Uuid, Row};
+use tokio::sync::mpsc;
+use tokio_stream::wrappers::ReceiverStream;
+use tokio_stream::StreamExt;
 use tonic::{Request, Response, Status};
 
 trait TryInto<U> {
@@ -69,6 +72,8 @@ fn map_user(row: Option<PgRow>) -> Result<User> {
 
 #[tonic::async_trait]
 impl UsersService for MyService {
+    type GetUsersStream = ReceiverStream<Result<User, Status>>;
+
     async fn auth(&self, request: Request<AuthRequest>) -> Result<Response<User>, Status> {
         #[cfg(debug_assertions)]
         println!("Auth: {:?}", request);
@@ -110,6 +115,59 @@ impl UsersService for MyService {
                 Ok(Response::new(user))
             }
         }
+    }
+
+    async fn get_users(
+        &self,
+        request: Request<UserIds>,
+    ) -> Result<Response<Self::GetUsersStream>, Status> {
+        #[cfg(debug_assertions)]
+        println!("GetNotes = {:?}", request);
+        let start = std::time::Instant::now();
+
+        let pool = self.pool.clone();
+        let (tx, rx) = mpsc::channel(4);
+
+        let user_ids = request.into_inner().user_ids;
+        let user_ids = user_ids
+            .into_iter()
+            .map(|id| users_service::TryInto::try_into(id))
+            .collect::<Result<Vec<Uuid>>>()
+            .map_err(anyhow::Error::into_status)?;
+
+        tokio::spawn(async move {
+            let mut stream = query("SELECT * FROM users WHERE id = ANY($1)")
+                .bind(user_ids)
+                .fetch(&pool);
+
+            loop {
+                match stream.try_next().await {
+                    Ok(None) => {
+                        let elapsed = start.elapsed();
+                        println!("Elapsed: {:.2?}", elapsed);
+                        break;
+                    }
+                    Ok(user) => {
+                        let user = map_user(user);
+                        if let Err(err) = user {
+                            tx.send(Err(Status::internal(err.to_string())))
+                                .await
+                                .unwrap();
+                            break;
+                        } else {
+                            let user = user.unwrap();
+                            tx.send(Ok(user)).await.unwrap();
+                        }
+                    }
+                    Err(e) => {
+                        println!("Error: {:?}", e);
+                        tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                        break;
+                    }
+                }
+            }
+        });
+        Ok(Response::new(ReceiverStream::new(rx)))
     }
 
     async fn get_user(&self, request: Request<UserId>) -> Result<Response<User>, Status> {

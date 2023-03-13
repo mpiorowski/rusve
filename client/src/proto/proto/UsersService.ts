@@ -5,6 +5,7 @@ import type { MethodDefinition } from '@grpc/proto-loader'
 import type { AuthRequest as _proto_AuthRequest, AuthRequest__Output as _proto_AuthRequest__Output } from '../proto/AuthRequest';
 import type { User as _proto_User, User__Output as _proto_User__Output } from '../proto/User';
 import type { UserId as _proto_UserId, UserId__Output as _proto_UserId__Output } from '../proto/UserId';
+import type { UserIds as _proto_UserIds, UserIds__Output as _proto_UserIds__Output } from '../proto/UserIds';
 
 export interface UsersServiceClient extends grpc.Client {
   Auth(argument: _proto_AuthRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
@@ -25,6 +26,11 @@ export interface UsersServiceClient extends grpc.Client {
   getUser(argument: _proto_UserId, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
   getUser(argument: _proto_UserId, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
   
+  GetUsers(argument: _proto_UserIds, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_User__Output>;
+  GetUsers(argument: _proto_UserIds, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_User__Output>;
+  getUsers(argument: _proto_UserIds, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_User__Output>;
+  getUsers(argument: _proto_UserIds, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_User__Output>;
+  
 }
 
 export interface UsersServiceHandlers extends grpc.UntypedServiceImplementation {
@@ -32,9 +38,12 @@ export interface UsersServiceHandlers extends grpc.UntypedServiceImplementation 
   
   GetUser: grpc.handleUnaryCall<_proto_UserId__Output, _proto_User>;
   
+  GetUsers: grpc.handleServerStreamingCall<_proto_UserIds__Output, _proto_User>;
+  
 }
 
 export interface UsersServiceDefinition extends grpc.ServiceDefinition {
   Auth: MethodDefinition<_proto_AuthRequest, _proto_User, _proto_AuthRequest__Output, _proto_User__Output>
   GetUser: MethodDefinition<_proto_UserId, _proto_User, _proto_UserId__Output, _proto_User__Output>
+  GetUsers: MethodDefinition<_proto_UserIds, _proto_User, _proto_UserIds__Output, _proto_User__Output>
 }

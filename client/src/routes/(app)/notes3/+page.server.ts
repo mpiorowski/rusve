@@ -1,11 +1,12 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import type { UserId } from "../../../proto/proto/UserId";
-import { createAuthMetadata, notesClient } from "../../../grpc";
+import { createAuthMetadata, notesClient, usersClient } from "../../../grpc";
 import type { Note__Output } from "../../../proto/proto/Note";
 import type { NoteId } from "../../../proto/proto/NoteId";
 import { URI_NOTES } from "$env/static/private";
 import { z } from "zod";
+import type { User__Output } from "../../../proto/proto/User";
 
 export const load = (async ({ locals }) => {
     try {
@@ -14,27 +15,40 @@ export const load = (async ({ locals }) => {
         const request: UserId = { userId: userId };
 
         const metadata = await createAuthMetadata(userId);
-        const stream = notesClient.getNotes(request, metadata);
+        const stream = notesClient.getOnlyNotes(request, metadata);
         const notes: Note__Output[] = [];
 
+        const userIds: Set<string> = new Set();
+
         await new Promise<Note__Output[]>((resolve, reject) => {
-            stream.on("data", (note) => {
+            stream.on("data", (note: Note__Output) => {
                 notes.push(note);
+                userIds.add(note.userId);
             });
-
-            stream.on("end", () => {
-                resolve(notes);
-            });
-
-            stream.on("error", (err: unknown) => {
-                reject(err);
-            });
+            stream.on("end", () => resolve(notes));
+            stream.on("error", (err: unknown) => reject(err));
         });
 
         const end = performance.now();
+
+        const usersStream = usersClient.getUsers(
+            { userIds: Array.from(userIds) },
+            metadata,
+        );
+        const users: User__Output[] = [];
+
+        const usersPromise = new Promise<User__Output[]>((resolve, reject) => {
+            usersStream.on("data", (user: User__Output) => users.push(user));
+            usersStream.on("end", () => resolve(users));
+            usersStream.on("error", (err: unknown) => reject(err));
+        });
+
         return {
             notes: notes,
             duration: end - start,
+            streamed: {
+                users: usersPromise,
+            },
         };
     } catch (err) {
         console.error(err);

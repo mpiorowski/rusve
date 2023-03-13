@@ -53,6 +53,11 @@
         use:enhance
     >
         <pre>Note: {JSON.stringify(note, null, 2)}</pre>
+        {#await data.streamed.users}
+            <p>Loading user...</p>
+        {:then users}
+            <p>User: {JSON.stringify(users.find((u) => u.id === note.userId), null, 2)}</p>
+        {/await}
         <input type="hidden" name="id" value={note.id} />
         <button
             type="submit"

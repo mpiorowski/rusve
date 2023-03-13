@@ -1,11 +1,12 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import type { UserId } from "../../../proto/proto/UserId";
-import { createAuthMetadata, notesClient } from "../../../grpc";
+import { createAuthMetadata, notesClient, usersClient } from "../../../grpc";
 import type { Note__Output } from "../../../proto/proto/Note";
 import type { NoteId } from "../../../proto/proto/NoteId";
 import { URI_NOTES } from "$env/static/private";
 import { z } from "zod";
+import type { User__Output } from "../../../proto/proto/User";
 
 export const load = (async ({ locals }) => {
     try {
@@ -14,12 +15,24 @@ export const load = (async ({ locals }) => {
         const request: UserId = { userId: userId };
 
         const metadata = await createAuthMetadata(userId);
-        const stream = notesClient.getNotes(request, metadata);
+        const stream = notesClient.getOnlyNotes(request, metadata);
         const notes: Note__Output[] = [];
 
+        const users: Promise<User__Output>[] = [];
+
         await new Promise<Note__Output[]>((resolve, reject) => {
-            stream.on("data", (note) => {
+            stream.on("data", (note: Note__Output) => {
                 notes.push(note);
+                // get user
+                const user = new Promise<User__Output>((resolve, reject) => {
+                    usersClient.getUser(
+                        { userId: note.userId },
+                        metadata,
+                        (err, response) =>
+                            err || !response ? reject(err) : resolve(response),
+                    );
+                });
+                users.push(user);
             });
 
             stream.on("end", () => {
@@ -32,9 +45,13 @@ export const load = (async ({ locals }) => {
         });
 
         const end = performance.now();
+        const allUsers = Promise.all(users);
         return {
             notes: notes,
             duration: end - start,
+            streamed: {
+                users: allUsers,
+            },
         };
     } catch (err) {
         console.error(err);

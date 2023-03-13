@@ -70,6 +70,7 @@ fn map_note(row: Option<PgRow>) -> Result<Note> {
 #[tonic::async_trait]
 impl NotesService for MyService {
     type GetNotesStream = ReceiverStream<Result<Note, Status>>;
+    type GetOnlyNotesStream = ReceiverStream<Result<Note, Status>>;
 
     async fn get_notes(
         &self,
@@ -133,6 +134,55 @@ impl NotesService for MyService {
                             let user = response.into_inner();
                             note.user = Some(user);
                             println!("note = {:?}", note);
+                            tx.send(Ok(note)).await.unwrap();
+                        }
+                    }
+                    Err(e) => {
+                        println!("Error: {:?}", e);
+                        tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                        break;
+                    }
+                }
+            }
+        });
+        Ok(Response::new(ReceiverStream::new(rx)))
+    }
+
+    async fn get_only_notes(
+        &self,
+        request: Request<UserId>,
+    ) -> Result<Response<Self::GetOnlyNotesStream>, Status> {
+        #[cfg(debug_assertions)]
+        println!("GetNotes = {:?}", request);
+        let start = std::time::Instant::now();
+
+        let pool = self.pool.clone();
+        let (tx, rx) = mpsc::channel(4);
+
+        let user_id = request.into_inner().user_id;
+        let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
+
+        tokio::spawn(async move {
+            let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
+                .bind(user_id)
+                .fetch(&pool);
+
+            loop {
+                match notes_stream.try_next().await {
+                    Ok(None) => {
+                        let elapsed = start.elapsed();
+                        println!("Elapsed: {:.2?}", elapsed);
+                        break;
+                    }
+                    Ok(note) => {
+                        let note = map_note(note);
+                        if let Err(note) = note {
+                            tx.send(Err(Status::internal(note.to_string())))
+                                .await
+                                .unwrap();
+                            break;
+                        } else {
+                            let note = note.unwrap();
                             tx.send(Ok(note)).await.unwrap();
                         }
                     }

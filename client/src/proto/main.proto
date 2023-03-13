@@ -10,9 +10,13 @@ message Empty {}
 message UserId {
     string userId = 1;
 }
+message UserIds {
+    repeated string userIds = 1;
+}
 
 service UsersService {
     rpc Auth(AuthRequest) returns (User) {}
+    rpc GetUsers(UserIds) returns (stream User) {}
     rpc GetUser(UserId) returns (User) {}
 }
 
@@ -24,6 +28,7 @@ service UtilsService {
 
 service NotesService {
     rpc GetNotes(UserId) returns (stream Note) {}
+    rpc GetOnlyNotes(UserId) returns (stream Note) {}
     rpc CreateNote(Note) returns (Note) {}
     rpc DeleteNote(NoteId) returns (Note) {}
 }

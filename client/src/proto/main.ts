@@ -22,6 +22,7 @@ export interface ProtoGrpcType {
     TargetId: MessageTypeDefinition
     User: MessageTypeDefinition
     UserId: MessageTypeDefinition
+    UserIds: MessageTypeDefinition
     UserRole: EnumTypeDefinition
     UsersService: SubtypeConstructor<typeof grpc.Client, _proto_UsersServiceClient> & { service: _proto_UsersServiceDefinition }
     UtilsService: SubtypeConstructor<typeof grpc.Client, _proto_UtilsServiceClient> & { service: _proto_UtilsServiceDefinition }

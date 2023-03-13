@@ -147,6 +147,12 @@ pub struct UserId {
     #[prost(string, tag = "1")]
     pub user_id: ::prost::alloc::string::String,
 }
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UserIds {
+    #[prost(string, repeated, tag = "1")]
+    pub user_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+}
 /// Generated client implementations.
 pub mod users_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
@@ -232,6 +238,28 @@ pub mod users_service_client {
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/proto.UsersService/Auth");
             self.inner.unary(request.into_request(), path, codec).await
+        }
+        pub async fn get_users(
+            &mut self,
+            request: impl tonic::IntoRequest<super::UserIds>,
+        ) -> Result<
+            tonic::Response<tonic::codec::Streaming<super::User>>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/proto.UsersService/GetUsers",
+            );
+            self.inner.server_streaming(request.into_request(), path, codec).await
         }
         pub async fn get_user(
             &mut self,
@@ -476,6 +504,28 @@ pub mod notes_service_client {
             );
             self.inner.server_streaming(request.into_request(), path, codec).await
         }
+        pub async fn get_only_notes(
+            &mut self,
+            request: impl tonic::IntoRequest<super::UserId>,
+        ) -> Result<
+            tonic::Response<tonic::codec::Streaming<super::Note>>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/proto.NotesService/GetOnlyNotes",
+            );
+            self.inner.server_streaming(request.into_request(), path, codec).await
+        }
         pub async fn create_note(
             &mut self,
             request: impl tonic::IntoRequest<super::Note>,
@@ -527,6 +577,16 @@ pub mod users_service_server {
             &self,
             request: tonic::Request<super::AuthRequest>,
         ) -> Result<tonic::Response<super::User>, tonic::Status>;
+        /// Server streaming response type for the GetUsers method.
+        type GetUsersStream: futures_core::Stream<
+                Item = Result<super::User, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        async fn get_users(
+            &self,
+            request: tonic::Request<super::UserIds>,
+        ) -> Result<tonic::Response<Self::GetUsersStream>, tonic::Status>;
         async fn get_user(
             &self,
             request: tonic::Request<super::UserId>,
@@ -623,6 +683,45 @@ pub mod users_service_server {
                                 send_compression_encodings,
                             );
                         let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/proto.UsersService/GetUsers" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetUsersSvc<T: UsersService>(pub Arc<T>);
+                    impl<
+                        T: UsersService,
+                    > tonic::server::ServerStreamingService<super::UserIds>
+                    for GetUsersSvc<T> {
+                        type Response = super::User;
+                        type ResponseStream = T::GetUsersStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::UserIds>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).get_users(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetUsersSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.server_streaming(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)
@@ -954,6 +1053,16 @@ pub mod notes_service_server {
             &self,
             request: tonic::Request<super::UserId>,
         ) -> Result<tonic::Response<Self::GetNotesStream>, tonic::Status>;
+        /// Server streaming response type for the GetOnlyNotes method.
+        type GetOnlyNotesStream: futures_core::Stream<
+                Item = Result<super::Note, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        async fn get_only_notes(
+            &self,
+            request: tonic::Request<super::UserId>,
+        ) -> Result<tonic::Response<Self::GetOnlyNotesStream>, tonic::Status>;
         async fn create_note(
             &self,
             request: tonic::Request<super::Note>,
@@ -1050,6 +1159,47 @@ pub mod notes_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = GetNotesSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.server_streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/proto.NotesService/GetOnlyNotes" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetOnlyNotesSvc<T: NotesService>(pub Arc<T>);
+                    impl<
+                        T: NotesService,
+                    > tonic::server::ServerStreamingService<super::UserId>
+                    for GetOnlyNotesSvc<T> {
+                        type Response = super::Note;
+                        type ResponseStream = T::GetOnlyNotesStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::UserId>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).get_only_notes(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetOnlyNotesSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
