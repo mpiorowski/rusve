@@ -8,7 +8,7 @@ processes = []
 [env]
   PORT = 443
   ENV = "production"
-  SECRET = "my-secret-key"
+  SECRET = "my-jwt-secret"
 
 [experimental]
   allowed_public_ports = []

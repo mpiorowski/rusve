@@ -112,7 +112,6 @@ impl NotesService for MyService {
 
                             // Get user
                             let auth_metadata = create_auth_metadata(&note.user_id);
-                            println!("auth_metadata = {:?}", auth_metadata);
                             if let Err(e) = auth_metadata {
                                 println!("Error: {:?}", e);
                                 tx.send(Err(Status::internal(e.to_string()))).await.unwrap();

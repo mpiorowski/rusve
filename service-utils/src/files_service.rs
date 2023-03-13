@@ -1,6 +1,5 @@
 use crate::proto::utils_service_server::UtilsService;
 use crate::proto::{File, FileId, FileType, TargetId};
-use crate::utils::check_env;
 use crate::MyService;
 use anyhow::Result;
 use futures_util::TryStreamExt;
@@ -126,13 +125,10 @@ impl UtilsService for MyService {
         let file = map_file(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
 
         // save file to disk
-        let env = check_env("ENV").map_err(|e| Status::internal(e.to_string()))?;
-        if env == "development" {
-            let file_path = format!("/app/files/{}/{}", file.id, file.name);
-            tokio::fs::create_dir_all(format!("/app/files/{}", file.id)).await?;
-            let mut new_file = tokio::fs::File::create(file_path).await?;
-            new_file.write_all(&file_data).await?;
-        }
+        let file_path = format!("/app/files/{}/{}", file.id, file.name);
+        tokio::fs::create_dir_all(format!("/app/files/{}", file.id)).await?;
+        let mut new_file = tokio::fs::File::create(file_path).await?;
+        new_file.write_all(&file_data).await?;
 
         // commit transaction
         tx.commit()
@@ -167,6 +163,9 @@ impl UtilsService for MyService {
         .fetch_one(&mut tx)
         .await
         .map_err(|e| Status::not_found(e.to_string()))?;
+
+        // delete file from disk
+        tokio::fs::remove_dir_all(format!("/app/files/{}", file_id)).await?;
 
         let file = map_file(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
 

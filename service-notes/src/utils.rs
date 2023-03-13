@@ -1,5 +1,5 @@
 use anyhow::Result;
-use jsonwebtoken::{encode, EncodingKey, Header};
+use jsonwebtoken::{encode, EncodingKey, Header, Validation, DecodingKey};
 use serde::{Deserialize, Serialize};
 use tonic::metadata::{MetadataMap, MetadataValue};
 
@@ -23,11 +23,20 @@ pub fn create_auth_metadata(user_id: &String) -> Result<MetadataMap> {
     Ok(metadata)
 }
 
+
 #[derive(Debug, Deserialize, Serialize)]
 struct Claims {
     user_id: String,
     exp: usize,
 }
+
+pub fn decode_token(token: &str, secret: &[u8]) -> Result<String, jsonwebtoken::errors::Error> {
+    let validation = Validation::new(jsonwebtoken::Algorithm::HS256);
+    let decoding_key = DecodingKey::from_secret(secret);
+    let token_data = jsonwebtoken::decode::<Claims>(token, &decoding_key, &validation)?;
+    Ok(token_data.claims.user_id)
+}
+
 pub fn encode_token(user_id: &String, secret: &[u8]) -> Result<String> {
     let current_time = time::OffsetDateTime::now_utc();
     let claims = Claims {

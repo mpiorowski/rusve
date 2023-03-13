@@ -1,14 +1,13 @@
+mod files_service;
 mod proto;
 mod utils;
-mod files_service;
 
 use anyhow::{Context, Result};
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use tonic::transport::Server;
-use utils::check_env;
+use tonic::{transport::Server, Request, Status};
+use utils::{check_env, decode_token};
 
 use crate::proto::utils_service_server::UtilsServiceServer;
-
 
 #[derive(Debug)]
 pub struct MyService {
@@ -37,15 +36,37 @@ async fn main() -> Result<()> {
     let port = check_env("PORT")?;
     let addr = ("0.0.0.0:".to_owned() + &port).parse()?;
 
-    let service = MyService {
-        pool,
-    };
-
     println!("Server started on port: {}", port);
+
+    let server = MyService { pool };
+    let svc = UtilsServiceServer::with_interceptor(server, check_auth);
     Server::builder()
-        .add_service(UtilsServiceServer::new(service))
+        .add_service(svc)
         .serve(addr)
         .await?;
 
     Ok(())
+}
+
+fn check_auth(mut req: Request<()>) -> Result<Request<()>, Status> {
+    match req.metadata().get("authorization") {
+        Some(t) => {
+            let token = t
+                .to_str()
+                .map_err(|_| Status::unauthenticated("Invalid auth token"))?;
+            let secret =
+                check_env("SECRET").map_err(|_| Status::unauthenticated("Missing auth secret"))?;
+            let token = token.trim_start_matches("Bearer ");
+            let user_id = decode_token(token, secret.as_ref())
+                .map_err(|_| Status::unauthenticated("Invalid auth token"))?;
+            req.metadata_mut().insert(
+                "user_id",
+                user_id
+                    .parse()
+                    .map_err(|_| Status::unauthenticated("Invalid user id"))?,
+            );
+            return Ok(req);
+        }
+        _ => Err(Status::unauthenticated("No valid auth token")),
+    }
 }

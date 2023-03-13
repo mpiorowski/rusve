@@ -1,15 +1,19 @@
-# fly.toml file generated for rust-grpc-notes on 2023-03-02T21:22:51+01:00
+# fly.toml file generated for rust-grpc-utils on 2023-03-13T00:35:05+01:00
 
-app = "rust-grpc-notes"
+app = "rust-grpc-utils"
 kill_signal = "SIGINT"
 kill_timeout = 5
+primary_region = "waw"
 processes = []
 
 [env]
   PORT = 443
   ENV = "production"
-  URI_USERS = "https://rust-grpc-users.fly.dev:443"
   SECRET = "my-jwt-secret"
+
+[mounts]
+  destination = "/app/files"
+  source = "files"
 
 [experimental]
   allowed_public_ports = []
