@@ -1,5 +1,5 @@
 import { URI_UTILS } from "$env/static/private";
-import { error } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 import { z } from "zod";
 import { createAuthMetadata, utilsClient } from "../../../grpc";
 import type { File__Output } from "../../../proto/proto/File";
@@ -61,9 +61,13 @@ export const actions = {
         const type = form.get("type");
         const file = form.get("file");
 
-        // max 10MB
-        if (!(file instanceof File) || file.size === 0 || file.size > 10 * 1024 * 1024) {
+        if (!(file instanceof File) || file.size === 0) {
             throw error(400, "Invalid request");
+        }
+
+        // max 10MB
+        if (file.size > 10 * 1024 * 1024) {
+            return fail(400, { error: "File too large. Max 10MB" });
         }
 
         const name = file.name;

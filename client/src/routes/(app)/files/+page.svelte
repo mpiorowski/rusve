@@ -6,12 +6,16 @@
     export let form: ActionData;
 </script>
 
+{#if form?.error}
+    <h2 class="text-center text-red-700">{form.error}</h2>
+{/if}
+
 <h2 class="text-center">
     Files loaded in {data.duration.toFixed(4)}ms
 </h2>
 {#if form}
     <h2 class="text-center">
-        Files created or deleted in {form.duration.toFixed(4)}ms
+        Files created or deleted in {form.duration?.toFixed(4)}ms
     </h2>
 {/if}
 
