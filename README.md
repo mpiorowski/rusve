@@ -5,7 +5,7 @@ If You have any questions, feel free to ask them in Discussions or Issues. I hop
 https://rust-grpc-client.fly.dev/
 
 ## Architecture
-![image](https://user-images.githubusercontent.com/26543876/221436948-fc87fd40-ff48-4825-8e6d-2e2cc8bd3e27.png)
+![image](https://user-images.githubusercontent.com/26543876/224659620-6f986493-6305-4960-956c-1080ff6dda3c.png)
 
 - Rust as microservices
 - SvelteKit client for frontend
