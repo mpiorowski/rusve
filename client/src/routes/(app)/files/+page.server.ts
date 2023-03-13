@@ -61,7 +61,8 @@ export const actions = {
         const type = form.get("type");
         const file = form.get("file");
 
-        if (!(file instanceof File) || file.size === 0) {
+        // max 10MB
+        if (!(file instanceof File) || file.size === 0 || file.size > 10 * 1024 * 1024) {
             throw error(400, "Invalid request");
         }
 
