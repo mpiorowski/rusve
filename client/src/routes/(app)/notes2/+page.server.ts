@@ -87,15 +87,18 @@ export const actions = {
 
         try {
             const metadata = await createAuthMetadata(URI_NOTES);
-            const note = await new Promise<Note__Output>((resolve, reject) => {
-                notesClient.createNote(schema.data, metadata, (err, response) =>
-                    err || !response ? reject(err) : resolve(response),
-                );
-            });
+            // Do this 100 times
+            for (let i = 0; i < 100; i++) {
+                await new Promise<Note__Output>((resolve, reject) => {
+                    notesClient.createNote(schema.data, metadata, (err, response) =>
+                        err || !response ? reject(err) : resolve(response),
+                    );
+                });
+            }
 
             const end = performance.now();
             return {
-                note: note,
+                success: true,
                 duration: end - start,
             };
         } catch (err) {

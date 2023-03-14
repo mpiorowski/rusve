@@ -11,6 +11,7 @@
 
 <h2 class="text-center">
     Notes loaded in {data.duration.toFixed(4)}ms
+    Count: {data.notes.length}
 </h2>
 {#if form}
     <h2 class="text-center">
@@ -41,7 +42,7 @@
         class="bg-teal-700 p-3 rounded hover:bg-teal-600 transition"
         type="submit"
     >
-        Create Note
+        Create 100x Notes
     </button>
 </form>
 
