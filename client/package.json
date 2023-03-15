@@ -40,8 +40,11 @@
         "@auth/sveltekit": "^0.3.0",
         "@grpc/grpc-js": "^1.8.12",
         "@grpc/proto-loader": "^0.7.5",
+        "@next-auth/upstash-redis-adapter": "^3.0.4",
         "@sveltejs/adapter-node": "^1.2.2",
         "@types/jsonwebtoken": "^9.0.1",
+        "@upstash/redis": "^1.20.1",
+        "ioredis": "^5.3.1",
         "jsonwebtoken": "^9.0.0",
         "zod": "^3.21.4"
     }

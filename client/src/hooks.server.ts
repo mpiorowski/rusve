@@ -3,10 +3,13 @@ import { redirect, type Handle, type HandleServerError } from "@sveltejs/kit";
 import { createAuthMetadata, usersClient } from "./grpc";
 import type { User__Output } from "./proto/proto/User";
 import Google from "@auth/core/providers/google";
-import { AUTH_SECRET, GOOGLE_ID, GOOGLE_SECRET } from "$env/static/private";
+import { AUTH_SECRET, GOOGLE_ID, GOOGLE_SECRET, REDIS_URL, SENDGRID_API_KEY } from "$env/static/private";
 import type { AuthRequest } from "./proto/proto/AuthRequest";
 import { sequence } from "@sveltejs/kit/hooks";
 import type { Provider } from "@auth/core/providers";
+import { UpstashRedisAdapter } from "@next-auth/upstash-redis-adapter";
+import Redis from "ioredis";
+import Email from "@auth/core/providers/email";
 
 export const handleError: HandleServerError = ({ error }) => {
     console.error("Error: %s", error);
@@ -64,9 +67,23 @@ export const authorization = (async ({ event, resolve }) => {
     return result;
 }) satisfies Handle;
 
+const redis = new Redis(REDIS_URL);
+
 export const handle = sequence(
     SvelteKitAuth({
+        adapter: UpstashRedisAdapter(redis),
         providers: [
+            Email({
+                server: {
+                    host: "smtp.sendgrid.net",
+                    port: 587,
+                    auth: {
+                        user: 'apiKey',
+                        pass: SENDGRID_API_KEY,
+                    },
+                },
+                from: "homeit.app"
+            }),
             Google({
                 clientId: GOOGLE_ID,
                 clientSecret: GOOGLE_SECRET,
