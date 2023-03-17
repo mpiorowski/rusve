@@ -56,6 +56,13 @@ npm i --prefix client
 - GOOGLE_SECRET
 - AUTH_SECRET
 
+If You don't need paswordless auth, delete the adapter and Email provider in `hooks.server.ts`. If You need them, then You also must fill this secrets:
+
+- SENDGRID_API_KEY
+- REDIS_URL
+- REDIS_TOKEN
+
+
 3. Start docker:
 ```
 docker-compose up --build
