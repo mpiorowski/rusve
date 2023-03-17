@@ -50,7 +50,7 @@ cp client/.env.dist client/.env
 npm i --prefix client
 ```
 
-2. Fill in missing secrets:
+2. Fill in missing secrets in `client/.env`:
 - JWT_SECRET
 - GOOGLE_ID
 - GOOGLE_SECRET
