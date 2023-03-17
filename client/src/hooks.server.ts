@@ -3,10 +3,13 @@ import { redirect, type Handle, type HandleServerError } from "@sveltejs/kit";
 import { createAuthMetadata, usersClient } from "./grpc";
 import type { User__Output } from "./proto/proto/User";
 import Google from "@auth/core/providers/google";
-import { AUTH_SECRET, GOOGLE_ID, GOOGLE_SECRET } from "$env/static/private";
+import { AUTH_SECRET, GOOGLE_ID, GOOGLE_SECRET, REDIS_TOKEN, REDIS_URL, SENDGRID_API_KEY } from "$env/static/private";
 import type { AuthRequest } from "./proto/proto/AuthRequest";
 import { sequence } from "@sveltejs/kit/hooks";
 import type { Provider } from "@auth/core/providers";
+import { UpstashRedisAdapter } from "@next-auth/upstash-redis-adapter"
+import Email from "@auth/core/providers/email";
+import { Redis } from "@upstash/redis";
 
 export const handleError: HandleServerError = ({ error }) => {
     console.error("Error: %s", error);
@@ -64,9 +67,30 @@ export const authorization = (async ({ event, resolve }) => {
     return result;
 }) satisfies Handle;
 
+const redis = new Redis({
+    url: REDIS_URL,
+    token: REDIS_TOKEN
+});
+
 export const handle = sequence(
     SvelteKitAuth({
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        adapter: UpstashRedisAdapter(redis),
         providers: [
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            Email({
+                server: {
+                    host: "smtp.sendgrid.net",
+                    port: 587,
+                    auth: {
+                        user: 'apikey',
+                        pass: SENDGRID_API_KEY
+                    },
+                },
+                from: "email@homeit.app",
+            }),
             Google({
                 clientId: GOOGLE_ID,
                 clientSecret: GOOGLE_SECRET,
@@ -76,10 +100,11 @@ export const handle = sequence(
         trustHost: true,
         callbacks: {
             async session({ session, token }) {
+                console.log("session", session, token);
                 return {
                     user: {
-                        ...session.user,
-                        sub: token.sub,
+                        email: session.user?.email,
+                        sub: session.user?.email,
                     },
                     expires: session.expires,
                 };

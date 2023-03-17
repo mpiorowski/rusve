@@ -7,7 +7,5 @@
     "bracketSameLine": false,
     "arrowParens": "always",
     "printWidth": 80,
-    "htmlWhitespaceSensitivity": "ignore",
-    "tailwindConfig": "./tailwind.config.js",
-    "plugins": ["prettier-plugin-tailwindcss"],
+    "htmlWhitespaceSensitivity": "ignore"
 }

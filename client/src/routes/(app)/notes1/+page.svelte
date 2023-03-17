@@ -7,7 +7,7 @@
 </script>
 
 <section class="p-4">
-    <h1 class="text-center mb-4">Notes with Streamed Users one by one</h1>
+    <h1 class="text-center mb-4">Notes loaded with Users</h1>
     <h2 class="text-center">
         Notes loaded in {data.duration.toFixed(4)}ms
         <br />
@@ -19,15 +19,7 @@
             <span slot="title">{note.title}</span>
             <span slot="content">{note.content}</span>
             <span slot="user">
-                {#await data.streamed.users}
-                    Loading...
-                {:then users}
-                    {#if users.find((u) => u.id === note.userId)}
-                        {users.find((u) => u.id === note.userId)?.email}
-                    {:else}
-                        User not found
-                    {/if}
-                {/await}
+                {note.user?.email}
             </span>
         </Note>
         <form

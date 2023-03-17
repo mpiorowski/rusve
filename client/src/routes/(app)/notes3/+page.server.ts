@@ -1,12 +1,11 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
+import { URI_NOTES } from "$env/static/private";
 import type { UserId } from "../../../proto/proto/UserId";
 import { createAuthMetadata, notesClient, usersClient } from "../../../grpc";
 import type { Note__Output } from "../../../proto/proto/Note";
-import type { NoteId } from "../../../proto/proto/NoteId";
-import { URI_NOTES } from "$env/static/private";
-import { z } from "zod";
 import type { User__Output } from "../../../proto/proto/User";
+import type { NoteId } from "../../../proto/proto/NoteId";
 
 export const load = (async ({ locals }) => {
     try {
@@ -57,53 +56,6 @@ export const load = (async ({ locals }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-    createNote: async ({ locals, request }) => {
-        const start = performance.now();
-
-        const form = await request.formData();
-        const title = form.get("title");
-        const content = form.get("content");
-
-        const data = {
-            title: title,
-            content: content,
-            userId: locals.userId,
-        };
-
-        const schema = z
-            .object({
-                userId: z.string().uuid(),
-                title: z.string().min(1),
-                content: z.string().min(1),
-            })
-            .safeParse(data);
-
-        if (!schema.success) {
-            throw error(400, "Invalid request");
-        }
-
-        try {
-            const metadata = await createAuthMetadata(URI_NOTES);
-
-            // Do this 100 times
-            for (let i = 0; i < 100; i++) {
-                await new Promise<Note__Output>((resolve, reject) => {
-                    notesClient.createNote(schema.data, metadata, (err, response) =>
-                        err || !response ? reject(err) : resolve(response),
-                    );
-                });
-            }
-
-            const end = performance.now();
-            return {
-                success: true,
-                duration: end - start,
-            };
-        } catch (err) {
-            console.error(err);
-            throw error(500, "Could not create note");
-        }
-    },
     deleteNote: async ({ locals, request }) => {
         const start = performance.now();
 

@@ -3,42 +3,15 @@
 </script>
 
 <navigation
-    class="flex flex-col items-center justify-center gap-2 text-xl mb-10 text-emerald-400"
+    class="flex flex-row items-center justify-center gap-4 text-lg text-emerald-400 p-2 border-b border-gray-600"
 >
-    <div class="flex flex-row gap-2">
-        <a
-            href="/"
-            class="border rounded p-2 border-emerald-400 hover:border-emerald-500"
-        >
-            Home
-        </a>
-        <a
-            href="/files"
-            class="border rounded p-2 border-emerald-400 hover:border-emerald-500"
-        >
-            Files
-        </a>
-        <button on:click={() => signOut()}>Logout</button>
-    </div>
-    <div class="flex flex-row gap-2">
-        <a
-            href="/notes"
-            class="border rounded p-2 border-emerald-400 hover:border-emerald-500"
-        >
-            Notes with Users
-        </a>
-        <a
-            href="/notes2"
-            class="border rounded p-2 border-emerald-400 hover:border-emerald-500"
-        >
-            Only Notes + Streamed Users
-        </a>
-        <a
-            href="/notes3"
-            class="border rounded p-2 border-emerald-400 hover:border-emerald-500"
-        >
-            Only Notes + Streamed Users loaded with one request
-        </a>
-    </div>
+    <a href="/" class="hover:text-emerald-500">Home</a>
+    <a href="/files" class="hover:text-emerald-500">Files</a>
+    <a href="/notes1" class="hover:text-emerald-500">Notes-1</a>
+    <a href="/notes2" class="hover:text-emerald-500">Notes-2</a>
+    <a href="/notes3" class="hover:text-emerald-500">Notes-3</a>
+    <button on:click={() => signOut()}>Logout</button>
 </navigation>
-<slot />
+<div class="p-4">
+    <slot />
+</div>
