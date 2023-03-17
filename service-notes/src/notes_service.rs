@@ -210,16 +210,18 @@ impl NotesService for MyService {
         let user_id =
             Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        let row =
-            query("INSERT INTO notes (title, content, \"userId\") VALUES ($1, $2, $3) RETURNING *")
-                .bind(note.title)
-                .bind(note.content)
-                .bind(user_id)
-                .fetch_one(&mut tx)
-                .await
-                .map_err(sqlx::Error::into_status)?;
-
-        let note = map_note(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+        // do it 100 times
+        for _ in 0..100 {
+            query(
+                "INSERT INTO notes (title, content, \"userId\") VALUES ($1, $2, $3) RETURNING *",
+            )
+            .bind(note.title.clone())
+            .bind(note.content.clone())
+            .bind(user_id)
+            .fetch_one(&mut tx)
+            .await
+            .map_err(sqlx::Error::into_status)?;
+        }
 
         // commit transaction
         tx.commit().await.map_err(sqlx::Error::into_status)?;

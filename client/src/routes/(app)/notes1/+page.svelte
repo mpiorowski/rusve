@@ -6,7 +6,8 @@
 </script>
 
 <h2 class="text-center">
-    Notes loaded in {data.duration.toFixed(4)}ms Count: {data.notes.length}
+    Notes loaded in {data.duration.toFixed(4)}ms
+    Count: {data.notes.length}
 </h2>
 
 {#each data.notes as note}
@@ -17,17 +18,6 @@
         use:enhance
     >
         <pre>Note: {JSON.stringify(note, null, 2)}</pre>
-        {#await data.streamed.users}
-            <p>Loading user...</p>
-        {:then users}
-            <p>
-                User: {JSON.stringify(
-                    users.find((u) => u.id === note.userId),
-                    null,
-                    2,
-                )}
-            </p>
-        {/await}
         <input type="hidden" name="id" value={note.id} />
         <button
             type="submit"
