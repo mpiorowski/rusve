@@ -98,18 +98,6 @@ export const handle = sequence(
         ],
         secret: AUTH_SECRET,
         trustHost: true,
-        callbacks: {
-            async session({ session, token }) {
-                console.log("session", session, token);
-                return {
-                    user: {
-                        email: session.user?.email,
-                        sub: session.user?.email,
-                    },
-                    expires: session.expires,
-                };
-            },
-        },
     }),
     authorization,
 ) satisfies Handle;
