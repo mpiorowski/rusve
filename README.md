@@ -50,11 +50,18 @@ cp client/.env.dist client/.env
 npm i --prefix client
 ```
 
-2. Fill in missing secrets:
+2. Fill in missing secrets in `client/.env`:
 - JWT_SECRET
 - GOOGLE_ID
 - GOOGLE_SECRET
 - AUTH_SECRET
+
+If You don't need paswordless auth, delete the adapter and Email provider in `hooks.server.ts`. If You need them, then You also must fill this secrets:
+
+- SENDGRID_API_KEY
+- REDIS_URL
+- REDIS_TOKEN
+
 
 3. Start docker:
 ```
