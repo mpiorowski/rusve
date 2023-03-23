@@ -28,17 +28,18 @@ export const handleError: HandleServerError = ({ error }) => {
 export const authorization = (async ({ event, resolve }) => {
     try {
         const session = (await event.locals.getSession()) as {
-            user: { sub: string; role: string; email: string };
+            user: { role: string; email: string };
             expires: string;
         };
-        if (!session?.user?.email || !session?.user?.sub) {
+        console.log("Session: %s", JSON.stringify(session));
+        if (!session?.user?.email) {
             throw new Error("No user session");
         }
         const request: AuthRequest = {
-            sub: session.user.sub,
+            sub: session.user.email,
             email: session.user.email,
         };
-        const metadata = await createAuthMetadata(session.user.sub);
+        const metadata = await createAuthMetadata(session.user.email);
         const user = await new Promise<User__Output>((resolve, reject) => {
             usersClient.Auth(request, metadata, (err, response) =>
                 err || !response ? reject(err) : resolve(response),
