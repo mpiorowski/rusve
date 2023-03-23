@@ -41,6 +41,7 @@
         "@grpc/grpc-js": "^1.8.12",
         "@grpc/proto-loader": "^0.7.5",
         "@next-auth/upstash-redis-adapter": "^3.0.4",
+        "@sveltejs/adapter-vercel": "^2.4.0",
         "@types/jsonwebtoken": "^9.0.1",
         "ioredis": "^5.3.1",
         "jsonwebtoken": "^9.0.0",
