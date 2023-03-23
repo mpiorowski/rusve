@@ -2,9 +2,9 @@ import { URI_UTILS } from "$env/static/private";
 import { error, fail } from "@sveltejs/kit";
 import { z } from "zod";
 import { createAuthMetadata, utilsClient } from "../../../grpc";
-import type { File__Output } from "../../../proto/proto/File";
-import { FileType } from "../../../proto/proto/FileType";
-import type { TargetId } from "../../../proto/proto/TargetId";
+import type { File__Output } from "$lib/proto/proto/File";
+import { FileType } from "$lib/proto/proto/FileType";
+import type { TargetId } from "$lib/proto/proto/TargetId";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load = (async ({ locals }) => {

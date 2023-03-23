@@ -1,10 +1,10 @@
 import { SvelteKitAuth } from "@auth/sveltekit";
 import { redirect, type Handle, type HandleServerError } from "@sveltejs/kit";
 import { createAuthMetadata, usersClient } from "./grpc";
-import type { User__Output } from "./proto/proto/User";
+import type { User__Output } from "$lib/proto/proto/User";
 import Google from "@auth/core/providers/google";
 import { AUTH_SECRET, GOOGLE_ID, GOOGLE_SECRET, REDIS_TOKEN, REDIS_URL, SENDGRID_API_KEY } from "$env/static/private";
-import type { AuthRequest } from "./proto/proto/AuthRequest";
+import type { AuthRequest } from "$lib/proto/proto/AuthRequest";
 import { sequence } from "@sveltejs/kit/hooks";
 import type { Provider } from "@auth/core/providers";
 import { UpstashRedisAdapter } from "@next-auth/upstash-redis-adapter"

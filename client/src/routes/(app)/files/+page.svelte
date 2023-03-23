@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { FileType } from "../../../proto/proto/FileType";
+    import { FileType } from "$lib/proto/proto/FileType";
     import type { ActionData, PageData } from "./$types";
 
     export let data: PageData;

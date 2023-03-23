@@ -2,7 +2,7 @@ import { URI_NOTES } from "$env/static/private";
 import { error, type Actions } from "@sveltejs/kit";
 import { z } from "zod";
 import { createAuthMetadata, notesClient } from "../../grpc";
-import type { Note__Output } from "../../proto/proto/Note";
+import type { Note__Output } from "$lib/proto/proto/Note";
 
 export const actions = {
     createNote: async ({ locals, request }) => {

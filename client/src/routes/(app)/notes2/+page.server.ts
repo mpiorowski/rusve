@@ -1,10 +1,10 @@
 import { URI_NOTES } from "$env/static/private";
 import { error } from "@sveltejs/kit";
 import { createAuthMetadata, notesClient, usersClient } from "../../../grpc";
-import type { Note__Output } from "../../../proto/proto/Note";
-import type { NoteId } from "../../../proto/proto/NoteId";
-import type { User__Output } from "../../../proto/proto/User";
-import type { UserId } from "../../../proto/proto/UserId";
+import type { Note__Output } from "$lib/proto/proto/Note";
+import type { NoteId } from "$lib/proto/proto/NoteId";
+import type { User__Output } from "$lib/proto/proto/User";
+import type { UserId } from "$lib/proto/proto/UserId";
 import type { PageServerLoad, Actions } from "./$types";
 
 export const load = (async ({ locals }) => {
