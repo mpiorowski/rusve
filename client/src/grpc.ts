@@ -1,6 +1,6 @@
 import protoLoader from "@grpc/proto-loader";
 import { credentials, loadPackageDefinition, Metadata } from "@grpc/grpc-js";
-import type { ProtoGrpcType } from "./lib/proto/main";
+import type { ProtoGrpcType } from "$lib/proto/main";
 import {
     URI_USERS,
     URI_NOTES,
