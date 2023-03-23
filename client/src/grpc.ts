@@ -9,6 +9,7 @@ import {
     JWT_SECRET,
 } from "$env/static/private";
 import jwt from "jsonwebtoken";
+import.meta.glob("/src/lib/proto/*.proto", { as: "raw" });
 
 export const createAuthMetadata = async (userId: string) => {
     const metadata = new Metadata();
@@ -20,7 +21,9 @@ export const createAuthMetadata = async (userId: string) => {
     return metadata;
 };
 
-export const packageDefinition = protoLoader.loadSync("./src/lib/proto/main.proto");
+export const packageDefinition = protoLoader.loadSync(
+    "./src/lib/proto/main.proto",
+);
 export const proto = loadPackageDefinition(
     packageDefinition,
 ) as unknown as ProtoGrpcType;
