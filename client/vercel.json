@@ -1,5 +1,0 @@
-{
-    "functions": {
-        "includeFiles": "src/proto/**"
-    }
-}

@@ -1,6 +1,6 @@
 import protoLoader from "@grpc/proto-loader";
 import { credentials, loadPackageDefinition, Metadata } from "@grpc/grpc-js";
-import type { ProtoGrpcType } from "./proto/main";
+import type { ProtoGrpcType } from "./lib/proto/main";
 import {
     URI_USERS,
     URI_NOTES,
@@ -20,7 +20,7 @@ export const createAuthMetadata = async (userId: string) => {
     return metadata;
 };
 
-export const packageDefinition = protoLoader.loadSync("./src/proto/main.proto");
+export const packageDefinition = protoLoader.loadSync("./src/lib/proto/main.proto");
 export const proto = loadPackageDefinition(
     packageDefinition,
 ) as unknown as ProtoGrpcType;
