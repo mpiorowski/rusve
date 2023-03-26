@@ -1,6 +1,12 @@
 # Rust microservices with Typescript SvelteKit using gRPC deployed on Fly.io
 If You have any questions, feel free to ask them in Discussions or Issues. I hope this will be helpful :).
 
+For now this project will be the one that i will try to keep up to date and update it with new functionalities. SvelteKit + Rust is an perfect combo for me now :)
+
+Check out my other, similar projects if You it:
+- [Go with SvelteKit using gRPC](https://github.com/mpiorowski/go-svelte-grpc)
+- [NodeJs with SvelteKit using GraphQL](https://github.com/mpiorowski/microservices-ts-fastify-svelte)
+
 ## Demo
 https://rust-grpc-client.fly.dev/
 
@@ -32,15 +38,7 @@ This project shows how flexible the gRPC + SvelteKit setup is, using the newest 
 
 Try to create hundres of notes and You will see the diffrence :)
 
-Files in progress...
 - Files send as bytes, on development environment they are stored in /files folder, on production environment in Google Cloud Storage. Client send base64 string to Node server using SvelteKit api, which then creates a file and respond with a download header.
-
-
-Check my other similar projects:
-- [Go with SvelteKit using gRPC](https://github.com/mpiorowski/go-svelte-grpc)
-- [NodeJs with SvelteKit using GraphQL](https://github.com/mpiorowski/microservices-ts-fastify-svelte)
-
-In development: Files and Async Email
 
 ## Dev deployment
 
