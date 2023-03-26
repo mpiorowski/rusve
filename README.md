@@ -3,7 +3,7 @@ If You have any questions, feel free to ask them in Discussions or Issues. I hop
 
 For now this project will be the one that i will try to keep up to date and update it with new functionalities. SvelteKit + Rust is an perfect combo for me now :)
 
-Check out my other, similar projects if You it:
+Check out my other, similar projects if You need it:
 - [Go with SvelteKit using gRPC](https://github.com/mpiorowski/go-svelte-grpc)
 - [NodeJs with SvelteKit using GraphQL](https://github.com/mpiorowski/microservices-ts-fastify-svelte)
 
