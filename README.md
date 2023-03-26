@@ -38,7 +38,7 @@ This project shows how flexible the gRPC + SvelteKit setup is, using the newest 
 
 Try to create hundres of notes and You will see the diffrence :)
 
-- Files send as bytes, on development environment they are stored in /files folder, on production environment in Google Cloud Storage. Client send base64 string to Node server using SvelteKit api, which then creates a file and respond with a download header.
+- Files send as bytes, on development environment they are stored in /files folder, on production environment in Fly.io volumes. Client send base64 string to Node server using SvelteKit api, which then creates a file and respond with a download header.
 
 ## Dev deployment
 
