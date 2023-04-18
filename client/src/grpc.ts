@@ -10,6 +10,10 @@ import {
 } from "$env/static/private";
 import jwt from "jsonwebtoken";
 
+import { writeFileSync } from "fs";
+import mainProto from "$lib/proto/main.proto?raw";
+writeFileSync("/tmp/main.proto", mainProto);
+
 export const createAuthMetadata = async (userId: string) => {
     const metadata = new Metadata();
     const token = jwt.sign({ user_id: userId }, JWT_SECRET, {
@@ -20,9 +24,7 @@ export const createAuthMetadata = async (userId: string) => {
     return metadata;
 };
 
-export const packageDefinition = protoLoader.loadSync(
-    "./src/lib/proto/main.proto",
-);
+export const packageDefinition = protoLoader.loadSync("/tmp/main.proto");
 export const proto = loadPackageDefinition(
     packageDefinition,
 ) as unknown as ProtoGrpcType;
