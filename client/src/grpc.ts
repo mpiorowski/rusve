@@ -12,7 +12,14 @@ import jwt from "jsonwebtoken";
 
 import { writeFileSync } from "fs";
 import mainProto from "$lib/proto/main.proto?raw";
+import usersProto from "$lib/proto/users.proto?raw";
+import notesProto from "$lib/proto/notes.proto?raw";
+import utilsProto from "$lib/proto/utils.proto?raw";
+
 writeFileSync("/tmp/main.proto", mainProto);
+writeFileSync("/tmp/users.proto", usersProto);
+writeFileSync("/tmp/notes.proto", notesProto);
+writeFileSync("/tmp/utils.proto", utilsProto);
 
 export const createAuthMetadata = async (userId: string) => {
     const metadata = new Metadata();

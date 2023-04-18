@@ -3,7 +3,7 @@ syntax = "proto3";
 package proto;
 
 import "users.proto";
-import "files.proto";
+import "utils.proto";
 import "notes.proto";
 
 message Empty {}

@@ -1,4 +1,4 @@
-// Original file: ../proto/files.proto
+// Original file: ../proto/utils.proto
 
 
 export interface TargetId {
