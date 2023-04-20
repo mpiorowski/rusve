@@ -1,38 +1,20 @@
-# fly.toml file generated for rust-grpc-client on 2023-03-02T17:07:06+01:00
+# fly.toml app configuration file generated for rust-client on 2023-04-20T22:02:34+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "rust-grpc-client"
-kill_signal = "SIGINT"
-kill_timeout = 5
-processes = []
+app = "rust-client"
+primary_region = "arn"
 
-[env]
-
-[experimental]
-  auto_rollback = true
-  private_network = true
-
-[[services]]
-  http_checks = []
+[http_service]
   internal_port = 3000
-  processes = ["app"]
-  protocol = "tcp"
-  script_checks = []
-  [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
-    type = "connections"
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
 
-  [[services.ports]]
-    force_https = true
-    handlers = ["http"]
-    port = 80
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
-
-  [[services.tcp_checks]]
-    grace_period = "1s"
+[checks]
+  [checks.alive]
+    type = "tcp"
     interval = "15s"
-    restart_limit = 0
     timeout = "2s"
+    grace_period = "5s"
