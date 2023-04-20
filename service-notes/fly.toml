@@ -3,13 +3,14 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "rust-utils"
+app = "rust-notes"
 primary_region = "arn"
 
 [env]
   PORT = 443
   ENV = "production"
   SECRET = "my-rust-secret"
+  URI_USERS = "https://rust-users.fly.dev"
 
 [http_service]
   internal_port = 443
