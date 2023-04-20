@@ -1,11 +1,12 @@
 import { URI_NOTES } from "$env/static/private";
 import { error } from "@sveltejs/kit";
-import { createAuthMetadata, notesClient, usersClient } from "../../../grpc";
 import type { Note__Output } from "$lib/proto/proto/Note";
 import type { NoteId } from "$lib/proto/proto/NoteId";
 import type { User__Output } from "$lib/proto/proto/User";
 import type { UserId } from "$lib/proto/proto/UserId";
 import type { PageServerLoad, Actions } from "./$types";
+import { createMetadata } from "$lib/metadata";
+import { notesClient, usersClient } from "$lib/grpc";
 
 export const load = (async ({ locals }) => {
     try {
@@ -13,7 +14,7 @@ export const load = (async ({ locals }) => {
         const userId = locals.userId;
         const request: UserId = { userId: userId };
 
-        const metadata = await createAuthMetadata(userId);
+        const metadata = createMetadata(userId);
         const stream = notesClient.getOnlyNotes(request, metadata);
         const notes: Note__Output[] = [];
 
@@ -74,7 +75,7 @@ export const actions = {
                 userId: locals.userId,
             };
 
-            const metadata = await createAuthMetadata(URI_NOTES);
+            const metadata = createMetadata(URI_NOTES);
             const note = await new Promise<Note__Output>((resolve, reject) => {
                 notesClient.deleteNote(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),

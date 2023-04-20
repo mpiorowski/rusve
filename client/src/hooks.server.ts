@@ -1,15 +1,23 @@
 import { SvelteKitAuth } from "@auth/sveltekit";
 import { redirect, type Handle, type HandleServerError } from "@sveltejs/kit";
-import { createAuthMetadata, usersClient } from "./grpc";
 import type { User__Output } from "$lib/proto/proto/User";
 import Google from "@auth/core/providers/google";
-import { AUTH_SECRET, GOOGLE_ID, GOOGLE_SECRET, REDIS_TOKEN, REDIS_URL, SENDGRID_API_KEY } from "$env/static/private";
+import {
+    AUTH_SECRET,
+    GOOGLE_ID,
+    GOOGLE_SECRET,
+    REDIS_TOKEN,
+    REDIS_URL,
+    SENDGRID_API_KEY,
+} from "$env/static/private";
 import type { AuthRequest } from "$lib/proto/proto/AuthRequest";
 import { sequence } from "@sveltejs/kit/hooks";
 import type { Provider } from "@auth/core/providers";
-import { UpstashRedisAdapter } from "@next-auth/upstash-redis-adapter"
+import { UpstashRedisAdapter } from "@next-auth/upstash-redis-adapter";
 import Email from "@auth/core/providers/email";
 import { Redis } from "@upstash/redis";
+import { createMetadata } from "$lib/metadata";
+import { usersClient } from "$lib/grpc";
 
 export const handleError: HandleServerError = ({ error }) => {
     console.error("Error: %s", error);
@@ -39,7 +47,7 @@ export const authorization = (async ({ event, resolve }) => {
             sub: session.user.email,
             email: session.user.email,
         };
-        const metadata = await createAuthMetadata(session.user.email);
+        const metadata = createMetadata(session.user.email);
         const user = await new Promise<User__Output>((resolve, reject) => {
             usersClient.Auth(request, metadata, (err, response) =>
                 err || !response ? reject(err) : resolve(response),
@@ -70,7 +78,7 @@ export const authorization = (async ({ event, resolve }) => {
 
 const redis = new Redis({
     url: REDIS_URL,
-    token: REDIS_TOKEN
+    token: REDIS_TOKEN,
 });
 
 export const handle = sequence(
@@ -86,8 +94,8 @@ export const handle = sequence(
                     host: "smtp.sendgrid.net",
                     port: 587,
                     auth: {
-                        user: 'apikey',
-                        pass: SENDGRID_API_KEY
+                        user: "apikey",
+                        pass: SENDGRID_API_KEY,
                     },
                 },
                 from: "email@homeit.app",

@@ -1,8 +1,9 @@
 import { URI_NOTES } from "$env/static/private";
 import { error, type Actions } from "@sveltejs/kit";
 import { z } from "zod";
-import { createAuthMetadata, notesClient } from "../../grpc";
 import type { Note__Output } from "$lib/proto/proto/Note";
+import { createMetadata } from "$lib/metadata";
+import { notesClient } from "$lib/grpc";
 
 export const actions = {
     createNote: async ({ locals, request }) => {
@@ -31,7 +32,7 @@ export const actions = {
         }
 
         try {
-            const metadata = await createAuthMetadata(URI_NOTES);
+            const metadata = createMetadata(URI_NOTES);
             await new Promise<Note__Output>((resolve, reject) => {
                 notesClient.createNote(schema.data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),

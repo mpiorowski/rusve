@@ -1,45 +1,37 @@
-# fly.toml file generated for rust-grpc-notes on 2023-03-02T21:22:51+01:00
+# fly.toml app configuration file generated for rust-notes on 2023-04-20T13:34:42+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "rust-grpc-notes"
-kill_signal = "SIGINT"
-kill_timeout = 5
-processes = []
+app = "rust-notes"
+primary_region = "arn"
 
 [env]
   PORT = 443
   ENV = "production"
-  URI_USERS = "https://rust-grpc-users.fly.dev:443"
-  SECRET = "my-jwt-secret"
+  SECRET = "my-rust-secret"
+  URI_USERS = "https://rust-users.fly.dev"
 
-[experimental]
-  allowed_public_ports = []
-  auto_rollback = true
-  private_network = true
-
-[[services]]
-  http_checks = []
+[http_service]
   internal_port = 443
-  processes = ["app"]
-  protocol = "tcp"
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+
+[services]
+  http_checks = []
   script_checks = []
-
-  [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
-    type = "connections"
-
-  [[services.ports]]
-    force_https = true
-    handlers = ["http"]
-    port = 80
+  internal_port = 443
+  protocol = "tcp"
 
   [[services.ports]]
     handlers = ["tls"]
-    port = 443
+    port = "443"
     tls_options = { "alpn" = ["h2"] }
 
-  [[services.tcp_checks]]
-    grace_period = "1s"
+[checks]
+  [checks.alive]
+    type = "tcp"
     interval = "15s"
-    restart_limit = 0
     timeout = "2s"
+    grace_period = "5s"
