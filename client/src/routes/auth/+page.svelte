@@ -1,18 +1,20 @@
 <script lang="ts">
+    import Button from "$lib/form/Button.svelte";
+    import Input from "$lib/form/Input.svelte";
     import Gmail from "$lib/icons/gmail.svelte";
     import { signIn } from "@auth/sveltekit/client";
 
     let email = "";
-    let error = "";
+    let errors: string[] = [];
 
     async function onSignInUsingGoogle() {
         await signIn("google");
     }
 
     async function onSignInUsingEmail() {
-        error = "";
+        errors = [];
         if (RegExp(/^\S+@\S+$/).test(email) === false) {
-            error = "Please enter an email";
+            errors = ["Please enter a valid email address"];
             return;
         }
         await signIn("email", { email: email });
@@ -20,35 +22,33 @@
 </script>
 
 <section
-    class="flex flex-col gap-6 justify-center bg-slate-600 shadow-lg p-8 rounded-md m-8"
+    class="max-w-md h-screen m-auto flex flex-col justify-center items-center p-4"
 >
-    <button
-        on:click={onSignInUsingGoogle}
-        class="flex flex-row gap-4 justify-center items-center rounded px-4 py-2 shadow-md font-bold bg-gray-800 text-gray-200 hover:bg-gray-700 transition"
-    >
-        <div class="h-8">
+    <h2 class="text-primary-200">Welcome back!</h2>
+    <p class="text-primary-300 mb-4 mt-2">
+        Sign in to your account and enjoy the show
+    </p>
+    <Button on:click={onSignInUsingGoogle}>
+        <div class="h-6">
             <Gmail />
         </div>
-        <div>Sign in with Google</div>
-    </button>
-    <div class="flex flex-row gap-4 items-center">
-        <div class="border-b w-full border-gray-200" />
-        <div class="text-gray-200">or</div>
-        <div class="border-b w-full border-gray-200" />
+        <div>Google</div>
+    </Button>
+    <div class="w-full flex flex-row gap-4 items-center my-4">
+        <div class="border-b w-full border-primary-300" />
+        <div class="text-primary-300 whitespace-nowrap">
+            or sign in with email
+        </div>
+        <div class="border-b w-full border-primary-300" />
     </div>
-    <input
+    <Input
         type="email"
         name="email"
-        bind:value={email}
         placeholder="Email"
-        class={`rounded px-4 py-2 bg-slate-700 text-gray-200 shadow-inner w-full transition ${
-            error ? "ring-1 ring-red-500" : ""
-        }`}
+        {errors}
+        bind:value={email}
     />
-    <button
-        on:click={onSignInUsingEmail}
-        class="flex flex-row gap-4 justify-center items-center rounded px-4 py-2 shadow-md bg-gray-800 hover:bg-gray-700 transition text-gray-200 font-bold"
-    >
-        <div>Sign in with Email</div>
-    </button>
+    <Button on:click={onSignInUsingEmail}>
+        <div>Email</div>
+    </Button>
 </section>

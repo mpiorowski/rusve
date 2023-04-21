@@ -3,6 +3,12 @@ module.exports = {
     content: ['./src/**/*.{html,js,svelte,ts}'],
     theme: {
         extend: {
+            fontFamily: {
+                inter: ['Inter', 'sans-serif'],
+            },
+            boxShadow: {
+                inner2: 'inset 0 2px 2px 0 rgba(0, 0, 0, 0.1)',
+            },
             colors: {
                 primary: {
                     50: "#f9fafb",
