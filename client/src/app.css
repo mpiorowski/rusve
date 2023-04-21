@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
 
 :focus {
     outline: none;
@@ -12,15 +11,15 @@ body {
 }
 
 h1 {
-    @apply text-3xl font-bold;
+    @apply text-3xl font-semibold;
 }
 
 h2 {
-    @apply text-2xl font-bold;
+    @apply text-2xl font-semibold;
 }
 
 h3 {
-    @apply text-xl font-bold;
+    @apply text-xl font-semibold;
 }
 
 p {

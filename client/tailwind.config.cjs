@@ -1,13 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    content: ['./src/**/*.{html,js,svelte,ts}'],
+    content: ["./src/**/*.{html,js,svelte,ts}"],
     theme: {
         extend: {
             fontFamily: {
-                inter: ['Inter', 'sans-serif'],
+                inter: ["Inter"],
             },
             boxShadow: {
-                inner2: 'inset 0 2px 2px 0 rgba(0, 0, 0, 0.1)',
+                inner2: "inset 0 2px 2px 0 rgba(0, 0, 0, 0.1)",
+                inner3: "inset 0 1px 3px rgba(0,0,0,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)",
             },
             colors: {
                 primary: {
@@ -38,4 +39,4 @@ module.exports = {
         },
     },
     plugins: [],
-}
+};
