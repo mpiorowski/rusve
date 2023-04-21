@@ -7,8 +7,7 @@ module.exports = {
                 inter: ["Inter"],
             },
             boxShadow: {
-                inner2: "inset 0 2px 2px 0 rgba(0, 0, 0, 0.1)",
-                inner3: "inset 0 1px 3px rgba(0,0,0,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)",
+                inner: "inset 0 1px 3px rgba(0,0,0,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)",
             },
             colors: {
                 primary: {
@@ -34,6 +33,10 @@ module.exports = {
                     700: "#0f766e",
                     800: "#115e59",
                     900: "#134e4a",
+                },
+                error: {
+                    400: "#F87171",
+                    500: "#EF4444",
                 },
             },
         },

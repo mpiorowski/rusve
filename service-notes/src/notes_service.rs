@@ -211,17 +211,13 @@ impl NotesService for MyService {
             Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         // do it 100 times
-        for _ in 0..100 {
-            query(
-                "INSERT INTO notes (title, content, \"userId\") VALUES ($1, $2, $3) RETURNING *",
-            )
+        query("INSERT INTO notes (title, content, \"userId\") VALUES ($1, $2, $3) RETURNING *")
             .bind(note.title.clone())
             .bind(note.content.clone())
             .bind(user_id)
             .fetch_one(&mut tx)
             .await
             .map_err(sqlx::Error::into_status)?;
-        }
 
         // commit transaction
         tx.commit().await.map_err(sqlx::Error::into_status)?;

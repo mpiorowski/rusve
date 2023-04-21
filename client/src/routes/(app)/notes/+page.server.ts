@@ -1,4 +1,4 @@
-import { error } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { URI_NOTES } from "$env/static/private";
 import type { UserId } from "$lib/proto/proto/UserId";
@@ -7,6 +7,7 @@ import type { User__Output } from "$lib/proto/proto/User";
 import type { NoteId } from "$lib/proto/proto/NoteId";
 import { createMetadata } from "$lib/metadata";
 import { notesClient, usersClient } from "$lib/grpc";
+import { z } from "zod";
 
 export const load = (async ({ locals }) => {
     try {
@@ -57,6 +58,49 @@ export const load = (async ({ locals }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
+    createNote: async ({ locals, request }) => {
+        const start = performance.now();
+
+        const form = await request.formData();
+        const title = form.get("title");
+        const content = form.get("content");
+
+        const data = {
+            title: title,
+            content: content,
+            userId: locals.userId,
+        };
+
+        const schema = z
+            .object({
+                userId: z.string().uuid(),
+                title: z.string().min(1),
+                content: z.string().min(1),
+            })
+            .safeParse(data);
+
+        if (!schema.success) {
+            return fail(409, { error: schema.error.flatten() });
+        }
+
+        try {
+            const metadata = createMetadata(URI_NOTES);
+            await new Promise<Note__Output>((resolve, reject) => {
+                notesClient.createNote(schema.data, metadata, (err, response) =>
+                    err || !response ? reject(err) : resolve(response),
+                );
+            });
+
+            const end = performance.now();
+            return {
+                success: true,
+                duration: end - start,
+            };
+        } catch (err) {
+            console.error(err);
+            throw error(500, "Could not create note");
+        }
+    },
     deleteNote: async ({ locals, request }) => {
         const start = performance.now();
 
