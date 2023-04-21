@@ -5,7 +5,7 @@
 <button
     on:click
     {type}
-    class="w-full h-10 flex flex-row gap-4 justify-center items-center rounded px-4 py-2 shadow-md font-bold bg-slate-600 hover:bg-slate-500 transition text-gray-200"
+    class="w-full h-10 flex flex-row gap-4 justify-center items-center rounded px-4 py-2 shadow-md font-semibold bg-slate-600 hover:bg-slate-500 transition text-gray-200"
 >
     <slot />
 </button>

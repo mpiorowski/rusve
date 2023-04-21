@@ -17,7 +17,7 @@
         use:typeAction
         {placeholder}
         bind:value
-        class={`rounded px-4 py-2 bg-slate-600 text-gray-200 shadow-inner2 w-full transition ${
+        class={`rounded px-4 py-2 bg-slate-600 text-gray-200 shadow-inner3 w-full transition ${
             haveErrors ? "ring-1 ring-red-500" : ""
         }`}
     />
