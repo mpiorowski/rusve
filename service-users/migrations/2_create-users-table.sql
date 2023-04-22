@@ -8,7 +8,7 @@ CREATE TABLE
     role text NOT NULL,
     sub text UNIQUE NOT NULL,
     name text NOT NULL DEFAULT '',
-    avatar text NOT NULL DEFAULT ''
+    avatar uuid
   );
 
 CREATE TRIGGER set_timestamp BEFORE

@@ -25,8 +25,8 @@ pub struct User {
     pub sub: ::prost::alloc::string::String,
     #[prost(string, tag = "8")]
     pub name: ::prost::alloc::string::String,
-    #[prost(string, tag = "9")]
-    pub avatar: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "9")]
+    pub avatar: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -62,6 +62,8 @@ impl UserRole {
 pub struct TargetId {
     #[prost(string, tag = "1")]
     pub target_id: ::prost::alloc::string::String,
+    #[prost(enumeration = "FileType", tag = "2")]
+    pub r#type: i32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -89,7 +91,7 @@ pub struct File {
     #[prost(enumeration = "FileType", tag = "7")]
     pub r#type: i32,
     #[prost(bytes = "vec", tag = "8")]
-    pub data: ::prost::alloc::vec::Vec<u8>,
+    pub buffer: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -398,6 +400,25 @@ pub mod utils_service_client {
                 "/proto.UtilsService/GetFiles",
             );
             self.inner.server_streaming(request.into_request(), path, codec).await
+        }
+        pub async fn get_file(
+            &mut self,
+            request: impl tonic::IntoRequest<super::FileId>,
+        ) -> Result<tonic::Response<super::File>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/proto.UtilsService/GetFile",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
         }
         pub async fn create_file(
             &mut self,
@@ -884,6 +905,10 @@ pub mod utils_service_server {
             &self,
             request: tonic::Request<super::TargetId>,
         ) -> Result<tonic::Response<Self::GetFilesStream>, tonic::Status>;
+        async fn get_file(
+            &self,
+            request: tonic::Request<super::FileId>,
+        ) -> Result<tonic::Response<super::File>, tonic::Status>;
         async fn create_file(
             &self,
             request: tonic::Request<super::File>,
@@ -987,6 +1012,42 @@ pub mod utils_service_server {
                                 send_compression_encodings,
                             );
                         let res = grpc.server_streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/proto.UtilsService/GetFile" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetFileSvc<T: UtilsService>(pub Arc<T>);
+                    impl<T: UtilsService> tonic::server::UnaryService<super::FileId>
+                    for GetFileSvc<T> {
+                        type Response = super::File;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::FileId>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).get_file(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetFileSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)

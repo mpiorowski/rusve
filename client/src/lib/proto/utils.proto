@@ -9,6 +9,7 @@ enum FileType {
 
 message TargetId {
     string targetId = 1;
+    FileType type = 2;
 }
 
 message FileId {
@@ -26,5 +27,5 @@ message File {
     string name = 6;
     FileType type = 7;
 
-    bytes data = 8;
+    bytes buffer = 8;
 }

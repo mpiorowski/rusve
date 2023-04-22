@@ -3,12 +3,11 @@
     import Button from "$lib/form/Button.svelte";
     import Input from "$lib/form/Input.svelte";
     import { getContext } from "svelte";
-    import type { ActionData } from "./$types";
-    import type { ProfileContext } from "./profile.types";
     import { toast } from "$lib/toast/toast";
     import SaveIcon from "$lib/icons/SaveIcon.svelte";
+    import type { ProfileContext } from "./profile.types";
 
-    const profile = getContext<ProfileContext<ActionData>>("profile");
+    const profile = getContext<ProfileContext>("profile");
     let loading = false;
 </script>
 
@@ -31,7 +30,8 @@
     class="p-4"
 >
     <h3 class="mb-4">Your name</h3>
-    <Input bind:value={profile.user.name} name="name" />
+    <input type="hidden" name="avatar" value={$profile.user.avatar ?? ""} />
+    <Input bind:value={$profile.user.name} name="name" />
     <div class="w-28">
         <Button type="submit" {loading}>
             <span slot="icon">

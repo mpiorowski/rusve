@@ -5,9 +5,9 @@
     export let toast: Toast;
 
     setTimeout(() => {
-        // remove last toast
+        // remove first toast
         toastStore.update((toasts) => {
-            return toasts.slice(0, -1);
+            return toasts.slice(1);
         });
     }, 3000);
 </script>

@@ -10,7 +10,7 @@ export interface File {
   'targetId'?: (string);
   'name'?: (string);
   'type'?: (_proto_FileType);
-  'data'?: (Buffer | Uint8Array | string);
+  'buffer'?: (Buffer | Uint8Array | string);
   '_deleted'?: "deleted";
 }
 
@@ -22,6 +22,6 @@ export interface File__Output {
   'targetId': (string);
   'name': (string);
   'type': (_proto_FileType__Output);
-  'data': (Buffer);
+  'buffer': (Buffer);
   '_deleted': "deleted";
 }

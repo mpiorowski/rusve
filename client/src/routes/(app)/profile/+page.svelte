@@ -2,9 +2,9 @@
     import { setContext } from "svelte";
     import ProfileAvatar from "./ProfileAvatar.svelte";
     import ProfileData from "./ProfileData.svelte";
-    import type { ProfileContext } from "./profile.types";
-    import type { ActionData } from "./$types";
     import { toast } from "$lib/toast/toast";
+    import { writable } from "svelte/store";
+    import type { ProfileContext, ProfileStore } from "./profile.types";
 
     export let data;
     export let form;
@@ -14,10 +14,13 @@
             type: "error",
         });
     }
-    setContext<ProfileContext<ActionData>>("profile", {
+
+    const profileStore = writable<ProfileStore>();
+    $: profileStore.set({
         user: data.user,
-        form: form,
+        file: data.stream.file,
     });
+    setContext<ProfileContext>("profile", profileStore);
 </script>
 
 <div class="flex flex-col border border-primary-600 rounded">

@@ -23,6 +23,7 @@ service UsersService {
 
 service UtilsService {
     rpc GetFiles(TargetId) returns (stream File) {}
+    rpc GetFile(FileId) returns (File) {}
     rpc CreateFile(File) returns (File) {}
     rpc DeleteFile(FileId) returns (File) {}
 }

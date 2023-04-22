@@ -13,6 +13,7 @@ export interface User {
   'name'?: (string);
   'avatar'?: (string);
   '_deleted'?: "deleted";
+  '_avatar'?: "avatar";
 }
 
 export interface User__Output {
@@ -24,6 +25,7 @@ export interface User__Output {
   'role': (_proto_UserRole__Output);
   'sub': (string);
   'name': (string);
-  'avatar': (string);
+  'avatar'?: (string);
   '_deleted': "deleted";
+  '_avatar': "avatar";
 }

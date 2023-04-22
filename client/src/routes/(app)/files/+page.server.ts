@@ -35,7 +35,7 @@ export const load = (async ({ locals }) => {
         const end = performance.now();
         const mapped = files.map((file) => {
             // create base64 string
-            const base64 = Buffer.from(file.data).toString("base64");
+            const base64 = Buffer.from(file.buffer).toString("base64");
             return {
                 id: file.id,
                 name: file.name,

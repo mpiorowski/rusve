@@ -31,7 +31,7 @@ fn map_file(row: Option<PgRow>) -> Result<File> {
                 target_id: target_id.to_string(),
                 name: name.to_string(),
                 r#type: file_type.into(),
-                data: Vec::new(),
+                buffer: Vec::new(),
             };
             return Ok(file);
         }
@@ -48,7 +48,7 @@ impl UtilsService for MyService {
         request: Request<TargetId>,
     ) -> Result<Response<Self::GetFilesStream>, Status> {
         #[cfg(debug_assertions)]
-        println!("GetFiles = {:?}", request);
+        println!("GetFiles: {:?}", request);
         let start = std::time::Instant::now();
 
         let pool = self.pool.clone();
@@ -56,10 +56,14 @@ impl UtilsService for MyService {
         let request = request.into_inner();
         let uuid =
             Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
+        let r#type = FileType::from_i32(request.r#type)
+            .ok_or(Status::internal("Invalid file type"))?
+            .as_str_name();
 
         tokio::spawn(async move {
-            let mut files_stream = query("SELECT * FROM files WHERE \"targetId\" = $1 and deleted is null order by created desc")
+            let mut files_stream = query("SELECT * FROM files WHERE \"targetId\" = $1 and type = $2 and deleted is null order by created desc")
                 .bind(&uuid)
+                .bind(&r#type)
                 .fetch(&pool);
 
             loop {
@@ -78,8 +82,9 @@ impl UtilsService for MyService {
                         } else {
                             let mut file = file.unwrap();
                             let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
-                            let data = std::fs::read(file_path).unwrap();
-                            file.data = data;
+                            // TODO: check if file exists
+                            let buffer = std::fs::read(file_path).unwrap();
+                            file.buffer = buffer;
                             tx.send(Ok(file)).await.unwrap();
                         }
                     }
@@ -91,6 +96,34 @@ impl UtilsService for MyService {
             }
         });
         Ok(Response::new(ReceiverStream::new(rx)))
+    }
+
+    async fn get_file(&self, request: Request<FileId>) -> Result<Response<File>, Status> {
+        #[cfg(debug_assertions)]
+        println!("GetFile: {:?}", request);
+        let start = std::time::Instant::now();
+
+        let pool = self.pool.clone();
+        let request = request.into_inner();
+        let uuid =
+            Uuid::parse_str(&request.file_id).map_err(|e| Status::internal(e.to_string()))?;
+        let target_uuid =
+            Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
+        let row =
+            query("SELECT * FROM files WHERE id = $1 and \"targetId\" = $2 and deleted is null")
+                .bind(&uuid)
+                .bind(&target_uuid)
+                .fetch_one(&pool)
+                .await
+                .map_err(|e| Status::internal(e.to_string()))?;
+        let mut file = map_file(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+        let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
+        let buffer = std::fs::read(file_path).unwrap();
+        file.buffer = buffer;
+
+        let elapsed = start.elapsed();
+        println!("Elapsed: {:.2?}", elapsed);
+        Ok(Response::new(file))
     }
 
     async fn create_file(&self, request: Request<File>) -> Result<Response<File>, Status> {
@@ -106,7 +139,7 @@ impl UtilsService for MyService {
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let file = request.into_inner();
-        let file_data = file.data;
+        let file_buffer = file.buffer;
 
         // save file to db
         let uuid = Uuid::parse_str(&file.target_id).map_err(|e| Status::internal(e.to_string()))?;
@@ -128,7 +161,7 @@ impl UtilsService for MyService {
         let file_path = format!("/app/files/{}/{}", file.id, file.name);
         tokio::fs::create_dir_all(format!("/app/files/{}", file.id)).await?;
         let mut new_file = tokio::fs::File::create(file_path).await?;
-        new_file.write_all(&file_data).await?;
+        new_file.write_all(&file_buffer).await?;
 
         // commit transaction
         tx.commit()
@@ -140,7 +173,7 @@ impl UtilsService for MyService {
     }
 
     async fn delete_file(&self, request: Request<FileId>) -> Result<Response<File>, Status> {
-        println!("DeleteFile = {:?}", request);
+        println!("DeleteFile: {:?}", request);
         let start = std::time::Instant::now();
 
         // start transaction

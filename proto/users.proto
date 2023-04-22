@@ -24,6 +24,6 @@ message User {
     string sub = 7;
 
     string name = 8;
-    string avatar = 9;
+    optional string avatar = 9;
 }
 

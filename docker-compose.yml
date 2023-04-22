@@ -19,6 +19,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./files:/app/files
+      - ./service-utils:/app
     depends_on:
       - db-utils
     environment:
@@ -43,6 +44,8 @@ services:
     build:
       context: ./service-users/
       dockerfile: Dockerfile.dev
+    volumes:
+      - ./service-users:/app
     depends_on:
       - db-users
     environment:
@@ -65,6 +68,8 @@ services:
     build:
       context: ./service-notes/
       dockerfile: Dockerfile.dev
+    volumes:
+      - ./service-notes:/app
     depends_on:
       - db-notes
       - service-users
