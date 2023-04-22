@@ -95,6 +95,7 @@ pub struct File {
 #[repr(i32)]
 pub enum FileType {
     Document = 0,
+    Avatar = 1,
 }
 impl FileType {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -104,12 +105,14 @@ impl FileType {
     pub fn as_str_name(&self) -> &'static str {
         match self {
             FileType::Document => "DOCUMENT",
+            FileType::Avatar => "AVATAR",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
             "DOCUMENT" => Some(Self::Document),
+            "AVATAR" => Some(Self::Avatar),
             _ => None,
         }
     }

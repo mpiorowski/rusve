@@ -5,9 +5,11 @@
     import { getContext } from "svelte";
     import type { ActionData } from "./$types";
     import type { ProfileContext } from "./profile.types";
+    import { toast } from "$lib/toast/toast";
+    import SaveIcon from "$lib/icons/SaveIcon.svelte";
 
     const profile = getContext<ProfileContext<ActionData>>("profile");
-
+    let loading = false;
 </script>
 
 <form
@@ -15,19 +17,27 @@
     method="post"
     use:enhance={() => {
         return async ({ result, update }) => {
+            loading = true;
             await update({ reset: false });
-            if (result.type === "error") {
-                console.error("success");
-            } else {
-                console.log("success");
+            if (result.type === "success") {
+                toast({
+                    message: "Profile updated",
+                    type: "success",
+                });
             }
+            loading = false;
         };
     }}
     class="p-4"
 >
     <h3 class="mb-4">Your name</h3>
     <Input bind:value={profile.user.name} name="name" />
-    <div class="w-20">
-        <Button type="submit">Save</Button>
+    <div class="w-28">
+        <Button type="submit" {loading}>
+            <span slot="icon">
+                <SaveIcon />
+            </span>
+            Save
+        </Button>
     </div>
 </form>

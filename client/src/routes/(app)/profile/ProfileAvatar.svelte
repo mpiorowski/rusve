@@ -4,8 +4,13 @@
     import { getContext } from "svelte";
     import type { ProfileContext } from "./profile.types";
     import type { ActionData } from "./$types";
+    import SaveIcon from "$lib/icons/SaveIcon.svelte";
+    import { FileType } from "$lib/proto/proto/FileType";
+    import { enhance } from "$app/forms";
+    import { toast } from "$lib/toast/toast";
 
     const profile = getContext<ProfileContext<ActionData>>("profile");
+    let loading = false;
 </script>
 
 <form action="/?createUser" class="p-4 flex flex-col gap-4">
@@ -17,8 +22,35 @@
             <EmptyAvatar />
         {/if}
     </div>
-    <input type="file" name="avatar" />
-    <div class="w-20">
-        <Button type="submit">Upload</Button>
-    </div>
+
+    <form
+        action="?/createAvatar"
+        method="post"
+        enctype="multipart/form-data"
+        class="flex flex-col gap-2 p-4"
+        use:enhance={() => {
+            return async ({ result, update }) => {
+                loading = true;
+                await update();
+                if (result.type === "success") {
+                    toast({
+                        message: "Avatar uploaded",
+                        type: "success",
+                    });
+                }
+                loading = false;
+            };
+        }}
+    >
+        <input class="bg-gray-800 p-3 rounded" type="file" name="file" />
+        <input type="hidden" name="type" value={FileType.AVATAR} />
+        <div class="w-28">
+            <Button {loading}>
+                <span slot="icon">
+                    <SaveIcon />
+                </span>
+                Upload
+            </Button>
+        </div>
+    </form>
 </form>

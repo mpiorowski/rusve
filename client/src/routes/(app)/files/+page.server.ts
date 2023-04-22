@@ -63,7 +63,7 @@ export const actions = {
         const file = form.get("file");
 
         if (!(file instanceof File) || file.size === 0) {
-            throw error(400, "Invalid request");
+            throw fail(400, { error: "Invalid file" });
         }
 
         // max 10MB

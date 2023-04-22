@@ -4,9 +4,16 @@
     import ProfileData from "./ProfileData.svelte";
     import type { ProfileContext } from "./profile.types";
     import type { ActionData } from "./$types";
+    import { toast } from "$lib/toast/toast";
 
     export let data;
     export let form;
+    $: if (form?.error) {
+        toast({
+            message: form.error,
+            type: "error",
+        });
+    }
     setContext<ProfileContext<ActionData>>("profile", {
         user: data.user,
         form: form,

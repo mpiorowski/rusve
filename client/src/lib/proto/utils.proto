@@ -4,6 +4,7 @@ package proto;
 
 enum FileType {
     DOCUMENT = 0;
+    AVATAR = 1;
 }
 
 message TargetId {
