@@ -1,10 +1,25 @@
 <script lang="ts">
-    import type { PageData } from "./$types";
+    import { setContext } from "svelte";
+    import ProfileAvatar from "./ProfileAvatar.svelte";
+    import ProfileData from "./ProfileData.svelte";
+    import type { ProfileContext } from "./profile.types";
+    import type { ActionData } from "./$types";
 
-    export let data: PageData;
+    export let data;
+    export let form;
+    setContext<ProfileContext<ActionData>>("profile", {
+        user: data.user,
+        form: form,
+    });
 </script>
 
-<div class="flex gap-4 justify-between items-center w-full bg-primary-600 rounded">
-    <h2>Profile email</h2>
-    <p>{data.email}</p>
+<div class="flex flex-col border border-primary-600 rounded">
+    <div class="p-4">
+        <h3>Your email</h3>
+        <p>{data.email}</p>
+    </div>
+    <div class="border-b border-primary-600" />
+    <ProfileData />
+    <div class="border-b border-primary-600" />
+    <ProfileAvatar />
 </div>

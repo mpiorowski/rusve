@@ -7,10 +7,8 @@ CREATE TABLE
     email text UNIQUE NOT NULL,
     role text NOT NULL,
     sub text UNIQUE NOT NULL,
-    first_name text NOT NULL DEFAULT '',
-    last_name text NOT NULL DEFAULT '',
-    phone text NOT NULL DEFAULT '',
-    avatar text NOT NULL DEFAULT '',
+    name text NOT NULL DEFAULT '',
+    avatar text NOT NULL DEFAULT ''
   );
 
 CREATE TRIGGER set_timestamp BEFORE

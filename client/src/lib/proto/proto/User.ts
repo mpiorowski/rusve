@@ -10,6 +10,8 @@ export interface User {
   'email'?: (string);
   'role'?: (_proto_UserRole);
   'sub'?: (string);
+  'name'?: (string);
+  'avatar'?: (string);
   '_deleted'?: "deleted";
 }
 
@@ -21,5 +23,7 @@ export interface User__Output {
   'email': (string);
   'role': (_proto_UserRole__Output);
   'sub': (string);
+  'name': (string);
+  'avatar': (string);
   '_deleted': "deleted";
 }

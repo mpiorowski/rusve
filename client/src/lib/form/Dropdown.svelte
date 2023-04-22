@@ -38,7 +38,15 @@
     >
         <slot name="button" />
     </button>
-    <div class="relative">
+    <div
+        class="relative"
+        on:keypress={() => {
+            open = false;
+        }}
+        on:click={() => {
+            open = false;
+        }}
+    >
         {#if open}
             <div
                 class="absolute right-0 top-1 whitespace-nowrap shadow-lg"

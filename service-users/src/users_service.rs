@@ -48,22 +48,26 @@ fn map_user(row: Option<PgRow>) -> Result<User> {
     match row {
         Some(row) => {
             let id: Uuid = row.try_get("id")?;
-            let sub: String = row.try_get("sub")?;
-            let email: String = row.try_get("email")?;
             let created: OffsetDateTime = row.try_get("created")?;
             let updated: OffsetDateTime = row.try_get("updated")?;
             let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
+            let email: String = row.try_get("email")?;
             let role: String = row.try_get("role")?;
             let role = UserRole::from_str_name(&role).ok_or(anyhow::anyhow!("Invalid role"))?;
+            let sub: String = row.try_get("sub")?;
+            let name = row.try_get("name")?;
+            let avatar = row.try_get("avatar")?;
 
             Ok(User {
                 id: id.to_string(),
-                role: role.into(),
-                sub,
-                email,
                 created: created.to_string(),
                 updated: updated.to_string(),
                 deleted: deleted.map(|d| d.to_string()),
+                email,
+                role: role.into(),
+                sub,
+                name,
+                avatar,
             })
         }
         None => Err(anyhow::anyhow!("User not found")),
@@ -199,6 +203,37 @@ impl UsersService for MyService {
             .map_err(sqlx::Error::into_status)?;
 
         let user = map_user(row).map_err(anyhow::Error::into_status)?;
+        println!("Elapsed: {:?}", start.elapsed());
+        Ok(Response::new(user))
+    }
+
+    async fn create_user(&self, request: Request<User>) -> Result<Response<User>, Status> {
+        #[cfg(debug_assertions)]
+        println!("CreateUser: {:?}", request);
+        let start = std::time::Instant::now();
+
+        let pool = self.pool.clone();
+        let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
+
+        let user_id = request
+            .metadata()
+            .get("user_id")
+            .ok_or_else(|| Status::unauthenticated("Missing user_id metadata"))?
+            .to_str()
+            .map_err(|e| Status::internal(e.to_string()))?;
+        let user_uuid = Uuid::parse_str(user_id).map_err(|e| Status::internal(e.to_string()))?;
+
+        let request = request.into_inner();
+        let row = query("update users set name = $1, avatar = $2 where id = $3 returning *")
+            .bind(&request.name)
+            .bind(&request.avatar)
+            .bind(&user_uuid)
+            .fetch_one(&mut tx)
+            .await
+            .map_err(sqlx::Error::into_status)?;
+
+        let user = map_user(Some(row)).map_err(anyhow::Error::into_status)?;
+        tx.commit().await.map_err(sqlx::Error::into_status)?;
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(user))
     }

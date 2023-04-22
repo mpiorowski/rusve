@@ -22,5 +22,8 @@ message User {
     string email = 5;
     UserRole role = 6;
     string sub = 7;
+
+    string name = 8;
+    string avatar = 9;
 }
 
