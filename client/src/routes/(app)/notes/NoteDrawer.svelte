@@ -15,7 +15,6 @@
 </script>
 
 <Drawer {open} on:clickOutside>
-    (open = false)}>
     <span slot="header">
         <h2>Create note</h2>
     </span>

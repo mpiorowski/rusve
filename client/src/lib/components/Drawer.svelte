@@ -10,8 +10,6 @@
     function clickOutside() {
         dispatch("clickOutside");
     }
-
-    $: console.log(open);
 </script>
 
 {#if open}

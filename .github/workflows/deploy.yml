@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --build-arg ENV=production --build-arg URI_USERS=${{ secrets.URI_USERS }} --build-arg URI_NOTES=${{ secrets.URI_NOTES }} --build-arg URI_UTILS=${{ secrets.URI_UTILS }} --build-arg JWT_SECRET=${{ secrets.JWT_SECRET }} --build-arg GOOGLE_ID=${{ secrets.GOOGLE_ID }} --build-arg GOOGLE_SECRET=${{ secrets.GOOGLE_SECRET }} --build-arg AUTH_SECRET=${{ secrets.AUTH_SECRET }} --build-arg REDIS_URL=${{ secrets.REDIS_URL }} --build-arg REDIS_TOKEN=${{ secrets.REDIS_TOKEN }} --build-arg SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+      - run: flyctl deploy --remote-only --build-arg ENV=production --build-arg URI_USERS=${{ secrets.URI_USERS }} --build-arg URI_NOTES=${{ secrets.URI_NOTES }} --build-arg URI_UTILS=${{ secrets.URI_UTILS }} --build-arg JWT_SECRET=${{ secrets.JWT_SECRET }} --build-arg PUBLIC_API_KEY=${{ secrets.PUBLIC_API_KEY }} --build-arg PUBLIC_AUTH_DOMAIN=${{ secrets.PUBLIC_AUTH_DOMAIN }} --build-arg SERVICE_ACCOUNT=${{ secrets.SERVICE_ACCOUNT }}
         working-directory: client
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
