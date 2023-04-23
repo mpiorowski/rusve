@@ -17,6 +17,15 @@ export interface UsersServiceClient extends grpc.Client {
   auth(argument: _proto_AuthRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
   auth(argument: _proto_AuthRequest, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
   
+  CreateUser(argument: _proto_User, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
+  CreateUser(argument: _proto_User, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
+  CreateUser(argument: _proto_User, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
+  CreateUser(argument: _proto_User, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
+  createUser(argument: _proto_User, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
+  createUser(argument: _proto_User, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
+  createUser(argument: _proto_User, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
+  createUser(argument: _proto_User, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
+  
   GetUser(argument: _proto_UserId, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
   GetUser(argument: _proto_UserId, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
   GetUser(argument: _proto_UserId, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
@@ -36,6 +45,8 @@ export interface UsersServiceClient extends grpc.Client {
 export interface UsersServiceHandlers extends grpc.UntypedServiceImplementation {
   Auth: grpc.handleUnaryCall<_proto_AuthRequest__Output, _proto_User>;
   
+  CreateUser: grpc.handleUnaryCall<_proto_User__Output, _proto_User>;
+  
   GetUser: grpc.handleUnaryCall<_proto_UserId__Output, _proto_User>;
   
   GetUsers: grpc.handleServerStreamingCall<_proto_UserIds__Output, _proto_User>;
@@ -44,6 +55,7 @@ export interface UsersServiceHandlers extends grpc.UntypedServiceImplementation 
 
 export interface UsersServiceDefinition extends grpc.ServiceDefinition {
   Auth: MethodDefinition<_proto_AuthRequest, _proto_User, _proto_AuthRequest__Output, _proto_User__Output>
+  CreateUser: MethodDefinition<_proto_User, _proto_User, _proto_User__Output, _proto_User__Output>
   GetUser: MethodDefinition<_proto_UserId, _proto_User, _proto_UserId__Output, _proto_User__Output>
   GetUsers: MethodDefinition<_proto_UserIds, _proto_User, _proto_UserIds__Output, _proto_User__Output>
 }

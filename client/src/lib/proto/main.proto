@@ -18,10 +18,12 @@ service UsersService {
     rpc Auth(AuthRequest) returns (User) {}
     rpc GetUsers(UserIds) returns (stream User) {}
     rpc GetUser(UserId) returns (User) {}
+    rpc CreateUser(User) returns (User) {}
 }
 
 service UtilsService {
     rpc GetFiles(TargetId) returns (stream File) {}
+    rpc GetFile(FileId) returns (File) {}
     rpc CreateFile(File) returns (File) {}
     rpc DeleteFile(FileId) returns (File) {}
 }

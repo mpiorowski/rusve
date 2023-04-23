@@ -1,10 +1,11 @@
-FROM rust:1.67
+FROM rust:1.69
 
 WORKDIR /app
 
 COPY ./Cargo.toml /app/Cargo.toml
 COPY ./Cargo.lock /app/Cargo.lock
 COPY ./migrations /app/migrations
+COPY ./target /app/target
 COPY ./src /app/src
 RUN cargo build
 

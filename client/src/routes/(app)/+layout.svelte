@@ -1,17 +1,76 @@
 <script lang="ts">
+    import AvatarIcon from "$lib/icons/AvatarIcon.svelte";
     import { signOut } from "@auth/sveltekit/client";
+    import Dropdown from "$lib/components/Dropdown.svelte";
+
+    export let data;
 </script>
 
-<navigation
-    class="flex flex-row items-center justify-center gap-4 text-lg text-emerald-400 p-2 border-b border-gray-600"
->
-    <a href="/" class="hover:text-emerald-500">Home</a>
-    <a href="/files" class="hover:text-emerald-500">Files</a>
-    <a href="/notes1" class="hover:text-emerald-500">Notes-1</a>
-    <a href="/notes2" class="hover:text-emerald-500">Notes-2</a>
-    <a href="/notes3" class="hover:text-emerald-500">Notes-3</a>
-    <button on:click={() => signOut()}>Logout</button>
-</navigation>
-<div class="p-4">
-    <slot />
+<div class="flex flex-col h-screen">
+    <nav class="border-b border-gray-600">
+        <div
+            class="max-w-7xl mx-auto w-full flex items-center justify-between text-lg py-2 px-6"
+        >
+            <div class="flex items-center gap-6">
+                <a
+                    href="/"
+                    class="flex flex-row items-center gap-2 font-bold mr-4 hover:text-secondary-500 hover:cursor-pointer transition"
+                >
+                    Rusve
+                </a>
+                <a href="/profile" class="hover:text-secondary-500 transition">
+                    Profile
+                </a>
+                <a href="/notes" class="hover:text-secondary-500 transition">
+                    Notes
+                </a>
+                <a href="/todos" class="hover:text-secondary-500 transition">
+                    Todos
+                </a>
+            </div>
+            <Dropdown>
+                <svelte:fragment slot="button">
+                    <div
+                        class="w-6 hover:cursor-pointer hover:text-secondary-500 transition"
+                    >
+                        <AvatarIcon />
+                    </div>
+                </svelte:fragment>
+                <svelte:fragment slot="dropdown">
+                    <div
+                        class="flex flex-col bg-primary-600 min-w-[120px] rounded"
+                    >
+                        <p class="font-semibold px-3 py-2">
+                            {data.email}
+                        </p>
+                        <div class="border-b border-gray-500 w-full" />
+                        <a
+                            href="/profile"
+                            class="hover:text-secondary-500 transition px-3 py-2"
+                        >
+                            Profile
+                        </a>
+                        <a
+                            href="/billing"
+                            class="hover:text-secondary-500 transition px-3 py-2"
+                        >
+                            Billing
+                        </a>
+                        <div class="border-b border-gray-500 w-full" />
+                        <button
+                            class="w-full text-left hover:text-secondary-500 transition px-3 py-2"
+                            on:click={() => signOut()}
+                        >
+                            Sign out
+                        </button>
+                    </div>
+                </svelte:fragment>
+            </Dropdown>
+        </div>
+    </nav>
+    <section class="flex-1 overflow-auto">
+        <div class="max-w-3xl mx-auto px-6 py-8">
+            <slot />
+        </div>
+    </section>
 </div>

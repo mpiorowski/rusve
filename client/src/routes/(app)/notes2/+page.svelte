@@ -1,7 +1,7 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
     import type { PageData } from "./$types";
-    import Note from "../note/Note.svelte";
+    import Note from "../notes/Note.svelte";
 
     export let data: PageData;
 </script>

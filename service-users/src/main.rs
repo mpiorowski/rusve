@@ -35,19 +35,18 @@ async fn main() -> Result<()> {
         .connect(&database_url)
         .await
         .with_context(|| format!("Failed to connect to database: {}", database_url))?;
+    println!("Connected to database");
 
     sqlx::migrate!("./migrations")
         .run(&pool)
         .await
         .context("Failed to run migrations")?;
-
     println!("Migrations ran successfully");
 
     let port = check_env("PORT")?;
     let addr = ("0.0.0.0:".to_owned() + &port)
         .parse()
         .context("Failed to parse address")?;
-
     println!("Server started on port: {}", port);
 
     let server = MyService { pool };
@@ -78,7 +77,7 @@ fn check_auth(mut req: Request<()>) -> Result<Request<()>, Status> {
                     .parse()
                     .map_err(|_| Status::unauthenticated("Invalid user id"))?,
             );
-            return Ok(req);
+            Ok(req)
         }
         _ => Err(Status::unauthenticated("No valid auth token")),
     }

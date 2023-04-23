@@ -23,6 +23,10 @@ pub struct User {
     pub role: i32,
     #[prost(string, tag = "7")]
     pub sub: ::prost::alloc::string::String,
+    #[prost(string, tag = "8")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "9")]
+    pub avatar: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -58,6 +62,8 @@ impl UserRole {
 pub struct TargetId {
     #[prost(string, tag = "1")]
     pub target_id: ::prost::alloc::string::String,
+    #[prost(enumeration = "FileType", tag = "2")]
+    pub r#type: i32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -85,12 +91,13 @@ pub struct File {
     #[prost(enumeration = "FileType", tag = "7")]
     pub r#type: i32,
     #[prost(bytes = "vec", tag = "8")]
-    pub data: ::prost::alloc::vec::Vec<u8>,
+    pub buffer: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum FileType {
     Document = 0,
+    Avatar = 1,
 }
 impl FileType {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -100,12 +107,14 @@ impl FileType {
     pub fn as_str_name(&self) -> &'static str {
         match self {
             FileType::Document => "DOCUMENT",
+            FileType::Avatar => "AVATAR",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
             "DOCUMENT" => Some(Self::Document),
+            "AVATAR" => Some(Self::Avatar),
             _ => None,
         }
     }
@@ -146,6 +155,12 @@ pub struct Empty {}
 pub struct UserId {
     #[prost(string, tag = "1")]
     pub user_id: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UserIds {
+    #[prost(string, repeated, tag = "1")]
+    pub user_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 /// Generated client implementations.
 pub mod users_service_client {
@@ -235,7 +250,7 @@ pub mod users_service_client {
         }
         pub async fn get_users(
             &mut self,
-            request: impl tonic::IntoStreamingRequest<Message = super::UserId>,
+            request: impl tonic::IntoRequest<super::UserIds>,
         ) -> Result<
             tonic::Response<tonic::codec::Streaming<super::User>>,
             tonic::Status,
@@ -253,7 +268,7 @@ pub mod users_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/proto.UsersService/GetUsers",
             );
-            self.inner.streaming(request.into_streaming_request(), path, codec).await
+            self.inner.server_streaming(request.into_request(), path, codec).await
         }
         pub async fn get_user(
             &mut self,
@@ -271,6 +286,25 @@ pub mod users_service_client {
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/proto.UsersService/GetUser",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        pub async fn create_user(
+            &mut self,
+            request: impl tonic::IntoRequest<super::User>,
+        ) -> Result<tonic::Response<super::User>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/proto.UsersService/CreateUser",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
@@ -366,6 +400,25 @@ pub mod utils_service_client {
                 "/proto.UtilsService/GetFiles",
             );
             self.inner.server_streaming(request.into_request(), path, codec).await
+        }
+        pub async fn get_file(
+            &mut self,
+            request: impl tonic::IntoRequest<super::FileId>,
+        ) -> Result<tonic::Response<super::File>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/proto.UtilsService/GetFile",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
         }
         pub async fn create_file(
             &mut self,
@@ -579,11 +632,15 @@ pub mod users_service_server {
             + 'static;
         async fn get_users(
             &self,
-            request: tonic::Request<tonic::Streaming<super::UserId>>,
+            request: tonic::Request<super::UserIds>,
         ) -> Result<tonic::Response<Self::GetUsersStream>, tonic::Status>;
         async fn get_user(
             &self,
             request: tonic::Request<super::UserId>,
+        ) -> Result<tonic::Response<super::User>, tonic::Status>;
+        async fn create_user(
+            &self,
+            request: tonic::Request<super::User>,
         ) -> Result<tonic::Response<super::User>, tonic::Status>;
     }
     #[derive(Debug)]
@@ -684,7 +741,9 @@ pub mod users_service_server {
                 "/proto.UsersService/GetUsers" => {
                     #[allow(non_camel_case_types)]
                     struct GetUsersSvc<T: UsersService>(pub Arc<T>);
-                    impl<T: UsersService> tonic::server::StreamingService<super::UserId>
+                    impl<
+                        T: UsersService,
+                    > tonic::server::ServerStreamingService<super::UserIds>
                     for GetUsersSvc<T> {
                         type Response = super::User;
                         type ResponseStream = T::GetUsersStream;
@@ -694,7 +753,7 @@ pub mod users_service_server {
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<tonic::Streaming<super::UserId>>,
+                            request: tonic::Request<super::UserIds>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
                             let fut = async move { (*inner).get_users(request).await };
@@ -713,7 +772,7 @@ pub mod users_service_server {
                                 accept_compression_encodings,
                                 send_compression_encodings,
                             );
-                        let res = grpc.streaming(method, req).await;
+                        let res = grpc.server_streaming(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)
@@ -743,6 +802,42 @@ pub mod users_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = GetUserSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/proto.UsersService/CreateUser" => {
+                    #[allow(non_camel_case_types)]
+                    struct CreateUserSvc<T: UsersService>(pub Arc<T>);
+                    impl<T: UsersService> tonic::server::UnaryService<super::User>
+                    for CreateUserSvc<T> {
+                        type Response = super::User;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::User>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).create_user(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = CreateUserSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
@@ -810,6 +905,10 @@ pub mod utils_service_server {
             &self,
             request: tonic::Request<super::TargetId>,
         ) -> Result<tonic::Response<Self::GetFilesStream>, tonic::Status>;
+        async fn get_file(
+            &self,
+            request: tonic::Request<super::FileId>,
+        ) -> Result<tonic::Response<super::File>, tonic::Status>;
         async fn create_file(
             &self,
             request: tonic::Request<super::File>,
@@ -913,6 +1012,42 @@ pub mod utils_service_server {
                                 send_compression_encodings,
                             );
                         let res = grpc.server_streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/proto.UtilsService/GetFile" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetFileSvc<T: UtilsService>(pub Arc<T>);
+                    impl<T: UtilsService> tonic::server::UnaryService<super::FileId>
+                    for GetFileSvc<T> {
+                        type Response = super::File;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::FileId>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).get_file(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetFileSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)

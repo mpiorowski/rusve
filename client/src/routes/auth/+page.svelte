@@ -1,7 +1,7 @@
 <script lang="ts">
     import Button from "$lib/form/Button.svelte";
     import Input from "$lib/form/Input.svelte";
-    import Gmail from "$lib/icons/gmail.svelte";
+    import GmailIcon from "$lib/icons/GmailIcon.svelte";
     import { signIn } from "@auth/sveltekit/client";
 
     let email = "";
@@ -26,11 +26,11 @@
 >
     <h2 class="text-primary-200">Welcome back</h2>
     <p class="text-primary-300 mb-4 mt-2">
-        Log in and explore! Also now You can say "I use Rust".
+        Sign in so You can say "I use Rust"
     </p>
     <Button on:click={onSignInUsingGoogle}>
-        <div class="h-6">
-            <Gmail />
+        <div class="h-5">
+            <GmailIcon />
         </div>
         <div>Google</div>
     </Button>

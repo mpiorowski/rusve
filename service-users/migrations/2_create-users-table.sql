@@ -6,7 +6,9 @@ CREATE TABLE
     deleted timestamptz,
     email text UNIQUE NOT NULL,
     role text NOT NULL,
-    sub text UNIQUE NOT NULL
+    sub text UNIQUE NOT NULL,
+    name text NOT NULL DEFAULT '',
+    avatar uuid
   );
 
 CREATE TRIGGER set_timestamp BEFORE

@@ -1,6 +1,6 @@
-mod files_service;
 mod proto;
 mod utils;
+mod utils_service;
 
 use anyhow::{Context, Result};
 use sqlx::{postgres::PgPoolOptions, PgPool};
@@ -40,10 +40,7 @@ async fn main() -> Result<()> {
 
     let server = MyService { pool };
     let svc = UtilsServiceServer::with_interceptor(server, check_auth);
-    Server::builder()
-        .add_service(svc)
-        .serve(addr)
-        .await?;
+    Server::builder().add_service(svc).serve(addr).await?;
 
     Ok(())
 }
@@ -65,7 +62,7 @@ fn check_auth(mut req: Request<()>) -> Result<Request<()>, Status> {
                     .parse()
                     .map_err(|_| Status::unauthenticated("Invalid user id"))?,
             );
-            return Ok(req);
+            Ok(req)
         }
         _ => Err(Status::unauthenticated("No valid auth token")),
     }

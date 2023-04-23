@@ -25,6 +25,15 @@ export interface UtilsServiceClient extends grpc.Client {
   deleteFile(argument: _proto_FileId, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
   deleteFile(argument: _proto_FileId, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
   
+  GetFile(argument: _proto_FileId, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  GetFile(argument: _proto_FileId, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  GetFile(argument: _proto_FileId, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  GetFile(argument: _proto_FileId, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  getFile(argument: _proto_FileId, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  getFile(argument: _proto_FileId, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  getFile(argument: _proto_FileId, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  getFile(argument: _proto_FileId, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  
   GetFiles(argument: _proto_TargetId, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
   GetFiles(argument: _proto_TargetId, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
   getFiles(argument: _proto_TargetId, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
@@ -37,6 +46,8 @@ export interface UtilsServiceHandlers extends grpc.UntypedServiceImplementation 
   
   DeleteFile: grpc.handleUnaryCall<_proto_FileId__Output, _proto_File>;
   
+  GetFile: grpc.handleUnaryCall<_proto_FileId__Output, _proto_File>;
+  
   GetFiles: grpc.handleServerStreamingCall<_proto_TargetId__Output, _proto_File>;
   
 }
@@ -44,5 +55,6 @@ export interface UtilsServiceHandlers extends grpc.UntypedServiceImplementation 
 export interface UtilsServiceDefinition extends grpc.ServiceDefinition {
   CreateFile: MethodDefinition<_proto_File, _proto_File, _proto_File__Output, _proto_File__Output>
   DeleteFile: MethodDefinition<_proto_FileId, _proto_File, _proto_FileId__Output, _proto_File__Output>
+  GetFile: MethodDefinition<_proto_FileId, _proto_File, _proto_FileId__Output, _proto_File__Output>
   GetFiles: MethodDefinition<_proto_TargetId, _proto_File, _proto_TargetId__Output, _proto_File__Output>
 }
