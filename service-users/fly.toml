@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for rusve-users on 2023-04-23T20:16:33+02:00
+# fly.toml app configuration file generated for rusve-users on 2023-04-23T20:31:17+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -6,34 +6,30 @@
 app = "rusve-users"
 primary_region = "arn"
 
-[build]
-
-[checks]
-  [checks.alive]
-    grace_period = "5s"
-    interval = "15s"
-    timeout = "2s"
-    type = "tcp"
-
 [env]
   ENV = "production"
-  PORT = 443
+  PORT = "443"
   SECRET = "my-rust-secret"
 
 [http_service]
-  auto_start_machines = true
-  auto_stop_machines = true
+  internal_port = 443
   force_https = true
-  internal_port = 443
+  auto_stop_machines = true
+  auto_start_machines = true
 
-[services]
-  http_checks = []
-  internal_port = 443
+[[services]]
   protocol = "tcp"
-  script_checks = []
+  internal_port = 443
 
   [[services.ports]]
+    port = 443
     handlers = ["tls"]
-    port = "443"
     [services.ports.tls_options]
       alpn = ["h2"]
+
+[checks]
+  [checks.alive]
+    type = "tcp"
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "5s"

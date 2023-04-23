@@ -1,14 +1,14 @@
-# fly.toml app configuration file generated for rust-notes on 2023-04-20T13:34:42+02:00
+# fly.toml app configuration file generated for rusve-notes on 2023-04-23T20:56:16+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "rust-notes"
+app = "rusve-notes"
 primary_region = "arn"
 
 [env]
-  PORT = 443
   ENV = "production"
+  PORT = "443"
   SECRET = "my-rust-secret"
   URI_USERS = "https://rust-users.fly.dev"
 
@@ -18,16 +18,15 @@ primary_region = "arn"
   auto_stop_machines = true
   auto_start_machines = true
 
-[services]
-  http_checks = []
-  script_checks = []
-  internal_port = 443
+[[services]]
   protocol = "tcp"
+  internal_port = 443
 
   [[services.ports]]
+    port = 443
     handlers = ["tls"]
-    port = "443"
-    tls_options = { "alpn" = ["h2"] }
+    [services.ports.tls_options]
+      alpn = ["h2"]
 
 [checks]
   [checks.alive]
