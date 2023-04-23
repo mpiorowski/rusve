@@ -1,8 +1,7 @@
 <script lang="ts">
-    import BearIcon from "$lib/icons/BearIcon.svelte";
     import AvatarIcon from "$lib/icons/AvatarIcon.svelte";
     import { signOut } from "@auth/sveltekit/client";
-    import Dropdown from "$lib/form/Dropdown.svelte";
+    import Dropdown from "$lib/components/Dropdown.svelte";
 
     export let data;
 </script>
@@ -17,16 +16,16 @@
                     href="/"
                     class="flex flex-row items-center gap-2 font-bold mr-4 hover:text-secondary-500 hover:cursor-pointer transition"
                 >
-                    <div class="w-10">
-                        <BearIcon />
-                    </div>
                     Rusve
+                </a>
+                <a href="/profile" class="hover:text-secondary-500 transition">
+                    Profile
                 </a>
                 <a href="/notes" class="hover:text-secondary-500 transition">
                     Notes
                 </a>
-                <a href="/files" class="hover:text-secondary-500 transition">
-                    Files
+                <a href="/todos" class="hover:text-secondary-500 transition">
+                    Todos
                 </a>
             </div>
             <Dropdown>
@@ -41,19 +40,25 @@
                     <div
                         class="flex flex-col bg-primary-600 min-w-[120px] rounded"
                     >
-                        <p class="font-semibold px-2 py-3">
+                        <p class="font-semibold px-3 py-2">
                             {data.email}
                         </p>
                         <div class="border-b border-gray-500 w-full" />
                         <a
                             href="/profile"
-                            class="hover:text-secondary-500 transition px-2 py-3"
+                            class="hover:text-secondary-500 transition px-3 py-2"
                         >
                             Profile
                         </a>
+                        <a
+                            href="/billing"
+                            class="hover:text-secondary-500 transition px-3 py-2"
+                        >
+                            Billing
+                        </a>
                         <div class="border-b border-gray-500 w-full" />
                         <button
-                            class="w-full text-left hover:text-secondary-500 transition px-2 py-3"
+                            class="w-full text-left hover:text-secondary-500 transition px-3 py-2"
                             on:click={() => signOut()}
                         >
                             Sign out

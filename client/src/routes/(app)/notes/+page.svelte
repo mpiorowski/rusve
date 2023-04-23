@@ -16,10 +16,12 @@
     {data.duration.toFixed(4)}ms
 </h3>
 
-<Button type="button" on:click={() => (open = true)}>
-    <span slot="icon"><PlusIcon /></span>
-    Create note
-</Button>
+<div class="mb-6">
+    <Button type="button" on:click={() => (open = true)}>
+        <span slot="icon"><PlusIcon /></span>
+        Create note
+    </Button>
+</div>
 
 {#each data.notes as note}
     <Note noteId={note.id}>
@@ -31,7 +33,7 @@
         </span>
         <span slot="user">
             {#await data.streamed.users}
-                Loading...
+                <span class="block h-4" />
             {:then users}
                 {#if users.find((u) => u.id === note.userId)}
                     {users.find((u) => u.id === note.userId)?.email}

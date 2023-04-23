@@ -9,6 +9,7 @@
     import { toast } from "$lib/toast/toast";
     import FileInput from "$lib/form/FileInput.svelte";
     import DeleteIcon from "$lib/icons/DeleteIcon.svelte";
+    import DownloadIcon from "$lib/icons/DownloadIcon.svelte";
 
     const profile = getContext<ProfileContext>("profile");
     let loading = false;
@@ -23,24 +24,7 @@
         </div>
     {:then file}
         {#if file}
-            <form
-                action="?/deleteAvatar"
-                method="post"
-                class="flex flex-row gap-4 items-center"
-                use:enhance={() => {
-                    return async ({ result, update }) => {
-                        deleteLoading = true;
-                        await update();
-                        if (result.type === "success") {
-                            toast({
-                                message: "Avatar deleted",
-                                type: "success",
-                            });
-                        }
-                        deleteLoading = false;
-                    };
-                }}
-            >
+            <div class="flex flex-row items-center gap-4">
                 <div class="h-16 w-16">
                     <img
                         src={`data:image;base64,${file.data}`}
@@ -48,17 +32,49 @@
                         class="rounded-full object-cover h-full w-full"
                     />
                 </div>
-                <input type="hidden" name="fileId" value={file.id} />
-                <input type="hidden" name="name" value={$profile.user.name || ""} />
-                <div>
-                    <Button variant="error" {loading}>
-                        <span slot="icon">
-                            <DeleteIcon />
-                        </span>
-                        Delete
-                    </Button>
+                <div class="flex flex-row gap-2">
+                    <form action="/api/files" method="post">
+                        <input type="hidden" name="base64" value={file.data} />
+                        <input type="hidden" name="name" value={file.name} />
+                        <Button variant="secondary">
+                            <span slot="icon">
+                                <DownloadIcon />
+                            </span>
+                            Download
+                        </Button>
+                    </form>
+                    <form
+                        action="?/deleteAvatar"
+                        method="post"
+                        use:enhance={() => {
+                            return async ({ result, update }) => {
+                                deleteLoading = true;
+                                await update();
+                                if (result.type === "success") {
+                                    toast({
+                                        message: "Avatar deleted",
+                                        type: "success",
+                                    });
+                                }
+                                deleteLoading = false;
+                            };
+                        }}
+                    >
+                        <input type="hidden" name="fileId" value={file.id} />
+                        <input
+                            type="hidden"
+                            name="name"
+                            value={$profile.user.name || ""}
+                        />
+                        <Button variant="error" {loading}>
+                            <span slot="icon">
+                                <DeleteIcon />
+                            </span>
+                            Delete
+                        </Button>
+                    </form>
                 </div>
-            </form>
+            </div>
         {:else}
             <div class="h-16 w-16">
                 <EmptyAvatar />

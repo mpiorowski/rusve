@@ -142,15 +142,16 @@ impl UtilsService for MyService {
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
+        // get file from request
         let file = request.into_inner();
         let file_buffer = file.buffer;
-
-        // save file to db
         let uuid = Uuid::parse_str(&file.target_id).map_err(|e| Status::internal(e.to_string()))?;
         let r#type = FileType::from_i32(file.r#type)
             .ok_or(anyhow::anyhow!("Invalid file type"))
             .map_err(|e| Status::internal(e.to_string()))?
             .as_str_name();
+
+        // save file to db
         let row =
             query("INSERT INTO files (\"targetId\", name, type) VALUES ($1, $2, $3) RETURNING *")
                 .bind(&uuid)

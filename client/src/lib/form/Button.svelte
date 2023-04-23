@@ -4,7 +4,7 @@
     export let type: "button" | "submit" = "submit";
     export let loading = false;
     export let variant: "primary" | "secondary" | "error" = "primary";
-    export let form = "";
+    export let form: string | undefined = undefined;
 </script>
 
 <button

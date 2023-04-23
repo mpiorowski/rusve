@@ -1,6 +1,6 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
-    import Drawer from "$lib/drawer/Drawer.svelte";
+    import Drawer from "$lib/components/Drawer.svelte";
     import Button from "$lib/form/Button.svelte";
     import Input from "$lib/form/Input.svelte";
     import { toast } from "$lib/toast/toast";
