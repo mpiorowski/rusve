@@ -1,4 +1,7 @@
 # Rust microservices with Typescript SvelteKit using gRPC deployed on Fly.io
+
+# Big changes comming to this project in a days. Want to make it more completed with much more really helpfull sections, like Stripe integration, or ready to use github actions deployment to Fly.io or GCP. Keep a watch on this :)
+
 If You have any questions, feel free to ask them in Discussions or Issues. I hope this will be helpful :).
 
 For now this project will be the one that i will try to keep up to date and update it with new functionalities. SvelteKit + Rust is an perfect combo for me now :)
