@@ -1,9 +1,15 @@
 <script lang="ts">
     import AvatarIcon from "$lib/icons/AvatarIcon.svelte";
-    import { signOut } from "@auth/sveltekit/client";
     import Dropdown from "$lib/components/Dropdown.svelte";
 
     export let data;
+
+    async function onLogout() {
+        await fetch("/api/auth", {
+            method: "DELETE",
+        });
+        window.location.reload();
+    }
 </script>
 
 <div class="flex flex-col h-screen">
@@ -58,8 +64,8 @@
                         </a>
                         <div class="border-b border-gray-500 w-full" />
                         <button
+                            on:click={onLogout}
                             class="w-full text-left hover:text-secondary-500 transition px-3 py-2"
-                            on:click={() => signOut()}
                         >
                             Sign out
                         </button>

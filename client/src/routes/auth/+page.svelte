@@ -1,24 +1,92 @@
 <script lang="ts">
+    import { browser } from "$app/environment";
+    import { goto } from "$app/navigation";
+    import { getFirebaseClient } from "$lib/firebase/firebase_client";
     import Button from "$lib/form/Button.svelte";
     import Input from "$lib/form/Input.svelte";
     import GmailIcon from "$lib/icons/GmailIcon.svelte";
-    import { signIn } from "@auth/sveltekit/client";
+    import {
+        GoogleAuthProvider,
+        isSignInWithEmailLink,
+        sendSignInLinkToEmail,
+        signInWithEmailLink,
+        signInWithPopup,
+    } from "firebase/auth";
 
-    let email = "";
     let errors: string[] = [];
 
-    async function onSignInUsingGoogle() {
-        await signIn("google");
+    const googleProvider = new GoogleAuthProvider();
+    const auth = getFirebaseClient();
+
+    async function sendIdToken(idToken: string): Promise<void> {
+        try {
+            await fetch("/api/auth", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    idToken,
+                }),
+            });
+        } catch (err) {
+            console.error(err);
+        }
     }
 
-    async function onSignInUsingEmail() {
-        errors = [];
-        if (RegExp(/^\S+@\S+$/).test(email) === false) {
-            errors = ["Please enter a valid email address"];
-            return;
+    async function onSignInUsingGoogle() {
+        try {
+            const user = await signInWithPopup(auth, googleProvider);
+            const idToken = await user.user.getIdToken();
+            await sendIdToken(idToken);
+            await auth.signOut();
+            window.location.reload();
+        } catch (err) {
+            console.error(err);
+            await auth.signOut();
         }
-        await signIn("email", { email: email });
     }
+
+    let email = "";
+    async function onSignInWithMagicLink() {
+        try {
+            const url = import.meta.env.DEV
+                ? "http://localhost:3000/auth"
+                : "https://www.rusve.app/auth";
+            await sendSignInLinkToEmail(auth, email, {
+                url: url,
+                handleCodeInApp: true,
+            });
+            window.localStorage.setItem("emailForSignIn", email);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function checkMagicLink(browser: boolean) {
+        if (browser && isSignInWithEmailLink(auth, window.location.href)) {
+            try {
+                const email = window.localStorage.getItem("emailForSignIn");
+                if (!email) {
+                    console.error("No email found");
+                    return;
+                }
+                const user = await signInWithEmailLink(
+                    auth,
+                    email,
+                    window.location.href,
+                );
+                const idToken = await user.user.getIdToken();
+                await sendIdToken(idToken);
+                goto("/");
+            } catch (err) {
+                console.error(err);
+            } finally {
+                auth.signOut();
+            }
+        }
+    }
+    $: checkMagicLink(browser);
 </script>
 
 <section
@@ -28,7 +96,7 @@
     <p class="text-primary-300 mb-4 mt-2">
         Sign in so You can say "I use Rust"
     </p>
-    <Button on:click={onSignInUsingGoogle}>
+    <Button variant="secondary" on:click={onSignInUsingGoogle}>
         <div class="h-5">
             <GmailIcon />
         </div>
@@ -48,7 +116,7 @@
         {errors}
         bind:value={email}
     />
-    <Button on:click={onSignInUsingEmail}>
+    <Button variant="secondary" on:click={onSignInWithMagicLink}>
         <div>Email</div>
     </Button>
 </section>
