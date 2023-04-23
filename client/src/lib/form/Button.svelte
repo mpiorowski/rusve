@@ -4,15 +4,17 @@
     export let type: "button" | "submit" = "submit";
     export let loading = false;
     export let variant: "primary" | "secondary" | "error" = "primary";
+    export let form = "";
 </script>
 
 <button
+    {form}
     on:click
     {type}
     disabled={loading}
     class={"w-full h-10 flex flex-row gap-3 justify-center items-center rounded px-4 py-2 shadow-md font-semibold hover:opacity-80 transition " +
-        (variant === "primary" ? " bg-primary-800" : "") +
-        (variant === "secondary" ? " bg-gray-800" : "") +
+        (variant === "primary" ? " bg-secondary-700" : "") +
+        (variant === "secondary" ? " bg-primary-800" : "") +
         (variant === "error" ? " bg-error-600" : "")}
 >
     {#if loading}

@@ -50,11 +50,11 @@ impl UtilsService for MyService {
         #[cfg(debug_assertions)]
         println!("GetFiles: {:?}", request);
         let start = std::time::Instant::now();
-
         let pool = self.pool.clone();
         let (tx, rx) = mpsc::channel(4);
+
         let request = request.into_inner();
-        let uuid =
+        let target_uuid =
             Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
         let r#type = FileType::from_i32(request.r#type)
             .ok_or(Status::internal("Invalid file type"))?
@@ -62,7 +62,7 @@ impl UtilsService for MyService {
 
         tokio::spawn(async move {
             let mut files_stream = query("SELECT * FROM files WHERE \"targetId\" = $1 and type = $2 and deleted is null order by created desc")
-                .bind(&uuid)
+                .bind(&target_uuid)
                 .bind(&r#type)
                 .fetch(&pool);
 
@@ -74,19 +74,23 @@ impl UtilsService for MyService {
                         break;
                     }
                     Ok(file) => {
-                        let file = map_file(file);
-
-                        if let Err(e) = file {
-                            tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                            break;
-                        } else {
-                            let mut file = file.unwrap();
-                            let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
-                            // TODO: check if file exists
-                            let buffer = std::fs::read(file_path).unwrap();
-                            file.buffer = buffer;
-                            tx.send(Ok(file)).await.unwrap();
-                        }
+                        let mut file = match map_file(file) {
+                            Ok(file) => file,
+                            Err(e) => {
+                                tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                                break;
+                            }
+                        };
+                        let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
+                        let buffer = match std::fs::read(file_path) {
+                            Ok(buffer) => buffer,
+                            Err(e) => {
+                                tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                                break;
+                            }
+                        };
+                        file.buffer = buffer;
+                        tx.send(Ok(file)).await.unwrap();
                     }
                     Err(e) => {
                         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();

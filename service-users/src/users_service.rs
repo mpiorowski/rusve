@@ -31,34 +31,37 @@ impl IntoStatus for anyhow::Error {
     }
 }
 
-// impl instead of map
-fn map_user(row: Option<PgRow>) -> Result<User> {
-    match row {
-        Some(row) => {
-            let id: Uuid = row.try_get("id")?;
-            let created: OffsetDateTime = row.try_get("created")?;
-            let updated: OffsetDateTime = row.try_get("updated")?;
-            let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
-            let email: String = row.try_get("email")?;
-            let role: String = row.try_get("role")?;
-            let role = UserRole::from_str_name(&role).ok_or(anyhow::anyhow!("Invalid role"))?;
-            let sub: String = row.try_get("sub")?;
-            let name = row.try_get("name")?;
-            let avatar: Option<Uuid> = row.try_get("avatar")?;
+impl TryFrom<Option<PgRow>> for User {
+    type Error = anyhow::Error;
 
-            Ok(User {
-                id: id.to_string(),
-                created: created.to_string(),
-                updated: updated.to_string(),
-                deleted: deleted.map(|d| d.to_string()),
-                email,
-                role: role.into(),
-                sub,
-                name,
-                avatar: avatar.map(|a| a.to_string()),
-            })
+    fn try_from(row: Option<PgRow>) -> Result<Self, Self::Error> {
+        match row {
+            Some(row) => {
+                let id: Uuid = row.try_get("id")?;
+                let created: OffsetDateTime = row.try_get("created")?;
+                let updated: OffsetDateTime = row.try_get("updated")?;
+                let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
+                let email: String = row.try_get("email")?;
+                let role: String = row.try_get("role")?;
+                let role = UserRole::from_str_name(&role).ok_or(anyhow::anyhow!("Invalid role"))?;
+                let sub: String = row.try_get("sub")?;
+                let name = row.try_get("name")?;
+                let avatar: Option<Uuid> = row.try_get("avatar")?;
+
+                Ok(User {
+                    id: id.to_string(),
+                    created: created.to_string(),
+                    updated: updated.to_string(),
+                    deleted: deleted.map(|d| d.to_string()),
+                    email,
+                    role: role.into(),
+                    sub,
+                    name,
+                    avatar: avatar.map(|a| a.to_string()),
+                })
+            }
+            None => Err(anyhow::anyhow!("User not found")),
         }
-        None => Err(anyhow::anyhow!("User not found")),
     }
 }
 
@@ -70,8 +73,6 @@ impl UsersService for MyService {
         #[cfg(debug_assertions)]
         println!("Auth: {:?}", request);
         let start = std::time::Instant::now();
-
-        // Start transaction
         let pool = self.pool.clone();
         let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
 
@@ -86,7 +87,7 @@ impl UsersService for MyService {
 
         match row {
             Some(row) => {
-                let user = map_user(Some(row)).map_err(anyhow::Error::into_status)?;
+                let user: User = Some(row).try_into().map_err(anyhow::Error::into_status)?;
                 tx.commit().await.map_err(sqlx::Error::into_status)?;
                 println!("Elapsed: {:?}", start.elapsed());
                 Ok(Response::new(user))
@@ -101,7 +102,7 @@ impl UsersService for MyService {
                         .await
                         .map_err(sqlx::Error::into_status)?;
 
-                let user = map_user(Some(row)).map_err(anyhow::Error::into_status)?;
+                let user = Some(row).try_into().map_err(anyhow::Error::into_status)?;
                 tx.commit().await.map_err(sqlx::Error::into_status)?;
                 println!("Elapsed: {:?}", start.elapsed());
                 Ok(Response::new(user))
@@ -140,15 +141,17 @@ impl UsersService for MyService {
                         break;
                     }
                     Ok(user) => {
-                        let user = map_user(user);
-                        if let Err(err) = user {
-                            tx.send(Err(Status::internal(err.to_string())))
-                                .await
-                                .unwrap();
-                            break;
-                        } else {
-                            let user = user.unwrap();
-                            tx.send(Ok(user)).await.unwrap();
+                        let user = user.try_into().map_err(anyhow::Error::into_status);
+                        match user {
+                            Err(err) => {
+                                tx.send(Err(Status::internal(err.to_string())))
+                                    .await
+                                    .unwrap();
+                                break;
+                            }
+                            Ok(user) => {
+                                tx.send(Ok(user)).await.unwrap();
+                            }
                         }
                     }
                     Err(e) => {
@@ -166,18 +169,19 @@ impl UsersService for MyService {
         #[cfg(debug_assertions)]
         println!("GetUser: {:?}", request);
         let start = std::time::Instant::now();
+        let pool = self.pool.clone();
 
         let user_id_metadata = request
             .metadata()
             .get("user_id")
             .ok_or_else(|| Status::unauthenticated("Missing user_id metadata"))?
+            .to_str()
+            .map_err(|e| Status::internal(e.to_string()))?
             .to_owned();
 
-        let pool = self.pool.clone();
         let request = request.into_inner();
         let user_id = request.user_id;
-
-        if user_id != user_id_metadata.to_str().unwrap() {
+        if user_id != user_id_metadata {
             return Err(Status::unauthenticated("Invalid user_id"));
         }
 
@@ -189,7 +193,7 @@ impl UsersService for MyService {
             .await
             .map_err(sqlx::Error::into_status)?;
 
-        let user = map_user(row).map_err(anyhow::Error::into_status)?;
+        let user = row.try_into().map_err(anyhow::Error::into_status)?;
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(user))
     }
@@ -227,7 +231,7 @@ impl UsersService for MyService {
             .await
             .map_err(sqlx::Error::into_status)?;
 
-        let user = map_user(Some(row)).map_err(anyhow::Error::into_status)?;
+        let user = Some(row).try_into().map_err(anyhow::Error::into_status)?;
         tx.commit().await.map_err(sqlx::Error::into_status)?;
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(user))

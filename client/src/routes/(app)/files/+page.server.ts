@@ -1,4 +1,3 @@
-import { URI_UTILS } from "$env/static/private";
 import { error, fail } from "@sveltejs/kit";
 import { z } from "zod";
 import type { File__Output } from "$lib/proto/proto/File";
@@ -12,24 +11,16 @@ export const load = (async ({ locals }) => {
     try {
         const start = performance.now();
         const userId = locals.userId;
-        const request: TargetId = { targetId: userId };
+        const request: TargetId = { targetId: userId, type: FileType.DOCUMENT };
 
-        const metadata = createMetadata(URI_UTILS);
+        const metadata = createMetadata(userId);
         const stream = utilsClient.getFiles(request, metadata);
+
         const files: File__Output[] = [];
-
         await new Promise<File__Output[]>((resolve, reject) => {
-            stream.on("data", (file) => {
-                files.push(file);
-            });
-
-            stream.on("end", () => {
-                resolve(files);
-            });
-
-            stream.on("error", (err: unknown) => {
-                reject(err);
-            });
+            stream.on("data", (file) => files.push(file));
+            stream.on("end", () => resolve(files));
+            stream.on("error", (err: unknown) => reject(err));
         });
 
         const end = performance.now();
@@ -54,7 +45,7 @@ export const load = (async ({ locals }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-    createFile: async ({ request }) => {
+    createFile: async ({ request, locals }) => {
         const start = performance.now();
 
         const form = await request.formData();
@@ -93,7 +84,7 @@ export const actions = {
             throw error(400, "Invalid request");
         }
 
-        const metadata = createMetadata(URI_UTILS);
+        const metadata = createMetadata(locals.userId);
         await new Promise<File__Output>((resolve, reject) => {
             utilsClient.createFile(schema.data, metadata, (err, response) =>
                 err || !response ? reject(err) : resolve(response),
@@ -103,7 +94,7 @@ export const actions = {
         const end = performance.now();
         return { duration: end - start };
     },
-    deleteFile: async ({ request }) => {
+    deleteFile: async ({ request, locals }) => {
         const start = performance.now();
 
         const form = await request.formData();
@@ -125,7 +116,7 @@ export const actions = {
             throw error(400, "Invalid request");
         }
 
-        const metadata = createMetadata(URI_UTILS);
+        const metadata = createMetadata(locals.userId);
         await new Promise<File__Output>((resolve, reject) => {
             utilsClient.deleteFile(schema.data, metadata, (err, response) =>
                 err || !response ? reject(err) : resolve(response),

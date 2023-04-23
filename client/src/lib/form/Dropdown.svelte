@@ -3,7 +3,7 @@
     let open = false;
 
     const transitionConfig = {
-        duration: 200,
+        duration: 100,
         delay: 0,
         easing: cubicInOut,
     };

@@ -1,18 +1,25 @@
 <script lang="ts">
     import { FileType } from "$lib/proto/proto/FileType";
-    import type { ActionData, PageData } from "./$types";
+    import { toast } from "$lib/toast/toast.js";
 
-    export let data: PageData;
-    export let form: ActionData;
+    export let data;
+    export let form;
+    $: if (form?.error) {
+        toast({
+            message: form.error,
+            type: "error",
+        });
+    }
 </script>
+
+<h3 class="text-right">
+    {data.duration.toFixed(4)}ms
+</h3>
 
 {#if form?.error}
     <h2 class="text-center text-red-700">{form.error}</h2>
 {/if}
 
-<h2 class="text-center">
-    Files loaded in {data.duration.toFixed(4)}ms
-</h2>
 {#if form}
     <h2 class="text-center">
         Files created or deleted in {form.duration?.toFixed(4)}ms
@@ -41,11 +48,7 @@
         {#each data.files as file}
             <li class="flex flex-row gap-2 items-center">
                 <div>{file.name}</div>
-                <form
-                    action="/api"
-                    method="post"
-                    class="flex flex-row gap-2"
-                >
+                <form action="/api" method="post" class="flex flex-row gap-2">
                     <input type="hidden" name="base64" value={file.data} />
                     <input type="hidden" name="name" value={file.name} />
                     <button

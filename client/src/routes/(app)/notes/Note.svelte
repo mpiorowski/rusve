@@ -1,6 +1,7 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
-    import ThrashIcon from "$lib/icons/ThrashIcon.svelte";
+    import DeleteIcon from "$lib/icons/DeleteIcon.svelte";
+    import { toast } from "$lib/toast/toast";
 
     export let noteId: string;
 </script>
@@ -11,7 +12,17 @@
     action="?/deleteNote"
     method="post"
     id={noteId}
-    use:enhance
+    use:enhance={() => {
+        return async ({ result, update }) => {
+            await update();
+            if (result.type === "success") {
+                toast({
+                    message: "Note deleted",
+                    type: "success",
+                });
+            }
+        };
+    }}
 >
     <input type="hidden" name="id" value={noteId} />
     <h2>
@@ -28,7 +39,7 @@
         </p>
         <button type="submit" form={noteId}>
             <div class="h-5 w-5 text-error-500 hover:text-error-400 transition">
-                <ThrashIcon />
+                <DeleteIcon />
             </div>
         </button>
     </div>

@@ -14,7 +14,7 @@
 
 <div
     transition:fade={{ duration: 200 }}
-    class={"bg-primary-500 border-l-4 py-2 px-4 rounded-md shadow-lg " +
+    class={"bg-primary-500 border-l-4 py-2 px-4 rounded-md shadow-lg z-[1000] " +
         (toast.type === "success" ? "border-green-500" : "border-red-500")}
 >
     {toast.message}

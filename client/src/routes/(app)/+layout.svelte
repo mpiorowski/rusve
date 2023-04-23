@@ -3,6 +3,8 @@
     import AvatarIcon from "$lib/icons/AvatarIcon.svelte";
     import { signOut } from "@auth/sveltekit/client";
     import Dropdown from "$lib/form/Dropdown.svelte";
+
+    export let data;
 </script>
 
 <div class="flex flex-col h-screen">
@@ -37,17 +39,21 @@
                 </svelte:fragment>
                 <svelte:fragment slot="dropdown">
                     <div
-                        class="flex flex-col text-sm bg-primary-600 w-40 rounded"
+                        class="flex flex-col bg-primary-600 min-w-[120px] rounded"
                     >
+                        <p class="font-semibold px-2 py-3">
+                            {data.email}
+                        </p>
+                        <div class="border-b border-gray-500 w-full" />
                         <a
                             href="/profile"
-                            class="hover:text-secondary-500 transition p-2"
+                            class="hover:text-secondary-500 transition px-2 py-3"
                         >
                             Profile
                         </a>
                         <div class="border-b border-gray-500 w-full" />
                         <button
-                            class="w-full text-left hover:text-secondary-500 transition p-2"
+                            class="w-full text-left hover:text-secondary-500 transition px-2 py-3"
                             on:click={() => signOut()}
                         >
                             Sign out
@@ -58,7 +64,7 @@
         </div>
     </nav>
     <section class="flex-1 overflow-auto">
-        <div class="max-w-3xl mx-auto p-6">
+        <div class="max-w-3xl mx-auto px-6 py-8">
             <slot />
         </div>
     </section>
