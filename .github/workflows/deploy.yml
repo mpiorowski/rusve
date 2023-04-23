@@ -6,18 +6,53 @@ on:
 jobs:
   lint-client:
     uses: ./.github/workflows/lint-client.yml
-  lint-server:
+  deploy-client:
     needs:
       - lint-client
-    uses: ./.github/workflows/lint-server.yml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        working-directory: client
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  lint-utils:
+    uses: ./.github/workflows/lint-utils.yml
+  deploy-utils:
+    needs:
+      - lint-utils
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        working-directory: service-utils
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  lint-users:
+    uses: ./.github/workflows/lint-users.yml
   deploy-users:
     needs:
-      - lint-server
+      - lint-users
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only
         working-directory: service-users
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  lint-notes:
+    uses: ./.github/workflows/lint-notes.yml
+  deploy-notes:
+    needs:
+      - lint-notes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        working-directory: service-notes
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

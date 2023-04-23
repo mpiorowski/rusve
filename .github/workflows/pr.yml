@@ -4,5 +4,9 @@ on:
 jobs:
   lint-client:
     uses: ./.github/workflows/lint-client.yml
-  lint-server:
-    uses: ./.github/workflows/lint-server.yml
+  lint-utils:
+    uses: ./.github/workflows/lint-utils.yml
+  lint-users:
+    uses: ./.github/workflows/lint-users.yml
+  lint-notes:
+    uses: ./.github/workflows/lint-notes.yml

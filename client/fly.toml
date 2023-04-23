@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for rust-client on 2023-04-20T22:02:34+02:00
+# fly.toml app configuration file generated for rusve-client on 2023-04-23T21:15:07+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "rust-client"
+app = "rusve-client"
 primary_region = "arn"
 
 [http_service]
