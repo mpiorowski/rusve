@@ -15,7 +15,7 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
           flyctl deploy --remote-only --build-arg \
-            ENV=production
+            ENV=production \
             URI_USERS=${{ secrets.URI_USERS }} \
             URI_NOTES=${{ secrets.URI_NOTES }} \
             URI_UTILS=${{ secrets.URI_UTILS }} \
