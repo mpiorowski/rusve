@@ -188,7 +188,7 @@ impl UsersService for MyService {
         let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         let row = query("select * from users where id = $1")
-            .bind(&user_id)
+            .bind(user_id)
             .fetch_optional(&pool)
             .await
             .map_err(sqlx::Error::into_status)?;
@@ -212,21 +212,21 @@ impl UsersService for MyService {
             .ok_or_else(|| Status::unauthenticated("Missing user_id metadata"))?
             .to_str()
             .map_err(|e| Status::internal(e.to_string()))?;
-        let user_uuid = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
+        let user_uuid = Uuid::parse_str(user_id).map_err(|e| Status::internal(e.to_string()))?;
         let request = request.into_inner();
 
         let avatar_id = request.avatar;
         let avatar_uuid = match avatar_id {
             Some(avatar_id) => Some(Uuid::try_parse(&avatar_id).map_err(|e| {
-                Status::invalid_argument(format!("Invalid avatar_id: {}", e.to_string()))
+                Status::invalid_argument(format!("Invalid avatar_id: {}", e))
             })?),
             None => None,
         };
 
         let row = query("update users set name = $1, avatar = $2 where id = $3 returning *")
             .bind(&request.name)
-            .bind(&avatar_uuid)
-            .bind(&user_uuid)
+            .bind(avatar_uuid)
+            .bind(user_uuid)
             .fetch_one(&mut tx)
             .await
             .map_err(sqlx::Error::into_status)?;

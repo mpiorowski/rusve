@@ -10,32 +10,36 @@ use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 
-fn map_file(row: Option<PgRow>) -> Result<File> {
-    match row {
-        Some(row) => {
-            let id: Uuid = row.try_get("id")?;
-            let created: OffsetDateTime = row.try_get("created")?;
-            let updated: OffsetDateTime = row.try_get("updated")?;
-            let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
-            let target_id: Uuid = row.try_get("targetId")?;
-            let name: String = row.try_get("name")?;
-            let r#type: String = row.try_get("type")?;
-            let file_type =
-                FileType::from_str_name(&r#type).ok_or(anyhow::anyhow!("Invalid file type"))?;
+impl TryFrom<Option<PgRow>> for File {
+    type Error = anyhow::Error;
 
-            let file = File {
-                id: id.to_string(),
-                created: created.to_string(),
-                updated: updated.to_string(),
-                deleted: deleted.map(|d| d.to_string()),
-                target_id: target_id.to_string(),
-                name: name.to_string(),
-                r#type: file_type.into(),
-                buffer: Vec::new(),
-            };
-            return Ok(file);
+    fn try_from(row: Option<PgRow>) -> Result<Self, Self::Error> {
+        match row {
+            Some(row) => {
+                let id: Uuid = row.try_get("id")?;
+                let created: OffsetDateTime = row.try_get("created")?;
+                let updated: OffsetDateTime = row.try_get("updated")?;
+                let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
+                let target_id: Uuid = row.try_get("targetId")?;
+                let name: String = row.try_get("name")?;
+                let r#type: String = row.try_get("type")?;
+                let file_type =
+                    FileType::from_str_name(&r#type).ok_or(anyhow::anyhow!("Invalid file type"))?;
+
+                let file = File {
+                    id: id.to_string(),
+                    created: created.to_string(),
+                    updated: updated.to_string(),
+                    deleted: deleted.map(|d| d.to_string()),
+                    target_id: target_id.to_string(),
+                    name,
+                    r#type: file_type.into(),
+                    buffer: Vec::new(),
+                };
+                Ok(file)
+            }
+            None => Err(anyhow::anyhow!("File not found")),
         }
-        None => Err(anyhow::anyhow!("File not found")),
     }
 }
 
@@ -62,8 +66,8 @@ impl UtilsService for MyService {
 
         tokio::spawn(async move {
             let mut files_stream = query("SELECT * FROM files WHERE \"targetId\" = $1 and type = $2 and deleted is null order by created desc")
-                .bind(&target_uuid)
-                .bind(&r#type)
+                .bind(target_uuid)
+                .bind(r#type)
                 .fetch(&pool);
 
             loop {
@@ -74,7 +78,7 @@ impl UtilsService for MyService {
                         break;
                     }
                     Ok(file) => {
-                        let mut file = match map_file(file) {
+                        let mut file: File = match file.try_into() {
                             Ok(file) => file,
                             Err(e) => {
                                 tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
@@ -115,12 +119,17 @@ impl UtilsService for MyService {
             Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
         let row =
             query("SELECT * FROM files WHERE id = $1 and \"targetId\" = $2 and deleted is null")
-                .bind(&uuid)
-                .bind(&target_uuid)
+                .bind(uuid)
+                .bind(target_uuid)
                 .fetch_one(&pool)
                 .await
                 .map_err(|e| Status::internal(e.to_string()))?;
-        let mut file = map_file(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+
+        let mut file: File = match Some(row).try_into() {
+            Ok(file) => file,
+            Err(e) => return Err(Status::internal(e.to_string())),
+        };
+
         let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
         let buffer = std::fs::read(file_path).unwrap();
         file.buffer = buffer;
@@ -154,13 +163,16 @@ impl UtilsService for MyService {
         // save file to db
         let row =
             query("INSERT INTO files (\"targetId\", name, type) VALUES ($1, $2, $3) RETURNING *")
-                .bind(&uuid)
-                .bind(&file.name)
-                .bind(&r#type)
+                .bind(uuid)
+                .bind(file.name)
+                .bind(r#type)
                 .fetch_one(&mut tx)
                 .await
                 .map_err(|e| Status::internal(e.to_string()))?;
-        let file = map_file(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+        let file: File = match Some(row).try_into() {
+            Ok(file) => file,
+            Err(e) => return Err(Status::internal(e.to_string())),
+        };
 
         // save file to disk
         let file_path = format!("/app/files/{}/{}", file.id, file.name);
@@ -196,8 +208,8 @@ impl UtilsService for MyService {
         let row = query(
             "UPDATE files SET deleted = now() WHERE id = $1 and \"targetId\" = $2 RETURNING *",
         )
-        .bind(&file_id)
-        .bind(&target_id)
+        .bind(file_id)
+        .bind(target_id)
         .fetch_one(&mut tx)
         .await
         .map_err(|e| Status::not_found(e.to_string()))?;
@@ -205,7 +217,10 @@ impl UtilsService for MyService {
         // delete file from disk
         tokio::fs::remove_dir_all(format!("/app/files/{}", file_id)).await?;
 
-        let file = map_file(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+        let file: File = match Some(row).try_into() {
+            Ok(file) => file,
+            Err(e) => return Err(Status::internal(e.to_string())),
+        };
 
         // commit transaction
         tx.commit()

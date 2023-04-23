@@ -77,7 +77,7 @@ fn check_auth(mut req: Request<()>) -> Result<Request<()>, Status> {
                     .parse()
                     .map_err(|_| Status::unauthenticated("Invalid user id"))?,
             );
-            return Ok(req);
+            Ok(req)
         }
         _ => Err(Status::unauthenticated("No valid auth token")),
     }
