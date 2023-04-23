@@ -1,0 +1,8 @@
+name: Pull request
+on:
+  pull_request:
+jobs:
+  lint-client:
+    uses: ./.github/workflows/lint-client.yml
+  lint-server:
+    uses: ./.github/workflows/lint-server.yml
