@@ -13,46 +13,57 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
+      - run: flyctl deploy --remote-only --build-args \
+              ENV=${{ secrets.ENV }} \
+              URI_USERS=${{ secrets.URI_USERS }} \
+              URI_NOTES=${{ secrets.URI_NOTES }} \
+              URI_UTILS=${{ secrets.URI_UTILS }} \
+              JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              GOOGLE_ID=${{ secrets.GOOGLE_ID }} \
+              GOOGLE_SECRET=${{ secrets.GOOGLE_SECRET }} \
+              AUTH_SECRET=${{ secrets.AUTH_SECRET }} \
+              REDIS_URL=${{ secrets.REDIS_URL }} \
+              REDIS_TOKEN=${{ secrets.REDIS_TOKEN }} \
+              SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
         working-directory: client
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-  lint-utils:
-    uses: ./.github/workflows/lint-utils.yml
-  deploy-utils:
-    needs:
-      - lint-utils
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
-        working-directory: service-utils
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-  lint-users:
-    uses: ./.github/workflows/lint-users.yml
-  deploy-users:
-    needs:
-      - lint-users
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
-        working-directory: service-users
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-  lint-notes:
-    uses: ./.github/workflows/lint-notes.yml
-  deploy-notes:
-    needs:
-      - lint-notes
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
-        working-directory: service-notes
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+            #lint-utils:
+            #  uses: ./.github/workflows/lint-utils.yml
+            #deploy-utils:
+            #  needs:
+            #    - lint-utils
+            #  runs-on: ubuntu-latest
+            #  steps:
+            #    - uses: actions/checkout@v3
+            #    - uses: superfly/flyctl-actions/setup-flyctl@master
+            #    - run: flyctl deploy --remote-only
+            #      working-directory: service-utils
+            #      env:
+            #        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+            #lint-users:
+            #  uses: ./.github/workflows/lint-users.yml
+            #deploy-users:
+            #  needs:
+            #    - lint-users
+            #  runs-on: ubuntu-latest
+            #  steps:
+            #    - uses: actions/checkout@v3
+            #    - uses: superfly/flyctl-actions/setup-flyctl@master
+            #    - run: flyctl deploy --remote-only
+            #      working-directory: service-users
+            #      env:
+            #        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+            #lint-notes:
+            #  uses: ./.github/workflows/lint-notes.yml
+            #deploy-notes:
+            #  needs:
+            #    - lint-notes
+            #  runs-on: ubuntu-latest
+            #  steps:
+            #    - uses: actions/checkout@v3
+            #    - uses: superfly/flyctl-actions/setup-flyctl@master
+            #    - run: flyctl deploy --remote-only
+            #      working-directory: service-notes
+            #      env:
+            #        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
