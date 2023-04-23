@@ -15,17 +15,17 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
           flyctl deploy --remote-only --build-arg \
-            ENV=production \
-            URI_USERS=${{ secrets.URI_USERS }} \
-            URI_NOTES=${{ secrets.URI_NOTES }} \
-            URI_UTILS=${{ secrets.URI_UTILS }} \
-            JWT_SECRET=${{ secrets.JWT_SECRET }} \
-            GOOGLE_ID=${{ secrets.GOOGLE_ID }} \
-            GOOGLE_SECRET=${{ secrets.GOOGLE_SECRET }} \
-            AUTH_SECRET=${{ secrets.AUTH_SECRET }} \
-            REDIS_URL=${{ secrets.REDIS_URL }} \
-            REDIS_TOKEN=${{ secrets.REDIS_TOKEN }} \
-            SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+          ENV=production \
+          URI_USERS=${{ secrets.URI_USERS }} \
+          URI_NOTES=${{ secrets.URI_NOTES }} \
+          URI_UTILS=${{ secrets.URI_UTILS }} \
+          JWT_SECRET=${{ secrets.JWT_SECRET }} \
+          GOOGLE_ID=${{ secrets.GOOGLE_ID }} \
+          GOOGLE_SECRET=${{ secrets.GOOGLE_SECRET }} \
+          AUTH_SECRET=${{ secrets.AUTH_SECRET }} \
+          REDIS_URL=${{ secrets.REDIS_URL }} \
+          REDIS_TOKEN=${{ secrets.REDIS_TOKEN }} \
+          SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
         working-directory: client
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
