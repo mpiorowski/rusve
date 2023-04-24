@@ -76,14 +76,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     const isAuth = event.url.pathname === "/auth";
     const isApiAuth = event.url.pathname === "/api/auth";
-    console.log(event.locals);
     if (!isAuth && !isApiAuth && !event.locals.userId) {
         throw redirect(303, "/auth");
     }
     if (isAuth && event.locals.userId) {
         throw redirect(303, "/");
     }
-
     console.debug(`Authorization: ${performance.now() - now}ms`);
 
     const result = await resolve(event, {
