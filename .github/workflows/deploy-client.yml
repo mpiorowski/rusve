@@ -14,7 +14,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - name: Create .env.prod file
-        env: ENV=production
+        env: 
+          ENV=production
           URI_USERS=${{ secrets.URI_USERS }}
           URI_NOTES=${{ secrets.URI_NOTES }}
           URI_UTILS=${{ secrets.URI_UTILS }}
