@@ -26,44 +26,33 @@ impl SqlxError for sqlx::Error {
     }
 }
 
-// TODO - find a way to use it automatically with ? operator
-trait From<T> {
-    fn from(e: T) -> Status;
-}
-impl From<sqlx::Error> for Status {
-    fn from(e: sqlx::Error) -> Status {
-        e.into_status()
-    }
-}
-impl From<std::io::Error> for Status {
-    fn from(e: std::io::Error) -> Status {
-        Status::internal(e.to_string())
-    }
-}
+impl TryFrom<Option<PgRow>> for Note {
+    type Error = anyhow::Error;
 
-fn map_note(row: Option<PgRow>) -> Result<Note> {
-    match row {
-        Some(row) => {
-            let id: Uuid = row.try_get("id")?;
-            let user_id: Uuid = row.try_get("userId")?;
-            let created: OffsetDateTime = row.try_get("created")?;
-            let updated: OffsetDateTime = row.try_get("updated")?;
-            let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
-            let title = row.try_get("title")?;
-            let content = row.try_get("content")?;
-            let note = Note {
-                id: id.to_string(),
-                user_id: user_id.to_string(),
-                title,
-                content,
-                created: created.to_string(),
-                updated: updated.to_string(),
-                deleted: deleted.map(|d| d.to_string()),
-                user: None,
-            };
-            Ok(note)
+    fn try_from(row: Option<PgRow>) -> Result<Self, Self::Error> {
+        match row {
+            Some(row) => {
+                let id: Uuid = row.try_get("id")?;
+                let user_id: Uuid = row.try_get("userId")?;
+                let created: OffsetDateTime = row.try_get("created")?;
+                let updated: OffsetDateTime = row.try_get("updated")?;
+                let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
+                let title = row.try_get("title")?;
+                let content = row.try_get("content")?;
+                let note = Note {
+                    id: id.to_string(),
+                    user_id: user_id.to_string(),
+                    title,
+                    content,
+                    created: created.to_string(),
+                    updated: updated.to_string(),
+                    deleted: deleted.map(|d| d.to_string()),
+                    user: None,
+                };
+                Ok(note)
+            }
+            None => Err(anyhow::anyhow!("Note not found")),
         }
-        None => Err(anyhow::anyhow!("Note not found")),
     }
 }
 
@@ -102,40 +91,38 @@ impl NotesService for MyService {
                         break;
                     }
                     Ok(note) => {
-                        let note = map_note(note);
-                        if let Err(note) = note {
-                            tx.send(Err(Status::internal(note.to_string())))
-                                .await
-                                .unwrap();
-                            break;
-                        } else {
-                            let mut note = note.unwrap();
-
-                            // Get user
-                            let auth_metadata = create_auth_metadata(&note.user_id);
-                            if let Err(e) = auth_metadata {
+                        let mut note: Note = match note.try_into() {
+                            Ok(note) => note,
+                            Err(e) => {
                                 println!("Error: {:?}", e);
                                 tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
                                 break;
                             }
-                            let request = Request::from_parts(
-                                auth_metadata.unwrap(),
-                                Default::default(),
-                                UserId {
-                                    user_id: note.user_id.to_owned(),
-                                },
-                            );
-                            let response = users_conn.get_user(request).await;
-                            if let Err(e) = response {
-                                tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                                break;
-                            }
-                            let response = response.unwrap();
-                            let user = response.into_inner();
-                            note.user = Some(user);
-                            println!("note = {:?}", note);
-                            tx.send(Ok(note)).await.unwrap();
+                        };
+                        // Get user
+                        let auth_metadata = create_auth_metadata(&note.user_id);
+                        if let Err(e) = auth_metadata {
+                            println!("Error: {:?}", e);
+                            tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                            break;
                         }
+                        let request = Request::from_parts(
+                            auth_metadata.unwrap(),
+                            Default::default(),
+                            UserId {
+                                user_id: note.user_id.to_owned(),
+                            },
+                        );
+                        let response = users_conn.get_user(request).await;
+                        if let Err(e) = response {
+                            tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                            break;
+                        }
+                        let response = response.unwrap();
+                        let user = response.into_inner();
+                        note.user = Some(user);
+                        println!("note = {:?}", note);
+                        tx.send(Ok(note)).await.unwrap();
                     }
                     Err(e) => {
                         println!("Error: {:?}", e);
@@ -157,16 +144,18 @@ impl NotesService for MyService {
         let start = std::time::Instant::now();
 
         let pool = self.pool.clone();
-        let (tx, rx) = mpsc::channel(4);
+        let (tx, rx) = mpsc::channel(100);
 
         let user_id = request.into_inner().user_id;
         let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        tokio::spawn(async move {
-            let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
-                .bind(user_id)
-                .fetch(&pool);
+        let mut notes_stream = query(
+            "SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc",
+        )
+        .bind(user_id)
+        .fetch(&pool);
 
+        tokio::spawn(async move {
             loop {
                 match notes_stream.try_next().await {
                     Ok(None) => {
@@ -175,16 +164,14 @@ impl NotesService for MyService {
                         break;
                     }
                     Ok(note) => {
-                        let note = map_note(note);
-                        if let Err(note) = note {
-                            tx.send(Err(Status::internal(note.to_string())))
-                                .await
-                                .unwrap();
-                            break;
-                        } else {
-                            let note = note.unwrap();
-                            tx.send(Ok(note)).await.unwrap();
-                        }
+                        let note: Note = match note.try_into() {
+                            Ok(note) => note,
+                            Err(e) => {
+                                tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                                break;
+                            }
+                        };
+                        tx.send(Ok(note)).await.unwrap();
                     }
                     Err(e) => {
                         println!("Error: {:?}", e);
@@ -249,7 +236,12 @@ impl NotesService for MyService {
                 .await
                 .map_err(sqlx::Error::into_status)?;
 
-        let note = map_note(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+        let note: Note = match Some(row).try_into() {
+            Ok(note) => note,
+            Err(e) => {
+                return Err(Status::internal(e.to_string()));
+            }
+        };
 
         // commit transaction
         tx.commit().await.map_err(sqlx::Error::into_status)?;

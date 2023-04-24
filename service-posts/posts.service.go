@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"time"
 
 	pb "rusve/proto"
 
@@ -13,8 +14,9 @@ import (
 
 func (s *server) GetPosts(in *pb.Empty, stream pb.PostsService_GetPostsServer) error {
 	log.Println("GetPosts")
+	start := time.Now()
 
-	rows, err := db.Query(`select * from posts where deleted is null`)
+	rows, err := db.Query(`select * from posts where deleted is null order by created desc`)
 	if err != nil {
 		log.Printf("db.Query: %v", err)
 		return err
@@ -33,7 +35,8 @@ func (s *server) GetPosts(in *pb.Empty, stream pb.PostsService_GetPostsServer) e
 			return err
 		}
 	}
-
+	end := time.Now()
+    log.Printf("Elapsed: %v", end.Sub(start))
 	if rows.Err() != nil {
 		log.Printf("rows.Err: %v", err)
 		return err
@@ -45,7 +48,7 @@ func (s *server) CreatePost(ctx context.Context, in *pb.Post) (*pb.Post, error) 
 	log.Println("CreatePost")
 
 	rules := map[string]string{
-        "UserId":  "required,max=100",
+		"UserId":  "required,max=100",
 		"Title":   "required,max=100",
 		"Content": "required,max=1000",
 	}

@@ -115,7 +115,7 @@ impl UsersService for MyService {
         request: Request<UserIds>,
     ) -> Result<Response<Self::GetUsersStream>, Status> {
         #[cfg(debug_assertions)]
-        println!("GetNotes = {:?}", request);
+        println!("GetUsers = {:?}", request);
         let start = std::time::Instant::now();
 
         let pool = self.pool.clone();

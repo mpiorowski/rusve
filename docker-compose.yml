@@ -93,7 +93,7 @@ services:
     working_dir: /app
     build:
       context: ./service-posts
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     volumes:
       - ./service-posts:/app
     depends_on:

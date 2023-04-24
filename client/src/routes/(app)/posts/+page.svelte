@@ -16,13 +16,13 @@
 <PostDrawer {form} />
 
 <h3 class="text-right">
-    {data.duration.toFixed(4)}ms
+    Go: {data.duration.toFixed(4)}ms
 </h3>
 
 <div class="mb-6 grid grid-cols-2 gap-4">
     <h3>
         Posts are visible to everyone. <br />
-         Please be respectful.
+        Please be respectful.
     </h3>
     <Button type="button" on:click={() => drawer.set(true)}>
         <span slot="icon"><PlusIcon /></span>

@@ -13,8 +13,8 @@ export const load = (async ({ locals }) => {
     try {
         const start = performance.now();
         const userId = locals.userId;
-        const request: UserId = { userId: userId };
 
+        const request: UserId = { userId: userId };
         const metadata = createMetadata(userId);
         const stream = notesClient.getOnlyNotes(request, metadata);
         const notes: Note__Output[] = [];
