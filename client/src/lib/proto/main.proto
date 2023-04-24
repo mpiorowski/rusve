@@ -2,9 +2,12 @@ syntax = "proto3";
 
 package proto;
 
+option go_package = "rusve/proto";
+
 import "users.proto";
 import "utils.proto";
 import "notes.proto";
+import "posts.proto";
 
 message Empty {}
 message UserId {
@@ -35,3 +38,8 @@ service NotesService {
     rpc DeleteNote(NoteId) returns (Note) {}
 }
 
+service PostsService {
+    rpc GetPosts(Empty) returns (stream Post) {}
+    rpc CreatePost(Post) returns (Post) {}
+    rpc DeletePost(PostId) returns (Post) {}
+}

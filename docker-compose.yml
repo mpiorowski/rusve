@@ -1,7 +1,7 @@
 version: '3'
 services:
   client: 
-    container_name: rust-grpc-client
+    container_name: rusve-client
     working_dir: /app
     build:
       context: ./client/
@@ -12,10 +12,10 @@ services:
       - 3000:3000
 
   service-utils:
-    container_name: rust-grpc-service-utils
+    container_name: rusve-utils
     working_dir: /app
     build:
-      context: ./service-utils/
+      context: ./service-utils
       dockerfile: Dockerfile.dev
     volumes:
       - ./files:/app/files
@@ -29,7 +29,7 @@ services:
       SECRET: my-rust-secret
 
   db-utils:
-    container_name: rust-grpc-db-utils
+    container_name: rusve-utils-db
     image: postgres:15.1
     ports:
       - 5433:5432
@@ -39,10 +39,10 @@ services:
       POSTGRES_DB: utils
 
   service-users:
-    container_name: rust-grpc-service-users
+    container_name: rusve-users
     working_dir: /app
     build:
-      context: ./service-users/
+      context: ./service-users
       dockerfile: Dockerfile.dev
     volumes:
       - ./service-users:/app
@@ -55,7 +55,7 @@ services:
       SECRET: my-rust-secret
 
   db-users:
-    container_name: rust-grpc-db-users
+    container_name: rusve-users-db
     image: postgres:15.1
     environment:
       POSTGRES_USER: postgres
@@ -63,10 +63,10 @@ services:
       POSTGRES_DB: users
 
   service-notes:
-    container_name: rust-grpc-service-notes
+    container_name: rusve-notes
     working_dir: /app
     build:
-      context: ./service-notes/
+      context: ./service-notes
       dockerfile: Dockerfile.dev
     volumes:
       - ./service-notes:/app
@@ -81,9 +81,34 @@ services:
       SECRET: my-rust-secret
 
   db-notes:
-    container_name: rust-grpc-db-notes
+    container_name: rusve-notes-db
     image: postgres:15.1
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
       POSTGRES_DB: notes
+
+  service-posts:
+    container_name: rusve-posts
+    working_dir: /app
+    build:
+      context: ./service-posts
+      dockerfile: Dockerfile
+    volumes:
+      - ./service-posts:/app
+    depends_on:
+      - db-posts
+    environment:
+      ENV: development
+      PORT: 443
+      DATABASE_URL: postgresql://postgres:12345@db-posts/posts
+      SECRET: my-rust-secret
+
+  db-posts:
+    container_name: rusve-posts-db
+    image: postgres:15.1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: posts
+

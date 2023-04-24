@@ -4,23 +4,25 @@
     import Button from "$lib/form/Button.svelte";
     import Input from "$lib/form/Input.svelte";
     import { toast } from "$lib/toast/toast";
+    import { getContext } from "svelte";
     import type { ActionData } from "./$types";
+    import type { Writable } from "svelte/store";
 
     export let form: ActionData;
-
     let title = "";
     let content = "";
     let loading = false;
+    const drawer = getContext<Writable<boolean>>("drawer");
 </script>
 
 <Drawer>
     <span slot="header">
-        <h2>Create note</h2>
+        <h2>Create post</h2>
     </span>
     <span slot="content">
         <form
-            action="?/createNote"
-            id="createNote"
+            action="?/createPost"
+            id="createPost"
             method="post"
             use:enhance={() => {
                 loading = true;
@@ -28,9 +30,10 @@
                     await update({ reset: false });
                     if (result.type === "success") {
                         toast({
-                            message: "Note created",
+                            message: "Post created",
                             type: "success",
                         });
+                        drawer.set(false);
                     }
                     loading = false;
                 };
@@ -55,7 +58,7 @@
     </span>
     <span slot="footer">
         <div class="w-28">
-            <Button form="createNote" {loading}>Submit</Button>
+            <Button form="createPost" {loading}>Submit</Button>
         </div>
     </span>
 </Drawer>

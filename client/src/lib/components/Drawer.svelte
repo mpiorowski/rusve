@@ -1,25 +1,23 @@
 <script lang="ts">
     import Button from "$lib/form/Button.svelte";
     import XIcon from "$lib/icons/XIcon.svelte";
-    import { createEventDispatcher } from "svelte";
+    import { getContext } from "svelte";
+    import type { Writable } from "svelte/store";
     import { fade, slide } from "svelte/transition";
 
-    export let open: boolean;
-
-    const dispatch = createEventDispatcher();
-    function clickOutside() {
-        dispatch("clickOutside");
-    }
+    const drawer = getContext<Writable<boolean>>("drawer");
 </script>
 
-{#if open}
+{#if $drawer}
     <div
         transition:fade={{ duration: 200 }}
         class="absolute top-0 right-0 w-screen h-screen bg-black bg-opacity-50 z-40"
-        on:click={clickOutside}
+        on:click={() => {
+            drawer.set(false);
+        }}
         on:keypress={(e) => {
             if (e.key === "Escape") {
-                clickOutside();
+                drawer.set(false);
             }
         }}
     />
@@ -32,7 +30,9 @@
                 <slot name="header" />
             </div>
             <button
-                on:click={clickOutside}
+                on:click={() => {
+                    drawer.set(false);
+                }}
                 class="w-8 h-8 flex justify-center items-center hover:text-primary-300"
             >
                 <XIcon />
@@ -46,7 +46,9 @@
                 <Button
                     type="button"
                     variant="secondary"
-                    on:click={clickOutside}
+                    on:click={() => {
+                        drawer.set(false);
+                    }}
                 >
                     Close
                 </Button>

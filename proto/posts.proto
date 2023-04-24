@@ -6,12 +6,12 @@ option go_package = "rusve/proto";
 
 import "users.proto";
 
-message NoteId {
-    string noteId = 1;
+message PostId {
+    string postId = 1;
     string userId = 2;
 }
 
-message Note {
+message Post {
   string id = 1;
   string created = 2;
   string updated = 3;
