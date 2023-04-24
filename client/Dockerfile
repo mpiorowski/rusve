@@ -14,6 +14,7 @@ CMD ["npm", "run", "dev"]
 FROM node:19-alpine as prod
 WORKDIR /app
 COPY --from=dev /app /app
+# COPY .env.prod /app/.env
 
 ARG ENV
 ARG URI_USERS
