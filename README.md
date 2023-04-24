@@ -15,7 +15,7 @@ Check out my other, similar projects if You need it:
 - [NodeJs with SvelteKit using GraphQL](https://github.com/mpiorowski/microservices-ts-fastify-svelte)
 
 ## Demo
-https://rust-client.fly.dev/
+https://www.rusve.app
 
 ## Architecture
 ![photo](https://user-images.githubusercontent.com/26543876/225791367-2ad194ac-b2d2-4a7c-b143-c43b172d5a6b.png)
