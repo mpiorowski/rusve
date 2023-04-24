@@ -31,7 +31,7 @@ jobs:
           echo JWT_SECRET="$JWT_SECRET" >> .env.prod
           echo PUBLIC_API_KEY="$PUBLIC_API_KEY" >> .env.prod
           echo PUBLIC_AUTH_DOMAIN="$PUBLIC_AUTH_DOMAIN" >> .env.prod
-          echo SERVICE_ACCOUNT=`$SERVICE_ACCOUNT` >> .env.prod
+          echo SERVICE_ACCOUNT="$SERVICE_ACCOUNT" >> .env.prod
       - run: flyctl deploy --remote-only
         working-directory: client
         env:
