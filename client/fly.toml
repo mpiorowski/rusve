@@ -6,6 +6,10 @@
 app = "rusve-client"
 primary_region = "arn"
 
+[mounts]
+  destination = "/app/files"
+  source = "files"
+
 [http_service]
   internal_port = 3000
   force_https = true
