@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for rusve-utils on 2023-04-23T20:59:57+02:00
+# fly.toml app configuration file generated for rusve-utils on 2023-04-24T07:54:51+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -10,6 +10,10 @@ primary_region = "arn"
   ENV = "production"
   PORT = "443"
   SECRET = "my-rust-secret"
+
+[[mounts]]
+  source = "files"
+  destination = "/app/files"
 
 [http_service]
   internal_port = 443

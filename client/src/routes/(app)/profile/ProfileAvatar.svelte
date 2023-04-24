@@ -47,8 +47,8 @@
                         action="?/deleteAvatar"
                         method="post"
                         use:enhance={() => {
+                            deleteLoading = true;
                             return async ({ result, update }) => {
-                                deleteLoading = true;
                                 await update();
                                 if (result.type === "success") {
                                     toast({
@@ -86,8 +86,8 @@
         method="post"
         enctype="multipart/form-data"
         use:enhance={() => {
+            loading = true;
             return async ({ result, update }) => {
-                loading = true;
                 await update();
                 if (result.type === "success") {
                     toast({

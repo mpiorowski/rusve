@@ -15,8 +15,8 @@
     action="?/createUser"
     method="post"
     use:enhance={() => {
+        loading = true;
         return async ({ result, update }) => {
-            loading = true;
             await update({ reset: false });
             if (result.type === "success") {
                 toast({
