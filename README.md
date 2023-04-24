@@ -1,6 +1,10 @@
-# Rust microservices with Typescript SvelteKit using gRPC deployed on Fly.io
+# Welcome to Rusve!
+(do You see what I did there?)
+
 
 # Big changes comming to this project in a days. Want to make it more completed with much more really helpfull sections, like Stripe integration, or ready to use github actions deployment to Fly.io or GCP. Keep a watch on this :) Readme will be heavly rewriten also
+
+## Rust microservices with Typescript SvelteKit using gRPC deployed on Fly.io
 
 If You have any questions, feel free to ask them in Discussions or Issues. I hope this will be helpful :).
 
