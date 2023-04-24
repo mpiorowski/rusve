@@ -10,6 +10,9 @@ jobs:
     needs:
       - lint-client
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
     steps:
       - uses: actions/checkout@v3
       - uses: superfly/flyctl-actions/setup-flyctl@master
@@ -34,6 +37,5 @@ jobs:
           echo PUBLIC_AUTH_DOMAIN="$PUBLIC_AUTH_DOMAIN" >> .env.prod
           echo SERVICE_ACCOUNT="$SERVICE_ACCOUNT" >> .env.prod
       - run: flyctl deploy --remote-only
-        working-directory: client
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
