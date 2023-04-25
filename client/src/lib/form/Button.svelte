@@ -22,7 +22,7 @@
             <LoadingComponent />
         </div>
     {:else if $$slots.icon}
-        <div class="w-4 h-4 flex justify-center items-center">
+        <div class="w-6 h-6 flex justify-center items-center">
             <slot name="icon" />
         </div>
     {/if}

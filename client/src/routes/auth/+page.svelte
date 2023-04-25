@@ -1,22 +1,29 @@
 <script lang="ts">
-    import { browser } from "$app/environment";
-    import { goto } from "$app/navigation";
+    import LoadingComponent from "$lib/components/LoadingComponent.svelte";
     import { getFirebaseClient } from "$lib/firebase/firebase_client";
     import Button from "$lib/form/Button.svelte";
     import Input from "$lib/form/Input.svelte";
+    import GithubIcon from "$lib/icons/GithubIcon.svelte";
     import GmailIcon from "$lib/icons/GmailIcon.svelte";
+    import MailIcon from "$lib/icons/MailIcon.svelte";
+    import { toast } from "$lib/toast/toast";
     import {
+        GithubAuthProvider,
         GoogleAuthProvider,
+        getRedirectResult,
         isSignInWithEmailLink,
         sendSignInLinkToEmail,
         signInWithEmailLink,
-        signInWithPopup,
+        signInWithRedirect,
     } from "firebase/auth";
+    import { onMount } from "svelte";
 
     let errors: string[] = [];
+    let loading = false;
 
-    const googleProvider = new GoogleAuthProvider();
     const auth = getFirebaseClient();
+    const googleProvider = new GoogleAuthProvider();
+    const githubProvider = new GithubAuthProvider();
 
     async function sendIdToken(idToken: string): Promise<void> {
         try {
@@ -34,21 +41,19 @@
         }
     }
 
-    async function onSignInUsingGoogle() {
+    async function onSignInWithOAuth(
+        provider: GoogleAuthProvider | GithubAuthProvider,
+    ): Promise<void> {
         try {
-            const user = await signInWithPopup(auth, googleProvider);
-            const idToken = await user.user.getIdToken();
-            await sendIdToken(idToken);
-            await auth.signOut();
-            window.location.reload();
+            window.localStorage.setItem("checkRedirect", "true");
+            await signInWithRedirect(auth, provider);
         } catch (err) {
             console.error(err);
-            await auth.signOut();
         }
     }
 
     let email = "";
-    async function onSignInWithMagicLink() {
+    async function onSignInWithMagicLink(): Promise<void> {
         try {
             const url = import.meta.env.DEV
                 ? "http://localhost:3000/auth"
@@ -58,36 +63,85 @@
                 handleCodeInApp: true,
             });
             window.localStorage.setItem("emailForSignIn", email);
+            toast({
+                message: "Check your email for a magic link",
+                type: "success",
+            });
         } catch (err) {
             console.error(err);
         }
     }
 
-    async function checkMagicLink(browser: boolean) {
-        if (browser && isSignInWithEmailLink(auth, window.location.href)) {
-            try {
-                const email = window.localStorage.getItem("emailForSignIn");
-                if (!email) {
-                    console.error("No email found");
-                    return;
-                }
-                const user = await signInWithEmailLink(
-                    auth,
-                    email,
-                    window.location.href,
-                );
-                const idToken = await user.user.getIdToken();
-                await sendIdToken(idToken);
-                goto("/");
-            } catch (err) {
-                console.error(err);
-            } finally {
-                auth.signOut();
+    async function checkRedirect(): Promise<void> {
+        try {
+            if (!window.localStorage.getItem("checkRedirect")) {
+                return;
             }
+            loading = true;
+            const result = await getRedirectResult(auth);
+            if (!result) {
+                return;
+            }
+            const idToken = await result.user.getIdToken();
+            await sendIdToken(idToken);
+            await auth.signOut();
+            window.location.reload();
+        } catch (err) {
+            console.error(err);
+            toast({
+                message: "Something went wrong",
+                type: "error",
+            });
+            await auth.signOut();
+        } finally {
+            loading = false;
+            window.localStorage.removeItem("checkRedirect");
         }
     }
-    $: checkMagicLink(browser);
+
+    async function checkMagicLink(): Promise<void> {
+        if (!isSignInWithEmailLink(auth, window.location.href)) {
+            return;
+        }
+        try {
+            loading = true;
+            const email = window.localStorage.getItem("emailForSignIn");
+            if (!email) {
+                throw new Error("No email found");
+            }
+            const user = await signInWithEmailLink(
+                auth,
+                email,
+                window.location.href,
+            );
+            const idToken = await user.user.getIdToken();
+            await sendIdToken(idToken);
+            await auth.signOut();
+            window.location.reload();
+        } catch (err) {
+            await auth.signOut();
+            toast({
+                message: "Something went wrong",
+                type: "error",
+            });
+            console.error(err);
+        } finally {
+            loading = false;
+        }
+    }
+    onMount(() => {
+        checkMagicLink();
+        checkRedirect();
+    });
 </script>
+
+{#if loading}
+    <div
+        class="absolute top-0 left-0 w-screen h-screen bg-primary-500 z-10 opacity-40 flex justify-center items-center"
+    >
+        <LoadingComponent size={60} />
+    </div>
+{/if}
 
 <section
     class="max-w-md h-screen m-auto flex flex-col justify-center items-center p-4"
@@ -96,12 +150,26 @@
     <p class="text-primary-300 mb-4 mt-2">
         Sign in so You can say "I use Rust"
     </p>
-    <Button variant="secondary" on:click={onSignInUsingGoogle}>
-        <div class="h-5">
-            <GmailIcon />
-        </div>
-        <div>Google</div>
-    </Button>
+    <div class="flex flex-col w-full gap-2">
+        <Button
+            variant="secondary"
+            on:click={() => onSignInWithOAuth(googleProvider)}
+        >
+            <svelte:fragment slot="icon">
+                <GmailIcon />
+            </svelte:fragment>
+            Google
+        </Button>
+        <Button
+            variant="secondary"
+            on:click={() => onSignInWithOAuth(githubProvider)}
+        >
+            <svelte:fragment slot="icon">
+                <GithubIcon />
+            </svelte:fragment>
+            Github
+        </Button>
+    </div>
     <div class="w-full flex flex-row gap-4 items-center my-6">
         <div class="border-b w-full border-primary-300" />
         <div class="text-primary-300 text-sm whitespace-nowrap">
@@ -117,6 +185,9 @@
         bind:value={email}
     />
     <Button variant="secondary" on:click={onSignInWithMagicLink}>
+        <svelte:fragment slot="icon">
+            <MailIcon />
+        </svelte:fragment>
         <div>Email</div>
     </Button>
 </section>
