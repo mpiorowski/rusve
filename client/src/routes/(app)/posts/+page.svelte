@@ -1,8 +1,8 @@
 <script lang="ts">
-    import Note from "./Note.svelte";
+    import Post from "./Post.svelte";
     import Button from "$lib/form/Button.svelte";
     import PlusIcon from "$lib/icons/PlusIcon.svelte";
-    import NoteDrawer from "./NoteDrawer.svelte";
+    import PostDrawer from "./PostDrawer.svelte";
     import { writable } from "svelte/store";
     import { setContext } from "svelte";
 
@@ -13,38 +13,41 @@
     setContext("drawer", drawer);
 </script>
 
-<NoteDrawer {form} />
+<PostDrawer {form} />
 
 <h3 class="text-right">
-    Rust: {data.duration.toFixed(4)}ms
+    Go: {data.duration.toFixed(4)}ms
 </h3>
 
 <div class="mb-6 grid grid-cols-2 gap-4">
-    <h3>Notes are only visible to you.</h3>
+    <h3>
+        Posts are visible to everyone. <br />
+        Please be respectful.
+    </h3>
     <Button type="button" on:click={() => drawer.set(true)}>
         <span slot="icon"><PlusIcon /></span>
-        Create note
+        Create post
     </Button>
 </div>
 
-{#each data.notes as note}
-    <Note noteId={note.id}>
-        <span slot="title">{note.title}</span>
+{#each data.posts as post}
+    <Post postId={post.id} canDelete={post.userId === data.userId}>
+        <span slot="title">{post.title}</span>
         <span slot="content">
             <p class="whitespace-pre-wrap">
-                {@html note.content}
+                {@html post.content}
             </p>
         </span>
         <span slot="user">
             {#await data.stream.users}
                 <span class="block h-4" />
             {:then users}
-                {#if users.find((u) => u.id === note.userId)}
-                    {users.find((u) => u.id === note.userId)?.email}
+                {#if users.find((u) => u.id === post.userId)}
+                    {users.find((u) => u.id === post.userId)?.email}
                 {:else}
                     User not found
                 {/if}
             {/await}
         </span>
-    </Note>
+    </Post>
 {/each}

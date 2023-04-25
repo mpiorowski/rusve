@@ -1,32 +1,32 @@
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { URI_NOTES } from "$env/static/private";
-import type { UserId } from "$lib/proto/proto/UserId";
-import type { Note__Output } from "$lib/proto/proto/Note";
+import { URI_POSTS } from "$env/static/private";
 import type { User__Output } from "$lib/proto/proto/User";
-import type { NoteId } from "$lib/proto/proto/NoteId";
 import { createMetadata } from "$lib/metadata";
-import { notesClient, usersClient } from "$lib/grpc";
+import { postsClient, usersClient } from "$lib/grpc";
 import { z } from "zod";
+import type { Post__Output } from "$lib/proto/proto/Post";
+import type { PostId } from "$lib/proto/proto/PostId";
+import type { Empty } from "$lib/proto/proto/Empty";
 
 export const load = (async ({ locals }) => {
     try {
         const start = performance.now();
         const userId = locals.userId;
 
-        const request: UserId = { userId: userId };
+        const request: Empty = {};
         const metadata = createMetadata(userId);
-        const stream = notesClient.getOnlyNotes(request, metadata);
-        const notes: Note__Output[] = [];
+        const stream = postsClient.getPosts(request, metadata);
+        const posts: Post__Output[] = [];
 
         const userIds: Set<string> = new Set();
 
-        await new Promise<Note__Output[]>((resolve, reject) => {
-            stream.on("data", (note: Note__Output) => {
-                notes.push(note);
-                userIds.add(note.userId);
+        await new Promise<Post__Output[]>((resolve, reject) => {
+            stream.on("data", (post: Post__Output) => {
+                posts.push(post);
+                userIds.add(post.userId);
             });
-            stream.on("end", () => resolve(notes));
+            stream.on("end", () => resolve(posts));
             stream.on("error", (err: unknown) => reject(err));
         });
 
@@ -45,7 +45,7 @@ export const load = (async ({ locals }) => {
         });
 
         return {
-            notes: notes,
+            posts: posts,
             duration: end - start,
             stream: {
                 users: usersPromise,
@@ -53,12 +53,12 @@ export const load = (async ({ locals }) => {
         };
     } catch (err) {
         console.error(err);
-        throw error(500, "Could not load notes");
+        throw error(500, "Could not load posts");
     }
 }) satisfies PageServerLoad;
 
 export const actions = {
-    createNote: async ({ locals, request }) => {
+    createPost: async ({ locals, request }) => {
         const start = performance.now();
 
         const form = await request.formData();
@@ -84,9 +84,9 @@ export const actions = {
         }
 
         try {
-            const metadata = createMetadata(URI_NOTES);
-            await new Promise<Note__Output>((resolve, reject) => {
-                notesClient.createNote(schema.data, metadata, (err, response) =>
+            const metadata = createMetadata(URI_POSTS);
+            await new Promise<Post__Output>((resolve, reject) => {
+                postsClient.createPost(schema.data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });
@@ -98,10 +98,10 @@ export const actions = {
             };
         } catch (err) {
             console.error(err);
-            throw error(500, "Could not create note");
+            throw error(500, "Could not create post");
         }
     },
-    deleteNote: async ({ locals, request }) => {
+    deletePost: async ({ locals, request }) => {
         const start = performance.now();
 
         const form = await request.formData();
@@ -111,26 +111,26 @@ export const actions = {
             throw error(400, "Missing id");
         }
         try {
-            const data: NoteId = {
-                noteId: id as string,
+            const data: PostId = {
+                postId: id as string,
                 userId: locals.userId,
             };
 
-            const metadata = createMetadata(URI_NOTES);
-            const note = await new Promise<Note__Output>((resolve, reject) => {
-                notesClient.deleteNote(data, metadata, (err, response) =>
+            const metadata = createMetadata(URI_POSTS);
+            const post = await new Promise<Post__Output>((resolve, reject) => {
+                postsClient.deletePost(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });
 
             const end = performance.now();
             return {
-                note: note,
+                post: post,
                 duration: end - start,
             };
         } catch (err) {
             console.error(err);
-            throw error(500, "Failed to delete note");
+            throw error(500, "Failed to delete post");
         }
     },
 } satisfies Actions;

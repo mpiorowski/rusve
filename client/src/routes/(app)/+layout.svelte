@@ -30,8 +30,8 @@
                 <a href="/notes" class="hover:text-secondary-500 transition">
                     Notes
                 </a>
-                <a href="/todos" class="hover:text-secondary-500 transition">
-                    Todos
+                <a href="/posts" class="hover:text-secondary-500 transition">
+                    Posts
                 </a>
             </div>
             <Dropdown>
