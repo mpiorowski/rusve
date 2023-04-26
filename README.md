@@ -4,12 +4,21 @@ Do You see what I did there :)?
 It is a attempt to find the best way to build **fast** and **scalable** web applications, while not beeing afraid of new technologies. And I think we are getting there.
 
 ## Features
-- **SvelteKit** - Once You try it, it's hard to go back to any other framework. Also streaming is awesome.
+- **[SvelteKit](https://kit.svelte.dev/)** - Once You try it, it's hard to go back to any other framework:
+  - **[Typescript](https://www.typescriptlang.org/)** - Fully written in typescript with the [strict](https://typescript-eslint.io/linting/configs#strict) rules enforced. No any or unknown in code.
+  - **[Form actions](https://kit.svelte.dev/docs/form-actions)** - Forms are handled by server, which force You to seperate view and logic. This is a great pattern and makes the logic unaccesible by the browser. 
+  - **[Zod validation](https://github.com/colinhacks/zod)** - Every data if validated. Errors are returned and used by client to view them on forms.
+  - **[Streaming](https://kit.svelte.dev/docs/load#streaming-with-promises)** - Important data is loaded and rendered first, after that all the rest are returned as promises and rendered when they resolve.
+  - **[TawilwindCSS](https://tailwindcss.com/)** - Used for styling, no other UI library needed. 
+  - **Minimal external libraries** - With Svelte animation and stores builing custom components is very easy. Checkout `Toast`, `Drawer`, `Modal`, `Dropdown` and see for yourself.
 - **Rust** - Hard to learn, but once You do...You will be able to say "I use Rust".
+  - **No unnecessary unwrap** - Each error is handled.
+  - **No unnecessary cloning** - As performant as it can be.
+  - **[Tonic](https://docs.rs/tonic/latest/tonic/)** - amazing gRPC rust crate, with first class support of async/await. 
 - **gRPC** - Fast, streamable and gives You amazing typesafety across the whole project, no matter the language (hi tRPC).
 - **Microservices** - Scaling? Different Language? Cost-effecient? Done.
 - **Dockerized** - Easy do deploy, easy to move, easy to work with. Move to GCP? No problem.
-- **SSR Authentication** - Secured and safe.
+- **[Firebase SSR Authentication](https://firebase.google.com/docs/auth/admin/manage-cookies)** - Secured and safe, battle tested and very easy to work with.
 - **Sql Pools and Transactions** - Using the best practice for the best performance and safety.
 - **Multi language** - You can use any language for backend. Here we use mainly Rust, but there is also a Go service running.
 - **Files** - Upload, view and download. Everything ready to use.
