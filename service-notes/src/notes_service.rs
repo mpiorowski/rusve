@@ -188,8 +188,6 @@ impl NotesService for MyService {
         #[cfg(debug_assertions)]
         println!("CreateNote = {:?}", request);
         let start = std::time::Instant::now();
-
-        // start transaction
         let pool = self.pool.clone();
         let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
 
@@ -197,7 +195,6 @@ impl NotesService for MyService {
         let user_id =
             Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        // do it 100 times
         query("INSERT INTO notes (title, content, \"userId\") VALUES ($1, $2, $3) RETURNING *")
             .bind(note.title.clone())
             .bind(note.content.clone())

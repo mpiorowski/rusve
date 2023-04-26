@@ -5,7 +5,7 @@
 <div role="status">
     <svg
         aria-hidden="true"
-        class="animate-spin fill-primary-500"
+        class="animate-spin fill-secondary-500 text-primary-100 opacity-100 z-20"
         width={size}
         height={size}
         viewBox="0 0 100 101"
