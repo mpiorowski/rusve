@@ -21,5 +21,4 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.31
-          skip-go-installation: true
           working-directory: ./service-posts
