@@ -3,6 +3,10 @@ Do You see what I did there :)?
 ### What is Rusve? 
 It is a attempt to find the best way to build **fast** and **scalable** web applications, while not beeing afraid of new technologies. And I think we are getting there.
 
+### Currently working on...
+1. Deployment on GCP, with files on buckets and emails via pubsub
+2. Making the app resiliant to no internet
+
 ## Features
 - **[SvelteKit](https://kit.svelte.dev/)** - Once You try it, it's hard to go back to any other framework:
   - **[Typescript](https://www.typescriptlang.org/)** - Fully written in typescript with the [strict](https://typescript-eslint.io/linting/configs#strict) rules enforced. No any or unknown in code.
