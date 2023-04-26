@@ -20,5 +20,6 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.31
+          version: latest
           working-directory: ./service-posts
+          args: --skip-dirs=proto
