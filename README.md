@@ -1,7 +1,7 @@
 # Welcome to Rusve!
 Do You see what I did there :)?  
 ### What is Rusve? 
-It is a search to find the best way to build **fast** and **scalable** web applications, while not beeing afraid of new technologies. And I think we are getting there.
+It is a attempt to find the best way to build **fast** and **scalable** web applications, while not beeing afraid of new technologies. And I think we are getting there.
 
 ## Features
 - **SvelteKit** - Once You try it, it's hard to go back to any other framework. Also streaming is awesome.
@@ -11,7 +11,7 @@ It is a search to find the best way to build **fast** and **scalable** web appli
 - **Dockerized** - Easy do deploy, easy to move, easy to work with. Move to GCP? No problem.
 - **SSR Authentication** - Secured and safe.
 - **Sql Pools and Transactions** - Using the best practice for the best performance and safety.
-- **Multi-language** - You can use any language for backend. Here we use mainly Rust, but there is also a Go service running.
+- **Multi language** - You can use any language for backend. Here we use mainly Rust, but there is also a Go service running.
 - **Files** - Upload, view and download. Everything ready to use.
 
 In progress:
@@ -29,14 +29,6 @@ https://www.rusve.app
 
 ## Authorization
 ![image](https://user-images.githubusercontent.com/26543876/234501073-bfa1fcc4-dd51-4c47-9540-995b439a64b2.png)
-
-- Files send as bytes, on development environment they are stored in /files folder, on production environment in Fly.io volumes. Client send base64 string to Node server using SvelteKit api, which then creates a file and respond with a download header.
-
-## Bonus: Three ways to shows notes. Not implemented in application, but all the code is there to try it.
-This project shows how flexible the gRPC + SvelteKit setup is, using the newest SvelteKit `streamed` feature. There are three ways to display notes:
-1. `svelte server` calls `notes service` -> `notes service` selects all notes -> for each note it calls `users service` for user -> the note with the user is returned as stream
-2. `svelte server` calls `notes service` -> `notes service` selects all notes and return them -> for each note `svelte server` calls `users service` for user -> not waiting for users to resolve, he dispaly the notes, and after that await users as `streamed` data
-3. `svelte server` calls `notes service` -> `notes service` selects all notes and return them -> for each note `svelte server` add userId to set -> then, in one request he calls `users service` for all users -> not waiting for users to resolve, he displays notes and after that await users as `streamed` data
 
 ## Dev deployment
 
@@ -63,3 +55,9 @@ Getting the `SERVICE_ACCOUNT` key is a bit [tricky](https://firebase.google.com/
 ```
 docker-compose up --build
 ```
+
+## Bonus: Three ways to shows notes. Not implemented in application, but all the code is there to try it.
+This project shows how flexible the gRPC + SvelteKit setup is, using the newest SvelteKit `streamed` feature. There are three ways to display notes:
+1. `svelte server` calls `notes service` -> `notes service` selects all notes -> for each note it calls `users service` for user -> the note with the user is returned as stream
+2. `svelte server` calls `notes service` -> `notes service` selects all notes and return them -> for each note `svelte server` calls `users service` for user -> not waiting for users to resolve, he dispaly the notes, and after that await users as `streamed` data
+3. `svelte server` calls `notes service` -> `notes service` selects all notes and return them -> for each note `svelte server` add userId to set -> then, in one request he calls `users service` for all users -> not waiting for users to resolve, he displays notes and after that await users as `streamed` data
