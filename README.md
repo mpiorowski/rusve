@@ -6,11 +6,12 @@ It is a search to find the best way to build **fast** and **scalable** web appli
 ## Features
 - **SvelteKit** - Once You try it, it's hard to go back to any other framework. Also streaming is awesome.
 - **Rust** - Hard to learn, but once You do...You will be able to say "I use Rust".
+- **gRPC** - Fast, streamable and gives You amazing typesafety across the whole project, no matter the language (hi tRPC).
 - **Microservices** - Scaling? Different Language? Cost-effecient? Done.
 - **Dockerized** - Easy do deploy, easy to move, easy to work with. Move to GCP? No problem.
 - **SSR Authentication** - Secured and safe.
-- **gRPC** - Fast, streamable and gives You amazing typesafety across the whole project, no matter the language (hi tRPC).
 - **Sql Pools and Transactions** - Using the best practice for the best performance and safety.
+- **Multi-language** - You can use any language for backend. Here we use mainly Rust, but there is also a Go service running.
 - **Files** - Upload, view and download. Everything ready to use.
 
 In progress:
