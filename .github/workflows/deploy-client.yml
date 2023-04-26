@@ -30,9 +30,10 @@ jobs:
         run: |
           touch .env.prod
           echo ENV="$ENV" >> .env.prod
-          echo URI_USERS="$URI_USERS" >> .env.prod
           echo URI_UTILS="$URI_UTILS" >> .env.prod
+          echo URI_USERS="$URI_USERS" >> .env.prod
           echo URI_NOTES="$URI_NOTES" >> .env.prod
+          echo URI_POSTS="$URI_POSTS" >> .env.prod
           echo JWT_SECRET="$JWT_SECRET" >> .env.prod
           echo PUBLIC_API_KEY="$PUBLIC_API_KEY" >> .env.prod
           echo PUBLIC_AUTH_DOMAIN="$PUBLIC_AUTH_DOMAIN" >> .env.prod
