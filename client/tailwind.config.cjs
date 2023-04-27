@@ -4,7 +4,7 @@ module.exports = {
     theme: {
         extend: {
             fontFamily: {
-                inter: ["Inter"],
+                poppins: ["Poppins", "sans-serif"],
             },
             boxShadow: {
                 inner: "inset 0 1px 3px rgba(0,0,0,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)",

@@ -30,7 +30,7 @@
     </Button>
 </div>
 
-{#each data.posts.splice(0, 10) as post}
+{#each data.posts as post}
     <Post postId={post.id} canDelete={post.userId === data.userId}>
         <span slot="title">{post.title}</span>
         <span slot="content">
