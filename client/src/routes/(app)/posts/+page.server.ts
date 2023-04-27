@@ -1,6 +1,6 @@
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { URI_POSTS } from "$env/static/private";
+import { URI_POSTS, URI_USERS } from "$env/static/private";
 import type { User__Output } from "$lib/proto/proto/User";
 import { createMetadata } from "$lib/metadata";
 import { postsClient, usersClient } from "$lib/grpc";
@@ -14,7 +14,7 @@ export const load = (async () => {
         const start = performance.now();
 
         const request: Empty = {};
-        const metadata = await createMetadata(URI_POSTS);
+        let metadata = await createMetadata(URI_POSTS);
         const stream = postsClient.getPosts(request, metadata);
         const posts: Post__Output[] = [];
 
@@ -31,12 +31,12 @@ export const load = (async () => {
 
         const end = performance.now();
 
+        metadata = await createMetadata(URI_USERS);
         const usersStream = usersClient.getUsers(
             { userIds: Array.from(userIds) },
             metadata,
         );
         const users: User__Output[] = [];
-
         const usersPromise = new Promise<User__Output[]>((resolve, reject) => {
             usersStream.on("data", (user: User__Output) => users.push(user));
             usersStream.on("end", () => resolve(users));
