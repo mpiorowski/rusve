@@ -85,17 +85,11 @@ export const actions = {
 
         try {
             const metadata = createMetadata(URI_NOTES);
-            for (let i = 0; i < 1000; i++) {
-                await new Promise<Note__Output>((resolve, reject) => {
-                    // do it 1000 times
-                    notesClient.createNote(
-                        schema.data,
-                        metadata,
-                        (err, response) =>
-                            err || !response ? reject(err) : resolve(response),
-                    );
-                });
-            }
+            await new Promise<Note__Output>((resolve, reject) => {
+                notesClient.createNote(schema.data, metadata, (err, response) =>
+                    err || !response ? reject(err) : resolve(response),
+                );
+            });
 
             const end = performance.now();
             return {
