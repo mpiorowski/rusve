@@ -1,6 +1,9 @@
 name: CLient Service
 
 on:
+  push:
+    branches:
+      - release-client/**
   workflow_call:
     secrets:
       GCP_CREDENTIALS:
