@@ -1,9 +1,14 @@
 name: Users Service
 
 on:
+  push:
+    branches:
+      - release/**
   workflow_call:
     secrets:
       GCP_CREDENTIALS:
+        required: true
+      DB_PASS:
         required: true
 
 env:
@@ -37,7 +42,7 @@ jobs:
           password: ${{ secrets.GCP_CREDENTIALS }}
       - name: Build and Push Container
         run: |-
-          docker build -f ./service-users/Dockerfile -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./service-users
+          docker build -f ./service-${{ env.SERVICE }}/Dockerfile -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./service-${{ env.SERVICE }}
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
       - name: Deploy to Cloud Run
         id: deploy
@@ -48,6 +53,6 @@ jobs:
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
           env_vars: |
             ENV=production
-            DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=tqpa8qcMmrJ5qh
+            DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

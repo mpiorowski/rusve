@@ -4,9 +4,9 @@ CREATE TABLE
     created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted timestamptz,
-    "targetId" uuid NOT NULL,
-    "name" text NOT NULL,
-    "type" text NOT NULL
+    target_id uuid NOT NULL,
+    name text NOT NULL,
+    type text NOT NULL
   );
 
 CREATE TRIGGER set_timestamp BEFORE
