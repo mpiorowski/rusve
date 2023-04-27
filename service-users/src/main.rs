@@ -4,10 +4,8 @@ mod utils;
 
 use crate::proto::users_service_server::UsersServiceServer;
 use anyhow::{Context, Result};
-use jsonwebtoken::{DecodingKey, Validation};
-use serde::Deserialize;
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use tonic::{transport::Server, Request, Status};
+use tonic::{transport::Server, Status};
 use utils::check_env;
 
 trait IntoStatus {
@@ -58,40 +56,4 @@ async fn main() -> Result<()> {
         .context("Failed to start server")?;
 
     Ok(())
-}
-
-// TODO: Move to middleware
-fn check_auth(mut req: Request<()>) -> Result<Request<()>, Status> {
-    match req.metadata().get("authorization") {
-        Some(t) => {
-            let token = t
-                .to_str()
-                .map_err(|_| Status::unauthenticated("Invalid auth token"))?;
-            let secret =
-                check_env("SECRET").map_err(|_| Status::unauthenticated("Missing auth secret"))?;
-            let token = token.trim_start_matches("Bearer ");
-            let user_id = decode_token(token, secret.as_ref())
-                .map_err(|_| Status::unauthenticated("Invalid auth token"))?;
-            req.metadata_mut().insert(
-                "user_id",
-                user_id
-                    .parse()
-                    .map_err(|_| Status::unauthenticated("Invalid user id"))?,
-            );
-            Ok(req)
-        }
-        _ => Err(Status::unauthenticated("No valid auth token")),
-    }
-}
-
-#[derive(Debug, Deserialize)]
-struct Claims {
-    user_id: String,
-}
-
-fn decode_token(token: &str, secret: &[u8]) -> Result<String, jsonwebtoken::errors::Error> {
-    let validation = Validation::new(jsonwebtoken::Algorithm::HS256);
-    let decoding_key = DecodingKey::from_secret(secret);
-    let token_data = jsonwebtoken::decode::<Claims>(token, &decoding_key, &validation)?;
-    Ok(token_data.claims.user_id)
 }
