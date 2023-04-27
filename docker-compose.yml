@@ -7,7 +7,7 @@ services:
       context: ./client/
       target: dev
     volumes:
-      - ./client/src:/app/src
+      - ./client:/app
     ports: 
       - 3000:3000
 

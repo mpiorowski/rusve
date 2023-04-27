@@ -4,41 +4,10 @@ on:
     branches:
       - release/**
 jobs:
-  lint-client:
-    permissions:
-      contents: write
-      checks: write
-    uses: ./.github/workflows/lint-client.yml
-  lint-users:
-    permissions:
-      contents: write
-      checks: write
-    uses: ./.github/workflows/lint-users.yml
-  lint-utils:
-    permissions:
-      contents: write
-      checks: write
-    uses: ./.github/workflows/lint-utils.yml
-  lint-notes:
-    permissions:
-      contents: write
-      checks: write
-    uses: ./.github/workflows/lint-notes.yml
-  lint-posts:
-    permissions:
-      contents: write
-      checks: write
-    uses: ./.github/workflows/lint-posts.yml
   deploy-client:
     permissions:
       contents: write
       id-token: write
-    needs:
-      - lint-client
-      - lint-users
-      - lint-utils
-      - lint-notes
-      - lint-posts
     uses: ./.github/workflows/deploy-client.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}

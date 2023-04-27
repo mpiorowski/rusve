@@ -29,7 +29,11 @@ env:
   SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
 
 jobs:
+  lint:
+    uses: ./.github/workflows/lint-client.yml
   deploy:
+    needs:
+      - lint
     permissions:
       contents: 'read'
       id-token: 'write'

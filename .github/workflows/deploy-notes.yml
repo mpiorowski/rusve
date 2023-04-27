@@ -20,7 +20,11 @@ env:
   REGION: europe-north1
 
 jobs:
+  lint:
+    uses: ./.github/workflows/lint-notes.yml
   deploy:
+    needs:
+      - lint
     permissions:
       contents: 'read'
       id-token: 'write'
