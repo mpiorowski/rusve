@@ -10,12 +10,24 @@ jobs:
       checks: write
     uses: ./.github/workflows/lint-client.yml
   lint-utils:
+    permissions:
+      contents: write
+      checks: write
     uses: ./.github/workflows/lint-utils.yml
   lint-users:
+    permissions:
+      contents: write
+      checks: write
     uses: ./.github/workflows/lint-users.yml
   lint-notes:
+    permissions:
+      contents: write
+      checks: write
     uses: ./.github/workflows/lint-notes.yml
   lint-posts:
+    permissions:
+      contents: write
+      checks: write
     uses: ./.github/workflows/lint-posts.yml
   deploy-client:
     permissions:

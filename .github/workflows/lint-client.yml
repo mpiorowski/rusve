@@ -1,6 +1,11 @@
 name: Lint client
 on:
   workflow_call:
+
+permissions:
+  contents: write
+  checks: write
+
 jobs:
   lint:
     permissions:

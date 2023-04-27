@@ -2,7 +2,10 @@ name: Lint notes
 on:
   workflow_call:
 
-# Make sure CI fails on all warnings, including Clippy lints
+permissions:
+  contents: write
+  checks: write
+
 env:
   RUSTFLAGS: "-Dwarnings"
 
