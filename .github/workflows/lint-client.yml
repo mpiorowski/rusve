@@ -3,6 +3,10 @@ on:
   workflow_call:
 jobs:
   lint:
+    permissions:
+      contents: write
+      checks: write
+      id-token: write
     runs-on: ubuntu-latest
     defaults:
       run:

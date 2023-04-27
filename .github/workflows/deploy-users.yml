@@ -1,4 +1,4 @@
-name: CLient Service
+name: Users Service
 
 on:
   workflow_call:
@@ -11,7 +11,7 @@ env:
   PROJECT_ID: rusve-384620
   REPOSITORY: rusve-repo
   DATABASE: rusve-db
-  SERVICE: client
+  SERVICE: users
   REGION: europe-north1
 
 jobs:

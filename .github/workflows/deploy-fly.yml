@@ -2,7 +2,7 @@ name: Deploy
 on:
   push:
     branches:
-      - release/**
+      - release-fly/**
 permissions:
   contents: read
   pull-requests: read

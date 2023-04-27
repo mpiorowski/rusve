@@ -1,6 +1,8 @@
-name: Pull request
+name: Deploy
 on:
-  pull_request:
+  push:
+    branches:
+      - release/**
 jobs:
   lint-client:
     uses: ./.github/workflows/lint-client.yml
@@ -12,3 +14,12 @@ jobs:
     uses: ./.github/workflows/lint-notes.yml
   lint-posts:
     uses: ./.github/workflows/lint-posts.yml
+  deploy-client:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs:
+      - lint-client
+    uses: ./.github/workflows/deploy-client.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
