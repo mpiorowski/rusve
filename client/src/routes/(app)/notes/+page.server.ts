@@ -16,7 +16,7 @@ export const load = (async ({ locals }) => {
 
         const request: UserId = { userId: userId };
         const metadata = await createMetadata(URI_NOTES);
-        const stream = notesClient.getOnlyNotes(request, metadata);
+        const stream = notesClient.getNotes(request, metadata);
         const notes: Note__Output[] = [];
 
         const userIds: Set<string> = new Set();
