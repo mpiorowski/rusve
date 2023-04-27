@@ -18,4 +18,4 @@ COPY .env.prod /app/.env
 
 RUN npm run build
 
-CMD ["node", "build"]
+CMD ["PORT=8080", "node", "build"]
