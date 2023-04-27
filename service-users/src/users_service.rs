@@ -171,20 +171,8 @@ impl UsersService for MyService {
         let start = std::time::Instant::now();
         let pool = self.pool.clone();
 
-        let user_id_metadata = request
-            .metadata()
-            .get("user_id")
-            .ok_or_else(|| Status::unauthenticated("Missing user_id metadata"))?
-            .to_str()
-            .map_err(|e| Status::internal(e.to_string()))?
-            .to_owned();
-
         let request = request.into_inner();
         let user_id = request.user_id;
-        if user_id != user_id_metadata {
-            return Err(Status::unauthenticated("Invalid user_id"));
-        }
-
         let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         let row = query("select * from users where id = $1")
@@ -206,14 +194,8 @@ impl UsersService for MyService {
         let pool = self.pool.clone();
         let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
 
-        let user_id = request
-            .metadata()
-            .get("user_id")
-            .ok_or_else(|| Status::unauthenticated("Missing user_id metadata"))?
-            .to_str()
-            .map_err(|e| Status::internal(e.to_string()))?;
-        let user_uuid = Uuid::parse_str(user_id).map_err(|e| Status::internal(e.to_string()))?;
         let request = request.into_inner();
+        let user_uuid = Uuid::parse_str(&request.id).map_err(|e| Status::internal(e.to_string()))?;
 
         let avatar_id = request.avatar;
         let avatar_uuid = match avatar_id {
