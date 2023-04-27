@@ -1,6 +1,6 @@
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { URI_NOTES } from "$env/static/private";
+import { URI_NOTES, URI_USERS } from "$env/static/private";
 import type { UserId } from "$lib/proto/proto/UserId";
 import type { Note__Output } from "$lib/proto/proto/Note";
 import type { User__Output } from "$lib/proto/proto/User";
@@ -15,7 +15,7 @@ export const load = (async ({ locals }) => {
         const userId = locals.userId;
 
         const request: UserId = { userId: userId };
-        const metadata = await createMetadata(URI_NOTES);
+        let metadata = await createMetadata(URI_NOTES);
         const stream = notesClient.getNotes(request, metadata);
         const notes: Note__Output[] = [];
 
@@ -38,6 +38,7 @@ export const load = (async ({ locals }) => {
         );
         const users: User__Output[] = [];
 
+        metadata = await createMetadata(URI_USERS);
         const usersPromise = new Promise<User__Output[]>((resolve, reject) => {
             usersStream.on("data", (user: User__Output) => users.push(user));
             usersStream.on("end", () => resolve(users));

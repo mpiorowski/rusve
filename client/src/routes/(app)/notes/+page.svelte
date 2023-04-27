@@ -27,7 +27,7 @@
     </Button>
 </div>
 
-{#each data.notes.splice(0, 10) as note}
+{#each data.notes as note}
     <Note noteId={note.id}>
         <span slot="title">{note.title}</span>
         <span slot="content">

@@ -15,8 +15,7 @@ export const load = (async ({ locals }) => {
         const start = performance.now();
         const userId = locals.userId;
         const request: UserId = { userId: userId };
-        const metadata = await createMetadata(URI_USERS);
-        const metadataUtils = await createMetadata(URI_UTILS);
+        let metadata = await createMetadata(URI_USERS);
 
         const user = await new Promise<User__Output>((resolve, reject) => {
             usersClient.getUser(request, metadata, (err, response) =>
@@ -32,8 +31,9 @@ export const load = (async ({ locals }) => {
                 fileId: user.avatar,
                 targetId: userId,
             };
+            metadata = await createMetadata(URI_UTILS);
             file = new Promise((resolve, reject) => {
-                utilsClient.getFile(fileId, metadataUtils, (err, response) => {
+                utilsClient.getFile(fileId, metadata, (err, response) => {
                     if (err) {
                         reject(err);
                     } else if (response) {
