@@ -28,15 +28,17 @@ env:
   PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
   SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
 
+permissions:
+  contents: write
+  id-token: write
+  checks: write
+
 jobs:
   lint:
     uses: ./.github/workflows/lint-client.yml
   deploy:
     needs:
       - lint
-    permissions:
-      contents: 'read'
-      id-token: 'write'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
