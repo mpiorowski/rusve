@@ -9,26 +9,26 @@ jobs:
       contents: write
       checks: write
     uses: ./.github/workflows/lint-client.yml
-      #lint-utils:
-      #  permissions:
-      #    contents: write
-      #    checks: write
-      #  uses: ./.github/workflows/lint-utils.yml
   lint-users:
     permissions:
       contents: write
       checks: write
     uses: ./.github/workflows/lint-users.yml
-      #lint-notes:
-      #  permissions:
-      #    contents: write
-      #    checks: write
-      #  uses: ./.github/workflows/lint-notes.yml
-      #lint-posts:
-      #  permissions:
-      #    contents: write
-      #    checks: write
-      #  uses: ./.github/workflows/lint-posts.yml
+  lint-utils:
+    permissions:
+      contents: write
+      checks: write
+    uses: ./.github/workflows/lint-utils.yml
+  lint-notes:
+    permissions:
+      contents: write
+      checks: write
+    uses: ./.github/workflows/lint-notes.yml
+  lint-posts:
+    permissions:
+      contents: write
+      checks: write
+    uses: ./.github/workflows/lint-posts.yml
   deploy-client:
     permissions:
       contents: write
@@ -36,6 +36,9 @@ jobs:
     needs:
       - lint-client
       - lint-users
+      - lint-utils
+      - lint-notes
+      - lint-posts
     uses: ./.github/workflows/deploy-client.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
@@ -52,5 +55,33 @@ jobs:
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DB_PASS: ${{ secrets.DB_PASS }}
-
-
+  deploy-utils:
+    permissions:
+      contents: write
+      id-token: write
+    needs:
+      - deploy-client
+    uses: ./.github/workflows/deploy-utils.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      DB_PASS: ${{ secrets.DB_PASS }}
+  deploy-notes:
+    permissions:
+      contents: write
+      id-token: write
+    needs:
+      - deploy-client
+    uses: ./.github/workflows/deploy-notes.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      DB_PASS: ${{ secrets.DB_PASS }}
+  deploy-posts:
+    permissions:
+      contents: write
+      id-token: write
+    needs:
+      - deploy-client
+    uses: ./.github/workflows/deploy-posts.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      DB_PASS: ${{ secrets.DB_PASS }}
