@@ -9,13 +9,12 @@ import type { Post__Output } from "$lib/proto/proto/Post";
 import type { PostId } from "$lib/proto/proto/PostId";
 import type { Empty } from "$lib/proto/proto/Empty";
 
-export const load = (async ({ locals }) => {
+export const load = (async () => {
     try {
         const start = performance.now();
-        const userId = locals.userId;
 
         const request: Empty = {};
-        const metadata = createMetadata(userId);
+        const metadata = await createMetadata(URI_POSTS);
         const stream = postsClient.getPosts(request, metadata);
         const posts: Post__Output[] = [];
 
@@ -84,7 +83,7 @@ export const actions = {
         }
 
         try {
-            const metadata = createMetadata(URI_POSTS);
+            const metadata = await createMetadata(URI_POSTS);
             await new Promise<Post__Output>((resolve, reject) => {
                 postsClient.createPost(schema.data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
@@ -116,7 +115,7 @@ export const actions = {
                 userId: locals.userId,
             };
 
-            const metadata = createMetadata(URI_POSTS);
+            const metadata = await createMetadata(URI_POSTS);
             const post = await new Promise<Post__Output>((resolve, reject) => {
                 postsClient.deletePost(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),

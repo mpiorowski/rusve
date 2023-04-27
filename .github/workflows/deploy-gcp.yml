@@ -38,11 +38,6 @@ jobs:
     uses: ./.github/workflows/deploy-client.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      URI_UTILS: ${{ secrets.URI_UTILS }}
-      URI_USERS: ${{ secrets.URI_USERS }}
-      URI_NOTES: ${{ secrets.URI_NOTES }}
-      URI_POSTS: ${{ secrets.URI_POSTS }}
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
       PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
       PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
       SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}

@@ -4,6 +4,7 @@ import { createMetadata } from "$lib/metadata";
 import { usersClient } from "$lib/grpc";
 import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { getFirebaseServer } from "$lib/firebase/firebase_server";
+import { URI_USERS } from "$env/static/private";
 
 export const handleError: HandleServerError = ({ error }) => {
     console.error("Error: %s", error);
@@ -55,7 +56,7 @@ export const handle: Handle = async ({ event, resolve }) => {
                 sub: uid,
                 email: email ?? "",
             };
-            const metadata = createMetadata("");
+            const metadata = await createMetadata(URI_USERS);
             await new Promise<void>((res) => {
                 usersClient.Auth(request, metadata, (err, response) => {
                     if (err || !response?.id) {

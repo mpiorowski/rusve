@@ -5,11 +5,6 @@ on:
     secrets:
       GCP_CREDENTIALS:
         required: true
-      URI_UTILS:
-      URI_USERS:
-      URI_NOTES:
-      URI_POSTS:
-      JWT_SECRET:
       PUBLIC_API_KEY:
       PUBLIC_AUTH_DOMAIN:
       SERVICE_ACCOUNT:
@@ -22,11 +17,10 @@ env:
   SERVICE: client
   REGION: europe-north1
   ENV: production
-  URI_UTILS: ${{ secrets.URI_UTILS }}
-  URI_USERS: ${{ secrets.URI_USERS }}
-  URI_NOTES: ${{ secrets.URI_NOTES }}
-  URI_POSTS: ${{ secrets.URI_POSTS }}
-  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  URI_USERS: client-cdb5ecy4ia-lz.a.run.app
+  URI_UTILS: client-cdb5ecy4ia-lz.a.run.app
+  URI_NOTES: client-cdb5ecy4ia-lz.a.run.app
+  URI_POSTS: client-cdb5ecy4ia-lz.a.run.app
   PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
   PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
   SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
@@ -56,11 +50,10 @@ jobs:
         run: |
           touch ./client/.env.prod
           echo ENV="$ENV" >> ./client/.env.prod
-          echo URI_UTILS="$URI_UTILS" >> ./client/.env.prod
           echo URI_USERS="$URI_USERS" >> ./client/.env.prod
+          echo URI_UTILS="$URI_UTILS" >> ./client/.env.prod
           echo URI_NOTES="$URI_NOTES" >> ./client/.env.prod
           echo URI_POSTS="$URI_POSTS" >> ./client/.env.prod
-          echo JWT_SECRET="$JWT_SECRET" >> ./client/.env.prod
           echo PUBLIC_API_KEY="$PUBLIC_API_KEY" >> ./client/.env.prod
           echo PUBLIC_AUTH_DOMAIN="$PUBLIC_AUTH_DOMAIN" >> ./client/.env.prod
           echo SERVICE_ACCOUNT=\'$SERVICE_ACCOUNT\' >> ./client/.env.prod

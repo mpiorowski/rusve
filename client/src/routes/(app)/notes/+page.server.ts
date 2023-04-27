@@ -15,7 +15,7 @@ export const load = (async ({ locals }) => {
         const userId = locals.userId;
 
         const request: UserId = { userId: userId };
-        const metadata = createMetadata(userId);
+        const metadata = await createMetadata(URI_NOTES);
         const stream = notesClient.getOnlyNotes(request, metadata);
         const notes: Note__Output[] = [];
 
@@ -84,7 +84,7 @@ export const actions = {
         }
 
         try {
-            const metadata = createMetadata(URI_NOTES);
+            const metadata = await createMetadata(URI_NOTES);
             await new Promise<Note__Output>((resolve, reject) => {
                 notesClient.createNote(schema.data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
@@ -116,7 +116,7 @@ export const actions = {
                 userId: locals.userId,
             };
 
-            const metadata = createMetadata(URI_NOTES);
+            const metadata = await createMetadata(URI_NOTES);
             const note = await new Promise<Note__Output>((resolve, reject) => {
                 notesClient.deleteNote(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),

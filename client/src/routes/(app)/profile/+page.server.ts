@@ -1,3 +1,4 @@
+import { URI_USERS, URI_UTILS } from "$env/static/private";
 import { usersClient, utilsClient } from "$lib/grpc";
 import { createMetadata } from "$lib/metadata";
 import type { File, File__Output } from "$lib/proto/proto/File";
@@ -14,7 +15,8 @@ export const load = (async ({ locals }) => {
         const start = performance.now();
         const userId = locals.userId;
         const request: UserId = { userId: userId };
-        const metadata = createMetadata(userId);
+        const metadata = await createMetadata(URI_USERS);
+        const metadataUtils = await createMetadata(URI_UTILS);
 
         const user = await new Promise<User__Output>((resolve, reject) => {
             usersClient.getUser(request, metadata, (err, response) =>
@@ -31,7 +33,7 @@ export const load = (async ({ locals }) => {
                 targetId: userId,
             };
             file = new Promise((resolve, reject) => {
-                utilsClient.getFile(fileId, metadata, (err, response) => {
+                utilsClient.getFile(fileId, metadataUtils, (err, response) => {
                     if (err) {
                         reject(err);
                     } else if (response) {
@@ -66,7 +68,7 @@ export const load = (async ({ locals }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-    createUser: async ({ request, locals }) => {
+    createUser: async ({ request }) => {
         try {
             const form = await request.formData();
             const name = form.get("name");
@@ -87,7 +89,7 @@ export const actions = {
                 name: schema.data.name,
                 avatar: schema.data.avatar || undefined,
             };
-            const metadata = createMetadata(locals.userId);
+            const metadata = await createMetadata(URI_USERS);
             const user = await new Promise<User__Output>((resolve, reject) => {
                 usersClient.createUser(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
@@ -146,7 +148,7 @@ export const actions = {
                 return fail(400, { error: "Invalid request" });
             }
 
-            const metadata = createMetadata(locals.userId);
+            const metadata = await createMetadata(URI_UTILS);
             // Delete old avatar
             if (schema.data.avatar) {
                 const oldFileId: FileId = {
@@ -230,7 +232,8 @@ export const actions = {
             return fail(409, { error: "Invalid request" });
         }
 
-        const metadata = createMetadata(locals.userId);
+        const metadata = await createMetadata(URI_USERS);
+        const metadataUtils = await createMetadata(URI_UTILS);
 
         // Delete file
         const fileData: FileId = {
@@ -238,7 +241,7 @@ export const actions = {
             targetId: schema.data.targetId,
         };
         const file = new Promise<File__Output>((resolve, reject) => {
-            utilsClient.deleteFile(fileData, metadata, (err, response) =>
+            utilsClient.deleteFile(fileData, metadataUtils, (err, response) =>
                 err || !response ? reject(err) : resolve(response),
             );
         });

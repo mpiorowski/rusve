@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
     println!("Server started on port: {}", port);
 
     let server = MyService { pool };
-    let svc = UsersServiceServer::with_interceptor(server, check_auth);
+    let svc = UsersServiceServer::new(server);
     Server::builder()
         .add_service(svc)
         .serve(addr)
@@ -60,6 +60,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+// TODO: Move to middleware
 fn check_auth(mut req: Request<()>) -> Result<Request<()>, Status> {
     match req.metadata().get("authorization") {
         Some(t) => {

@@ -23,15 +23,15 @@ export const proto = loadPackageDefinition(
     packageDefinition,
 ) as unknown as ProtoGrpcType;
 
-export const utilsClient = new proto.proto.UtilsService(
-    URI_UTILS,
+export const usersClient = new proto.proto.UsersService(
+    URI_USERS,
     ENV === "production"
         ? credentials.createSsl()
         : credentials.createInsecure(),
 );
 
-export const usersClient = new proto.proto.UsersService(
-    URI_USERS,
+export const utilsClient = new proto.proto.UtilsService(
+    URI_UTILS,
     ENV === "production"
         ? credentials.createSsl()
         : credentials.createInsecure(),
