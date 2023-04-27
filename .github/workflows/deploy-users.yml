@@ -3,7 +3,7 @@ name: Users Service
 on:
   push:
     branches:
-      - release/**
+      - release-users/**
   workflow_call:
     secrets:
       GCP_CREDENTIALS:
