@@ -26,27 +26,39 @@ impl SqlxError for sqlx::Error {
     }
 }
 
+struct PgNote {
+    id: Uuid,
+    user_id: Uuid,
+    created: OffsetDateTime,
+    updated: OffsetDateTime,
+    deleted: Option<OffsetDateTime>,
+    title: String,
+    content: String,
+}
+
 impl TryFrom<Option<sqlx::postgres::PgRow>> for Note {
     type Error = anyhow::Error;
 
     fn try_from(row: Option<sqlx::postgres::PgRow>) -> Result<Self, Self::Error> {
         match row {
             Some(row) => {
-                let id: Uuid = row.try_get("id")?;
-                let user_id: Uuid = row.try_get("userId")?;
-                let created: OffsetDateTime = row.try_get("created")?;
-                let updated: OffsetDateTime = row.try_get("updated")?;
-                let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
-                let title = row.try_get("title")?;
-                let content = row.try_get("content")?;
+                let pg_note = PgNote {
+                    id: row.try_get("id")?,
+                    user_id: row.try_get("user_id")?,
+                    created: row.try_get("created")?,
+                    updated: row.try_get("updated")?,
+                    deleted: row.try_get("deleted")?,
+                    title: row.try_get("title")?,
+                    content: row.try_get("content")?,
+                };
                 let note = Note {
-                    id: id.to_string(),
-                    user_id: user_id.to_string(),
-                    title,
-                    content,
-                    created: created.to_string(),
-                    updated: updated.to_string(),
-                    deleted: deleted.map(|d| d.to_string()),
+                    id: pg_note.id.to_string(),
+                    user_id: pg_note.user_id.to_string(),
+                    title: pg_note.title,
+                    content: pg_note.content,
+                    created: pg_note.created.to_string(),
+                    updated: pg_note.updated.to_string(),
+                    deleted: pg_note.deleted.map(|d| d.to_string()),
                     user: None,
                 };
                 Ok(note)
@@ -79,7 +91,7 @@ impl NotesService for MyService {
         let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         tokio::spawn(async move {
-            let mut notes_stream = sqlx::query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
+            let mut notes_stream = sqlx::query("SELECT * FROM notes WHERE user_id = $1 and deleted is null order by created desc")
                 .bind(user_id)
                 .fetch(&pool);
 
@@ -149,11 +161,11 @@ impl NotesService for MyService {
         let user_id = request.into_inner().user_id;
         let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        let mut notes_stream = sqlx::query!(
-            "SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc",
-            user_id
+        let mut notes_stream = sqlx::query(
+            "SELECT * FROM notes WHERE user_id = $1 and deleted is null order by created desc",
         )
-        .fetch(&pool).await?;
+        .bind(user_id)
+        .fetch(&pool);
 
         tokio::spawn(async move {
             println!("Prepare: {:?}", start.elapsed());
@@ -201,7 +213,7 @@ impl NotesService for MyService {
             Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         sqlx::query(
-            "INSERT INTO notes (title, content, \"userId\") VALUES ($1, $2, $3) RETURNING *",
+            "INSERT INTO notes (title, content, user_id) VALUES ($1, $2, $3) RETURNING *",
         )
         .bind(note.title.clone())
         .bind(note.content.clone())
@@ -233,7 +245,7 @@ impl NotesService for MyService {
             Uuid::parse_str(&request.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         let row = sqlx::query(
-            "UPDATE notes SET deleted = NOW() WHERE id = $1 AND \"userId\" = $2 RETURNING *",
+            "UPDATE notes SET deleted = NOW() WHERE id = $1 AND user_id = $2 RETURNING *",
         )
         .bind(note_uuid)
         .bind(user_uuid)
