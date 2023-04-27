@@ -5,6 +5,14 @@ on:
     secrets:
       GCP_CREDENTIALS:
         required: true
+      URI_UTILS:
+      URI_USER:
+      URI_NOTES:
+      URI_POSTS:
+      JWT_SECRET:
+      PUBLIC_API_KEY:
+      PUBLIC_AUTH_DOMAIN:
+      SERVICE_ACCOUNT:
 
 env:
   GAR_LOCATION: europe-north1
