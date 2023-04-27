@@ -4,7 +4,7 @@ CREATE TABLE
     created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted timestamptz,
-    "userId" uuid NOT NULL,
+    user_id uuid NOT NULL,
     title text NOT NULL,
     content text NOT NULL
   );

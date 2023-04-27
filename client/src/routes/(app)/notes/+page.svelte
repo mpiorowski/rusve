@@ -16,7 +16,7 @@
 <NoteDrawer {form} />
 
 <h3 class="text-right">
-    Rust: {data.duration.toFixed(4)}ms
+    Rust: {data.duration.toFixed(4)}ms / {data.notes.length} notes
 </h3>
 
 <div class="mb-6 grid grid-cols-2 gap-4">
@@ -27,7 +27,7 @@
     </Button>
 </div>
 
-{#each data.notes as note}
+{#each data.notes.splice(0, 10) as note}
     <Note noteId={note.id}>
         <span slot="title">{note.title}</span>
         <span slot="content">

@@ -19,7 +19,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./files:/app/files
-      - ./service-utils:/app
+      - ./service-utils/src:/app/src
     depends_on:
       - db-utils
     environment:
@@ -45,7 +45,7 @@ services:
       context: ./service-users
       dockerfile: Dockerfile.dev
     volumes:
-      - ./service-users:/app
+      - ./service-users/src:/app/src
     depends_on:
       - db-users
     environment:
@@ -69,7 +69,7 @@ services:
       context: ./service-notes
       dockerfile: Dockerfile.dev
     volumes:
-      - ./service-notes:/app
+      - ./service-notes/src:/app/src
     depends_on:
       - db-notes
       - service-users
@@ -83,6 +83,8 @@ services:
   db-notes:
     container_name: rusve-notes-db
     image: postgres:15.1
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
