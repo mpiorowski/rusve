@@ -32,13 +32,12 @@ export const load = (async ({ locals }) => {
 
         const end = performance.now();
 
+        metadata = await createMetadata(URI_USERS);
         const usersStream = usersClient.getUsers(
             { userIds: Array.from(userIds) },
             metadata,
         );
         const users: User__Output[] = [];
-
-        metadata = await createMetadata(URI_USERS);
         const usersPromise = new Promise<User__Output[]>((resolve, reject) => {
             usersStream.on("data", (user: User__Output) => users.push(user));
             usersStream.on("end", () => resolve(users));
