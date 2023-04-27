@@ -5,18 +5,8 @@ mod utils;
 use crate::proto::users_service_server::UsersServiceServer;
 use anyhow::{Context, Result};
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use tonic::{transport::Server, Status};
+use tonic::transport::Server;
 use utils::check_env;
-
-trait IntoStatus {
-    fn into_status(self) -> Status;
-}
-
-impl IntoStatus for sqlx::Error {
-    fn into_status(self: sqlx::Error) -> Status {
-        Status::internal(self.to_string())
-    }
-}
 
 #[derive(Debug)]
 pub struct MyService {
@@ -27,6 +17,7 @@ pub struct MyService {
 async fn main() -> Result<()> {
     println!("Starting server...");
 
+    // Database
     let database_url = check_env("DATABASE_URL")?;
     let pool = PgPoolOptions::new()
         .max_connections(20)
@@ -35,6 +26,7 @@ async fn main() -> Result<()> {
         .with_context(|| format!("Failed to connect to database: {}", database_url))?;
     println!("Connected to database");
 
+    // Migrations
     sqlx::migrate!("./migrations")
         .run(&pool)
         .await
@@ -42,18 +34,12 @@ async fn main() -> Result<()> {
     println!("Migrations ran successfully");
 
     let port = check_env("PORT")?;
-    let addr = ("[::]:".to_owned() + &port)
-        .parse()
-        .context("Failed to parse address")?;
+    let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);
 
     let server = MyService { pool };
     let svc = UsersServiceServer::new(server);
-    Server::builder()
-        .add_service(svc)
-        .serve(addr)
-        .await
-        .context("Failed to start server")?;
+    Server::builder().add_service(svc).serve(addr).await?;
 
     Ok(())
 }

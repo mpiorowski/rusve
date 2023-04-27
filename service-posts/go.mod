@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/go-playground/validator/v10 v10.12.0
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/mpiorowski/golang v1.3.0
 	github.com/rubenv/sql-migrate v1.4.0
@@ -54,6 +53,5 @@ require (
 	google.golang.org/api v0.120.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

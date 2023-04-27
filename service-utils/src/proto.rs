@@ -579,28 +579,6 @@ pub mod notes_service_client {
             );
             self.inner.server_streaming(request.into_request(), path, codec).await
         }
-        pub async fn get_only_notes(
-            &mut self,
-            request: impl tonic::IntoRequest<super::UserId>,
-        ) -> Result<
-            tonic::Response<tonic::codec::Streaming<super::Note>>,
-            tonic::Status,
-        > {
-            self.inner
-                .ready()
-                .await
-                .map_err(|e| {
-                    tonic::Status::new(
-                        tonic::Code::Unknown,
-                        format!("Service was not ready: {}", e.into()),
-                    )
-                })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/proto.NotesService/GetOnlyNotes",
-            );
-            self.inner.server_streaming(request.into_request(), path, codec).await
-        }
         pub async fn create_note(
             &mut self,
             request: impl tonic::IntoRequest<super::Note>,
@@ -1339,16 +1317,6 @@ pub mod notes_service_server {
             &self,
             request: tonic::Request<super::UserId>,
         ) -> Result<tonic::Response<Self::GetNotesStream>, tonic::Status>;
-        /// Server streaming response type for the GetOnlyNotes method.
-        type GetOnlyNotesStream: futures_core::Stream<
-                Item = Result<super::Note, tonic::Status>,
-            >
-            + Send
-            + 'static;
-        async fn get_only_notes(
-            &self,
-            request: tonic::Request<super::UserId>,
-        ) -> Result<tonic::Response<Self::GetOnlyNotesStream>, tonic::Status>;
         async fn create_note(
             &self,
             request: tonic::Request<super::Note>,
@@ -1445,47 +1413,6 @@ pub mod notes_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = GetNotesSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec)
-                            .apply_compression_config(
-                                accept_compression_encodings,
-                                send_compression_encodings,
-                            );
-                        let res = grpc.server_streaming(method, req).await;
-                        Ok(res)
-                    };
-                    Box::pin(fut)
-                }
-                "/proto.NotesService/GetOnlyNotes" => {
-                    #[allow(non_camel_case_types)]
-                    struct GetOnlyNotesSvc<T: NotesService>(pub Arc<T>);
-                    impl<
-                        T: NotesService,
-                    > tonic::server::ServerStreamingService<super::UserId>
-                    for GetOnlyNotesSvc<T> {
-                        type Response = super::Note;
-                        type ResponseStream = T::GetOnlyNotesStream;
-                        type Future = BoxFuture<
-                            tonic::Response<Self::ResponseStream>,
-                            tonic::Status,
-                        >;
-                        fn call(
-                            &mut self,
-                            request: tonic::Request<super::UserId>,
-                        ) -> Self::Future {
-                            let inner = self.0.clone();
-                            let fut = async move {
-                                (*inner).get_only_notes(request).await
-                            };
-                            Box::pin(fut)
-                        }
-                    }
-                    let accept_compression_encodings = self.accept_compression_encodings;
-                    let send_compression_encodings = self.send_compression_encodings;
-                    let inner = self.inner.clone();
-                    let fut = async move {
-                        let inner = inner.0;
-                        let method = GetOnlyNotesSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

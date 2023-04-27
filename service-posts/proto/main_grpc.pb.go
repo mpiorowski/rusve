@@ -467,7 +467,6 @@ var UtilsService_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NotesServiceClient interface {
 	GetNotes(ctx context.Context, in *UserId, opts ...grpc.CallOption) (NotesService_GetNotesClient, error)
-	GetOnlyNotes(ctx context.Context, in *UserId, opts ...grpc.CallOption) (NotesService_GetOnlyNotesClient, error)
 	CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Note, error)
 	DeleteNote(ctx context.Context, in *NoteId, opts ...grpc.CallOption) (*Note, error)
 }
@@ -512,38 +511,6 @@ func (x *notesServiceGetNotesClient) Recv() (*Note, error) {
 	return m, nil
 }
 
-func (c *notesServiceClient) GetOnlyNotes(ctx context.Context, in *UserId, opts ...grpc.CallOption) (NotesService_GetOnlyNotesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &NotesService_ServiceDesc.Streams[1], "/proto.NotesService/GetOnlyNotes", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &notesServiceGetOnlyNotesClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type NotesService_GetOnlyNotesClient interface {
-	Recv() (*Note, error)
-	grpc.ClientStream
-}
-
-type notesServiceGetOnlyNotesClient struct {
-	grpc.ClientStream
-}
-
-func (x *notesServiceGetOnlyNotesClient) Recv() (*Note, error) {
-	m := new(Note)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 func (c *notesServiceClient) CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Note, error) {
 	out := new(Note)
 	err := c.cc.Invoke(ctx, "/proto.NotesService/CreateNote", in, out, opts...)
@@ -567,7 +534,6 @@ func (c *notesServiceClient) DeleteNote(ctx context.Context, in *NoteId, opts ..
 // for forward compatibility
 type NotesServiceServer interface {
 	GetNotes(*UserId, NotesService_GetNotesServer) error
-	GetOnlyNotes(*UserId, NotesService_GetOnlyNotesServer) error
 	CreateNote(context.Context, *Note) (*Note, error)
 	DeleteNote(context.Context, *NoteId) (*Note, error)
 	mustEmbedUnimplementedNotesServiceServer()
@@ -579,9 +545,6 @@ type UnimplementedNotesServiceServer struct {
 
 func (UnimplementedNotesServiceServer) GetNotes(*UserId, NotesService_GetNotesServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetNotes not implemented")
-}
-func (UnimplementedNotesServiceServer) GetOnlyNotes(*UserId, NotesService_GetOnlyNotesServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetOnlyNotes not implemented")
 }
 func (UnimplementedNotesServiceServer) CreateNote(context.Context, *Note) (*Note, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateNote not implemented")
@@ -620,27 +583,6 @@ type notesServiceGetNotesServer struct {
 }
 
 func (x *notesServiceGetNotesServer) Send(m *Note) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _NotesService_GetOnlyNotes_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(UserId)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(NotesServiceServer).GetOnlyNotes(m, &notesServiceGetOnlyNotesServer{stream})
-}
-
-type NotesService_GetOnlyNotesServer interface {
-	Send(*Note) error
-	grpc.ServerStream
-}
-
-type notesServiceGetOnlyNotesServer struct {
-	grpc.ServerStream
-}
-
-func (x *notesServiceGetOnlyNotesServer) Send(m *Note) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -700,11 +642,6 @@ var NotesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "GetNotes",
 			Handler:       _NotesService_GetNotes_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "GetOnlyNotes",
-			Handler:       _NotesService_GetOnlyNotes_Handler,
 			ServerStreams: true,
 		},
 	},

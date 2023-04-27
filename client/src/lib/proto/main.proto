@@ -33,7 +33,6 @@ service UtilsService {
 
 service NotesService {
     rpc GetNotes(UserId) returns (stream Note) {}
-    rpc GetOnlyNotes(UserId) returns (stream Note) {}
     rpc CreateNote(Note) returns (Note) {}
     rpc DeleteNote(NoteId) returns (Note) {}
 }

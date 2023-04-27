@@ -188,11 +188,8 @@ var file_main_proto_rawDesc = []byte{
 	0x69, 0x6c, 0x65, 0x22, 0x00, 0x12, 0x2a, 0x0a, 0x0a, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x46,
 	0x69, 0x6c, 0x65, 0x12, 0x0d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x46, 0x69, 0x6c, 0x65,
 	0x49, 0x64, 0x1a, 0x0b, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x46, 0x69, 0x6c, 0x65, 0x22,
-	0x00, 0x32, 0xc0, 0x01, 0x0a, 0x0c, 0x4e, 0x6f, 0x74, 0x65, 0x73, 0x53, 0x65, 0x72, 0x76, 0x69,
+	0x00, 0x32, 0x90, 0x01, 0x0a, 0x0c, 0x4e, 0x6f, 0x74, 0x65, 0x73, 0x53, 0x65, 0x72, 0x76, 0x69,
 	0x63, 0x65, 0x12, 0x2a, 0x0a, 0x08, 0x47, 0x65, 0x74, 0x4e, 0x6f, 0x74, 0x65, 0x73, 0x12, 0x0d,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x49, 0x64, 0x1a, 0x0b, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4e, 0x6f, 0x74, 0x65, 0x22, 0x00, 0x30, 0x01, 0x12, 0x2e,
-	0x0a, 0x0c, 0x47, 0x65, 0x74, 0x4f, 0x6e, 0x6c, 0x79, 0x4e, 0x6f, 0x74, 0x65, 0x73, 0x12, 0x0d,
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x49, 0x64, 0x1a, 0x0b, 0x2e,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4e, 0x6f, 0x74, 0x65, 0x22, 0x00, 0x30, 0x01, 0x12, 0x28,
 	0x0a, 0x0a, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4e, 0x6f, 0x74, 0x65, 0x12, 0x0b, 0x2e, 0x70,
@@ -250,29 +247,27 @@ var file_main_proto_depIdxs = []int32{
 	7,  // 6: proto.UtilsService.CreateFile:input_type -> proto.File
 	6,  // 7: proto.UtilsService.DeleteFile:input_type -> proto.FileId
 	1,  // 8: proto.NotesService.GetNotes:input_type -> proto.UserId
-	1,  // 9: proto.NotesService.GetOnlyNotes:input_type -> proto.UserId
-	8,  // 10: proto.NotesService.CreateNote:input_type -> proto.Note
-	9,  // 11: proto.NotesService.DeleteNote:input_type -> proto.NoteId
-	0,  // 12: proto.PostsService.GetPosts:input_type -> proto.Empty
-	10, // 13: proto.PostsService.CreatePost:input_type -> proto.Post
-	11, // 14: proto.PostsService.DeletePost:input_type -> proto.PostId
-	4,  // 15: proto.UsersService.Auth:output_type -> proto.User
-	4,  // 16: proto.UsersService.GetUsers:output_type -> proto.User
-	4,  // 17: proto.UsersService.GetUser:output_type -> proto.User
-	4,  // 18: proto.UsersService.CreateUser:output_type -> proto.User
-	7,  // 19: proto.UtilsService.GetFiles:output_type -> proto.File
-	7,  // 20: proto.UtilsService.GetFile:output_type -> proto.File
-	7,  // 21: proto.UtilsService.CreateFile:output_type -> proto.File
-	7,  // 22: proto.UtilsService.DeleteFile:output_type -> proto.File
-	8,  // 23: proto.NotesService.GetNotes:output_type -> proto.Note
-	8,  // 24: proto.NotesService.GetOnlyNotes:output_type -> proto.Note
-	8,  // 25: proto.NotesService.CreateNote:output_type -> proto.Note
-	8,  // 26: proto.NotesService.DeleteNote:output_type -> proto.Note
-	10, // 27: proto.PostsService.GetPosts:output_type -> proto.Post
-	10, // 28: proto.PostsService.CreatePost:output_type -> proto.Post
-	10, // 29: proto.PostsService.DeletePost:output_type -> proto.Post
-	15, // [15:30] is the sub-list for method output_type
-	0,  // [0:15] is the sub-list for method input_type
+	8,  // 9: proto.NotesService.CreateNote:input_type -> proto.Note
+	9,  // 10: proto.NotesService.DeleteNote:input_type -> proto.NoteId
+	0,  // 11: proto.PostsService.GetPosts:input_type -> proto.Empty
+	10, // 12: proto.PostsService.CreatePost:input_type -> proto.Post
+	11, // 13: proto.PostsService.DeletePost:input_type -> proto.PostId
+	4,  // 14: proto.UsersService.Auth:output_type -> proto.User
+	4,  // 15: proto.UsersService.GetUsers:output_type -> proto.User
+	4,  // 16: proto.UsersService.GetUser:output_type -> proto.User
+	4,  // 17: proto.UsersService.CreateUser:output_type -> proto.User
+	7,  // 18: proto.UtilsService.GetFiles:output_type -> proto.File
+	7,  // 19: proto.UtilsService.GetFile:output_type -> proto.File
+	7,  // 20: proto.UtilsService.CreateFile:output_type -> proto.File
+	7,  // 21: proto.UtilsService.DeleteFile:output_type -> proto.File
+	8,  // 22: proto.NotesService.GetNotes:output_type -> proto.Note
+	8,  // 23: proto.NotesService.CreateNote:output_type -> proto.Note
+	8,  // 24: proto.NotesService.DeleteNote:output_type -> proto.Note
+	10, // 25: proto.PostsService.GetPosts:output_type -> proto.Post
+	10, // 26: proto.PostsService.CreatePost:output_type -> proto.Post
+	10, // 27: proto.PostsService.DeletePost:output_type -> proto.Post
+	14, // [14:28] is the sub-list for method output_type
+	0,  // [0:14] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
