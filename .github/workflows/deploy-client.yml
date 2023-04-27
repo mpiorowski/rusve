@@ -6,7 +6,7 @@ on:
       GCP_CREDENTIALS:
         required: true
       URI_UTILS:
-      URI_USER:
+      URI_USERS:
       URI_NOTES:
       URI_POSTS:
       JWT_SECRET:
