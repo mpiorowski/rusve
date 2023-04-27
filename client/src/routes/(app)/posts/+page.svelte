@@ -16,7 +16,7 @@
 <PostDrawer {form} />
 
 <h3 class="text-right">
-    Go: {data.duration.toFixed(4)}ms
+    Go: {data.duration.toFixed(4)}ms / {data.posts.length} posts
 </h3>
 
 <div class="mb-6 grid grid-cols-2 gap-4">
@@ -30,7 +30,7 @@
     </Button>
 </div>
 
-{#each data.posts as post}
+{#each data.posts.splice(0, 10) as post}
     <Post postId={post.id} canDelete={post.userId === data.userId}>
         <span slot="title">{post.title}</span>
         <span slot="content">

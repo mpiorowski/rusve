@@ -5,8 +5,8 @@ use crate::{
 };
 use anyhow::Result;
 use futures_util::TryStreamExt;
-use sqlx::types::time::OffsetDateTime;
-use sqlx::{postgres::PgRow, query, types::Uuid, Row};
+use sqlx::{types::Uuid, Row};
+use time::OffsetDateTime;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
@@ -26,10 +26,10 @@ impl SqlxError for sqlx::Error {
     }
 }
 
-impl TryFrom<Option<PgRow>> for Note {
+impl TryFrom<Option<sqlx::postgres::PgRow>> for Note {
     type Error = anyhow::Error;
 
-    fn try_from(row: Option<PgRow>) -> Result<Self, Self::Error> {
+    fn try_from(row: Option<sqlx::postgres::PgRow>) -> Result<Self, Self::Error> {
         match row {
             Some(row) => {
                 let id: Uuid = row.try_get("id")?;
@@ -79,7 +79,7 @@ impl NotesService for MyService {
         let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         tokio::spawn(async move {
-            let mut notes_stream = query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
+            let mut notes_stream = sqlx::query("SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc")
                 .bind(user_id)
                 .fetch(&pool);
 
@@ -144,23 +144,28 @@ impl NotesService for MyService {
         let start = std::time::Instant::now();
 
         let pool = self.pool.clone();
-        let (tx, rx) = mpsc::channel(100);
+        let (tx, rx) = mpsc::channel(4);
 
         let user_id = request.into_inner().user_id;
         let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        let mut notes_stream = query(
+        let mut notes_stream = sqlx::query!(
             "SELECT * FROM notes WHERE \"userId\" = $1 and deleted is null order by created desc",
+            user_id
         )
-        .bind(user_id)
-        .fetch(&pool);
+        .fetch(&pool).await?;
 
         tokio::spawn(async move {
+            println!("Prepare: {:?}", start.elapsed());
+
+            let start_loop = std::time::Instant::now();
+
             loop {
                 match notes_stream.try_next().await {
                     Ok(None) => {
                         let elapsed = start.elapsed();
                         println!("Elapsed: {:.2?}", elapsed);
+                        println!("Loop: {:.2?}", start_loop.elapsed());
                         break;
                     }
                     Ok(note) => {
@@ -195,13 +200,15 @@ impl NotesService for MyService {
         let user_id =
             Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        query("INSERT INTO notes (title, content, \"userId\") VALUES ($1, $2, $3) RETURNING *")
-            .bind(note.title.clone())
-            .bind(note.content.clone())
-            .bind(user_id)
-            .fetch_one(&mut tx)
-            .await
-            .map_err(sqlx::Error::into_status)?;
+        sqlx::query(
+            "INSERT INTO notes (title, content, \"userId\") VALUES ($1, $2, $3) RETURNING *",
+        )
+        .bind(note.title.clone())
+        .bind(note.content.clone())
+        .bind(user_id)
+        .fetch_one(&mut tx)
+        .await
+        .map_err(sqlx::Error::into_status)?;
 
         // commit transaction
         tx.commit().await.map_err(sqlx::Error::into_status)?;
@@ -225,13 +232,14 @@ impl NotesService for MyService {
         let user_uuid =
             Uuid::parse_str(&request.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        let row =
-            query("UPDATE notes SET deleted = NOW() WHERE id = $1 AND \"userId\" = $2 RETURNING *")
-                .bind(note_uuid)
-                .bind(user_uuid)
-                .fetch_one(&mut tx)
-                .await
-                .map_err(sqlx::Error::into_status)?;
+        let row = sqlx::query(
+            "UPDATE notes SET deleted = NOW() WHERE id = $1 AND \"userId\" = $2 RETURNING *",
+        )
+        .bind(note_uuid)
+        .bind(user_uuid)
+        .fetch_one(&mut tx)
+        .await
+        .map_err(sqlx::Error::into_status)?;
 
         let note: Note = match Some(row).try_into() {
             Ok(note) => note,

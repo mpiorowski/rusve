@@ -5,13 +5,12 @@ mod utils;
 use crate::proto::users_service_client::UsersServiceClient;
 use anyhow::{Context, Result};
 use proto::notes_service_server::NotesServiceServer;
-use sqlx::{postgres::PgPoolOptions, PgPool};
 use tonic::{transport::Server, Request, Status};
 use utils::{check_env, decode_token};
 
 #[derive(Debug)]
 pub struct MyService {
-    pool: PgPool,
+    pool: sqlx::PgPool,
     users_conn: UsersServiceClient<tonic::transport::Channel>,
 }
 
@@ -21,7 +20,7 @@ async fn main() -> Result<()> {
 
     // Database
     let database_url = check_env("DATABASE_URL")?;
-    let pool = PgPoolOptions::new()
+    let pool = sqlx::postgres::PgPoolOptions::new()
         .max_connections(20)
         .connect(&database_url)
         .await
