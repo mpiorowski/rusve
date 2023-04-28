@@ -20,7 +20,7 @@ export async function POST({ request }: { request: Request }) {
     const header = new Headers();
     header.append(
         "set-cookie",
-        `session=${sessionCookie}; Max-Age=${expiresIn}; SameSite=strict; HttpOnly; Path=/; ${
+        `session=${sessionCookie}; Max-Age=${expiresIn}; SameSite=lax; HttpOnly; Path=/; ${
             !import.meta.env.DEV ? "Secure;" : ""
         }`,
     );
