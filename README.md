@@ -23,14 +23,13 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
   - **Minimal external libraries** - With Svelte animation and stores builing custom components is very easy. Checkout `Toast`, `Drawer`, `Modal`, `Dropdown` and see for yourself.
 - **gRPC** - Fast, streamable and gives You amazing typesafety across the whole project, no matter the language (hi tRPC).
 - **Microservices** - Scaling? Different Language? Cost-effecient? Done.
+- **[Google Cloud Platform](https://cloud.google.com/)** - Deployed to Google Cloud Run, great scaling solution for dockerized application. Everything is done via github actions.
 - **Dockerized** - Easy do deploy, easy to move, easy to work with. Move to GCP? No problem.
 - **[Firebase SSR Authentication](https://firebase.google.com/docs/auth/admin/manage-cookies)** - Secured and safe, battle tested and very easy to work with.
 - **Multi language** - You can use any language for backend. Here we use mainly Rust, but there is also a Go service running.
 - **Files** - Upload, view and download. Everything ready to use.
 
 In progress:
-- **Production deployment using github actions**
-- **GCP flow**
 - **MDX**
 - **Stripe**
 - **Any other feature You will request :)**
@@ -42,7 +41,11 @@ https://www.rusve.app
 ![image](https://user-images.githubusercontent.com/26543876/234502285-e92ca1e2-70ab-4e8c-9ced-4147215a4e71.png)
 
 ## Authorization
-![image](https://user-images.githubusercontent.com/26543876/234501073-bfa1fcc4-dd51-4c47-9540-995b439a64b2.png)
+![image](https://user-images.githubusercontent.com/26543876/235083225-c3506fad-9702-4269-b623-487a44274a95.png)
+
+## Github action deployment
+![image](https://user-images.githubusercontent.com/26543876/235082796-cfc6a48b-4a3b-4633-a713-d19f99507e60.png)
+
 
 ## Dev deployment
 
