@@ -12,9 +12,13 @@
     on:click
     {type}
     disabled={loading}
-    class={"w-full h-10 flex flex-row gap-3 justify-center items-center rounded px-4 py-2 shadow-md font-semibold hover:opacity-80 transition " +
-        (variant === "primary" ? " bg-secondary-700" : "") +
-        (variant === "secondary" ? " bg-primary-800" : "") +
+    class={"w-full h-10 flex flex-row gap-3 justify-center items-center rounded px-4 shadow-md font-normal text-base text-white transition" +
+        (variant === "primary"
+            ? " bg-secondary-700 hover:bg-secondary-800"
+            : "") +
+        (variant === "secondary"
+            ? " bg-primary-800 hover:bg-primary-900"
+            : "") +
         (variant === "error" ? " bg-error-600" : "")}
 >
     {#if loading}

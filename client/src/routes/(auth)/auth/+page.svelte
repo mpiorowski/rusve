@@ -143,9 +143,7 @@
     </div>
 {/if}
 
-<section
-    class="max-w-md h-screen m-auto flex flex-col justify-center items-center p-4"
->
+<div class="max-w-md m-auto flex flex-col items-center justify-center h-full">
     <h2 class="text-primary-200">Welcome back</h2>
     <p class="text-primary-300 mb-4 mt-2">
         Sign in so You can say "I use Rust"
@@ -190,4 +188,4 @@
         </svelte:fragment>
         <div>Email</div>
     </Button>
-</section>
+</div>

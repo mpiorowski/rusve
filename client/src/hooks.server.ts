@@ -75,10 +75,18 @@ export const handle: Handle = async ({ event, resolve }) => {
         }
     }
 
+    const isMain = event.url.pathname === "/rusve";
+    const isFeatures = event.url.pathname === "/features";
     const isAuth = event.url.pathname === "/auth";
     const isApiAuth = event.url.pathname === "/api/auth";
-    if (!isAuth && !isApiAuth && !event.locals.userId) {
-        throw redirect(303, "/auth");
+    if (
+        !isMain &&
+        !isFeatures &&
+        !isAuth &&
+        !isApiAuth &&
+        !event.locals.userId
+    ) {
+        throw redirect(303, "/rusve");
     }
     if (isAuth && event.locals.userId) {
         throw redirect(303, "/");
