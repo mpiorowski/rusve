@@ -8,7 +8,7 @@
     <title>Rusve</title>
     <meta
         name="description"
-        content="Open source Rust with SvelteKit application, using gRPC and microservices"
+        content="Open source Rust with SvelteKit application, using gRPC and microservices."
     />
 </svelte:head>
 
