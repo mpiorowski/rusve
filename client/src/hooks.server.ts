@@ -22,12 +22,18 @@ export const handleError: HandleServerError = ({ error }) => {
 
 export const handle: Handle = async ({ event, resolve }) => {
     const now = performance.now();
-
     const emptySession = {
         userId: "",
         email: "",
         role: "",
     };
+
+    const isMain = event.url.pathname === "/rusve";
+    const isFeatures = event.url.pathname === "/features";
+    if (isMain || isFeatures) {
+        event.locals = emptySession;
+        return await resolve(event);
+    }
 
     const session = event.cookies.get("session") ?? "";
     if (!session || session === "") {
@@ -75,10 +81,8 @@ export const handle: Handle = async ({ event, resolve }) => {
         }
     }
 
-    const isMain = event.url.pathname === "/rusve";
-    const isFeatures = event.url.pathname === "/features";
-    const isAuth = event.url.pathname === "/auth";
     const isApiAuth = event.url.pathname === "/api/auth";
+    const isAuth = event.url.pathname === "/auth";
     if (
         !isMain &&
         !isFeatures &&
