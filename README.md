@@ -9,10 +9,9 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
 
 ## Features
 - **[Rust](https://www.rust-lang.org/)** - Hard to learn, but once You do...You will be able to say "I use Rust".
-  - **No unnecessary unwrap** - Each error is handled.
-  - **No unnecessary cloning** - As performant as it can be.
-  - **[Tonic](https://docs.rs/tonic/latest/tonic/)** - amazing gRPC rust crate, with first class support of async/await. 
-  - **Sql Pools and Transactions** - Using the best practice for the best performance and error prone.
+  - **No unnecessary unwrap / cloning** - As clean and performant as possible.
+  - **[Tonic](https://docs.rs/tonic/latest/tonic/)** - Amazing gRPC rust crate, with first class support of async/await. 
+  - **Sql Pools and Transactions** - Using the best practice for the best performance and error handling.
   - **Streaming** - Streaming the data directly from postgreSQL.
 - **[SvelteKit](https://kit.svelte.dev/)** - Once You try it, it's hard to go back to any other framework:
   - **[Typescript](https://www.typescriptlang.org/)** - Fully written in typescript with the [strict](https://typescript-eslint.io/linting/configs#strict) rules enforced. No any or unknown in code.
@@ -22,11 +21,11 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
   - **[TawilwindCSS](https://tailwindcss.com/)** - Used for styling, no other UI library needed. 
   - **Minimal external libraries** - With Svelte animation and stores builing custom components is very easy. Checkout `Toast`, `Drawer`, `Modal`, `Dropdown` and see for yourself.
 - **gRPC** - Fast, streamable and gives You amazing typesafety across the whole project, no matter the language (hi tRPC).
-- **Microservices** - Scaling? Different Language? Cost-effecient? Done.
-- **[Google Cloud Platform](https://cloud.google.com/)** - Deployed to Google Cloud Run, great scaling solution for dockerized application. Everything is done via github actions.
-- **Dockerized** - Easy do deploy, easy to move, easy to work with. Move to GCP? No problem.
-- **[Firebase SSR Authentication](https://firebase.google.com/docs/auth/admin/manage-cookies)** - Secured and safe, battle tested and very easy to work with.
-- **Multi language** - You can use any language for backend. Here we use mainly Rust, but there is also a Go service running.
+- **Microservices** - Scaling? Cost-efficiency? Resilience? Got you covered.
+- **[Google Cloud Platform](https://cloud.google.com/)** - Using Google Cloud Run. Easy to deploy, easy to scale, easy to maintain.
+- **Dockerized** - Local development? CI/CD? Production? All the same. Dockerized.
+- **[Firebase SSR Authentication](https://firebase.google.com/docs/auth/admin/manage-cookies)** - Battle-tested OAuth, Magic Link, Phone Number, and all done on the server.
+- **Multi language** - Mutli-language for backend. Using mainly Rust, with one Go service.
 - **Files** - Upload, view and download. Everything ready to use.
 
 In progress:
