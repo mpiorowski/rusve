@@ -1,10 +1,5 @@
 <script lang="ts">
     export let data;
-    export let form;
-
-    const test: number = "Wrong type";
-
-    const test2: number = 10;
 </script>
 
 <div class="p-4">
