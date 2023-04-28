@@ -15,9 +15,10 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: npm ci
-      - run: cp .env.dist .env
-      - run: npm run build
+      - name: Install dependencies
+        run: npm ci
+      - name: Copy env file
+        run: cp .env.dist .env
       - name: Run ESLint
         run: npm run lint-report
       - name: Annotate Pull Request
@@ -54,4 +55,6 @@ jobs:
                 },
               });
             }
+      - name: Run build 
+        run: npm run build
       #- run: npm run test
