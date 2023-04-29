@@ -16,7 +16,6 @@ export const load = (async ({ locals }) => {
         const userId = locals.userId;
         const request: UserId = { userId: userId };
         let metadata = await createMetadata(URI_USERS);
-
         const user = await new Promise<User__Output>((resolve, reject) => {
             usersClient.getUser(request, metadata, (err, response) =>
                 err || !response ? reject(err) : resolve(response),
@@ -148,7 +147,7 @@ export const actions = {
                 return fail(400, { error: "Invalid request" });
             }
 
-            const metadata = await createMetadata(URI_UTILS);
+            let metadata = await createMetadata(URI_UTILS);
             // Delete old avatar
             if (schema.data.avatar) {
                 const oldFileId: FileId = {
@@ -191,6 +190,7 @@ export const actions = {
                 name: schema.data.name,
                 avatar: newFile.id,
             };
+            metadata = await createMetadata(URI_USERS);
             const user = await new Promise<User__Output>((resolve, reject) => {
                 usersClient.createUser(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),

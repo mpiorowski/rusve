@@ -7,8 +7,8 @@ option go_package = "rusve/proto";
 import "users.proto";
 
 message NoteId {
-    string noteId = 1;
-    string userId = 2;
+    string note_id = 1;
+    string user_id = 2;
 }
 
 message Note {
@@ -17,7 +17,7 @@ message Note {
   string updated = 3;
   optional string deleted = 4;
 
-  string userId = 5;
+  string user_id = 5;
   string title = 6;
   string content = 7;
 

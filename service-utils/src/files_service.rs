@@ -5,6 +5,8 @@ use anyhow::Result;
 use futures_util::TryStreamExt;
 use google_cloud_default::WithAuthExt;
 use google_cloud_storage::client::{Client, ClientConfig};
+use google_cloud_storage::http::objects::download::Range;
+use google_cloud_storage::http::objects::get::GetObjectRequest;
 use google_cloud_storage::http::objects::upload::{Media, UploadObjectRequest, UploadType};
 use sqlx::types::time::OffsetDateTime;
 use sqlx::{postgres::PgRow, query, types::Uuid, Row};
@@ -88,14 +90,45 @@ impl UtilsService for MyService {
                                 break;
                             }
                         };
-                        let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
-                        let buffer = match std::fs::read(file_path) {
-                            Ok(buffer) => buffer,
-                            Err(e) => {
-                                tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                                break;
-                            }
-                        };
+                        let env = std::env::var("ENV").unwrap();
+                        let bucket = std::env::var("BUCKET").unwrap();
+                        let mut buffer = Vec::new();
+                        if env == "development" {
+                            let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
+                            buffer = match std::fs::read(file_path) {
+                                Ok(buffer) => buffer,
+                                Err(e) => {
+                                    tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                                    break;
+                                }
+                            };
+                        } else if env == "production" {
+                            let config = match ClientConfig::default().with_auth().await {
+                                Ok(config) => config,
+                                Err(e) => {
+                                    tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                                    break;
+                                }
+                            };
+                            let client = Client::new(config);
+                            let data = client
+                                .download_object(
+                                    &GetObjectRequest {
+                                        bucket,
+                                        object: format!("{}/{}", &file.id, &file.name),
+                                        ..Default::default()
+                                    },
+                                    &Range::default(),
+                                )
+                                .await;
+                            buffer = match data {
+                                Ok(data) => data,
+                                Err(e) => {
+                                    tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                                    break;
+                                }
+                            };
+                        }
                         file.buffer = buffer;
                         tx.send(Ok(file)).await.unwrap();
                     }
@@ -120,21 +153,49 @@ impl UtilsService for MyService {
             Uuid::parse_str(&request.file_id).map_err(|e| Status::internal(e.to_string()))?;
         let target_uuid =
             Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
-        let row =
-            query("SELECT * FROM files WHERE id = $1 and target_id = $2 and deleted is null")
-                .bind(uuid)
-                .bind(target_uuid)
-                .fetch_one(&pool)
-                .await
-                .map_err(|e| Status::internal(e.to_string()))?;
+        let row = query("SELECT * FROM files WHERE id = $1 and target_id = $2 and deleted is null")
+            .bind(uuid)
+            .bind(target_uuid)
+            .fetch_one(&pool)
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let mut file: File = match Some(row).try_into() {
             Ok(file) => file,
             Err(e) => return Err(Status::internal(e.to_string())),
         };
 
-        let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
-        let buffer = std::fs::read(file_path).unwrap();
+        let env = std::env::var("ENV").unwrap();
+        let bucket = std::env::var("BUCKET").unwrap();
+        let mut buffer = Vec::new();
+
+        if env == "development" {
+            let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
+            buffer = match std::fs::read(file_path) {
+                Ok(buffer) => buffer,
+                Err(e) => return Err(Status::internal(e.to_string())),
+            };
+        } else if env == "production" {
+            let config = match ClientConfig::default().with_auth().await {
+                Ok(config) => config,
+                Err(e) => return Err(Status::internal(e.to_string())),
+            };
+            let client = Client::new(config);
+            let data = client
+                .download_object(
+                    &GetObjectRequest {
+                        bucket,
+                        object: format!("{}/{}", &file.id, &file.name),
+                        ..Default::default()
+                    },
+                    &Range::default(),
+                )
+                .await;
+            buffer = match data {
+                Ok(data) => data,
+                Err(e) => return Err(Status::internal(e.to_string())),
+            };
+        }
         file.buffer = buffer;
 
         let elapsed = start.elapsed();
@@ -187,9 +248,13 @@ impl UtilsService for MyService {
             new_file.write_all(&file_buffer).await?;
         } else if env == "production" {
             // save to GCP storage
-            let config = ClientConfig::default().with_auth().await.unwrap();
+            let config = ClientConfig::default()
+                .with_auth()
+                .await
+                .map_err(|e| Status::internal(e.to_string()))?;
             let client = Client::new(config);
-            let upload_type = UploadType::Simple(Media::new(file.name.to_string()));
+            let file_path = format!("{}/{}", file.id, file.name);
+            let upload_type = UploadType::Simple(Media::new(file_path));
             let uploaded = client
                 .upload_object(
                     &UploadObjectRequest {
@@ -232,14 +297,13 @@ impl UtilsService for MyService {
             Uuid::parse_str(&request.file_id).map_err(|e| Status::internal(e.to_string()))?;
         let target_id =
             Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
-        let row = query(
-            "UPDATE files SET deleted = now() WHERE id = $1 and target_id = $2 RETURNING *",
-        )
-        .bind(file_id)
-        .bind(target_id)
-        .fetch_one(&mut tx)
-        .await
-        .map_err(|e| Status::not_found(e.to_string()))?;
+        let row =
+            query("UPDATE files SET deleted = now() WHERE id = $1 and target_id = $2 RETURNING *")
+                .bind(file_id)
+                .bind(target_id)
+                .fetch_one(&mut tx)
+                .await
+                .map_err(|e| Status::not_found(e.to_string()))?;
 
         // delete file from disk
         tokio::fs::remove_dir_all(format!("/app/files/{}", file_id)).await?;

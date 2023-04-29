@@ -1,5 +1,5 @@
 mod proto;
-mod utils_service;
+mod files_service;
 
 use crate::proto::utils_service_server::UtilsServiceServer;
 use anyhow::{Context, Result};
