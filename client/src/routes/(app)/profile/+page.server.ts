@@ -67,7 +67,7 @@ export const load = (async ({ locals }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-    createUser: async ({ request }) => {
+    createUser: async ({ request, locals }) => {
         try {
             const form = await request.formData();
             const name = form.get("name");
@@ -85,6 +85,7 @@ export const actions = {
             }
 
             const data: User = {
+                id: locals.userId,
                 name: schema.data.name,
                 avatar: schema.data.avatar || undefined,
             };
@@ -187,6 +188,7 @@ export const actions = {
 
             // Create avatar
             const data: User = {
+                id: locals.userId,
                 name: schema.data.name,
                 avatar: newFile.id,
             };
