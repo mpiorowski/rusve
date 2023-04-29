@@ -29,3 +29,5 @@ time = "0.3.17"
 reqwest = "0.11.14"
 jsonwebtoken = "8.2.0"
 serde = "1.0.155"
+google-cloud-storage = "0.11.0"
+google-cloud-default = { version = "0.2.0", features = ["storage", "pubsub"] }

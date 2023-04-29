@@ -3,6 +3,9 @@ use crate::proto::{File, FileId, FileType, TargetId};
 use crate::MyService;
 use anyhow::Result;
 use futures_util::TryStreamExt;
+use google_cloud_default::WithAuthExt;
+use google_cloud_storage::client::{Client, ClientConfig};
+use google_cloud_storage::http::objects::upload::{Media, UploadObjectRequest, UploadType};
 use sqlx::types::time::OffsetDateTime;
 use sqlx::{postgres::PgRow, query, types::Uuid, Row};
 use tokio::io::AsyncWriteExt;
@@ -174,11 +177,34 @@ impl UtilsService for MyService {
             Err(e) => return Err(Status::internal(e.to_string())),
         };
 
-        // save file to disk
-        let file_path = format!("/app/files/{}/{}", file.id, file.name);
-        tokio::fs::create_dir_all(format!("/app/files/{}", file.id)).await?;
-        let mut new_file = tokio::fs::File::create(file_path).await?;
-        new_file.write_all(&file_buffer).await?;
+        let env = std::env::var("ENV").unwrap_or_else(|_| "development".to_string());
+        if env == "development" {
+            // save file to disk
+            let file_path = format!("/app/files/{}/{}", file.id, file.name);
+            tokio::fs::create_dir_all(format!("/app/files/{}", file.id)).await?;
+            let mut new_file = tokio::fs::File::create(file_path).await?;
+            new_file.write_all(&file_buffer).await?;
+        } else if env == "production" {
+            // save to GCP storage
+            let config = ClientConfig::default().with_auth().await.unwrap();
+            let client = Client::new(config);
+            let upload_type = UploadType::Simple(Media::new(file.name.to_string()));
+            let uploaded = client
+                .upload_object(
+                    &UploadObjectRequest {
+                        bucket: "bucket".to_string(),
+                        ..Default::default()
+                    },
+                    "hello world".as_bytes(),
+                    &upload_type,
+                )
+                .await;
+            if let Err(e) = uploaded {
+                // TODO - do i need it? if yes, use it everywhere
+                tx.rollback().await.unwrap();
+                return Err(Status::internal(e.to_string()));
+            }
+        }
 
         // commit transaction
         tx.commit()

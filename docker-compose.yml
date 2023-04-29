@@ -11,6 +11,30 @@ services:
     ports: 
       - 3000:3000
 
+  service-users:
+    container_name: rusve-users
+    working_dir: /app
+    build:
+      context: ./service-users
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./service-users/src:/app/src
+    depends_on:
+      - db-users
+    environment:
+      PORT: 443
+      ENV: development
+      DATABASE_URL: postgresql://postgres:12345@db-users/users
+      SECRET: my-rust-secret
+
+  db-users:
+    container_name: rusve-users-db
+    image: postgres:15.1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: users
+
   service-utils:
     container_name: rusve-utils
     working_dir: /app
@@ -37,30 +61,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
       POSTGRES_DB: utils
-
-  service-users:
-    container_name: rusve-users
-    working_dir: /app
-    build:
-      context: ./service-users
-      dockerfile: Dockerfile.dev
-    volumes:
-      - ./service-users/src:/app/src
-    depends_on:
-      - db-users
-    environment:
-      PORT: 443
-      ENV: development
-      DATABASE_URL: postgresql://postgres:12345@db-users/users
-      SECRET: my-rust-secret
-
-  db-users:
-    container_name: rusve-users-db
-    image: postgres:15.1
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: users
 
   service-notes:
     container_name: rusve-notes
