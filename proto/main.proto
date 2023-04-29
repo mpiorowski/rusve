@@ -11,10 +11,10 @@ import "posts.proto";
 
 message Empty {}
 message UserId {
-    string userId = 1;
+    string user_id = 1;
 }
 message UserIds {
-    repeated string userIds = 1;
+    repeated string user_ids = 1;
 }
 
 service UsersService {

@@ -60,5 +60,6 @@ jobs:
           env_vars: |
             ENV=production
             DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
+            BUCKET=rusve-bucket
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

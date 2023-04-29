@@ -21,4 +21,4 @@ jobs:
         with:
           version: latest
           working-directory: ./service-posts
-          args: --skip-dirs=proto
+          args: --skip-dirs=proto --timeout=3m

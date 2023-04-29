@@ -106,12 +106,19 @@ export const actions = {
         const form = await request.formData();
         const id = form.get("id");
 
-        if (!id) {
+        const schema = z.object({
+            id: z.string().uuid(),
+        }).safeParse({ id: id });
+        if (!schema.success) {
+            throw error(400, "Missing id");
+        }
+
+        if (!schema.success) {
             throw error(400, "Missing id");
         }
         try {
             const data: PostId = {
-                postId: id as string,
+                postId: schema.data.id,
                 userId: locals.userId,
             };
 
