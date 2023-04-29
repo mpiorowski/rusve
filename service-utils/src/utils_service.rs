@@ -23,7 +23,7 @@ impl TryFrom<Option<PgRow>> for File {
                 let created: OffsetDateTime = row.try_get("created")?;
                 let updated: OffsetDateTime = row.try_get("updated")?;
                 let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
-                let target_id: Uuid = row.try_get("targetId")?;
+                let target_id: Uuid = row.try_get("target_id")?;
                 let name: String = row.try_get("name")?;
                 let r#type: String = row.try_get("type")?;
                 let file_type =
@@ -68,7 +68,7 @@ impl UtilsService for MyService {
             .as_str_name();
 
         tokio::spawn(async move {
-            let mut files_stream = query("SELECT * FROM files WHERE \"targetId\" = $1 and type = $2 and deleted is null order by created desc")
+            let mut files_stream = query("SELECT * FROM files WHERE target_id = $1 and type = $2 and deleted is null order by created desc")
                 .bind(target_uuid)
                 .bind(r#type)
                 .fetch(&pool);
@@ -121,7 +121,7 @@ impl UtilsService for MyService {
         let target_uuid =
             Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
         let row =
-            query("SELECT * FROM files WHERE id = $1 and \"targetId\" = $2 and deleted is null")
+            query("SELECT * FROM files WHERE id = $1 and target_id = $2 and deleted is null")
                 .bind(uuid)
                 .bind(target_uuid)
                 .fetch_one(&pool)
@@ -165,7 +165,7 @@ impl UtilsService for MyService {
 
         // save file to db
         let row =
-            query("INSERT INTO files (\"targetId\", name, type) VALUES ($1, $2, $3) RETURNING *")
+            query("INSERT INTO files (target_id, name, type) VALUES ($1, $2, $3) RETURNING *")
                 .bind(uuid)
                 .bind(file.name)
                 .bind(r#type)
@@ -233,7 +233,7 @@ impl UtilsService for MyService {
         let target_id =
             Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
         let row = query(
-            "UPDATE files SET deleted = now() WHERE id = $1 and \"targetId\" = $2 RETURNING *",
+            "UPDATE files SET deleted = now() WHERE id = $1 and target_id = $2 RETURNING *",
         )
         .bind(file_id)
         .bind(target_id)
