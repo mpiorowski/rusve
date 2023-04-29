@@ -177,7 +177,8 @@ impl UtilsService for MyService {
             Err(e) => return Err(Status::internal(e.to_string())),
         };
 
-        let env = std::env::var("ENV").unwrap_or_else(|_| "development".to_string());
+        let env = std::env::var("ENV").unwrap();
+        let bucket = std::env::var("BUCKET").unwrap();
         if env == "development" {
             // save file to disk
             let file_path = format!("/app/files/{}/{}", file.id, file.name);
@@ -192,10 +193,10 @@ impl UtilsService for MyService {
             let uploaded = client
                 .upload_object(
                     &UploadObjectRequest {
-                        bucket: "bucket".to_string(),
+                        bucket: bucket.to_string(),
                         ..Default::default()
                     },
-                    "hello world".as_bytes(),
+                    file_buffer,
                     &upload_type,
                 )
                 .await;

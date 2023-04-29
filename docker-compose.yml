@@ -50,7 +50,6 @@ services:
       PORT: 443
       ENV: development
       DATABASE_URL: postgresql://?host=db-utils&user=postgres&password=12345&dbname=utils
-      SECRET: my-rust-secret
 
   db-utils:
     container_name: rusve-utils-db
