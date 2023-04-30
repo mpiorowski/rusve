@@ -33,7 +33,7 @@
                     />
                 </div>
                 <div class="flex flex-row gap-2">
-                    <form action="/api/files" method="post" use:enhance>
+                    <form action="/api/files" method="post">
                         <input type="hidden" name="base64" value={file.data} />
                         <input type="hidden" name="name" value={file.name} />
                         <Button variant="secondary">
