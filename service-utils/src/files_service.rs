@@ -5,6 +5,7 @@ use anyhow::Result;
 use futures_util::TryStreamExt;
 use google_cloud_default::WithAuthExt;
 use google_cloud_storage::client::{Client, ClientConfig};
+use google_cloud_storage::http::objects::delete::DeleteObjectRequest;
 use google_cloud_storage::http::objects::download::Range;
 use google_cloud_storage::http::objects::get::GetObjectRequest;
 use google_cloud_storage::http::objects::upload::{Media, UploadObjectRequest, UploadType};
@@ -304,14 +305,34 @@ impl UtilsService for MyService {
                 .fetch_one(&mut tx)
                 .await
                 .map_err(|e| Status::not_found(e.to_string()))?;
-
-        // delete file from disk
-        tokio::fs::remove_dir_all(format!("/app/files/{}", file_id)).await?;
-
         let file: File = match Some(row).try_into() {
             Ok(file) => file,
             Err(e) => return Err(Status::internal(e.to_string())),
         };
+
+        let env = std::env::var("ENV").unwrap();
+        let bucket = std::env::var("BUCKET").unwrap();
+        if env == "development" {
+            // delete file from disk
+            tokio::fs::remove_dir_all(format!("/app/files/{}", file.id)).await?;
+        } else if env == "production" {
+            // delete from GCP storage
+            let config = ClientConfig::default()
+                .with_auth()
+                .await
+                .map_err(|e| Status::internal(e.to_string()))?;
+            let client = Client::new(config);
+            let deleted = client
+                .delete_object(&DeleteObjectRequest {
+                    bucket: bucket.to_string(),
+                    object: file.id.to_string(),
+                    ..Default::default()
+                })
+                .await;
+            if let Err(e) = deleted {
+                return Err(Status::internal(e.to_string()));
+            }
+        }
 
         // commit transaction
         tx.commit()

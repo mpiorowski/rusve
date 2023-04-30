@@ -242,7 +242,7 @@ export const actions = {
             fileId: schema.data.fileId,
             targetId: schema.data.targetId,
         };
-        const file = new Promise<File__Output>((resolve, reject) => {
+        await new Promise<File__Output>((resolve, reject) => {
             utilsClient.deleteFile(fileData, metadataUtils, (err, response) =>
                 err || !response ? reject(err) : resolve(response),
             );
@@ -250,15 +250,15 @@ export const actions = {
 
         // Update user
         const data: User = {
+            id: locals.userId,
             name: schema.data.name,
         };
-        const user = new Promise<User__Output>((resolve, reject) => {
+        await new Promise<User__Output>((resolve, reject) => {
             usersClient.createUser(data, metadata, (err, response) =>
                 err || !response ? reject(err) : resolve(response),
             );
         });
 
-        await Promise.all([file, user]);
         const end = performance.now();
         return { duration: end - start };
     },
