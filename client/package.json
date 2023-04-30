@@ -35,6 +35,7 @@
     },
     "type": "module",
     "dependencies": {
+        "@google-cloud/pubsub": "^3.5.2",
         "@grpc/grpc-js": "^1.8.12",
         "@grpc/proto-loader": "^0.7.5",
         "@types/jsonwebtoken": "^9.0.1",

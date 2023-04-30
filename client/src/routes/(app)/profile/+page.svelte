@@ -1,4 +1,5 @@
 <script lang="ts">
+    import ProfileEmail from "./ProfileEmail.svelte";
     import { setContext } from "svelte";
     import ProfileAvatar from "./ProfileAvatar.svelte";
     import ProfileData from "./ProfileData.svelte";
@@ -36,4 +37,6 @@
     <ProfileData />
     <div class="border-b border-primary-600" />
     <ProfileAvatar />
+    <div class="border-b border-primary-600" />
+    <ProfileEmail />
 </div>

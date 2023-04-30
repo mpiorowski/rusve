@@ -6,6 +6,7 @@ import type { FileId } from "$lib/proto/proto/FileId";
 import { FileType } from "$lib/proto/proto/FileType";
 import type { User, User__Output } from "$lib/proto/proto/User";
 import type { UserId } from "$lib/proto/proto/UserId";
+import { PubSub } from "@google-cloud/pubsub";
 import { error, fail } from "@sveltejs/kit";
 import { z } from "zod";
 import type { Actions, PageServerLoad } from "./$types";
@@ -258,6 +259,53 @@ export const actions = {
                 err || !response ? reject(err) : resolve(response),
             );
         });
+
+        const end = performance.now();
+        return { duration: end - start };
+    },
+    sendEmail: async ({ request, locals }) => {
+        const start = performance.now();
+
+        const form = await request.formData();
+        const email = locals.email;
+        const subject = form.get("subject");
+        const message = form.get("message");
+
+        const schema = z
+            .object({
+                email: z.string().email(),
+                subject: z.string().min(1),
+                message: z.string().min(1),
+            })
+            .safeParse({
+                email,
+                subject,
+                message,
+            });
+
+        if (!schema.success) {
+            console.error(schema.error);
+            return fail(409, { form: schema.error.flatten().fieldErrors });
+        }
+
+        const data = {
+            email: schema.data.email,
+            subject: schema.data.subject,
+            message: schema.data.message,
+        };
+
+        try {
+            const dataBuffer = Buffer.from(JSON.stringify(data));
+            // TODO - cache it
+            const pubSubClient = new PubSub();
+            const messageId = await pubSubClient
+                .topic("email")
+                .publishMessage({ data: dataBuffer });
+            console.log(`Message ${messageId} published.`);
+        } catch (error) {
+            console.error(`Received error while publishing: ${error}`);
+            return fail(500, { error: "Could not send email" });
+        }
 
         const end = performance.now();
         return { duration: end - start };
