@@ -283,6 +283,7 @@ impl UtilsService for MyService {
     }
 
     async fn delete_file(&self, request: Request<FileId>) -> Result<Response<File>, Status> {
+        #[cfg(debug_assertions)]
         println!("DeleteFile: {:?}", request);
         let start = std::time::Instant::now();
 
@@ -325,7 +326,7 @@ impl UtilsService for MyService {
             let deleted = client
                 .delete_object(&DeleteObjectRequest {
                     bucket: bucket.to_string(),
-                    object: file.id.to_string(),
+                    object: format!("{}/{}", file.id, file.name),
                     ..Default::default()
                 })
                 .await;
