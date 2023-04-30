@@ -24,7 +24,7 @@ pub async fn subscribe_to_email() -> Result<(), Status> {
 
     // move it to another thread
     tokio::spawn(async move {
-        subscription
+        let sub = subscription
             .receive(
                 |message, _| async move {
                     // Handle data.
@@ -36,8 +36,11 @@ pub async fn subscribe_to_email() -> Result<(), Status> {
                 cancel.clone(),
                 None,
             )
-            .await
-            .unwrap();
+            .await;
+        match sub {
+            Ok(_) => println!("Subscription stopped"),
+            Err(e) => println!("Error: {}", e),
+        }
     });
 
     Ok(())
