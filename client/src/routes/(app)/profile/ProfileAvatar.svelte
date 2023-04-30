@@ -16,25 +16,25 @@
     let deleteLoading = false;
 
     async function downloadAvatar(base64: string, name: string) {
-        const response = await fetch(
-            `data:application/octet-stream;base64,${base64}`,
-        );
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // const formData = new FormData();
-        // formData.append("base64", base64);
-        // formData.append("name", name);
-        // const buffer = await fetch("/api/files", {
-        //     method: "POST",
-        //     body: formData,
-        // });
+        try {
+            const response = await fetch(
+                `data:application/octet-stream;base64,${base64}`,
+            );
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            console.error(e);
+            toast({
+                message: "Failed to download avatar",
+                type: "error",
+            });
+        }
     }
 </script>
 
