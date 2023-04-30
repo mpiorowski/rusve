@@ -22,18 +22,23 @@ pub async fn subscribe_to_email() -> Result<(), Status> {
     // Or simply use the `subscription.subscribe` method.
     let cancel = CancellationToken::new();
 
-    subscription
-        .receive(
-            |message, _| async move {
-                // Handle data.
-                println!("Got Message: {:?}", message.message.data);
+    // move it to another thread
+    tokio::spawn(async move {
+        subscription
+            .receive(
+                |message, _| async move {
+                    // Handle data.
+                    println!("Got Message: {:?}", message.message.data);
 
-                // Ack or Nack message.
-                let _ = message.ack().await;
-            },
-            cancel.clone(),
-            None,
-        )
-        .await?;
+                    // Ack or Nack message.
+                    let _ = message.ack().await;
+                },
+                cancel.clone(),
+                None,
+            )
+            .await
+            .unwrap();
+    });
+
     Ok(())
 }
