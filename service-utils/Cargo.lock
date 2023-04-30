@@ -1828,6 +1828,7 @@ dependencies = [
  "futures-core",
  "futures-util",
  "google-cloud-default",
+ "google-cloud-pubsub",
  "google-cloud-storage",
  "jsonwebtoken 8.3.0",
  "prost",
@@ -1837,6 +1838,7 @@ dependencies = [
  "time 0.3.20",
  "tokio",
  "tokio-stream",
+ "tokio-util",
  "tonic",
  "tonic-build",
 ]

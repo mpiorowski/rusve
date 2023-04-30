@@ -1,7 +1,8 @@
 mod proto;
 mod files_service;
+mod emails_service;
 
-use crate::proto::utils_service_server::UtilsServiceServer;
+use crate::{proto::utils_service_server::UtilsServiceServer, emails_service::subscribe_to_email};
 use anyhow::{Context, Result};
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tonic::transport::Server;
@@ -39,6 +40,9 @@ async fn main() -> Result<()> {
         .await
         .context("Failed to run migrations")?;
     println!("Migrations ran successfully");
+
+    // Subscribe to email
+    subscribe_to_email().await?;
 
     let port = std::env::var("PORT")?;
     let addr = ("[::]:".to_owned() + &port).parse()?;
