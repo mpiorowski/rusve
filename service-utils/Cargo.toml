@@ -33,3 +33,5 @@ google-cloud-storage = "0.11.0"
 google-cloud-default = { version = "0.2.0", features = ["storage", "pubsub"] }
 google-cloud-pubsub = "0.14.1"
 tokio-util = "0.7.8"
+serde_json = "1.0.96"
+sendgrid = "0.18.1"

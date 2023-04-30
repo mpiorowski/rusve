@@ -413,6 +413,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "data-encoding"
+version = "2.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23d8666cb01533c39dde32bcbab8e227b4ed6679b2c925eba05feabea39508fb"
+
+[[package]]
 name = "der"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1833,7 +1839,9 @@ dependencies = [
  "jsonwebtoken 8.3.0",
  "prost",
  "reqwest",
+ "sendgrid",
  "serde",
+ "serde_json",
  "sqlx",
  "time 0.3.20",
  "tokio",
@@ -1901,6 +1909,20 @@ checksum = "31c9bb296072e961fcbd8853511dd39c2d8be2deb1e17c6860b1d30732b323b4"
 dependencies = [
  "core-foundation-sys",
  "libc",
+]
+
+[[package]]
+name = "sendgrid"
+version = "0.18.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd6ba8c048dc4beab827cebc1d54f1007f5ebdfa240812ed6faa89452fd34ba0"
+dependencies = [
+ "data-encoding",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "url",
 ]
 
 [[package]]

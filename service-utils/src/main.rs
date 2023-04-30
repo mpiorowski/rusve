@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     println!("Starting server...");
 
     // check all env at start
-    let envs = vec!["ENV", "PORT", "DATABASE_URL", "BUCKET"];
+    let envs = vec!["ENV", "PORT", "DATABASE_URL", "BUCKET", "SENDGRID_API_KEY"];
     for env in envs {
         if std::env::var(env).is_err() || std::env::var(env).unwrap().is_empty() {
             println!("Missing env: {}", env);
