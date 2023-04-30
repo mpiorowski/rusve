@@ -2,7 +2,11 @@ import { getFirebaseServer } from "$lib/firebase/firebase_server";
 import { redirect } from "@sveltejs/kit";
 
 /** @type {import('./$types').RequestHandler} */
-export async function POST({ request }: { request: Request }) {
+export async function POST({
+    request,
+}: {
+    request: Request;
+}): Promise<Response> {
     const body = (await request.json()) as { idToken: string | undefined };
 
     if (!body.idToken) {
@@ -32,7 +36,7 @@ export async function POST({ request }: { request: Request }) {
 }
 
 /** @type {import('./$types').RequestHandler} */
-export function DELETE() {
+export function DELETE(): Response {
     const header = new Headers();
     header.append("set-cookie", `session=; Max-Age=0; Path=/`);
 
