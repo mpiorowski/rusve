@@ -23,7 +23,7 @@ export const load = (async ({ locals }) => {
         });
 
         let file: Promise<
-            { id: string; name: string; data: string } | undefined
+            { id: string; name: string; base64: string } | undefined
         > = Promise.resolve(undefined);
         if (user.avatar) {
             const fileId: FileId = {
@@ -39,7 +39,7 @@ export const load = (async ({ locals }) => {
                         const file = {
                             id: response.id,
                             name: response.name,
-                            data: Buffer.from(response.buffer).toString(
+                            base64: Buffer.from(response.buffer).toString(
                                 "base64",
                             ),
                         };

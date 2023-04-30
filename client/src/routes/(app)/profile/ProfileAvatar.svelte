@@ -14,6 +14,16 @@
     const profile = getContext<ProfileContext>("profile");
     let loading = false;
     let deleteLoading = false;
+
+    async function downloadAvatar(base64: string, name: string) {
+        const formData = new FormData();
+        formData.append("base64", base64);
+        formData.append("name", name);
+        await fetch("/api/files", {
+            method: "POST",
+            body: formData,
+        });
+    }
 </script>
 
 <div class="p-4 flex flex-col gap-4">
@@ -27,22 +37,22 @@
             <div class="flex flex-row items-center gap-4">
                 <div class="h-16 w-16">
                     <img
-                        src={`data:image;base64,${file.data}`}
+                        src={`data:image;base64,${file.base64}`}
                         alt="Avatar"
                         class="rounded-full object-cover h-full w-full"
                     />
                 </div>
                 <div class="flex flex-row gap-2">
-                    <form action="/api/files" method="post">
-                        <input type="hidden" name="base64" value={file.data} />
-                        <input type="hidden" name="name" value={file.name} />
-                        <Button variant="secondary">
-                            <span slot="icon">
-                                <DownloadIcon />
-                            </span>
-                            Download
-                        </Button>
-                    </form>
+                    <Button
+                        type="button"
+                        on:click={() => downloadAvatar(file.base64, file.name)}
+                        variant="secondary"
+                    >
+                        <span slot="icon">
+                            <DownloadIcon />
+                        </span>
+                        Download
+                    </Button>
                     <form
                         action="?/deleteAvatar"
                         method="post"
