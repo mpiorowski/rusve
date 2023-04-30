@@ -31,6 +31,7 @@ jobs:
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DB_PASS: ${{ secrets.DB_PASS }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
   deploy-notes:
     needs:
       - deploy-client

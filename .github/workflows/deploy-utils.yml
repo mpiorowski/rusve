@@ -10,6 +10,8 @@ on:
         required: true
       DB_PASS:
         required: true
+      SENDGRID_API_KEY:
+        required: true
 
 env:
   GAR_LOCATION: europe-north1
