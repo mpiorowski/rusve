@@ -12,7 +12,7 @@
     on:click
     {type}
     disabled={loading}
-    class={"w-full h-10 flex flex-row gap-3 justify-center items-center rounded px-4 shadow-md font-normal text-base text-white transition" +
+    class={"h-10 flex flex-row gap-3 justify-center items-center rounded px-4 shadow-md font-normal text-base text-white transition" +
         (variant === "primary"
             ? " bg-secondary-700 hover:bg-secondary-800"
             : "") +

@@ -1,6 +1,6 @@
 <script lang="ts">
     import Button from "$lib/form/Button.svelte";
-    import EmptyAvatar from "$lib/icons/EmptyAvatar.svelte";
+    import EmptyAvatarIcon from "$lib/icons/EmptyAvatarIcon.svelte";
     import { getContext } from "svelte";
     import type { ProfileContext } from "./profile.types";
     import SaveIcon from "$lib/icons/SaveIcon.svelte";
@@ -42,7 +42,7 @@
     <h3>Your avatar</h3>
     {#await $profile.file}
         <div class="h-16 w-16">
-            <EmptyAvatar />
+            <EmptyAvatarIcon />
         </div>
     {:then file}
         {#if file}
@@ -99,7 +99,7 @@
             </div>
         {:else}
             <div class="h-16 w-16">
-                <EmptyAvatar />
+                <EmptyAvatarIcon />
             </div>
         {/if}
     {/await}
