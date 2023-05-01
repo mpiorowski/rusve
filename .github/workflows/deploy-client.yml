@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - release-client/**
+      - release-users/**
+      - release-notes/**
+      - release-posts/**
+      - release-utils/**
   workflow_call:
     secrets:
       GCP_CREDENTIALS:
