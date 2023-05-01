@@ -59,7 +59,7 @@ impl TryFrom<Option<PgRow>> for User {
                     sub,
                     name,
                     avatar: avatar.map(|a| a.to_string()),
-                    payment_id: payment_id.map(|p| p.to_string()),
+                    payment_id,
                 })
             }
             None => Err(anyhow::anyhow!("User not found")),
