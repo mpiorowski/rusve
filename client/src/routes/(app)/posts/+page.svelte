@@ -19,12 +19,9 @@
         Please upgrade to the "I use Rust" plan to create posts.
     </h2>
     <p class="text-center">(test mode - no real payment will be made)</p>
-    <a
-        href="/billing"
-        class="mt-6 bg-slate-600 text-white rounded p-2 block text-center"
-    >
-        Go to billing
-    </a>
+    <div class="mt-4 w-fit ml-auto">
+        <Button href="/billing" variant="secondary">Go to billing</Button>
+    </div>
 {/if}
 
 {#if data.isSubscribed}

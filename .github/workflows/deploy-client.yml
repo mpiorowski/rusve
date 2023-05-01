@@ -1,4 +1,4 @@
-name: CLient Service
+name: Client Service
 
 on:
   push:
@@ -13,8 +13,13 @@ on:
       GCP_CREDENTIALS:
         required: true
       PUBLIC_API_KEY:
+        required: true
       PUBLIC_AUTH_DOMAIN:
+        required: true
       SERVICE_ACCOUNT:
+        required: true
+      STRIPE_API_KEY:
+        required: true
 
 env:
   GAR_LOCATION: europe-north1
@@ -24,6 +29,7 @@ env:
   SERVICE: client
   REGION: europe-north1
   ENV: production
+  DOMAIN: https://www.rusve.app
   URI_USERS: users-cdb5ecy4ia-lz.a.run.app
   URI_UTILS: utils-cdb5ecy4ia-lz.a.run.app
   URI_NOTES: notes-cdb5ecy4ia-lz.a.run.app
@@ -31,6 +37,7 @@ env:
   PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
   PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
   SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
+  STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
 
 permissions:
   contents: write
@@ -63,10 +70,12 @@ jobs:
         run: |
           touch ./client/.env.prod
           echo ENV="$ENV" >> ./client/.env.prod
+          echo DOMAIN="$DOMAIN" >> ./client/.env.prod
           echo URI_USERS="$URI_USERS" >> ./client/.env.prod
           echo URI_UTILS="$URI_UTILS" >> ./client/.env.prod
           echo URI_NOTES="$URI_NOTES" >> ./client/.env.prod
           echo URI_POSTS="$URI_POSTS" >> ./client/.env.prod
+          echo STRIPE_API_KEY="$STRIPE_API_KEY" >> ./client/.env.prod
           echo PUBLIC_API_KEY="$PUBLIC_API_KEY" >> ./client/.env.prod
           echo PUBLIC_AUTH_DOMAIN="$PUBLIC_AUTH_DOMAIN" >> ./client/.env.prod
           echo SERVICE_ACCOUNT=\'$SERVICE_ACCOUNT\' >> ./client/.env.prod
