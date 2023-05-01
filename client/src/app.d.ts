@@ -5,6 +5,7 @@ declare global {
 		// interface Error {}
 		interface Locals {
             userId: string;
+            paymentId: string | undefined;
             role: string;
             email: string;
         }

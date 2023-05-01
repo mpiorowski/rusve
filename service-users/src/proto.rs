@@ -27,6 +27,8 @@ pub struct User {
     pub name: ::prost::alloc::string::String,
     #[prost(string, optional, tag = "9")]
     pub avatar: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "10")]
+    pub payment_id: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -190,6 +192,14 @@ pub struct UserIds {
     #[prost(string, repeated, tag = "1")]
     pub user_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PaymentId {
+    #[prost(string, tag = "1")]
+    pub user_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub payment_id: ::prost::alloc::string::String,
+}
 /// Generated client implementations.
 pub mod users_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
@@ -333,6 +343,25 @@ pub mod users_service_client {
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/proto.UsersService/CreateUser",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        pub async fn update_payment_id(
+            &mut self,
+            request: impl tonic::IntoRequest<super::PaymentId>,
+        ) -> Result<tonic::Response<super::Empty>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/proto.UsersService/UpdatePaymentId",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
@@ -779,6 +808,10 @@ pub mod users_service_server {
             &self,
             request: tonic::Request<super::User>,
         ) -> Result<tonic::Response<super::User>, tonic::Status>;
+        async fn update_payment_id(
+            &self,
+            request: tonic::Request<super::PaymentId>,
+        ) -> Result<tonic::Response<super::Empty>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct UsersServiceServer<T: UsersService> {
@@ -975,6 +1008,44 @@ pub mod users_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = CreateUserSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/proto.UsersService/UpdatePaymentId" => {
+                    #[allow(non_camel_case_types)]
+                    struct UpdatePaymentIdSvc<T: UsersService>(pub Arc<T>);
+                    impl<T: UsersService> tonic::server::UnaryService<super::PaymentId>
+                    for UpdatePaymentIdSvc<T> {
+                        type Response = super::Empty;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::PaymentId>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).update_payment_id(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = UpdatePaymentIdSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

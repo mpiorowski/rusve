@@ -12,8 +12,10 @@ export interface User {
   'sub'?: (string);
   'name'?: (string);
   'avatar'?: (string);
+  'paymentId'?: (string);
   '_deleted'?: "deleted";
   '_avatar'?: "avatar";
+  '_paymentId'?: "paymentId";
 }
 
 export interface User__Output {
@@ -26,6 +28,8 @@ export interface User__Output {
   'sub': (string);
   'name': (string);
   'avatar'?: (string);
+  'paymentId'?: (string);
   '_deleted': "deleted";
   '_avatar': "avatar";
+  '_paymentId': "paymentId";
 }

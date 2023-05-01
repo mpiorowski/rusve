@@ -20,6 +20,7 @@ export interface ProtoGrpcType {
     Note: MessageTypeDefinition
     NoteId: MessageTypeDefinition
     NotesService: SubtypeConstructor<typeof grpc.Client, _proto_NotesServiceClient> & { service: _proto_NotesServiceDefinition }
+    PaymentId: MessageTypeDefinition
     Post: MessageTypeDefinition
     PostId: MessageTypeDefinition
     PostsService: SubtypeConstructor<typeof grpc.Client, _proto_PostsServiceClient> & { service: _proto_PostsServiceDefinition }

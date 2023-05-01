@@ -16,12 +16,17 @@ message UserId {
 message UserIds {
     repeated string user_ids = 1;
 }
+message PaymentId {
+    string user_id = 1;
+    string payment_id = 2;
+}
 
 service UsersService {
     rpc Auth(AuthRequest) returns (User) {}
     rpc GetUsers(UserIds) returns (stream User) {}
     rpc GetUser(UserId) returns (User) {}
     rpc CreateUser(User) returns (User) {}
+    rpc UpdatePaymentId(PaymentId) returns (Empty) {}
 }
 
 service UtilsService {

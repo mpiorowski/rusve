@@ -43,6 +43,7 @@
         "firebase": "^9.20.0",
         "firebase-admin": "^11.7.0",
         "jsonwebtoken": "^9.0.0",
+        "stripe": "^12.3.0",
         "zod": "^3.21.4"
     }
 }

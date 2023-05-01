@@ -26,6 +26,7 @@ type UsersServiceClient interface {
 	GetUsers(ctx context.Context, in *UserIds, opts ...grpc.CallOption) (UsersService_GetUsersClient, error)
 	GetUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*User, error)
 	CreateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*User, error)
+	UpdatePaymentId(ctx context.Context, in *PaymentId, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type usersServiceClient struct {
@@ -95,6 +96,15 @@ func (c *usersServiceClient) CreateUser(ctx context.Context, in *User, opts ...g
 	return out, nil
 }
 
+func (c *usersServiceClient) UpdatePaymentId(ctx context.Context, in *PaymentId, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/proto.UsersService/UpdatePaymentId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServiceServer is the server API for UsersService service.
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility
@@ -103,6 +113,7 @@ type UsersServiceServer interface {
 	GetUsers(*UserIds, UsersService_GetUsersServer) error
 	GetUser(context.Context, *UserId) (*User, error)
 	CreateUser(context.Context, *User) (*User, error)
+	UpdatePaymentId(context.Context, *PaymentId) (*Empty, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -121,6 +132,9 @@ func (UnimplementedUsersServiceServer) GetUser(context.Context, *UserId) (*User,
 }
 func (UnimplementedUsersServiceServer) CreateUser(context.Context, *User) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+}
+func (UnimplementedUsersServiceServer) UpdatePaymentId(context.Context, *PaymentId) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePaymentId not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
 
@@ -210,6 +224,24 @@ func _UsersService_CreateUser_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersService_UpdatePaymentId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PaymentId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).UpdatePaymentId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.UsersService/UpdatePaymentId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).UpdatePaymentId(ctx, req.(*PaymentId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UsersService_ServiceDesc is the grpc.ServiceDesc for UsersService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +260,10 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateUser",
 			Handler:    _UsersService_CreateUser_Handler,
+		},
+		{
+			MethodName: "UpdatePaymentId",
+			Handler:    _UsersService_UpdatePaymentId_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

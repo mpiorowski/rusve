@@ -27,5 +27,6 @@ message User {
 
     string name = 8;
     optional string avatar = 9;
+    optional string payment_id = 10;
 }
 

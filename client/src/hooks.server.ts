@@ -24,6 +24,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     const now = performance.now();
     const emptySession = {
         userId: "",
+        paymentId: "",
         email: "",
         role: "",
     };

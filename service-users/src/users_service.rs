@@ -1,5 +1,5 @@
 use crate::proto::users_service_server::UsersService;
-use crate::proto::{AuthRequest, User, UserIds};
+use crate::proto::{AuthRequest, Empty, PaymentId, User, UserIds};
 use crate::proto::{UserId, UserRole};
 use crate::MyService;
 use anyhow::Result;
@@ -47,6 +47,7 @@ impl TryFrom<Option<PgRow>> for User {
                 let sub: String = row.try_get("sub")?;
                 let name = row.try_get("name")?;
                 let avatar: Option<Uuid> = row.try_get("avatar")?;
+                let payment_id: Option<String> = row.try_get("payment_id")?;
 
                 Ok(User {
                     id: id.to_string(),
@@ -58,6 +59,7 @@ impl TryFrom<Option<PgRow>> for User {
                     sub,
                     name,
                     avatar: avatar.map(|a| a.to_string()),
+                    payment_id: payment_id.map(|p| p.to_string()),
                 })
             }
             None => Err(anyhow::anyhow!("User not found")),
@@ -195,18 +197,20 @@ impl UsersService for MyService {
         let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
 
         let request = request.into_inner();
-        let user_uuid = Uuid::parse_str(&request.id).map_err(|e| Status::internal(e.to_string()))?;
+        let user_uuid =
+            Uuid::parse_str(&request.id).map_err(|e| Status::internal(e.to_string()))?;
 
         let avatar_id = request.avatar;
         let avatar_uuid = match avatar_id {
-            Some(avatar_id) => Some(Uuid::try_parse(&avatar_id).map_err(|e| {
-                Status::invalid_argument(format!("Invalid avatar_id: {}", e))
-            })?),
+            Some(avatar_id) => Some(
+                Uuid::try_parse(&avatar_id)
+                    .map_err(|e| Status::invalid_argument(format!("Invalid avatar_id: {}", e)))?,
+            ),
             None => None,
         };
 
         let row = query("update users set name = $1, avatar = $2 where id = $3 returning *")
-            .bind(&request.name)
+            .bind(request.name)
             .bind(avatar_uuid)
             .bind(user_uuid)
             .fetch_one(&mut tx)
@@ -217,5 +221,33 @@ impl UsersService for MyService {
         tx.commit().await.map_err(sqlx::Error::into_status)?;
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(user))
+    }
+
+    async fn update_payment_id(
+        &self,
+        request: Request<PaymentId>,
+    ) -> Result<Response<Empty>, Status> {
+        #[cfg(debug_assertions)]
+        println!("UpdatePaymentId: {:?}", request);
+        let start = std::time::Instant::now();
+
+        let pool = self.pool.clone();
+        let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
+
+        let request = request.into_inner();
+        let user_uuid =
+            Uuid::parse_str(&request.user_id).map_err(|e| Status::internal(e.to_string()))?;
+        let payment_id = request.payment_id;
+
+        query("update users set payment_id = $1 where id = $2")
+            .bind(payment_id)
+            .bind(user_uuid)
+            .execute(&mut tx)
+            .await
+            .map_err(sqlx::Error::into_status)?;
+
+        tx.commit().await.map_err(sqlx::Error::into_status)?;
+        println!("Elapsed: {:?}", start.elapsed());
+        Ok(Response::new(Empty {}))
     }
 }
