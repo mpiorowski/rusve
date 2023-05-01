@@ -13,41 +13,54 @@
     setContext("drawer", drawer);
 </script>
 
-<PostDrawer {form} />
+{#if !data.isSubscribed}
+    <h2 class="text-center">
+        You are currently on the "Noob" plan. <br />
+        Please upgrade to the "I use Rust" plan to create posts.
+    </h2>
+    <p class="text-center">(test mode - no real payment will be made)</p>
+    <div class="mt-4 w-fit ml-auto">
+        <Button href="/billing" variant="secondary">Go to billing</Button>
+    </div>
+{/if}
 
-<h3 class="text-right">
-    Go: {data.duration.toFixed(4)}ms / {data.posts.length} posts
-</h3>
+{#if data.isSubscribed}
+    <PostDrawer {form} />
 
-<div class="mb-6 grid grid-cols-2 gap-4">
-    <h3>
-        Posts are visible to everyone. <br />
-        Please be respectful.
+    <h3 class="text-right">
+        Go: {data.duration.toFixed(4)}ms / {data.posts.length} posts
     </h3>
-    <Button type="button" on:click={() => drawer.set(true)}>
-        <span slot="icon"><PlusIcon /></span>
-        Create post
-    </Button>
-</div>
 
-{#each data.posts as post}
-    <Post postId={post.id} canDelete={post.userId === data.userId}>
-        <span slot="title">{post.title}</span>
-        <span slot="content">
-            <p class="whitespace-pre-wrap">
-                {@html post.content}
-            </p>
-        </span>
-        <span slot="user">
-            {#await data.stream.users}
-                <span class="block h-4" />
-            {:then users}
-                {#if users.find((u) => u.id === post.userId)}
-                    {users.find((u) => u.id === post.userId)?.email}
-                {:else}
-                    User not found
-                {/if}
-            {/await}
-        </span>
-    </Post>
-{/each}
+    <div class="mb-6 grid grid-cols-2 gap-4">
+        <h3>
+            Posts are visible to everyone. <br />
+            Please be respectful.
+        </h3>
+        <Button type="button" on:click={() => drawer.set(true)}>
+            <span slot="icon"><PlusIcon /></span>
+            Create post
+        </Button>
+    </div>
+
+    {#each data.posts as post}
+        <Post postId={post.id} canDelete={post.userId === data.userId}>
+            <span slot="title">{post.title}</span>
+            <span slot="content">
+                <p class="whitespace-pre-wrap">
+                    {@html post.content}
+                </p>
+            </span>
+            <span slot="user">
+                {#await data.stream.users}
+                    <span class="block h-4" />
+                {:then users}
+                    {#if users.find((u) => u.id === post.userId)}
+                        {users.find((u) => u.id === post.userId)?.email}
+                    {:else}
+                        User not found
+                    {/if}
+                {/await}
+            </span>
+        </Post>
+    {/each}
+{/if}

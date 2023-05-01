@@ -1,4 +1,6 @@
 <script lang="ts">
+    import Button from "$lib/form/Button.svelte";
+    import DollarIcon from "$lib/icons/DollarIcon.svelte";
     import { toast } from "$lib/toast/toast.js";
 
     export let data;
@@ -10,18 +12,38 @@
             type: "error",
         });
     }
+
+    const isPro = data.isSubscribed;
 </script>
 
-<h1>Billing</h1>
+<div class="flex flex-col border border-primary-600 rounded p-4">
+    <h3>Subscription plan</h3>
+    <p class="mb-4">You can change your subscription plan at any time.</p>
 
-<div class="product">
-    <div class="description">
-        <h3>Starter plan</h3>
-        <h5>$20.00 / month</h5>
-    </div>
+    {#if data.paymentId}
+        <form action="?/portal" method="post">
+            <Button variant="secondary">Manage billing</Button>
+        </form>
+    {/if}
+
+    <h3 class="my-6">
+        You are currently on the {isPro ? '"I use Rust"' : '"Noob"'} plan
+    </h3>
+
+    {#if !isPro}
+        <form action="?/checkout" method="POST">
+            <input
+                type="hidden"
+                name="paymentId"
+                value={data.paymentId ?? ""}
+            />
+            <Button type="submit">
+                <svelte:fragment slot="icon">
+                    <DollarIcon />
+                </svelte:fragment>
+                Upgrade to "I use Rust" plan
+            </Button>
+            <p class="mt-2">(test mode - no real payment will be made)</p>
+        </form>
+    {/if}
 </div>
-<form method="POST">
-    <input type="hidden" name="paymentId" value={data.paymentId ?? ""} />
-    <input type="hidden" name="lookup_key" value="standard_2" />
-    <button id="checkout-and-portal-button" type="submit">Checkout</button>
-</form>

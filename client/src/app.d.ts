@@ -5,9 +5,10 @@ declare global {
 		// interface Error {}
 		interface Locals {
             userId: string;
-            paymentId: string | undefined;
+            paymentId: string;
             role: string;
             email: string;
+            isSubscribed: boolean;
         }
 		// interface PageData {}
 		// interface Platform {}

@@ -5,6 +5,9 @@ import { usersClient } from "$lib/grpc";
 import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { getFirebaseServer } from "$lib/firebase/firebase_server";
 import { URI_USERS } from "$env/static/private";
+import type { User__Output } from "$lib/proto/proto/User";
+import { getStripe } from "$lib/apps/stripe";
+import type Stripe from "stripe";
 
 export const handleError: HandleServerError = ({ error }) => {
     console.error("Error: %s", error);
@@ -27,8 +30,12 @@ export const handle: Handle = async ({ event, resolve }) => {
         paymentId: "",
         email: "",
         role: "",
+        isSubscribed: false,
     };
 
+    /**
+     * Open pages for everyone
+     */
     const isMain = event.url.pathname === "/rusve";
     const isFeatures = event.url.pathname === "/features";
     if (isMain || isFeatures) {
@@ -57,29 +64,61 @@ export const handle: Handle = async ({ event, resolve }) => {
         } else {
             console.info("User session verified");
 
-            // Authenticate user agains our server
-            const { uid, email } = decodedClaims;
-            const request: AuthRequest = {
-                sub: uid,
-                email: email ?? "",
-            };
-            const metadata = await createMetadata(URI_USERS);
-            await new Promise<void>((res) => {
-                usersClient.Auth(request, metadata, (err, response) => {
-                    if (err || !response?.id) {
-                        console.error("Error authenticating user", err);
-                        event.locals = emptySession;
-                    } else {
-                        event.locals = {
-                            userId: response.id,
-                            email: response.email,
-                            role: response.role,
-                        };
-                    }
-                    res();
+            /**
+             * Authenticate user agains our server
+             * @param {string} uid - Firebase user id
+             * @param {string} email - Firebase user email
+             */
+            try {
+                const { uid, email } = decodedClaims;
+                const request: AuthRequest = {
+                    sub: uid,
+                    email: email ?? "",
+                };
+                const metadata = await createMetadata(URI_USERS);
+                const user = await new Promise<User__Output>((res, rej) => {
+                    usersClient.Auth(request, metadata, (err, response) => {
+                        err || !response?.id ? rej(err) : res(response);
+                    });
                 });
-            });
+                event.locals = {
+                    userId: user.id,
+                    email: user.email,
+                    role: user.role,
+                    paymentId: user.paymentId ?? "",
+                    isSubscribed: false,
+                };
+            } catch (err) {
+                console.error("Error authenticating user", err);
+                event.locals = emptySession;
+            }
         }
+    }
+
+    /**
+     * Check subscription only for certain pages
+     * This will reduce the number of requests to Stripe
+     */
+    const needsSubscription = ["/billing", "/posts"];
+    const isSubscriptionPage = needsSubscription.some((path) =>
+        event.url.pathname.startsWith(path),
+    );
+    if (isSubscriptionPage && event.locals.paymentId) {
+        const stripe = getStripe();
+        const stripeCustomer = (await stripe.customers.retrieve(
+            event.locals.paymentId,
+            {
+                expand: ["subscriptions"],
+            },
+        )) as {
+            subscriptions: {
+                data: Stripe.Subscription[];
+            };
+        };
+        const isSubscribed = stripeCustomer.subscriptions.data.some(
+            (sub) => sub.status === "active",
+        );
+        event.locals.isSubscribed = isSubscribed;
     }
 
     const isApiAuth = event.url.pathname === "/api/auth";
@@ -96,8 +135,8 @@ export const handle: Handle = async ({ event, resolve }) => {
     if (isAuth && event.locals.userId) {
         throw redirect(303, "/");
     }
-    console.debug(`Authorization: ${performance.now() - now}ms`);
 
+    console.debug(`Authorization: ${performance.now() - now}ms`);
     const result = await resolve(event, {
         transformPageChunk: ({ html }) => html,
     });

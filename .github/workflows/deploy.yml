@@ -17,6 +17,7 @@ jobs:
       PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
       PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
       SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
+      STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
   deploy-users:
     needs:
       - deploy-client
