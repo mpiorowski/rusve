@@ -4,8 +4,8 @@ Do You see what I did there :)?
 It is a attempt to find the best way to build **fast** and **scalable** web applications, while not beeing afraid of new technologies. And I think we are getting there.
 
 ### Currently working on...
-1. Deployment on GCP, with files on buckets and emails via pubsub
-2. Making the app resiliant to no internet
+- **Stripe**
+- Making the app resiliant to no internet
 
 ## Features
 - **[Rust](https://www.rust-lang.org/)** - Hard to learn, but once You do...You will be able to say "I use Rust".
@@ -21,29 +21,30 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
   - **[TawilwindCSS](https://tailwindcss.com/)** - Used for styling, no other UI library needed. 
   - **Minimal external libraries** - With Svelte animation and stores builing custom components is very easy. Checkout `Toast`, `Drawer`, `Modal`, `Dropdown` and see for yourself.
 - **gRPC** - Fast, streamable and gives You amazing typesafety across the whole project, no matter the language (hi tRPC).
-- **Microservices** - Scaling? Cost-efficiency? Resilience? Got you covered.
-- **[Google Cloud Platform](https://cloud.google.com/)** - Using Google Cloud Run. Easy to deploy, easy to scale, easy to maintain.
-- **Dockerized** - Local development? CI/CD? Production? All the same. Dockerized.
-- **[Firebase SSR Authentication](https://firebase.google.com/docs/auth/admin/manage-cookies)** - Battle-tested OAuth, Magic Link, Phone Number, and all done on the server.
-- **Multi language** - Mutli-language for backend. Using mainly Rust, with one Go service.
-- **Files** - Upload, view and download. Everything ready to use.
+- **[Google Cloud Platform](https://cloud.google.com/)** - Easy to deploy, easy to scale, easy to maintain.
+  - **Microservices** - Application splited into smaller parts, deployed using Google Cloud Run. Only client service is open to public and it's server act as a gateway.
+  - **Dockerized** - Every service is dockerized. Local build ready with one command.
+  - **Github Action** - Deployment using github actions, easch service is linted and checked. Posibilities to deploy all service or choose one.
+  - **Google Cloud Storage** - Working files upload, download and delete.
+  - **PubSub** - Asynchronus data sending.
+- **[Firebase SSR Authentication](https://firebase.google.com/docs/auth/admin/manage-cookies)** - Battle-tested OAuth, Magic Link, Phone Number, and all of that done on the server.
+- **Multi language** - Mutli-language for backend. Here, using mainly Rust, with one Go service running.
 
 In progress:
 - **MDX**
-- **Stripe**
 - **Any other feature You will request :)**
 
 ## Application
 https://www.rusve.app
 
 ## Architecture
-![image](https://user-images.githubusercontent.com/26543876/234502285-e92ca1e2-70ab-4e8c-9ced-4147215a4e71.png)
+![image](https://user-images.githubusercontent.com/26543876/235413857-4779ab2f-bf0c-465e-ab01-4826f3a8b17e.png)
 
 ## Authorization
-![image](https://user-images.githubusercontent.com/26543876/235083225-c3506fad-9702-4269-b623-487a44274a95.png)
+![image](https://user-images.githubusercontent.com/26543876/235413978-93d49f92-e8bb-47ac-a46d-f0fc08cec350.png)
 
 ## Github action deployment
-![image](https://user-images.githubusercontent.com/26543876/235082796-cfc6a48b-4a3b-4633-a713-d19f99507e60.png)
+![image](https://user-images.githubusercontent.com/26543876/235413947-4e0671b0-a8ca-4d0c-83c8-b7a3a809242e.png)
 
 
 ## Dev deployment
