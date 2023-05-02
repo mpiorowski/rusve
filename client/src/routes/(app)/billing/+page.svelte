@@ -43,7 +43,10 @@
                 </svelte:fragment>
                 Upgrade to "I use Rust" plan
             </Button>
-            <p class="mt-2">(test mode - no real payment will be made)</p>
+            <p class="mt-2">
+                test mode - no real payment will be made <br />
+                use (4242 4242 ....) as credit card number
+            </p>
         </form>
     {/if}
 </div>

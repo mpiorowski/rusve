@@ -24,7 +24,7 @@
             <div>
                 <a
                     href="/auth"
-                    class="bg-primary-800 text-white px-4 py-2 rounded hover:bg-primary-900 transition"
+                    class="bg-primary-800 text-white px-3 py-1 rounded hover:bg-primary-900 transition"
                 >
                     Login
                 </a>

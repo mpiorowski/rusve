@@ -8,10 +8,23 @@ import { z } from "zod";
 import type { Post__Output } from "$lib/proto/proto/Post";
 import type { PostId } from "$lib/proto/proto/PostId";
 import type { Empty } from "$lib/proto/proto/Empty";
+import { checkSubscription } from "$lib/apps/stripe";
 
-export const load = (async () => {
+export const load = (async ({ locals }) => {
     try {
         const start = performance.now();
+
+        const isSub = await checkSubscription(locals.paymentId);
+        if (!isSub) {
+            return {
+                isSubscribed: false,
+                posts: [],
+                duration: 0,
+                stream: {
+                    users: Promise.resolve([]),
+                },
+            };
+        }
 
         const request: Empty = {};
         let metadata = await createMetadata(URI_POSTS);
@@ -44,6 +57,7 @@ export const load = (async () => {
         });
 
         return {
+            isSubscribed: true,
             posts: posts,
             duration: end - start,
             stream: {
@@ -106,9 +120,11 @@ export const actions = {
         const form = await request.formData();
         const id = form.get("id");
 
-        const schema = z.object({
-            id: z.string().uuid(),
-        }).safeParse({ id: id });
+        const schema = z
+            .object({
+                id: z.string().uuid(),
+            })
+            .safeParse({ id: id });
         if (!schema.success) {
             throw error(400, "Missing id");
         }

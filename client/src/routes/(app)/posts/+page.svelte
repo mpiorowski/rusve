@@ -18,24 +18,26 @@
         You are currently on the "Noob" plan. <br />
         Please upgrade to the "I use Rust" plan to create posts.
     </h2>
-    <p class="text-center">(test mode - no real payment will be made)</p>
+    <p class="text-center">
+        test mode - no real payment will be made <br />
+        use (4242 4242 ....) as credit card number
+    </p>
     <div class="mt-4 w-fit ml-auto">
         <Button href="/billing" variant="secondary">Go to billing</Button>
     </div>
-{/if}
-
-{#if data.isSubscribed}
+{:else}
     <PostDrawer {form} />
 
-    <h3 class="text-right">
-        Go: {data.duration.toFixed(4)}ms / {data.posts.length} posts
-    </h3>
-
-    <div class="mb-6 grid grid-cols-2 gap-4">
-        <h3>
-            Posts are visible to everyone. <br />
-            Please be respectful.
-        </h3>
+    <div class="mb-6 grid grid-cols-2 gap-4 items-center">
+        <div>
+            <h3>
+                Posts are visible to everyone. <br />
+                Please be respectful.
+            </h3>
+            <h3>
+                Go: {data.duration.toFixed(4)}ms / {data.posts.length} posts
+            </h3>
+        </div>
         <Button type="button" on:click={() => drawer.set(true)}>
             <span slot="icon"><PlusIcon /></span>
             Create post

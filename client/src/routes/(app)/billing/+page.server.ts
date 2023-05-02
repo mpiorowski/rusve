@@ -1,11 +1,18 @@
 import { DOMAIN, URI_USERS } from "$env/static/private";
-import { getStripe } from "$lib/apps/stripe";
+import { checkSubscription, getStripe } from "$lib/apps/stripe";
 import { usersClient } from "$lib/grpc";
 import { createMetadata } from "$lib/metadata";
 import type { PaymentId } from "$lib/proto/proto/PaymentId";
 import { fail, redirect } from "@sveltejs/kit";
 import { z } from "zod";
-import type { Actions } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
+
+export const load = (async ({ locals }) => {
+    const isSub = await checkSubscription(locals.paymentId);
+    return {
+        isSubscribed: isSub,
+    };
+}) satisfies PageServerLoad;
 
 export const actions = {
     checkout: async ({ request, locals }) => {

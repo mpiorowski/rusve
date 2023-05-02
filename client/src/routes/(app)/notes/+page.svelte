@@ -15,12 +15,13 @@
 
 <NoteDrawer {form} />
 
-<h3 class="text-right">
-    Rust: {data.duration.toFixed(4)}ms / {data.notes.length} notes
-</h3>
-
-<div class="mb-6 grid grid-cols-2 gap-4">
-    <h3>Notes are only visible to you.</h3>
+<div class="mb-6 grid grid-cols-2 items-center gap-4">
+    <div>
+        <h3>Notes are only visible to you.</h3>
+        <h3>
+            Rust: {data.duration.toFixed(4)}ms / {data.notes.length} notes
+        </h3>
+    </div>
     <Button type="button" on:click={() => drawer.set(true)}>
         <span slot="icon"><PlusIcon /></span>
         Create note

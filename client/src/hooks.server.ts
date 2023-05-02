@@ -6,8 +6,6 @@ import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { getFirebaseServer } from "$lib/firebase/firebase_server";
 import { URI_USERS } from "$env/static/private";
 import type { User__Output } from "$lib/proto/proto/User";
-import { getStripe } from "$lib/apps/stripe";
-import type Stripe from "stripe";
 
 export const handleError: HandleServerError = ({ error }) => {
     console.error("Error: %s", error);
@@ -86,39 +84,12 @@ export const handle: Handle = async ({ event, resolve }) => {
                     email: user.email,
                     role: user.role,
                     paymentId: user.paymentId ?? "",
-                    isSubscribed: false,
                 };
             } catch (err) {
                 console.error("Error authenticating user", err);
                 event.locals = emptySession;
             }
         }
-    }
-
-    /**
-     * Check subscription only for certain pages
-     * This will reduce the number of requests to Stripe
-     */
-    const needsSubscription = ["/billing", "/posts"];
-    const isSubscriptionPage = needsSubscription.some((path) =>
-        event.url.pathname.startsWith(path),
-    );
-    if (isSubscriptionPage && event.locals.paymentId) {
-        const stripe = getStripe();
-        const stripeCustomer = (await stripe.customers.retrieve(
-            event.locals.paymentId,
-            {
-                expand: ["subscriptions"],
-            },
-        )) as {
-            subscriptions: {
-                data: Stripe.Subscription[];
-            };
-        };
-        const isSubscribed = stripeCustomer.subscriptions.data.some(
-            (sub) => sub.status === "active",
-        );
-        event.locals.isSubscribed = isSubscribed;
     }
 
     const isApiAuth = event.url.pathname === "/api/auth";

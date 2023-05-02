@@ -8,7 +8,6 @@ declare global {
             paymentId: string;
             role: string;
             email: string;
-            isSubscribed: boolean;
         }
 		// interface PageData {}
 		// interface Platform {}
