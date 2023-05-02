@@ -123,6 +123,17 @@ export const actions = {
                 return fail(400, { error: "File too large. Max 10MB" });
             }
 
+            // supported file types (jpeg, jpg, png, gif, webp)
+            if (
+                !file.type.startsWith("image/jpeg") &&
+                !file.type.startsWith("image/jpg") &&
+                !file.type.startsWith("image/png") &&
+                !file.type.startsWith("image/gif") &&
+                !file.type.startsWith("image/webp")
+            ) {
+                return fail(400, { error: "Invalid file type" });
+            }
+
             const fileName = file.name;
             const buffer = Buffer.from(await file.arrayBuffer());
 

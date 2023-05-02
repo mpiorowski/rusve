@@ -129,7 +129,7 @@
         <input type="hidden" name="type" value={FileType.AVATAR} />
         <input type="hidden" name="name" value={$profile.user.name || ""} />
 
-        <div class="flex flex-row items-center gap-4">
+        <div class="flex flex-row items-center gap-6">
             <div class="w-28">
                 <Button {loading}>
                     <span slot="icon">
@@ -140,5 +140,9 @@
             </div>
             <FileInput label="Choose new avatar" name="file" />
         </div>
+        <p class="text-xs mt-2">
+            Maximum file size is 1MB. Supported formats are JPEG, PNG, GIF, and
+            WebP.
+        </p>
     </form>
 </div>
