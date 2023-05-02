@@ -20,6 +20,7 @@ env:
   DATABASE: rusve-db
   SERVICE: utils
   REGION: europe-north1
+  BUCKET: rusve-bucket
 
 permissions:
   contents: write
@@ -62,7 +63,7 @@ jobs:
           env_vars: |
             ENV=production
             DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
-            BUCKET=rusve-bucket
             SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+            BUCKET=${{ env.BUCKET }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
