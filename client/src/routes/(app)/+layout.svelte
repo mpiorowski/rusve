@@ -1,6 +1,7 @@
 <script lang="ts">
     import AvatarIcon from "$lib/icons/AvatarIcon.svelte";
     import Dropdown from "$lib/components/Dropdown.svelte";
+    import LogoIcon from "$lib/icons/LogoIcon.svelte";
 
     export let data;
 
@@ -15,13 +16,16 @@
 <div class="flex flex-col h-screen">
     <nav class="border-b border-gray-600">
         <div
-            class="max-w-7xl mx-auto w-full flex items-center justify-between text-lg py-2 px-6"
+            class="max-w-7xl mx-auto w-full flex items-center justify-between text-xl py-2 px-6"
         >
             <div class="flex items-center gap-6">
                 <a
                     href="/"
-                    class="flex flex-row items-center gap-2 font-bold mr-4 hover:text-secondary-500 hover:cursor-pointer transition"
+                    class="flex flex-row text-2xl items-center gap-2 font-bold mr-4 hover:text-secondary-500 hover:cursor-pointer transition"
                 >
+                    <div class="w-12 h-12">
+                        <LogoIcon />
+                    </div>
                     Rusve
                 </a>
                 <a href="/profile" class="hover:text-secondary-500 transition">

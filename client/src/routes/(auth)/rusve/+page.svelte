@@ -1,4 +1,11 @@
+<script>
+    import LogoIcon from "$lib/icons/LogoIcon.svelte";
+</script>
+
 <h1 class="text-secondary-500 text-5xl text-center">
+    <div class="w-32 h-32 mb-4 m-auto">
+        <LogoIcon />
+    </div>
     Welcome to the Rusve!
     <br />
     Rust + Svelte = ❤️
