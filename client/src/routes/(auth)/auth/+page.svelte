@@ -45,10 +45,26 @@
         provider: GoogleAuthProvider | GithubAuthProvider,
     ): Promise<void> {
         try {
+            loading = true;
             window.localStorage.setItem("checkRedirect", "true");
+
+            /** Sign in with popup */
+            // const cred = await signInWithPopup(auth, provider);
+            // const idToken = await cred.user.getIdToken();
+            // await sendIdToken(idToken);
+            // await auth.signOut();
+            // window.location.reload();
+
+            /** Sign in with redirect */
             await signInWithRedirect(auth, provider);
         } catch (err) {
             console.error(err);
+            toast({
+                message: "Something went wrong",
+                type: "error",
+            });
+        } finally {
+            loading = false;
         }
     }
 
