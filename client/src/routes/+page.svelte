@@ -1,4 +1,6 @@
 <script lang="ts">
+    import LogoIcon from "$lib/icons/LogoIcon.svelte";
+
     const rustData = [
         {
             title: "No unnecessary unwrap / cloning",
@@ -83,6 +85,37 @@
         },
     ];
 </script>
+
+<h1 class="text-secondary-500 text-5xl text-center">
+    <div class="w-32 h-32 mb-4 m-auto">
+        <LogoIcon />
+    </div>
+    Welcome to the Rusve!
+    <br />
+    Rust + Svelte = ❤️
+</h1>
+
+<p class="text-3xl mt-4 text-center mb-10">
+    What are we doing here? We are searching for the best way to build
+    <b>fast</b>
+    and
+    <b>scalable</b>
+    web applications. And I think we are getting there.
+    <br />
+    <br />
+    I hope You will enjoy playing around!
+    <br />
+    <br />
+    Source code is available on
+    <a
+        class="text-secondary-500 hover:text-secondary-400 transition"
+        href="https://www.github.com/mpiorowski/rusve"
+        target="_blank"
+    >
+        Github
+    </a>
+    .
+</p>
 
 <div class="grid grid-cols-1 md:grid-cols-2 text-primary-200 gap-6 pb-10">
     <div class="w-full rounded-xl shadow-inner p-6 md:col-span-2">

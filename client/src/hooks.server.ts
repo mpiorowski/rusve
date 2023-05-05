@@ -31,16 +31,6 @@ export const handle: Handle = async ({ event, resolve }) => {
         isSubscribed: false,
     };
 
-    /**
-     * Open pages for everyone
-     */
-    const isMain = event.url.pathname === "/rusve";
-    const isFeatures = event.url.pathname === "/features";
-    if (isMain || isFeatures) {
-        event.locals = emptySession;
-        return await resolve(event);
-    }
-
     const session = event.cookies.get("session") ?? "";
     if (!session || session === "") {
         console.info("No session found");
@@ -91,23 +81,25 @@ export const handle: Handle = async ({ event, resolve }) => {
             }
         }
     }
+    console.debug(`Authorization: ${performance.now() - now}ms`);
+
+    const isMain = event.url.pathname === "/";
+    if (isMain) {
+        const result = await resolve(event, {
+            transformPageChunk: ({ html }) => html,
+        });
+        return result;
+    }
 
     const isApiAuth = event.url.pathname === "/api/auth";
     const isAuth = event.url.pathname === "/auth";
-    if (
-        !isMain &&
-        !isFeatures &&
-        !isAuth &&
-        !isApiAuth &&
-        !event.locals.userId
-    ) {
-        throw redirect(303, "/rusve");
+    if (!isAuth && !isApiAuth && !event.locals.userId) {
+        throw redirect(303, "/");
     }
     if (isAuth && event.locals.userId) {
         throw redirect(303, "/");
     }
 
-    console.debug(`Authorization: ${performance.now() - now}ms`);
     const result = await resolve(event, {
         transformPageChunk: ({ html }) => html,
     });
