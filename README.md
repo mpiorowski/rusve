@@ -6,6 +6,8 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
 ### Currently working on...
 - Making the app resiliant to no internet
 - **MDX**
+- **wyswig**
+- **headless cms**
 - **Any other feature You will request :)**
 
 ## Features
