@@ -21,6 +21,7 @@
     {/if}
     {#if !textarea}
         <input
+            aria-label={name}
             {name}
             use:typeAction
             {placeholder}
