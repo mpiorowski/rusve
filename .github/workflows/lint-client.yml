@@ -25,7 +25,7 @@ jobs:
         run: cp .env.example .env
       - name: Run build 
         run: npm run build
-      - name: Run ESLint
+      - name: Run lint
         run: npm run lint
           #- name: Annotate Pull Request
           #  uses: actions/github-script@v3

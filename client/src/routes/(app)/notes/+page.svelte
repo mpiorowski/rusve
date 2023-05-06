@@ -33,9 +33,9 @@
     <Note noteId={note.id}>
         <span slot="title">{note.title}</span>
         <span slot="content">
-            <template class="whitespace-pre-wrap">
+            <div class="whitespace-pre-wrap">
                 {note.content}
-            </template>
+            </div>
         </span>
         <span slot="user">
             {#await data.stream.users}

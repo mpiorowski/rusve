@@ -49,9 +49,9 @@
         <Post postId={post.id} canDelete={post.userId === data.userId}>
             <span slot="title">{post.title}</span>
             <span slot="content">
-                <template class="whitespace-pre-wrap">
+                <div class="whitespace-pre-wrap">
                     {post.content}
-                </template>
+                </div>
             </span>
             <span slot="user">
                 {#await data.stream.users}
