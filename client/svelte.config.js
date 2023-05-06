@@ -9,9 +9,6 @@ const config = {
     preprocess: vitePreprocess(),
     kit: {
         adapter: adapter(),
-        serviceWorker: {
-            register: false,
-        },
     },
 };
 
