@@ -42,6 +42,7 @@
 </script>
 
 <svelte:head>
+    {@html webManifest}
     <title>Rusve</title>
     <meta
         name="description"
