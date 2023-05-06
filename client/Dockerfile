@@ -2,7 +2,7 @@
 FROM node:19-alpine as dev
 
 # Install pnpm
-RUN curl -fsSL https://get.pnpm.io/install.sh | sh -
+RUN npm install -g pnpm
 
 WORKDIR /app
 COPY package.json /app/package.json
