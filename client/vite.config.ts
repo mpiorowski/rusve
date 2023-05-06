@@ -5,7 +5,10 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
     plugins: [
         sveltekit(),
-        SvelteKitPWA(),
+        SvelteKitPWA({
+            srcDir: "src",
+            filename: "service-worker.ts",
+        }),
     ],
     test: {
         include: ["src/**/*.{test,spec}.{js,ts}"],
