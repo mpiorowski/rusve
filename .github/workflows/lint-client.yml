@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: npm i
       - name: Copy env file
-        run: cp .env.dist .env
+        run: cp .env.example .env
       - name: Run ESLint
         run: npm run lint
           #- name: Annotate Pull Request
