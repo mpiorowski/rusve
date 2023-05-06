@@ -3,6 +3,8 @@ Do You see what I did there :)?
 ### What is Rusve? 
 It is a attempt to find the best way to build **fast** and **scalable** web applications, while not beeing afraid of new technologies. And I think we are getting there.
 
+Feel free to ask questions and throw new ideas!
+
 ### Currently working on...
 - Making the app resiliant to no internet
 - **MDX**
@@ -23,6 +25,7 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
   - **[Streaming](https://kit.svelte.dev/docs/load#streaming-with-promises)** - Important data is loaded and rendered first, after that all the rest are returned as promises and rendered when they resolve.
   - **[TawilwindCSS](https://tailwindcss.com/)** - Used for styling, no other UI library needed. 
   - **Minimal external libraries** - With Svelte animation and stores builing custom components is very easy. Checkout `Toast`, `Drawer`, `Modal`, `Dropdown` and see for yourself.
+  - **PWA** - Turn off the internet and check how resiliant the app is.
 - **gRPC** - Fast, streamable and gives You amazing typesafety across the whole project, no matter the language (hi tRPC).
 - **[Google Cloud Platform](https://cloud.google.com/)** - Easy to deploy, easy to scale, easy to maintain.
   - **Microservices** - Application splited into smaller parts, deployed using Google Cloud Run. Only client service is open to public and it's server act as a gateway.
