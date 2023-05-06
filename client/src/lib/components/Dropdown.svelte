@@ -35,6 +35,7 @@
         on:click={() => {
             open = !open;
         }}
+        aria-label="Dropdown"
     >
         <slot name="button" />
     </button>

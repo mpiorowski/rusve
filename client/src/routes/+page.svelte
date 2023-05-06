@@ -117,7 +117,7 @@
     .
 </p>
 
-<div class="grid grid-cols-1 md:grid-cols-2 text-primary-200 gap-6 pb-10">
+<div class="hidden grid-cols-1 md:grid-cols-2 text-primary-200 gap-6 pb-10">
     <div class="w-full rounded-xl shadow-inner p-6 md:col-span-2">
         <h1 class="mb-2 text-secondary-500">Rust</h1>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -11,7 +11,7 @@
         <slot name="title" />
     </h2>
     <slot name="content" />
-    <div class="flex text-xs justify-between mt-4">
+    <div class="flex text-xs justify-between mt-4" role="list">
         <p>
             Created by:
             <br />
@@ -36,12 +36,13 @@
             }}
         >
             <input type="hidden" name="id" value={noteId} />
-            <button type="submit" form={noteId}>
-                <div
-                    class="h-5 w-5 text-error-500 hover:text-error-400 transition"
-                >
-                    <DeleteIcon />
-                </div>
+            <button
+                type="submit"
+                form={noteId}
+                aria-label="Delete"
+                class="h-5 w-5 text-error-500 hover:text-error-400 transition"
+            >
+                <DeleteIcon />
             </button>
         </form>
     </div>
