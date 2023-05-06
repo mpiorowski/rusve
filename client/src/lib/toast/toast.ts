@@ -6,6 +6,6 @@ export type Toast = {
 };
 export const toastStore = writable<Toast[]>([]);
 
-export function toast(toast: Toast) {
-    toastStore.update((toasts) => [...toasts, toast]);
+export function toast(t: Toast) {
+    toastStore.update((toasts) => [...toasts, t]);
 }

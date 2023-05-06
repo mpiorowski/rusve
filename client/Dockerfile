@@ -6,18 +6,18 @@ WORKDIR /app
 COPY package.json /app/package.json
 
 # npm
-COPY package-lock.json /app/package-lock.json
-RUN npm ci
+# COPY package-lock.json /app/package-lock.json
+# RUN npm ci
 
 # pnpm
-# RUN npm install -g pnpm
-# COPY pnpm-lock.yaml /app/pnpm-lock.yaml
-# RUN pnpm install
+RUN npm install -g pnpm
+COPY pnpm-lock.yaml /app/pnpm-lock.yaml
+RUN pnpm install
 
 COPY . .
 
-CMD ["npm", "run", "dev"]
-# CMD ["pnpm", "dev"]
+# CMD ["npm", "run", "dev"]
+CMD ["pnpm", "dev"]
 
 # Production
 FROM node:19-alpine as prod

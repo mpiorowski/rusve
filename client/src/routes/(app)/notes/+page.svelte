@@ -5,9 +5,10 @@
     import NoteDrawer from "./NoteDrawer.svelte";
     import { writable } from "svelte/store";
     import { setContext } from "svelte";
+    import type { ActionData, PageData } from "./$types.js";
 
-    export let data;
-    export let form;
+    export let data: PageData;
+    export let form: ActionData;
 
     const drawer = writable(false);
     setContext("drawer", drawer);
@@ -32,9 +33,9 @@
     <Note noteId={note.id}>
         <span slot="title">{note.title}</span>
         <span slot="content">
-            <p class="whitespace-pre-wrap">
-                {@html note.content}
-            </p>
+            <template class="whitespace-pre-wrap">
+                {note.content}
+            </template>
         </span>
         <span slot="user">
             {#await data.stream.users}

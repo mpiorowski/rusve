@@ -121,13 +121,13 @@
         }
         try {
             loading = true;
-            const email = window.localStorage.getItem("emailForSignIn");
-            if (!email) {
+            const emailForSignIn = window.localStorage.getItem("emailForSignIn");
+            if (!emailForSignIn) {
                 throw new Error("No email found");
             }
             const user = await signInWithEmailLink(
                 auth,
-                email,
+                emailForSignIn,
                 window.location.href,
             );
             const idToken = await user.user.getIdToken();
@@ -146,8 +146,8 @@
         }
     }
     onMount(() => {
-        checkMagicLink();
-        checkRedirect();
+        void checkMagicLink();
+        void checkRedirect();
     });
 </script>
 

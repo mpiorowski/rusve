@@ -16,7 +16,7 @@
 
     function useClickOutisde(node: HTMLElement) {
         const handleClick = (event: MouseEvent) => {
-            if (node && !node.contains(event.target as Node)) {
+            if (!node.contains(event.target as Node)) {
                 open = false;
             }
         };

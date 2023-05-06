@@ -2,9 +2,10 @@
     import Button from "$lib/form/Button.svelte";
     import DollarIcon from "$lib/icons/DollarIcon.svelte";
     import { toast } from "$lib/toast/toast.js";
+    import type { ActionData, PageData } from "./$types.js";
 
-    export let data;
-    export let form;
+    export let data: PageData;
+    export let form: ActionData;
 
     $: if (form?.error) {
         toast({
@@ -35,7 +36,7 @@
             <input
                 type="hidden"
                 name="paymentId"
-                value={data.paymentId ?? ""}
+                value={data.paymentId}
             />
             <Button type="submit">
                 <svelte:fragment slot="icon">

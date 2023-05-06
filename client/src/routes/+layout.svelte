@@ -5,8 +5,9 @@
     import LogoIcon from "$lib/icons/LogoIcon.svelte";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import AvatarIcon from "$lib/icons/AvatarIcon.svelte";
+    import type { LayoutData } from "./$types";
 
-    export let data;
+    export let data: LayoutData;
 
     async function onLogout() {
         await fetch("/api/auth", {
