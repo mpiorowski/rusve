@@ -12,7 +12,7 @@
         <slot name="title" />
     </h2>
     <slot name="content" />
-    <div class="flex text-xs justify-between mt-4" role="list">
+    <div class="flex text-xs justify-between mt-4">
         <p>
             Created by:
             <br />
@@ -20,7 +20,6 @@
         </p>
         {#if canDelete}
             <form
-                role="listitem"
                 action="?/deletePost"
                 method="post"
                 id={postId}

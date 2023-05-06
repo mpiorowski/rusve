@@ -11,15 +11,13 @@
         <slot name="title" />
     </h2>
     <slot name="content" />
-    <div class="flex text-xs justify-between mt-4" role="list">
+    <div class="flex text-xs justify-between mt-4">
         <p>
             Created by:
             <br />
             <slot name="user" />
         </p>
-
         <form
-            role="listitem"
             action="?/deleteNote"
             method="post"
             id={noteId}
