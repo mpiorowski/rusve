@@ -20,7 +20,6 @@
         </p>
         {#if canDelete}
             <form
-                role="listitem"
                 action="?/deletePost"
                 method="post"
                 id={postId}
@@ -37,12 +36,13 @@
                 }}
             >
                 <input type="hidden" name="id" value={postId} />
-                <button type="submit" form={postId}>
-                    <div
-                        class="h-5 w-5 text-error-500 hover:text-error-400 transition"
-                    >
-                        <DeleteIcon />
-                    </div>
+                <button
+                    type="submit"
+                    form={postId}
+                    class="h-5 w-5 text-error-500 hover:text-error-400 transition"
+                    aria-label="Delete post"
+                >
+                    <DeleteIcon />
                 </button>
             </form>
         {/if}

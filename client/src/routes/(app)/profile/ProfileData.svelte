@@ -29,8 +29,8 @@
     }}
     class="p-4"
 >
-    <h3 class="mb-4">Your name</h3>
     <input type="hidden" name="avatar" value={$profile.user.avatar ?? ""} />
+    <label class="text-xl font-bold" for="name">Your name</label>
     <Input bind:value={$profile.user.name} name="name" />
     <div class="w-28">
         <Button type="submit" {loading}>

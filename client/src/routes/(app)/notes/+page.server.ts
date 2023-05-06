@@ -19,7 +19,7 @@ export const load = (async ({ locals }) => {
         const stream = notesClient.getNotes(request, metadata);
         const notes: Note__Output[] = [];
 
-        const userIds: Set<string> = new Set();
+        const userIds = new Set<string>();
 
         await new Promise<Note__Output[]>((resolve, reject) => {
             stream.on("data", (note: Note__Output) => {

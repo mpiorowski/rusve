@@ -5,9 +5,10 @@
     import PostDrawer from "./PostDrawer.svelte";
     import { writable } from "svelte/store";
     import { setContext } from "svelte";
+    import type { ActionData, PageData } from "./$types.js";
 
-    export let data;
-    export let form;
+    export let data: PageData;
+    export let form: ActionData;
 
     const drawer = writable(false);
     setContext("drawer", drawer);
@@ -48,9 +49,9 @@
         <Post postId={post.id} canDelete={post.userId === data.userId}>
             <span slot="title">{post.title}</span>
             <span slot="content">
-                <p class="whitespace-pre-wrap">
-                    {@html post.content}
-                </p>
+                <div class="whitespace-pre-wrap">
+                    {post.content}
+                </div>
             </span>
             <span slot="user">
                 {#await data.stream.users}

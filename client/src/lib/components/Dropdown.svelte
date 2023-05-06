@@ -16,7 +16,7 @@
 
     function useClickOutisde(node: HTMLElement) {
         const handleClick = (event: MouseEvent) => {
-            if (node && !node.contains(event.target as Node)) {
+            if (!node.contains(event.target as Node)) {
                 open = false;
             }
         };
@@ -35,6 +35,7 @@
         on:click={() => {
             open = !open;
         }}
+        aria-label="Dropdown"
     >
         <slot name="button" />
     </button>

@@ -6,9 +6,10 @@
     import { toast } from "$lib/toast/toast";
     import { writable } from "svelte/store";
     import type { ProfileContext, ProfileStore } from "./profile.types";
+    import type {  ActionData, PageData } from "./$types.js";
 
-    export let data;
-    export let form;
+    export let data: PageData;
+    export let form: ActionData;
     $: if (form?.error) {
         toast({
             message: form.error,

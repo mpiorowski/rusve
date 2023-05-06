@@ -31,7 +31,7 @@ export const load = (async ({ locals }) => {
         const stream = postsClient.getPosts(request, metadata);
         const posts: Post__Output[] = [];
 
-        const userIds: Set<string> = new Set();
+        const userIds = new Set<string>();
 
         await new Promise<Post__Output[]>((resolve, reject) => {
             stream.on("data", (post: Post__Output) => {
@@ -125,10 +125,6 @@ export const actions = {
                 id: z.string().uuid(),
             })
             .safeParse({ id: id });
-        if (!schema.success) {
-            throw error(400, "Missing id");
-        }
-
         if (!schema.success) {
             throw error(400, "Missing id");
         }

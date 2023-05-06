@@ -45,63 +45,70 @@
             <EmptyAvatarIcon />
         </div>
     {:then file}
-        {#if file}
-            <div class="flex flex-row items-center gap-4">
-                <div class="h-16 w-16">
-                    <img
-                        src={`data:image;base64,${file.base64}`}
-                        alt="Avatar"
-                        class="rounded-full object-cover h-full w-full"
-                    />
-                </div>
-                <div class="flex flex-row gap-2">
-                    <Button
-                        type="button"
-                        on:click={() => downloadAvatar(file.base64, file.name)}
-                        variant="secondary"
-                    >
-                        <span slot="icon">
-                            <DownloadIcon />
-                        </span>
-                        Download
-                    </Button>
-                    <form
-                        action="?/deleteAvatar"
-                        method="post"
-                        use:enhance={() => {
-                            deleteLoading = true;
-                            return async ({ result, update }) => {
-                                await update();
-                                if (result.type === "success") {
-                                    toast({
-                                        message: "Avatar deleted",
-                                        type: "success",
-                                    });
-                                }
-                                deleteLoading = false;
-                            };
-                        }}
-                    >
-                        <input type="hidden" name="fileId" value={file.id} />
-                        <input
-                            type="hidden"
-                            name="name"
-                            value={$profile.user.name || ""}
+        <span>
+            {#if file}
+                <div class="flex flex-row items-center gap-4">
+                    <div class="h-16 w-16">
+                        <img
+                            src={`data:image;base64,${file.base64}`}
+                            alt="Avatar"
+                            class="rounded-full object-cover h-full w-full"
                         />
-                        <Button variant="error" {loading}>
+                    </div>
+                    <div class="flex flex-row gap-2">
+                        <Button
+                            type="button"
+                            on:click={() =>
+                                downloadAvatar(file.base64, file.name)}
+                            variant="secondary"
+                        >
                             <span slot="icon">
-                                <DeleteIcon />
+                                <DownloadIcon />
                             </span>
-                            Delete
+                            Download
                         </Button>
-                    </form>
+                        <form
+                            action="?/deleteAvatar"
+                            method="post"
+                            use:enhance={() => {
+                                deleteLoading = true;
+                                return async ({ result, update }) => {
+                                    await update();
+                                    if (result.type === "success") {
+                                        toast({
+                                            message: "Avatar deleted",
+                                            type: "success",
+                                        });
+                                    }
+                                    deleteLoading = false;
+                                };
+                            }}
+                        >
+                            <input
+                                type="hidden"
+                                name="fileId"
+                                value={file.id}
+                            />
+                            <input
+                                type="hidden"
+                                name="name"
+                                value={$profile.user.name || ""}
+                            />
+                            <Button variant="error" loading={deleteLoading}>
+                                <span slot="icon">
+                                    <DeleteIcon />
+                                </span>
+                                Delete
+                            </Button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-        {:else}
-            <div class="h-16 w-16">
-                <EmptyAvatarIcon />
-            </div>
-        {/if}
+            {:else}
+                <div class="h-16 w-16">
+                    <EmptyAvatarIcon />
+                </div>
+            {/if}
+        </span>
     {/await}
     <form
         action="?/createAvatar"

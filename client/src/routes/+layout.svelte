@@ -5,8 +5,9 @@
     import LogoIcon from "$lib/icons/LogoIcon.svelte";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import AvatarIcon from "$lib/icons/AvatarIcon.svelte";
+    import type { LayoutData } from "./$types";
 
-    export let data;
+    export let data: LayoutData;
 
     async function onLogout() {
         await fetch("/api/auth", {
@@ -14,31 +15,6 @@
         });
         window.location.reload();
     }
-
-    import { onMount } from "svelte";
-    import { pwaInfo } from "virtual:pwa-info";
-
-    onMount(async () => {
-        if (pwaInfo) {
-            const { registerSW } = await import("virtual:pwa-register");
-            registerSW({
-                immediate: true,
-                onRegistered(r) {
-                    // uncomment following code if you want check for updates
-                    // r && setInterval(() => {
-                    //    console.log('Checking for sw update')
-                    //    r.update()
-                    // }, 20000 /* 20s for testing purposes */)
-                    console.log(`SW Registered: ${r}`);
-                },
-                onRegisterError(error) {
-                    console.log("SW registration error", error);
-                },
-            });
-        }
-    });
-
-    $: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : "";
 </script>
 
 <svelte:head>

@@ -17,9 +17,7 @@
             <br />
             <slot name="user" />
         </p>
-
         <form
-            role="listitem"
             action="?/deleteNote"
             method="post"
             id={noteId}
@@ -36,12 +34,13 @@
             }}
         >
             <input type="hidden" name="id" value={noteId} />
-            <button type="submit" form={noteId}>
-                <div
-                    class="h-5 w-5 text-error-500 hover:text-error-400 transition"
-                >
-                    <DeleteIcon />
-                </div>
+            <button
+                type="submit"
+                form={noteId}
+                aria-label="Delete note"
+                class="h-5 w-5 text-error-500 hover:text-error-400 transition"
+            >
+                <DeleteIcon />
             </button>
         </form>
     </div>

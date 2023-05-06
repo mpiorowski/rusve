@@ -37,14 +37,13 @@ export const load = (async ({ locals }) => {
                     if (err) {
                         reject(err);
                     } else if (response) {
-                        const file = {
+                        resolve({
                             id: response.id,
                             name: response.name,
                             base64: Buffer.from(response.buffer).toString(
                                 "base64",
                             ),
-                        };
-                        resolve(file);
+                        });
                     } else {
                         resolve(undefined);
                     }
@@ -88,7 +87,7 @@ export const actions = {
             const data: User = {
                 id: locals.userId,
                 name: schema.data.name,
-                avatar: schema.data.avatar || undefined,
+                avatar: schema.data.avatar ?? undefined,
             };
             const metadata = await createMetadata(URI_USERS);
             const user = await new Promise<User__Output>((resolve, reject) => {
@@ -313,8 +312,8 @@ export const actions = {
                 .topic("email")
                 .publishMessage({ data: dataBuffer });
             console.log(`Message ${messageId} published.`);
-        } catch (error) {
-            console.error(`Received error while publishing: ${error}`);
+        } catch (err) {
+            console.error("Received error while publishing: %s", err);
             return fail(500, { error: "Could not send email" });
         }
 

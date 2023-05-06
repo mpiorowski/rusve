@@ -53,7 +53,7 @@ https://www.rusve.app
 
 1. Client setup
 ```
-cp client/.env.dist client/.env
+cp client/.env.example client/.env
 npm i --prefix client
 ```
 
