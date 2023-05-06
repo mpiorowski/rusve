@@ -1,0 +1,12 @@
+{
+    "name": "Rusve",
+    "display": "standalone",
+    "start_url": "/",
+    "icons": [
+        {
+            "src": "favicon.svg",
+            "type": "image/svg",
+            "sizes": "144x144"
+        }
+    ]
+}
