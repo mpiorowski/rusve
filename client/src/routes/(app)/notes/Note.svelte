@@ -39,7 +39,7 @@
             <button
                 type="submit"
                 form={noteId}
-                aria-label="Delete"
+                aria-label="Delete note"
                 class="h-5 w-5 text-error-500 hover:text-error-400 transition"
             >
                 <DeleteIcon />
