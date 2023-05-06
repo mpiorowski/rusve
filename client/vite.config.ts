@@ -5,11 +5,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
     plugins: [
         sveltekit(),
-        SvelteKitPWA({
-            strategies: "injectManifest",
-            srcDir: "src",
-            filename: "service-worker.ts",
-        }),
+        SvelteKitPWA(),
     ],
     test: {
         include: ["src/**/*.{test,spec}.{js,ts}"],

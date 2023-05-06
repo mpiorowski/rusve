@@ -44,6 +44,7 @@
         "firebase": "^9.21.0",
         "firebase-admin": "^11.8.0",
         "jsonwebtoken": "^9.0.0",
+        "kolorist": "^1.8.0",
         "stripe": "^12.4.0",
         "zod": "^3.21.4"
     }

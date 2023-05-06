@@ -10,9 +10,6 @@ const config = {
 
     kit: {
         adapter: adapter(),
-        files: {
-            serviceWorker: 'src/service-worker.ts',
-        },
         serviceWorker: {
             register: false,
         },
