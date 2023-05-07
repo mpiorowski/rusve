@@ -1,9 +1,11 @@
 # Welcome to Rusve!
-Do You see what I did there :)?  
+
 ### What is Rusve? 
+Rust + Svelte = Love + Power
+
 It is a attempt to find the best way to build **fast** and **scalable** web applications, while not beeing afraid of new technologies. And I think we are getting there.
 
-Feel free to ask questions and throw new ideas!
+Feel free to ask questions and throw new ideas! Any contribution is also welcome, especially some ux/ui redesigns :)
 
 ### Currently working on...
 - Making the app resiliant to no internet
