@@ -3,8 +3,9 @@
     import { Editor } from "@tiptap/core";
     import StarterKit from "@tiptap/starter-kit";
 
+    export let label = "";
     export let content = "";
-    export let onChange: ((content: string) => void);
+    export let onChange: (content: string) => void;
     export let errors: string[] = [];
 
     let editor: Editor | undefined;
@@ -20,7 +21,7 @@
                 editor = editor;
             },
             onUpdate: (el) => {
-                onChange && onChange(el.editor.getHTML());
+                onChange(el.editor.getHTML());
             },
         });
     });
@@ -32,8 +33,12 @@
     });
 </script>
 
+<label for="tiptap">
+    {label}
+    <div bind:this={element} role="textbox" id="tiptap" />
+</label>
 {#if editor}
-    <div class="mb-2">
+    <div class="mt-2">
         <button
             type="button"
             class="h-8 w-8 border border-primary-400 rounded hover:bg-primary-600 transition mr-2"
@@ -102,8 +107,6 @@
         </button>
     </div>
 {/if}
-
-<div bind:this={element} />
 {#if errors.length > 0}
     <p class="text-red-500">{errors.join(", ")}</p>
 {/if}

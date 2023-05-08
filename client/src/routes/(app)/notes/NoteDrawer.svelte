@@ -50,6 +50,7 @@
                 />
                 <input type="hidden" name="content" bind:value={content} />
                 <TipTap
+                    label="Content"
                     {onChange}
                     errors={form?.error?.fieldErrors.content ?? []}
                 />
