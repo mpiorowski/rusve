@@ -49,9 +49,9 @@
         <Post postId={post.id} canDelete={post.userId === data.userId}>
             <span slot="title">{post.title}</span>
             <span slot="content">
-                <div class="whitespace-pre-wrap">
-                    {post.content}
-                </div>
+                <!-- TODO -->
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                {@html post.content}
             </span>
             <span slot="user">
                 {#await data.stream.users}

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
     import Drawer from "$lib/components/Drawer.svelte";
+    import TipTap from "$lib/form/TipTap.svelte";
     import Button from "$lib/form/Button.svelte";
     import Input from "$lib/form/Input.svelte";
     import { toast } from "$lib/toast/toast";
@@ -11,6 +12,10 @@
     let title = "";
     let content = "";
     let loading = false;
+
+    function onChange(val: string) {
+        content = val;
+    }
 </script>
 
 <Drawer>
@@ -43,11 +48,9 @@
                     label="Title"
                     errors={form?.error?.fieldErrors.title ?? []}
                 />
-                <Input
-                    textarea
-                    name="content"
-                    bind:value={content}
-                    label="Content"
+                <input type="hidden" name="content" bind:value={content} />
+                <TipTap
+                    {onChange}
                     errors={form?.error?.fieldErrors.content ?? []}
                 />
             </div>
