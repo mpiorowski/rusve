@@ -1,5 +1,6 @@
 <script lang="ts">
     import "../app.css";
+    import "$lib/form/TipTap.css";
     import Toast from "$lib/toast/Toast.svelte";
     import { toastStore } from "$lib/toast/toast";
     import LogoIcon from "$lib/icons/LogoIcon.svelte";

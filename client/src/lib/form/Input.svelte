@@ -26,7 +26,7 @@
             use:typeAction
             {placeholder}
             bind:value
-            class={`rounded px-4 py-2 bg-slate-600 border-primary-700 focus:ring-1 focus:ring-slate-800 shadow-inner w-full ${
+            class={`rounded px-4 py-2 bg-slate-600 focus:ring-1 focus:ring-slate-800 shadow-inner w-full ${
                 haveErrors ? "ring-1 ring-error-500" : ""
             }`}
         />
@@ -37,7 +37,7 @@
             rows="5"
             {placeholder}
             bind:value
-            class={`rounded px-4 py-2 bg-slate-600 border-primary-700 focus:ring-1 focus:ring-slate-800 shadow-inner w-full ${
+            class={`rounded px-4 py-2 bg-slate-600 focus:ring-1 focus:ring-slate-800 shadow-inner w-full ${
                 haveErrors ? "ring-1 ring-error-500" : ""
             }`}
         />

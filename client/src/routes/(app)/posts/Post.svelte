@@ -11,7 +11,9 @@
     <h2>
         <slot name="title" />
     </h2>
-    <slot name="content" />
+    <div class="whitespace-pre-wrap">
+        <slot name="content" />
+    </div>
     <div class="flex text-xs justify-between mt-4">
         <p>
             Created by:

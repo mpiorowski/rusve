@@ -7,12 +7,18 @@
     import { getContext } from "svelte";
     import type { ActionData } from "./$types";
     import type { Writable } from "svelte/store";
+    import TipTap from "$lib/form/TipTap.svelte";
 
     export let form: ActionData;
     let title = "";
     let content = "";
     let loading = false;
     const drawer = getContext<Writable<boolean>>("drawer");
+
+    function onChange(value: string) {
+        content = value;
+    }
+
 </script>
 
 <Drawer>
@@ -46,11 +52,10 @@
                     label="Title"
                     errors={form?.error?.fieldErrors.title ?? []}
                 />
-                <Input
-                    textarea
-                    name="content"
-                    bind:value={content}
+                <input type="hidden" name="content" bind:value={content} />
+                <TipTap
                     label="Content"
+                    {onChange}
                     errors={form?.error?.fieldErrors.content ?? []}
                 />
             </div>

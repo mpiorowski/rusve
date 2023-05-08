@@ -32,11 +32,9 @@
 {#each data.notes as note}
     <Note noteId={note.id}>
         <span slot="title">{note.title}</span>
-        <span slot="content">
-            <div class="whitespace-pre-wrap">
-                {note.content}
-            </div>
-        </span>
+        <!-- TODO -->
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+        <span slot="content">{@html note.content}</span>
         <span slot="user">
             {#await data.stream.users}
                 <span class="block h-4" />
