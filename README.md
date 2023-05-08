@@ -1,9 +1,11 @@
 # Welcome to Rusve!
-Do You see what I did there :)?  
+
 ### What is Rusve? 
+Rust + Svelte = Love + Power
+
 It is a attempt to find the best way to build **fast** and **scalable** web applications, while not beeing afraid of new technologies. And I think we are getting there.
 
-Feel free to ask questions and throw new ideas!
+Feel free to ask questions and throw new ideas! Any contribution is also welcome, especially some ux/ui redesigns :)
 
 ### Currently working on...
 - Making the app resiliant to no internet
@@ -48,6 +50,9 @@ https://www.rusve.app
 
 ## Github action deployment
 ![image](https://user-images.githubusercontent.com/26543876/235413947-4e0671b0-a8ca-4d0c-83c8-b7a3a809242e.png)
+
+## Aria and PWA with offline service workers
+![image](https://user-images.githubusercontent.com/26543876/236647026-0db54439-b841-4e69-8a2f-6976e423b453.png)
 
 ## Dev deployment
 
