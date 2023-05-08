@@ -3,9 +3,6 @@ name = "rusve-users"
 version = "0.1.0"
 edition = "2021"
 
-[registries.crates-io]
-protocol = "sparse"
-
 [[bin]]
 name = "main"
 path = "src/main.rs"
