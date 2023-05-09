@@ -1,6 +1,6 @@
-version: '3'
+version: "3"
 services:
-  client: 
+  client:
     container_name: rusve-client
     working_dir: /app
     build:
@@ -8,7 +8,7 @@ services:
       target: dev
     volumes:
       - ./client:/app
-    ports: 
+    ports:
       - 3000:3000
 
   service-users:
@@ -114,3 +114,17 @@ services:
       POSTGRES_PASSWORD: 12345
       POSTGRES_DB: posts
 
+  directus:
+    container_name: rusve-directus
+    image: directus/directus:latest
+    ports:
+      - 8055:8055
+    environment:
+      KEY: "255d861b-5ea1-5996-9aa3-922530ec40b1"
+      SECRET: "6116487b-cda1-52c2-b5b5-c8022c45e263"
+      DB_CLIENT: "sqlite3"
+      DB_FILENAME:
+        "./database/data.db"
+      CACHE_ENABLED: "false"
+      ADMIN_EMAIL: "admin@example.com"
+      ADMIN_PASSWORD: "d1r3ctu5"

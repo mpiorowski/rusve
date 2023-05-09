@@ -34,6 +34,7 @@ env:
   URI_UTILS: utils-cdb5ecy4ia-lz.a.run.app
   URI_NOTES: notes-cdb5ecy4ia-lz.a.run.app
   URI_POSTS: posts-cdb5ecy4ia-lz.a.run.app
+  URI_DIRECTUS: https://directus-cms.fly.dev
   PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
   PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
   SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
@@ -75,6 +76,7 @@ jobs:
           echo URI_UTILS="$URI_UTILS" >> ./client/.env.prod
           echo URI_NOTES="$URI_NOTES" >> ./client/.env.prod
           echo URI_POSTS="$URI_POSTS" >> ./client/.env.prod
+          echo URI_DIRECTUS="$URI_DIRECTUS" >> ./client/.env.prod
           echo STRIPE_API_KEY="$STRIPE_API_KEY" >> ./client/.env.prod
           echo PUBLIC_API_KEY="$PUBLIC_API_KEY" >> ./client/.env.prod
           echo PUBLIC_AUTH_DOMAIN="$PUBLIC_AUTH_DOMAIN" >> ./client/.env.prod
