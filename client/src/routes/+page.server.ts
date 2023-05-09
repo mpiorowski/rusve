@@ -21,7 +21,7 @@ async function fetchDashboard(): Promise<DashboardItem[]> {
                 title: z.string(),
                 description: z.string(),
                 category: z.string(),
-                sort: z.number(),
+                sort: z.number().optional(),
             }),
         ).parse(json.data);
 
