@@ -7,7 +7,6 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
 Feel free to ask questions and throw new ideas! Any contribution is also welcome, especially some ux/ui redesigns :)
 
 ### Currently working on...
-- Making the app resiliant to no internet
 - **MDX**
 - **Any other feature You will request :)**
 
