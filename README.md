@@ -10,6 +10,13 @@ Feel free to ask questions and throw new ideas! Any contribution is also welcome
 - **MDX**
 - **Any other feature You will request :)**
 
+## Application
+https://www.rusve.app
+## CMS
+https://directus-cms.fly.dev/
+Login: admin@example.com
+Password: d1r3ctu5
+
 ## Features
 - **Backend**
   - **Microservices** - Splitted into smaller parts, very easy to scale, and allows using any combination of languages and databases.
@@ -39,9 +46,6 @@ Feel free to ask questions and throw new ideas! Any contribution is also welcome
   - **[Stripe](https://stripe.com/en-pl)** - Fully working subscription flow.
   - **[HeadlessCMS](https://directus.io/)** - Headless cms via Directus.
   - **[WYSIWYG](https://tiptap.dev/)** - Wyswig text editor thanks to TipTap.
-
-## Application
-https://www.rusve.app
 
 ## Architecture
 ![image](https://github.com/mpiorowski/rusve/assets/26543876/298a7569-f306-4812-9abd-fd146b81c85c)
