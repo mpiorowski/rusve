@@ -7,9 +7,13 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
 Feel free to ask questions and throw new ideas! Any contribution is also welcome, especially some ux/ui redesigns :)
 
 ### Currently working on...
-- Making the app resiliant to no internet
 - **MDX**
 - **Any other feature You will request :)**
+
+## Application
+https://www.rusve.app
+## CMS
+https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5` 
 
 ## Features
 - **Backend**
@@ -40,9 +44,6 @@ Feel free to ask questions and throw new ideas! Any contribution is also welcome
   - **[Stripe](https://stripe.com/en-pl)** - Fully working subscription flow.
   - **[HeadlessCMS](https://directus.io/)** - Headless cms via Directus.
   - **[WYSIWYG](https://tiptap.dev/)** - Wyswig text editor thanks to TipTap.
-
-## Application
-https://www.rusve.app
 
 ## Architecture
 ![image](https://github.com/mpiorowski/rusve/assets/26543876/298a7569-f306-4812-9abd-fd146b81c85c)
@@ -85,6 +86,11 @@ Getting the `SERVICE_ACCOUNT` key is a bit [tricky](https://firebase.google.com/
 ```
 docker-compose up --build
 ```
+
+4. Access:
+
+Application - http://localhost:3000  
+CMS         - http://localhost:8055 | Login: `admin@example.com` | Password: `d1r3ctu5` 
 
 ## Production deployment
 
