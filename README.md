@@ -28,9 +28,9 @@ Feel free to ask questions and throw new ideas! Any contribution is also welcome
   - **[Streaming](https://kit.svelte.dev/docs/load#streaming-with-promises)** - Important data is loaded and rendered first, after that all the rest are returned as promises and rendered when they resolve.
   - **PWA with service workers** - Turn off the internet and check how resiliant the app is.
   - **[Firebase SSR Authentication](https://firebase.google.com/docs/auth)** - Battle-tested OAuth, Magic Link, Phone Number. And by doint it on Svelte server, it's much more [secure](https://firebase.google.com/docs/auth/admin/manage-cookies).
-  - **[TawilwindCSS](https://tailwindcss.com/)** - Used for styling, no other UI library needed. 
+  - **[TailwindCSS](https://tailwindcss.com/)** - Used for styling, no other UI library needed. 
   - **Minimal external libraries** - With Svelte animation and stores builing custom components is very easy. Checkout `Toast`, `Drawer`, `Modal`, `Dropdown` and see for yourself.
-- **Deploy**
+- **Deployment**
   - **[Google Cloud Platform](https://cloud.google.com/)** - Easy to deploy, easy to scale, easy to maintain, and still cheap.
   - **[Github Action](https://docs.github.com/en/actions)** - Ready to use github actions for deployment, each service is linted and checked. Possible to deploy all services or a single one.
   - **[Google Cloud Run](https://cloud.google.com/run)** - Thanks to dockerized application, it's very easy to deploy. Scaling done automatically, can set the min. instances to 1 to reduce cold start.
