@@ -16,12 +16,13 @@ async function fetchDashboard(): Promise<DashboardItem[]> {
         const data = await fetch(URI_DIRECTUS + "/items/dashboard");
 
         const json = (await data.json()) as { data: DashboardItem[] };
+        console.log(json);
         z.array(
             z.object({
                 title: z.string(),
                 description: z.string(),
                 category: z.string(),
-                sort: z.number().optional(),
+                sort: z.number(),
             }),
         ).parse(json.data);
 
