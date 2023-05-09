@@ -13,9 +13,9 @@ Feel free to ask questions and throw new ideas! Any contribution is also welcome
 ## Application
 https://www.rusve.app
 ## CMS
-https://directus-cms.fly.dev/
-Login: admin@example.com
-Password: d1r3ctu5
+https://directus-cms.fly.dev  
+Login: admin@example.com  
+Password: d1r3ctu5  
 
 ## Features
 - **Backend**
