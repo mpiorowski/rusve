@@ -13,9 +13,7 @@ Feel free to ask questions and throw new ideas! Any contribution is also welcome
 ## Application
 https://www.rusve.app
 ## CMS
-https://directus-cms.fly.dev  
-Login: admin@example.com  
-Password: d1r3ctu5  
+https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5` 
 
 ## Features
 - **Backend**
@@ -88,6 +86,11 @@ Getting the `SERVICE_ACCOUNT` key is a bit [tricky](https://firebase.google.com/
 ```
 docker-compose up --build
 ```
+
+4. Access:
+
+Application - http://localhost:3000  
+CMS         - http://localhost:8055 | Login: `admin@example.com` | Password: `d1r3ctu5` 
 
 ## Production deployment
 
