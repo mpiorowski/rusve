@@ -45,12 +45,12 @@
     {#await data.stream.dashboard then dashboard}
         {#each categories as category}
             {#if dashboard.some((el) => el.category === category)}
-                <h2 class="text-3xl text-secondary-500 mb-2 mt-6">
+                <h1 class="text-3xl text-secondary-500 mb-2 mt-6">
                     {category}
-                </h2>
+                </h1>
                 {#each dashboard.filter((el) => el.category === category) as { title, description }}
                     <div class="w-full rounded-xl shadow-inner p-6 mb-2">
-                        <h1 class="mb-2 text-secondary-500">{title}</h1>
+                        <h2 class="mb-2 text-secondary-500">{title}</h2>
                         <h3>{description}</h3>
                     </div>
                 {/each}
