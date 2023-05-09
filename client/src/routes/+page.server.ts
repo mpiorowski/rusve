@@ -25,7 +25,7 @@ async function fetchDashboard(): Promise<DashboardItem[]> {
 
     return json.data.sort((a, b) => a.sort - b.sort);
     } catch (err) {
-        console.log("No cms items found");
+        console.error(err);
         return [];
     }
 }
