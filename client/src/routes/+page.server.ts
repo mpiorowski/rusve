@@ -13,17 +13,19 @@ type DashboardItem = {
 
 async function fetchDashboard(): Promise<DashboardItem[]> {
     try {
-    const data = await fetch(URI_DIRECTUS + "/items/dashboard");
+        const data = await fetch(URI_DIRECTUS + "/items/dashboard");
 
-    const json = (await data.json()) as { data: DashboardItem[] };
-    z.object({
-        title: z.string(),
-        description: z.string(),
-        category: z.string(),
-        sort: z.number(),
-    }).parse(json.data);
+        const json = (await data.json()) as { data: DashboardItem[] };
+        z.array(
+            z.object({
+                title: z.string(),
+                description: z.string(),
+                category: z.string(),
+                sort: z.number(),
+            }),
+        ).parse(json.data);
 
-    return json.data.sort((a, b) => a.sort - b.sort);
+        return json.data.sort((a, b) => a.sort - b.sort);
     } catch (err) {
         console.error(err);
         return [];
