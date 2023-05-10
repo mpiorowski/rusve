@@ -8,6 +8,7 @@ Feel free to ask questions and throw new ideas! Any contribution is also welcome
 
 ### Currently working on...
 - **MDX**
+- Make it work without js
 - **Any other feature You will request :)**
 
 ## Application
