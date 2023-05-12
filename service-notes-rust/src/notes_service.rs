@@ -71,80 +71,6 @@ impl TryFrom<Option<sqlx::postgres::PgRow>> for Note {
 impl NotesService for MyService {
     type GetNotesStream = ReceiverStream<Result<Note, Status>>;
 
-    // async fn get_notes_wuth_users(
-    //     &self,
-    //     request: Request<UserId>,
-    // ) -> Result<Response<Self::GetNotesStream>, Status> {
-    //     #[cfg(debug_assertions)]
-    //     println!("GetNotes = {:?}", request);
-    //     let start = std::time::Instant::now();
-
-    //     let pool = self.pool.clone();
-    //     let (tx, rx) = mpsc::channel(4);
-
-    //     // User service
-    //     let mut users_conn = self.users_conn.clone();
-
-    //     let user_id = request.into_inner().user_id;
-    //     let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
-
-    //     tokio::spawn(async move {
-    //         let mut notes_stream = sqlx::query("SELECT * FROM notes WHERE user_id = $1 and deleted is null order by created desc")
-    //             .bind(user_id)
-    //             .fetch(&pool);
-
-    //         loop {
-    //             match notes_stream.try_next().await {
-    //                 Ok(None) => {
-    //                     let elapsed = start.elapsed();
-    //                     println!("Elapsed: {:.2?}", elapsed);
-    //                     break;
-    //                 }
-    //                 Ok(note) => {
-    //                     let mut note: Note = match note.try_into() {
-    //                         Ok(note) => note,
-    //                         Err(e) => {
-    //                             println!("Error: {:?}", e);
-    //                             tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-    //                             break;
-    //                         }
-    //                     };
-    //                     // Get user
-    //                     let auth_metadata = create_auth_metadata(&note.user_id);
-    //                     if let Err(e) = auth_metadata {
-    //                         println!("Error: {:?}", e);
-    //                         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-    //                         break;
-    //                     }
-    //                     let request = Request::from_parts(
-    //                         auth_metadata.unwrap(),
-    //                         Default::default(),
-    //                         UserId {
-    //                             user_id: note.user_id.to_owned(),
-    //                         },
-    //                     );
-    //                     let response = users_conn.get_user(request).await;
-    //                     if let Err(e) = response {
-    //                         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-    //                         break;
-    //                     }
-    //                     let response = response.unwrap();
-    //                     let user = response.into_inner();
-    //                     note.user = Some(user);
-    //                     println!("note = {:?}", note);
-    //                     tx.send(Ok(note)).await.unwrap();
-    //                 }
-    //                 Err(e) => {
-    //                     println!("Error: {:?}", e);
-    //                     tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //     });
-    //     Ok(Response::new(ReceiverStream::new(rx)))
-    // }
-
     async fn get_notes(
         &self,
         request: Request<UserId>,
@@ -216,7 +142,7 @@ impl NotesService for MyService {
         .bind(note.title.clone())
         .bind(note.content.clone())
         .bind(user_id)
-        .fetch_one(&mut tx)
+        .fetch_one(&pool)
         .await
         .map_err(sqlx::Error::into_status)?;
 
@@ -247,7 +173,7 @@ impl NotesService for MyService {
         )
         .bind(note_uuid)
         .bind(user_uuid)
-        .fetch_one(&mut tx)
+        .fetch_one(&pool)
         .await
         .map_err(sqlx::Error::into_status)?;
 

@@ -1,7 +1,7 @@
 import protoLoader from "@grpc/proto-loader";
 import { credentials, loadPackageDefinition } from "@grpc/grpc-js";
 import type { ProtoGrpcType } from "$lib/proto/main";
-import { URI_USERS, URI_NOTES, URI_UTILS, ENV, URI_POSTS } from "$env/static/private";
+import { URI_USERS, URI_NOTES_RUST, URI_UTILS, ENV, URI_NOTES_GO } from "$env/static/private";
 
 export const packageDefinition = protoLoader.loadSync("./src/lib/proto/main.proto");
 export const proto = loadPackageDefinition(
@@ -22,15 +22,15 @@ export const utilsClient = new proto.proto.UtilsService(
         : credentials.createInsecure(),
 );
 
-export const notesClient = new proto.proto.NotesService(
-    URI_NOTES,
+export const notesRustClient = new proto.proto.NotesService(
+    URI_NOTES_RUST,
     ENV === "production"
         ? credentials.createSsl()
         : credentials.createInsecure(),
 );
 
-export const postsClient = new proto.proto.PostsService(
-    URI_POSTS,
+export const notesGoClient = new proto.proto.NotesService(
+    URI_NOTES_GO,
     ENV === "production"
         ? credentials.createSsl()
         : credentials.createInsecure(),

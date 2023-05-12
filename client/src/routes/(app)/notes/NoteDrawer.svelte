@@ -6,6 +6,8 @@
     import Input from "$lib/form/Input.svelte";
     import { toast } from "$lib/toast/toast";
     import type { ActionData } from "./$types";
+    import { getContext } from "svelte";
+    import type { DrawerContext } from "$lib/types";
 
     export let form: ActionData;
 
@@ -16,6 +18,8 @@
     function onChange(val: string) {
         content = val;
     }
+
+    const drawer = getContext<DrawerContext>("drawer");
 </script>
 
 <Drawer>
@@ -37,6 +41,7 @@
                             type: "success",
                         });
                     }
+                    drawer.set({ open: false, data: "" });
                     loading = false;
                 };
             }}
@@ -49,6 +54,7 @@
                     errors={form?.error?.fieldErrors.title ?? []}
                 />
                 <input type="hidden" name="content" bind:value={content} />
+                <input type="hidden" name="type" value={$drawer.data} />
                 <TipTap
                     label="Content"
                     {onChange}

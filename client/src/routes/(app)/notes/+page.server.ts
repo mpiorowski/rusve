@@ -1,37 +1,59 @@
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { URI_NOTES, URI_USERS } from "$env/static/private";
+import { URI_NOTES_GO, URI_NOTES_RUST, URI_USERS } from "$env/static/private";
 import type { UserId } from "$lib/proto/proto/UserId";
 import type { Note__Output } from "$lib/proto/proto/Note";
 import type { User__Output } from "$lib/proto/proto/User";
 import type { NoteId } from "$lib/proto/proto/NoteId";
 import { createMetadata } from "$lib/metadata";
-import { notesClient, usersClient } from "$lib/grpc";
+import { notesGoClient, notesRustClient, usersClient } from "$lib/grpc";
 import { z } from "zod";
+import type { Metadata } from "@grpc/grpc-js";
 
 export const load = (async ({ locals }) => {
     try {
-        const start = performance.now();
         const userId = locals.userId;
-
         const request: UserId = { userId: userId };
-        let metadata = await createMetadata(URI_NOTES);
-        const stream = notesClient.getNotes(request, metadata);
-        const notes: Note__Output[] = [];
-
         const userIds = new Set<string>();
 
+        /**
+         * Get notes from Rust server
+         */
+        const startRust = performance.now();
+        let metadata = await createMetadata(URI_NOTES_RUST);
+        const streamRust = notesRustClient.getNotes(request, metadata);
+        const notesRust: Note__Output[] = [];
+
         await new Promise<Note__Output[]>((resolve, reject) => {
-            stream.on("data", (note: Note__Output) => {
-                notes.push(note);
+            streamRust.on("data", (note: Note__Output) => {
+                notesRust.push(note);
                 userIds.add(note.userId);
             });
-            stream.on("end", () => resolve(notes));
-            stream.on("error", (err: unknown) => reject(err));
+            streamRust.on("end", () => resolve(notesRust));
+            streamRust.on("error", (err: unknown) => reject(err));
         });
+        const timeRust = performance.now() - startRust;
 
-        const end = performance.now();
+        /**
+         * Get users from Go server
+         */
+        const startGo = performance.now();
+        metadata = await createMetadata(URI_NOTES_GO);
+        const streamGo = notesGoClient.getNotes(request, metadata);
+        const notesGo: Note__Output[] = [];
 
+        await new Promise<Note__Output[]>((resolve, reject) => {
+            streamGo.on("data", (note: Note__Output) => {
+                notesGo.push(note);
+            });
+            streamGo.on("end", () => resolve(notesGo));
+            streamGo.on("error", (err: unknown) => reject(err));
+        });
+        const timeGo = performance.now() - startGo;
+
+        /**
+         * Get users from Rust server
+         */
         metadata = await createMetadata(URI_USERS);
         const usersStream = usersClient.getUsers(
             { userIds: Array.from(userIds) },
@@ -45,8 +67,10 @@ export const load = (async ({ locals }) => {
         });
 
         return {
-            notes: notes,
-            duration: end - start,
+            notesRust: notesRust,
+            timeRust: timeRust,
+            notesGo: notesGo,
+            timeGo: timeGo,
             stream: {
                 users: usersPromise,
             },
@@ -64,10 +88,12 @@ export const actions = {
         const form = await request.formData();
         const title = form.get("title");
         const content = form.get("content");
+        const type = form.get("type");
 
         const data = {
             title: title,
             content: content,
+            type: type,
             userId: locals.userId,
         };
 
@@ -76,6 +102,7 @@ export const actions = {
                 userId: z.string().uuid(),
                 title: z.string().min(1).max(100),
                 content: z.string().min(1).max(1000),
+                type: z.union([z.literal("go"), z.literal("rust")]),
             })
             .safeParse(data);
 
@@ -84,13 +111,28 @@ export const actions = {
         }
 
         try {
-            const metadata = await createMetadata(URI_NOTES);
-            await new Promise<Note__Output>((resolve, reject) => {
-                notesClient.createNote(schema.data, metadata, (err, response) =>
-                    err || !response ? reject(err) : resolve(response),
-                );
-            });
-
+            let metadata: Metadata;
+            if (schema.data.type === "rust") {
+                metadata = await createMetadata(URI_NOTES_RUST);
+                await new Promise<Note__Output>((resolve, reject) => {
+                    notesRustClient.createNote(
+                        schema.data,
+                        metadata,
+                        (err, response) =>
+                            err || !response ? reject(err) : resolve(response),
+                    );
+                });
+            } else {
+                metadata = await createMetadata(URI_NOTES_GO);
+                await new Promise<Note__Output>((resolve, reject) => {
+                    notesGoClient.createNote(
+                        schema.data,
+                        metadata,
+                        (err, response) =>
+                            err || !response ? reject(err) : resolve(response),
+                    );
+                });
+            }
             const end = performance.now();
             return {
                 success: true,
@@ -107,9 +149,11 @@ export const actions = {
         const form = await request.formData();
         const id = form.get("id");
 
-        const schema = z.object({
-            id: z.string().uuid(),
-        }).safeParse({ id: id });
+        const schema = z
+            .object({
+                id: z.string().uuid(),
+            })
+            .safeParse({ id: id });
         if (!schema.success) {
             throw error(400, "Missing id");
         }
@@ -119,9 +163,9 @@ export const actions = {
                 userId: locals.userId,
             };
 
-            const metadata = await createMetadata(URI_NOTES);
+            const metadata = await createMetadata(URI_NOTES_RUST);
             const note = await new Promise<Note__Output>((resolve, reject) => {
-                notesClient.deleteNote(data, metadata, (err, response) =>
+                notesRustClient.deleteNote(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });

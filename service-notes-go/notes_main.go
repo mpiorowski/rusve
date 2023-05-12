@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	migrate "github.com/rubenv/sql-migrate"
+	// migrate "github.com/rubenv/sql-migrate"
 	"google.golang.org/grpc"
 
 	pb "rusve/proto"
@@ -19,7 +19,7 @@ import (
 var db *sql.DB
 
 type server struct {
-	pb.UnsafePostsServiceServer
+	pb.UnimplementedNotesServiceServer
 }
 
 var (
@@ -43,19 +43,19 @@ func init() {
 	}
 	log.Println("Connected to database")
 
-	// Migrations
-	var migrationsDir = "./migrations"
-	if ENV == "production" {
-		migrationsDir = "/migrations"
-	}
-	migrations := &migrate.FileMigrationSource{
-		Dir: migrationsDir,
-	}
-	n, err := migrate.Exec(db, "postgres", migrations, migrate.Up)
-	if err != nil {
-		log.Fatalf("Migrations failed: %v", err)
-	}
-	log.Printf("Applied migrations: %d", n)
+    // Example of running migrations
+	// var migrationsDir = "./migrations"
+	// if ENV == "production" {
+	// 	migrationsDir = "/migrations"
+	// }
+	// migrations := &migrate.FileMigrationSource{
+	// 	Dir: migrationsDir,
+	// }
+	// n, err := migrate.Exec(db, "postgres", migrations, migrate.Up)
+	// if err != nil {
+	// 	log.Fatalf("Migrations failed: %v", err)
+	// }
+	// log.Printf("Applied migrations: %d", n)
 }
 
 func main() {
@@ -66,7 +66,7 @@ func main() {
 	}
 	// this is not catching the requests
 	s := grpc.NewServer()
-	pb.RegisterPostsServiceServer(s, &server{})
+	pb.RegisterNotesServiceServer(s, &server{})
 	log.Printf("Server listening at: %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
