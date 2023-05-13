@@ -67,10 +67,11 @@ export const load = (async ({ locals }) => {
         });
 
         return {
-            notesRust: notesRust,
+            notesRust: notesRust.slice(0, 1),
             timeRust: timeRust,
-            notesGo: notesGo,
+            notesGo: notesGo.slice(0, 1),
             timeGo: timeGo,
+            length: notesRust.length,
             stream: {
                 users: usersPromise,
             },

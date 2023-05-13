@@ -54,6 +54,12 @@
                 {/if}
                 {#if data.userId}
                     <a
+                        href="/profile"
+                        class="hover:text-secondary-500 transition"
+                    >
+                        Profile
+                    </a>
+                    <a
                         href="/notes"
                         class="hover:text-secondary-500 transition"
                     >

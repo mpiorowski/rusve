@@ -28,7 +28,7 @@
     {/if}
 
     <h3 class="my-6">
-        You are currently on the {isPro ? '"I use Rust"' : '"Noob"'} plan
+        You are currently on the {isPro ? '"Pro"' : '"Noob"'} plan
     </h3>
 
     {#if !isPro}
@@ -42,7 +42,7 @@
                 <svelte:fragment slot="icon">
                     <DollarIcon />
                 </svelte:fragment>
-                Upgrade to "I use Rust" plan
+                Upgrade to "Pro" plan
             </Button>
             <p class="mt-2">
                 test mode - no real payment will be made <br />

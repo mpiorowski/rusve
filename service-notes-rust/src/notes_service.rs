@@ -3,11 +3,11 @@ use crate::{
     MyService,
 };
 use anyhow::Result;
-use sqlx::{types::Uuid, Row};
 use time::OffsetDateTime;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
+use uuid::Uuid;
 
 trait SqlxError {
     fn into_status(self) -> Status;
@@ -34,10 +34,10 @@ struct PgNote {
     content: String,
 }
 
-impl TryFrom<Option<sqlx::postgres::PgRow>> for Note {
+impl TryFrom<Option<tokio_postgres::Row>> for Note {
     type Error = anyhow::Error;
 
-    fn try_from(row: Option<sqlx::postgres::PgRow>) -> Result<Self, Self::Error> {
+    fn try_from(row: Option<tokio_postgres::Row>) -> Result<Self, Self::Error> {
         match row {
             Some(row) => {
                 let pg_note = PgNote {
@@ -98,26 +98,13 @@ impl NotesService for MyService {
 
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
-            // TODO: use try_get
             for row in rows {
-                let pg_note = PgNote {
-                    id: row.get("id"),
-                    user_id: row.get("user_id"),
-                    title: row.get("title"),
-                    content: row.get("content"),
-                    created: row.get("created"),
-                    updated: row.get("updated"),
-                    deleted: row.get("deleted"),
-                };
-                let note = Note {
-                    id: pg_note.id.to_string(),
-                    user_id: pg_note.user_id.to_string(),
-                    title: pg_note.title,
-                    content: pg_note.content,
-                    created: pg_note.created.to_string(),
-                    updated: pg_note.updated.to_string(),
-                    deleted: pg_note.deleted.map(|d| d.to_string()),
-                    user: None,
+                let note = match Note::try_from(Some(row)) {
+                    Ok(note) => note,
+                    Err(e) => {
+                        println!("Error: {:?}", e);
+                        break;
+                    }
                 };
                 match tx.send(Ok(note)).await {
                     Ok(_) => {}
@@ -137,13 +124,13 @@ impl NotesService for MyService {
         #[cfg(debug_assertions)]
         println!("CreateNote = {:?}", request);
         let start = std::time::Instant::now();
+
+        // start transaction
         let mut client = self
             .pool
             .get()
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
-
-        // start transaction
         let tx = client
             .transaction()
             .await
@@ -153,15 +140,46 @@ impl NotesService for MyService {
         let user_id =
             Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        tx.query_one(
-            "insert into notes (title, content, user_id) values ($1, $2, $3) returning *",
-            &[&note.title, &note.content, &user_id],
-        )
-        .await
-        .map_err(|e| Status::internal(e.to_string()))?;
+        let row;
+        if !note.id.is_empty() {
+            let note_id = Uuid::parse_str(&note.id).map_err(|e| Status::internal(e.to_string()))?;
+            row = tx
+                .query_one(
+                    "update notes set title = $1, content = $2 where id = $3 and user_id = $4 returning *",
+                    &[&note.title, &note.content, &note_id, &user_id],
+                )
+                .await
+                .map_err(|e| Status::internal(e.to_string()))?;
+        } else {
+            // for benchmarks, delete all notes and create 5000 new ones
+            tx.execute("delete from notes where user_id = $1", &[&user_id])
+                .await
+                .map_err(|e| Status::internal(e.to_string()))?;
+            for _ in 0..5000 {
+                tx.execute(
+                    "insert into notes (title, content, user_id) values ($1, $2, $3) returning *",
+                    &[&note.title, &note.content, &user_id],
+                )
+                .await
+                .map_err(|e| Status::internal(e.to_string()))?;
+            }
+            row = tx
+                .query_one(
+                    "insert into notes (title, content, user_id) values ($1, $2, $3) returning *",
+                    &[&note.title, &note.content, &user_id],
+                )
+                .await
+                .map_err(|e| Status::internal(e.to_string()))?;
+        }
 
-        let elapsed = start.elapsed();
-        println!("Elapsed: {:.2?}", elapsed);
+        let note = Note::try_from(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
+
+        // commit transaction
+        tx.commit()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+
+        println!("Elapsed: {:.2?}", start.elapsed());
         return Ok(Response::new(note));
     }
 
@@ -194,34 +212,14 @@ impl NotesService for MyService {
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
-        let pg_note = PgNote {
-            id: row.get("id"),
-            user_id: row.get("user_id"),
-            title: row.get("title"),
-            content: row.get("content"),
-            created: row.get("created"),
-            updated: row.get("updated"),
-            deleted: row.get("deleted"),
-        };
-
-        let note = Note {
-            id: pg_note.id.to_string(),
-            user_id: pg_note.user_id.to_string(),
-            title: pg_note.title,
-            content: pg_note.content,
-            created: pg_note.created.to_string(),
-            updated: pg_note.updated.to_string(),
-            deleted: pg_note.deleted.map(|d| d.to_string()),
-            user: None,
-        };
+        let note = Note::try_from(Some(row)).map_err(|e| Status::internal(e.to_string()))?;
 
         // commit transaction
         tx.commit()
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
-        let elapsed = start.elapsed();
-        println!("Elapsed: {:.2?}", elapsed);
+        println!("Elapsed: {:.2?}", start.elapsed());
         return Ok(Response::new(note));
     }
 }

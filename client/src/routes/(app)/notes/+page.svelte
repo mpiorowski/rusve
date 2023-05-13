@@ -11,10 +11,6 @@
     export let data: PageData;
     export let form: ActionData;
 
-    /**
-    * Over-engineered component composition
-    * Local store, not shared with other components
-    */
     const drawer: DrawerContext = writable({ open: false, data: "" });
     setContext("drawer", drawer);
 </script>
@@ -23,13 +19,13 @@
 
 <div class="mb-6 grid items-center gap-4">
     <h3>
-        Rust: {data.timeRust.toFixed(4)}ms
+        Rust Query: {data.timeRust.toFixed(4)}ms
     </h3>
     <h3>
-        Go: {data.timeGo.toFixed(4)}ms
+        Go Query: {data.timeGo.toFixed(4)}ms
     </h3>
     <h3>
-        Created in: {(form?.duration ?? 0).toFixed(4)}ms
+        Mutation: {(form?.duration ?? 0).toFixed(4)}ms
     </h3>
     <Button
         type="button"
@@ -47,7 +43,8 @@
     </Button>
 </div>
 
-{#each data.notesRust.slice(0, 10) as note}
+<h3>{data.length}x</h3>
+{#each data.notesRust as note}
     <Note noteId={note.id}>
         <span slot="title">{note.title}</span>
         <!-- TODO -->

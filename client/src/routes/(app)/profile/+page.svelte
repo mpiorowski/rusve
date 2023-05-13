@@ -6,7 +6,7 @@
     import { toast } from "$lib/toast/toast";
     import { writable } from "svelte/store";
     import type { ProfileContext, ProfileStore } from "./profile.types";
-    import type {  ActionData, PageData } from "./$types.js";
+    import type { ActionData, PageData } from "./$types.js";
 
     export let data: PageData;
     export let form: ActionData;
@@ -17,6 +17,10 @@
         });
     }
 
+    /**
+     * Component composition pattern
+     * Local store, not shared with other components
+     */
     const profileStore = writable<ProfileStore>();
     $: profileStore.set({
         user: data.user,
@@ -25,7 +29,7 @@
     setContext<ProfileContext>("profile", profileStore);
 </script>
 
-<h3 class="text-right">
+<h3>
     {data.duration.toFixed(4)}ms
 </h3>
 
