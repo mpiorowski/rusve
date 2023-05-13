@@ -20,7 +20,7 @@ https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5`
 ## Features
 - **Backend**
   - **Microservices** - Splitted into smaller parts, very easy to scale, and allows using any combination of languages and databases. Project have ready to use both Go and Rust services.
-  - **[Go](https://go.dev/)** - Go is very easy to work with while still having amazing performance. Out of the box support for gRPC. Recommended to start with.
+  - **[Go](https://go.dev/)** - Very easy to work with while still having amazing performance. Out of the box support for gRPC. Recommended to start with.
   - **[Rust](https://www.rust-lang.org/)** - For more complex services use Rust, hard but amazing language. Almost impossible to write code that will not start.
   - **[gRPC](https://grpc.io/)** - Connection between services using gRPC, which is very fast and gives an option for bi-directional streaming. For Rust using great **[Tonic](https://docs.rs/tonic/latest/tonic/)** create, with first class support of async/await.
   - **[Typesafety](https://protobuf.dev/)** - Thanks to protobuf, amazing typesafety across the whole project, no matter the language (not only for TS, hi tRPC).
