@@ -7,8 +7,8 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
 Feel free to ask questions and throw new ideas! Any contribution is also welcome, especially some ux/ui redesigns :)
 
 ### Currently working on...
-- Live benchmark
 - Markdown
+- Telemetry
 - Make it more resistanc to no js
 - **Any other feature You will request :)**
 
@@ -19,9 +19,9 @@ https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5`
 
 ## Features
 - **Backend**
-  - **Microservices** - Splitted into smaller parts, very easy to scale, and allows using any combination of languages and databases.
-  - **[Rust](https://www.rust-lang.org/)** - Most of the logic written in Rust, hard but amazing language. Almost impossible to write code that will not start.
-  - **[Go](https://go.dev/)** - One service written in Go, to show how it can be done as alternative. Go is very easy to learn while still having great performance.
+  - **Microservices** - Splitted into smaller parts, very easy to scale, and allows using any combination of languages and databases. Project have ready to use both Go and Rust services.
+  - **[Go](https://go.dev/)** - Go is very easy to work with while still having amazing performance. Out of the box support for gRPC. Recommended to start with.
+  - **[Rust](https://www.rust-lang.org/)** - For more complex services use Rust, hard but amazing language. Almost impossible to write code that will not start.
   - **[gRPC](https://grpc.io/)** - Connection between services using gRPC, which is very fast and gives an option for bi-directional streaming. For Rust using great **[Tonic](https://docs.rs/tonic/latest/tonic/)** create, with first class support of async/await.
   - **[Typesafety](https://protobuf.dev/)** - Thanks to protobuf, amazing typesafety across the whole project, no matter the language (not only for TS, hi tRPC).
   - **Sql Pools and Transactions** - Using the best practice for the best performance and error handling.
@@ -37,11 +37,11 @@ https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5`
   - **[TailwindCSS](https://tailwindcss.com/)** - Used for styling, no other UI library needed. 
   - **Minimal external libraries** - With Svelte animation and stores builing custom components is very easy. Checkout `Toast`, `Drawer`, `Modal`, `Dropdown` and see for yourself.
 - **Deployment**
-  - **[Google Cloud Platform](https://cloud.google.com/)** - Easy to deploy, easy to scale, easy to maintain, and still cheap.
   - **[Github Action](https://docs.github.com/en/actions)** - Ready to use github actions for deployment, each service is linted and checked. Possible to deploy all services or a single one.
+  - **[Google Cloud Platform](https://cloud.google.com/)** - Easy to deploy, easy to scale, easy to maintain, and still cheap.
   - **[Google Cloud Run](https://cloud.google.com/run)** - Thanks to dockerized application, it's very easy to deploy. Scaling done automatically, can set the min. instances to 1 to reduce cold start.
   - **[Google Cloud Storage](https://cloud.google.com/storage)** - Working files upload, download and delete.
-  - **[PubSub](https://cloud.google.com/pubsub)** - Asynchronus data sending.
+  - **[Google PubSub](https://cloud.google.com/pubsub)** - Asynchronus data sending.
 - **Additional features**
   - **[Stripe](https://stripe.com/en-pl)** - Fully working subscription flow.
   - **[HeadlessCMS](https://directus.io/)** - Headless cms via Directus.
