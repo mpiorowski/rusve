@@ -28,3 +28,4 @@ jsonwebtoken = "8.2.0"
 serde = "1.0.154"
 dotenvy = "0.15.7"
 tokio-postgres = { version = "0.7.8", features = ["with-uuid-1", "with-time-0_3"] }
+deadpool-postgres = "0.10.5"
