@@ -2,10 +2,6 @@ name: Lint notes
 on:
   workflow_call:
 
-permissions:
-  contents: write
-  checks: write
-
 env:
   RUSTFLAGS: "-Dwarnings"
 

@@ -2,10 +2,6 @@ name: Lint posts
 on:
   workflow_call:
 
-permissions:
-  contents: write
-  checks: write
-
 jobs:
   golangci:
     name: lint
