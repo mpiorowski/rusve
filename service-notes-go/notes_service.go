@@ -62,12 +62,12 @@ func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Note, error) 
 	var row *sql.Row
 	var note *pb.Note
 	if in.Id == "" {
+        // for benchmarks, delete all notes and create 5000 new ones
 		_, err = db.Exec(`delete from notes where user_id = $1`, in.UserId)
         if err != nil {
             log.Printf("db.Exec: %v", err)
             return nil, err
         }
-		// do it 5000 times
 		for i := 0; i < 5000; i++ {
 			row = db.QueryRow(`insert into notes (user_id, title, content) values ($1, $2, $3) returning *`, in.UserId, in.Title, in.Content)
 			note, err = mapNote(nil, row)

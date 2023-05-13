@@ -15,6 +15,9 @@ const cache = new Map<string, Date>();
  * Cache it for 1 hour
  */
 export async function checkSubscription(paymentId: string) {
+    if (!paymentId) {
+        return false;
+    }
     const stripe = getStripe();
 
     if (cache.has(paymentId)) {
