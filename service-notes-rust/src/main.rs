@@ -1,6 +1,5 @@
 mod notes_service;
 mod proto;
-mod utils;
 
 use std::str::FromStr;
 
