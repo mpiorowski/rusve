@@ -74,8 +74,8 @@ jobs:
           echo DOMAIN="$DOMAIN" >> ./client/.env.prod
           echo URI_USERS="$URI_USERS" >> ./client/.env.prod
           echo URI_UTILS="$URI_UTILS" >> ./client/.env.prod
-          echo URI_NOTES="$URI_NOTES" >> ./client/.env.prod
-          echo URI_POSTS="$URI_POSTS" >> ./client/.env.prod
+          echo URI_NOTES_RUST="$URI_NOTES_RUST" >> ./client/.env.prod
+          echo URI_NOTES_GO="$URI_NOTES_GO" >> ./client/.env.prod
           echo URI_DIRECTUS="$URI_DIRECTUS" >> ./client/.env.prod
           echo STRIPE_API_KEY="$STRIPE_API_KEY" >> ./client/.env.prod
           echo PUBLIC_API_KEY="$PUBLIC_API_KEY" >> ./client/.env.prod
