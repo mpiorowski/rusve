@@ -32,8 +32,8 @@ env:
   DOMAIN: https://www.rusve.app
   URI_USERS: users-cdb5ecy4ia-lz.a.run.app
   URI_UTILS: utils-cdb5ecy4ia-lz.a.run.app
-  URI_NOTES: notes-cdb5ecy4ia-lz.a.run.app
-  URI_POSTS: posts-cdb5ecy4ia-lz.a.run.app
+  URI_NOTES_RUST: notes-cdb5ecy4ia-lz.a.run.app
+  URI_NOTES_GO: posts-cdb5ecy4ia-lz.a.run.app
   URI_DIRECTUS: https://directus-cms.fly.dev
   PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
   PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
