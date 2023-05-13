@@ -2,22 +2,22 @@
     import Button from "$lib/form/Button.svelte";
     import XIcon from "$lib/icons/XIcon.svelte";
     import { getContext } from "svelte";
-    import type { Writable } from "svelte/store";
     import { fade, slide } from "svelte/transition";
+    import type { DrawerContext } from "$lib/types";
 
-    const drawer = getContext<Writable<boolean>>("drawer");
+    const drawer = getContext<DrawerContext>("drawer");
 </script>
 
-{#if $drawer}
+{#if $drawer.open}
     <div
         transition:fade={{ duration: 200 }}
         class="absolute top-0 right-0 w-screen h-screen bg-black bg-opacity-50 z-40"
         on:click={() => {
-            drawer.set(false);
+            drawer.set({ ...$drawer, open: false });
         }}
         on:keypress={(e) => {
             if (e.key === "Escape") {
-                drawer.set(false);
+                drawer.set({ ...$drawer, open: false });
             }
         }}
     />
@@ -31,7 +31,7 @@
             </div>
             <button
                 on:click={() => {
-                    drawer.set(false);
+                    drawer.set({ ...$drawer, open: false });
                 }}
                 class="w-8 h-8 flex justify-center items-center hover:text-primary-300"
             >
@@ -47,7 +47,7 @@
                     type="button"
                     variant="secondary"
                     on:click={() => {
-                        drawer.set(false);
+                        drawer.set({ ...$drawer, open: false });
                     }}
                 >
                     Close

@@ -71,6 +71,7 @@ npm i --prefix client
 ```
 
 2. Run proto generation
+Be sure to have `protoc` installed.
 ```
 sh proto.sh
 ```

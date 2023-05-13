@@ -1,31 +1,32 @@
 mod notes_service;
 mod proto;
-mod utils;
+
+use std::str::FromStr;
 
 use anyhow::{Context, Result};
+use deadpool_postgres::{Manager, ManagerConfig, Pool};
 use proto::notes_service_server::NotesServiceServer;
-use sqlx::{PgPool, postgres::PgPoolOptions};
+use sqlx::postgres::PgPoolOptions;
 use tonic::transport::Server;
-use utils::check_env;
 
 #[derive(Debug)]
 pub struct MyService {
-    pool: PgPool,
+    pool: Pool,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     println!("Starting server...");
 
+    let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
+    let port = std::env::var("PORT").context("PORT not set")?;
+
     // Database
-    let database_url = check_env("DATABASE_URL")?;
     let pool = PgPoolOptions::new()
         .max_connections(20)
         .connect(&database_url)
         .await
         .with_context(|| format!("Failed to connect to database: {}", database_url))?;
-    println!("Connected to database");
-
     // Migrations
     sqlx::migrate!("./migrations")
         .run(&pool)
@@ -33,7 +34,15 @@ async fn main() -> Result<()> {
         .context("Failed to run migrations")?;
     println!("Migrations ran successfully");
 
-    let port = check_env("PORT")?;
+    // Database connection pool
+    let pg_config = tokio_postgres::Config::from_str(&database_url)?;
+    let mgr = Manager::from_config(pg_config, tokio_postgres::NoTls, ManagerConfig::default());
+    let pool = Pool::builder(mgr)
+        .max_size(20)
+        .build()
+        .context("Failed to create database pool")?;
+    println!("Connected to database");
+
     let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);
 

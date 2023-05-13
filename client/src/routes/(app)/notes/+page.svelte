@@ -6,30 +6,48 @@
     import { writable } from "svelte/store";
     import { setContext } from "svelte";
     import type { ActionData, PageData } from "./$types.js";
+    import type { DrawerContext } from "$lib/types";
 
     export let data: PageData;
     export let form: ActionData;
 
-    const drawer = writable(false);
+    /**
+    * Over-engineered component composition
+    * Local store, not shared with other components
+    */
+    const drawer: DrawerContext = writable({ open: false, data: "" });
     setContext("drawer", drawer);
 </script>
 
 <NoteDrawer {form} />
 
-<div class="mb-6 grid grid-cols-2 items-center gap-4">
-    <div>
-        <h3>Notes are only visible to you.</h3>
-        <h3>
-            Rust: {data.duration.toFixed(4)}ms / {data.notes.length} notes
-        </h3>
-    </div>
-    <Button type="button" on:click={() => drawer.set(true)}>
+<div class="mb-6 grid items-center gap-4">
+    <h3>
+        Rust: {data.timeRust.toFixed(4)}ms
+    </h3>
+    <h3>
+        Go: {data.timeGo.toFixed(4)}ms
+    </h3>
+    <h3>
+        Created in: {(form?.duration ?? 0).toFixed(4)}ms
+    </h3>
+    <Button
+        type="button"
+        on:click={() => drawer.set({ open: true, data: "rust" })}
+    >
         <span slot="icon"><PlusIcon /></span>
-        Create note
+        Re-create 5000 notes using Rust
+    </Button>
+    <Button
+        type="button"
+        on:click={() => drawer.set({ open: true, data: "go" })}
+    >
+        <span slot="icon"><PlusIcon /></span>
+        Re-create 5000 notes using Go
     </Button>
 </div>
 
-{#each data.notes as note}
+{#each data.notesRust.slice(0, 10) as note}
     <Note noteId={note.id}>
         <span slot="title">{note.title}</span>
         <!-- TODO -->

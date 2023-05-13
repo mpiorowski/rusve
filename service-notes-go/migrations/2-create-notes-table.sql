@@ -1,6 +1,6 @@
 -- +migrate Up
 CREATE TABLE
-  posts (
+  notes (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid (),
     created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -12,4 +12,4 @@ CREATE TABLE
 
 CREATE TRIGGER set_timestamp BEFORE
 UPDATE
-  ON posts FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp ();
+  ON notes FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp ();

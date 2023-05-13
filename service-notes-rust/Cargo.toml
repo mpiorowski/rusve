@@ -21,9 +21,11 @@ futures-core = "0.3.28"
 futures-util = "0.3.28"
 
 anyhow = "1.0.69"
-sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "migrate", "postgres", "uuid", "time"] }
+sqlx = { version = "=0.7.0-alpha.3", features = [ "runtime-tokio-rustls", "migrate", "postgres", "uuid", "time"] }
 time = "0.3.20"
 reqwest = "0.11.14"
 jsonwebtoken = "8.2.0"
 serde = "1.0.154"
 dotenvy = "0.15.7"
+tokio-postgres = { version = "0.7.8", features = ["with-uuid-1", "with-time-0_3"] }
+deadpool-postgres = "0.10.5"

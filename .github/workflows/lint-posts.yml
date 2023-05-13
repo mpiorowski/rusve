@@ -20,5 +20,5 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          working-directory: ./service-posts
+          working-directory: ./service-notes-go
           args: --skip-dirs=proto --timeout=3m
