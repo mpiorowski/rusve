@@ -141,7 +141,7 @@ impl NotesService for MyService {
             Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         let row;
-        if note.id != "" {
+        if !note.id.is_empty() {
             let note_id = Uuid::parse_str(&note.id).map_err(|e| Status::internal(e.to_string()))?;
             row = tx
                 .query_one(
