@@ -1,9 +1,12 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
+    import { page } from "$app/stores";
     import DeleteIcon from "$lib/icons/DeleteIcon.svelte";
     import { toast } from "$lib/toast/toast";
 
     export let noteId: string;
+
+    const type = $page.url.searchParams.get("lang") ?? "rust";
 </script>
 
 <div class="flex flex-col gap-2 p-4 shadow-inner rounded bg-slate-600 mb-4">
@@ -36,6 +39,7 @@
             }}
         >
             <input type="hidden" name="id" value={noteId} />
+            <input type="hidden" name="type" value={type} />
             <button
                 type="submit"
                 form={noteId}

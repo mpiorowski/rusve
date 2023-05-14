@@ -114,7 +114,7 @@
             </div>
         </div>
     </nav>
-    <section class="h-[calc(100vh-60px)] overflow-auto">
+    <section class="h-[calc(100dvh-60px)] overflow-auto">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <slot />
         </div>
