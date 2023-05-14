@@ -22,7 +22,7 @@
         }}
     />
     <div
-        class="absolute grid grid-rows-[60px_1fr_60px] top-0 right-0 h-screen max-w-xl w-full bg-primary-700 z-50"
+        class="absolute grid grid-rows-[60px_1fr_60px] top-0 right-0 h-[100dvh] max-w-xl w-full bg-primary-700 z-50"
         transition:slide={{ duration: 200, axis: "x" }}
     >
         <div class="flex flex-row justify-between items-center px-6">
