@@ -31,6 +31,42 @@ impl IntoStatus for anyhow::Error {
     }
 }
 
+impl TryFrom<Option<PgRow>> for PgUser {
+    type Error = anyhow::Error;
+
+    fn try_from(value: Option<PgRow>) -> std::result::Result<Self, Self::Error> {
+        match value {
+            Some(row) => {
+                let id: Uuid = row.try_get("id")?;
+                let created: OffsetDateTime = row.try_get("created")?;
+                let updated: OffsetDateTime = row.try_get("updated")?;
+                let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
+                let email: String = row.try_get("email")?;
+                let role: String = row.try_get("role")?;
+                let role = UserRole::from_str_name(&role).ok_or(anyhow::anyhow!("Invalid role"))?;
+                let sub: String = row.try_get("sub")?;
+                let name = row.try_get("name")?;
+                let avatar: Option<Uuid> = row.try_get("avatar")?;
+                let payment_id: Option<String> = row.try_get("payment_id")?;
+
+                Ok(PgUser {
+                    id,
+                    created,
+                    updated,
+                    deleted,
+                    email,
+                    role,
+                    sub,
+                    name,
+                    avatar,
+                    payment_id,
+                })
+            }
+            None => Err(anyhow::anyhow!("User not found")),
+        }
+    }
+}
+
 impl TryFrom<Option<PgRow>> for User {
     type Error = anyhow::Error;
 
@@ -67,6 +103,19 @@ impl TryFrom<Option<PgRow>> for User {
     }
 }
 
+struct PgUser {
+    id: Uuid,
+    created: OffsetDateTime,
+    updated: OffsetDateTime,
+    deleted: Option<OffsetDateTime>,
+    email: String,
+    role: UserRole,
+    sub: String,
+    name: Option<String>,
+    avatar: Option<Uuid>,
+    payment_id: Option<String>,
+}
+
 #[tonic::async_trait]
 impl UsersService for MyService {
     type GetUsersStream = ReceiverStream<Result<User, Status>>;
@@ -79,13 +128,23 @@ impl UsersService for MyService {
         let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
 
         let request = request.into_inner();
-        let row =
-            query("update users set updated = now() where email = $1 and sub = $2 returning *")
-                .bind(&request.email)
-                .bind(&request.sub)
-                .fetch_optional(&mut tx)
-                .await
-                .map_err(sqlx::Error::into_status)?;
+
+        // check if user exists
+        let row = query("select * from users where email = $1 and sub = $2")
+            .bind(&request.email)
+            .bind(&request.sub)
+            .fetch_optional(&mut tx)
+            .await
+            .map_err(sqlx::Error::into_status)?;
+        let user: PgUser = row.try_into().map_err(anyhow::Error::into_status)?;
+        if user.deleted.is_some() {
+            return Err(Status::not_found("User not found"));
+        }
+        let row = query("update users set updated = now() where id = $1 returning *")
+            .bind(&user.id)
+            .fetch_optional(&mut tx)
+            .await
+            .map_err(sqlx::Error::into_status)?;
 
         match row {
             Some(row) => {
@@ -95,11 +154,12 @@ impl UsersService for MyService {
                 Ok(Response::new(user))
             }
             None => {
+                // TODO - user role
                 let row =
-                    query("insert into users (email, sub, role) values ($1, $2, $3) returning *")
+                    query("insert into users (email, role, sub) values ($1, $2, $3) returning *")
                         .bind(&request.email)
-                        .bind(&request.sub)
                         .bind(UserRole::as_str_name(&UserRole::RoleUser))
+                        .bind(&request.sub)
                         .fetch_one(&mut tx)
                         .await
                         .map_err(sqlx::Error::into_status)?;
