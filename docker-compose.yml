@@ -15,10 +15,10 @@ services:
     container_name: rusve-service-users-rust
     working_dir: /app
     build:
-      context: ./service-users-rust
+      context: ./service-users
       dockerfile: Dockerfile.dev
     volumes:
-      - ./service-users-rust/src:/app/src
+      - ./service-users/src:/app/src
     depends_on:
       - service-users-db
     environment:
@@ -81,10 +81,10 @@ services:
     container_name: rusve-service-notes-rust
     working_dir: /app
     build:
-      context: ./service-notes-rust
+      context: ./service-notes
       dockerfile: Dockerfile.dev
     volumes:
-      - ./service-notes-rust/src:/app/src
+      - ./service-notes/src:/app/src
     depends_on:
       - service-notes-db
     environment:
