@@ -15,7 +15,9 @@ jobs:
     uses: ./.github/workflows/lint-utils.yml
   lint-users:
     uses: ./.github/workflows/lint-users.yml
+  lint-users-go:
+    uses: ./.github/workflows/lint-users-go.yml
   lint-notes:
     uses: ./.github/workflows/lint-notes.yml
-  lint-posts:
-    uses: ./.github/workflows/lint-posts.yml
+  lint-notes-go:
+    uses: ./.github/workflows/lint-notes-go.yml
