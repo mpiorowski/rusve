@@ -25,6 +25,13 @@ jobs:
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DB_PASS: ${{ secrets.DB_PASS }}
+  deploy-users-go:
+    needs:
+      - deploy-client
+    uses: ./.github/workflows/deploy-users-go.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      DB_PASS: ${{ secrets.DB_PASS }}
   deploy-utils:
     needs:
       - deploy-client
@@ -40,10 +47,10 @@ jobs:
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DB_PASS: ${{ secrets.DB_PASS }}
-  deploy-posts:
+  deploy-notes-go:
     needs:
       - deploy-client
-    uses: ./.github/workflows/deploy-posts.yml
+    uses: ./.github/workflows/deploy-notes-go.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DB_PASS: ${{ secrets.DB_PASS }}
