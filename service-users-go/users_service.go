@@ -36,11 +36,10 @@ func (s *server) Auth(ctx context.Context, in *pb.AuthRequest) (*pb.User, error)
 	}
 
 	if user.GetDeleted() != "" {
-		return nil, status.Error(codes.Unauthenticated, "User is deleted")
+		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
 	}
 
 	if err == sql.ErrNoRows {
-		// TODO - dynamic role assign
 		role := pb.UserRole_ROLE_USER
 		println("role", role)
 		row = db.QueryRow(`insert into users (email, role, sub) values ($1, $2, $3) returning *`, in.Email, role, in.Sub)

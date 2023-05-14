@@ -8,16 +8,16 @@
     const drawer = getContext<DrawerContext>("drawer");
 </script>
 
-{#if $drawer.open}
+{#if $drawer}
     <div
         transition:fade={{ duration: 200 }}
         class="absolute top-0 right-0 w-screen h-screen bg-black bg-opacity-50 z-40"
         on:click={() => {
-            drawer.set({ ...$drawer, open: false });
+            drawer.set(false);
         }}
         on:keypress={(e) => {
             if (e.key === "Escape") {
-                drawer.set({ ...$drawer, open: false });
+                drawer.set(false);
             }
         }}
     />
@@ -31,7 +31,7 @@
             </div>
             <button
                 on:click={() => {
-                    drawer.set({ ...$drawer, open: false });
+                    drawer.set(false);
                 }}
                 class="w-8 h-8 flex justify-center items-center hover:text-primary-300"
             >
@@ -47,7 +47,7 @@
                     type="button"
                     variant="secondary"
                     on:click={() => {
-                        drawer.set({ ...$drawer, open: false });
+                        drawer.set(false);
                     }}
                 >
                     Close

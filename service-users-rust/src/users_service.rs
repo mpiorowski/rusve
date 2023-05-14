@@ -34,72 +34,57 @@ impl IntoStatus for anyhow::Error {
 impl TryFrom<Option<PgRow>> for PgUser {
     type Error = anyhow::Error;
 
-    fn try_from(value: Option<PgRow>) -> std::result::Result<Self, Self::Error> {
+    fn try_from(value: Option<PgRow>) -> Result<Self> {
         match value {
             Some(row) => {
-                let id: Uuid = row.try_get("id")?;
-                let created: OffsetDateTime = row.try_get("created")?;
-                let updated: OffsetDateTime = row.try_get("updated")?;
-                let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
-                let email: String = row.try_get("email")?;
-                let role: String = row.try_get("role")?;
-                let role = UserRole::from_str_name(&role).ok_or(anyhow::anyhow!("Invalid role"))?;
-                let sub: String = row.try_get("sub")?;
-                let name = row.try_get("name")?;
-                let avatar: Option<Uuid> = row.try_get("avatar")?;
-                let payment_id: Option<String> = row.try_get("payment_id")?;
-
-                Ok(PgUser {
-                    id,
-                    created,
-                    updated,
-                    deleted,
-                    email,
-                    role,
-                    sub,
-                    name,
-                    avatar,
-                    payment_id,
-                })
+                let pg_user = PgUser {
+                    id: row.try_get("id")?,
+                    created: row.try_get("created")?,
+                    updated: row.try_get("updated")?,
+                    deleted: row.try_get("deleted")?,
+                    email: row.try_get("email")?,
+                    role: row.try_get("role")?,
+                    sub: row.try_get("sub")?,
+                    name: row.try_get("name")?,
+                    avatar: row.try_get("avatar")?,
+                    payment_id: row.try_get("payment_id")?,
+                };
+                Ok(pg_user)
             }
             None => Err(anyhow::anyhow!("User not found")),
         }
     }
 }
 
+impl TryFrom<PgUser> for User {
+    type Error = anyhow::Error;
+
+    fn try_from(user: PgUser) -> Result<Self> {
+        let user = User {
+            id: user.id.to_string(),
+            created: user.created.to_string(),
+            updated: user.updated.to_string(),
+            deleted: user.deleted.map(|d| d.to_string()),
+            email: user.email,
+            role: UserRole::from_str_name(&user.role)
+                .unwrap_or(UserRole::RoleUser)
+                .into(),
+            sub: user.sub,
+            name: Some(user.name),
+            avatar: user.avatar.map(|a| a.to_string()),
+            payment_id: Some(user.payment_id),
+        };
+        Ok(user)
+    }
+}
+
 impl TryFrom<Option<PgRow>> for User {
     type Error = anyhow::Error;
 
-    fn try_from(row: Option<PgRow>) -> Result<Self, Self::Error> {
-        match row {
-            Some(row) => {
-                let id: Uuid = row.try_get("id")?;
-                let created: OffsetDateTime = row.try_get("created")?;
-                let updated: OffsetDateTime = row.try_get("updated")?;
-                let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
-                let email: String = row.try_get("email")?;
-                let role: String = row.try_get("role")?;
-                let role = UserRole::from_str_name(&role).ok_or(anyhow::anyhow!("Invalid role"))?;
-                let sub: String = row.try_get("sub")?;
-                let name = row.try_get("name")?;
-                let avatar: Option<Uuid> = row.try_get("avatar")?;
-                let payment_id: Option<String> = row.try_get("payment_id")?;
-
-                Ok(User {
-                    id: id.to_string(),
-                    created: created.to_string(),
-                    updated: updated.to_string(),
-                    deleted: deleted.map(|d| d.to_string()),
-                    email,
-                    role: role.into(),
-                    sub,
-                    name,
-                    avatar: avatar.map(|a| a.to_string()),
-                    payment_id,
-                })
-            }
-            None => Err(anyhow::anyhow!("User not found")),
-        }
+    fn try_from(value: Option<PgRow>) -> Result<Self> {
+        let pg_user = PgUser::try_from(value)?;
+        let user = User::try_from(pg_user)?;
+        Ok(user)
     }
 }
 
@@ -109,11 +94,11 @@ struct PgUser {
     updated: OffsetDateTime,
     deleted: Option<OffsetDateTime>,
     email: String,
-    role: UserRole,
+    role: String,
     sub: String,
-    name: Option<String>,
+    name: String,
     avatar: Option<Uuid>,
-    payment_id: Option<String>,
+    payment_id: String,
 }
 
 #[tonic::async_trait]
@@ -121,40 +106,32 @@ impl UsersService for MyService {
     type GetUsersStream = ReceiverStream<Result<User, Status>>;
 
     async fn auth(&self, request: Request<AuthRequest>) -> Result<Response<User>, Status> {
-        #[cfg(debug_assertions)]
-        println!("Auth: {:?}", request);
         let start = std::time::Instant::now();
         let pool = self.pool.clone();
         let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
 
         let request = request.into_inner();
 
-        // check if user exists
-        let row = query("select * from users where email = $1 and sub = $2")
-            .bind(&request.email)
-            .bind(&request.sub)
-            .fetch_optional(&mut tx)
-            .await
-            .map_err(sqlx::Error::into_status)?;
-        let user: PgUser = row.try_into().map_err(anyhow::Error::into_status)?;
-        if user.deleted.is_some() {
-            return Err(Status::not_found("User not found"));
-        }
-        let row = query("update users set updated = now() where id = $1 returning *")
-            .bind(&user.id)
-            .fetch_optional(&mut tx)
-            .await
-            .map_err(sqlx::Error::into_status)?;
+        let row =
+            query("update users set updated = now() where email = $1 and sub = $2 returning *")
+                .bind(&request.email)
+                .bind(&request.sub)
+                .fetch_optional(&mut tx)
+                .await
+                .map_err(sqlx::Error::into_status)?;
 
         match row {
             Some(row) => {
-                let user: User = Some(row).try_into().map_err(anyhow::Error::into_status)?;
+                let user: PgUser = Some(row).try_into().map_err(anyhow::Error::into_status)?;
+                if user.deleted.is_some() {
+                    return Err(Status::unauthenticated("Unauthenticated"));
+                }
+                let user: User = user.try_into().map_err(anyhow::Error::into_status)?;
                 tx.commit().await.map_err(sqlx::Error::into_status)?;
                 println!("Elapsed: {:?}", start.elapsed());
                 Ok(Response::new(user))
             }
             None => {
-                // TODO - user role
                 let row =
                     query("insert into users (email, role, sub) values ($1, $2, $3) returning *")
                         .bind(&request.email)
@@ -176,8 +153,6 @@ impl UsersService for MyService {
         &self,
         request: Request<UserIds>,
     ) -> Result<Response<Self::GetUsersStream>, Status> {
-        #[cfg(debug_assertions)]
-        println!("GetUsers = {:?}", request);
         let start = std::time::Instant::now();
 
         let pool = self.pool.clone();
@@ -228,8 +203,6 @@ impl UsersService for MyService {
     }
 
     async fn get_user(&self, request: Request<UserId>) -> Result<Response<User>, Status> {
-        #[cfg(debug_assertions)]
-        println!("GetUser: {:?}", request);
         let start = std::time::Instant::now();
         let pool = self.pool.clone();
 
@@ -249,8 +222,6 @@ impl UsersService for MyService {
     }
 
     async fn create_user(&self, request: Request<User>) -> Result<Response<User>, Status> {
-        #[cfg(debug_assertions)]
-        println!("CreateUser: {:?}", request);
         let start = std::time::Instant::now();
 
         let pool = self.pool.clone();
@@ -287,8 +258,6 @@ impl UsersService for MyService {
         &self,
         request: Request<PaymentId>,
     ) -> Result<Response<Empty>, Status> {
-        #[cfg(debug_assertions)]
-        println!("UpdatePaymentId: {:?}", request);
         let start = std::time::Instant::now();
 
         let pool = self.pool.clone();

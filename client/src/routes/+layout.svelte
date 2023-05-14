@@ -16,6 +16,7 @@
         });
         window.location.reload();
     }
+
 </script>
 
 <svelte:head>
@@ -65,44 +66,50 @@
                     >
                         Notes
                     </a>
-                    <Dropdown>
-                        <svelte:fragment slot="button">
-                            <div
-                                class="w-6 hover:cursor-pointer hover:text-secondary-500 transition"
-                            >
-                                <AvatarIcon />
-                            </div>
-                        </svelte:fragment>
-                        <svelte:fragment slot="dropdown">
-                            <div
-                                class="flex flex-col bg-primary-600 min-w-[120px] rounded"
-                            >
-                                <p class="font-semibold px-3 py-3">
-                                    {data.email}
-                                </p>
-                                <div class="border-b border-gray-500 w-full" />
-                                <a
-                                    href="/profile"
-                                    class="hover:text-secondary-500 transition px-3 py-3"
+                    <div class="flex flex-row items-center gap-4">
+                        <Dropdown>
+                            <svelte:fragment slot="button">
+                                <div
+                                    class="w-6 hover:cursor-pointer hover:text-secondary-500 transition"
                                 >
-                                    Profile
-                                </a>
-                                <a
-                                    href="/billing"
-                                    class="hover:text-secondary-500 transition px-3 py-3"
+                                    <AvatarIcon />
+                                </div>
+                            </svelte:fragment>
+                            <svelte:fragment slot="dropdown">
+                                <div
+                                    class="flex flex-col bg-primary-600 min-w-[120px] rounded"
                                 >
-                                    Billing
-                                </a>
-                                <div class="border-b border-gray-500 w-full" />
-                                <button
-                                    on:click={onLogout}
-                                    class="w-full text-left hover:text-secondary-500 transition px-3 py-3"
-                                >
-                                    Sign out
-                                </button>
-                            </div>
-                        </svelte:fragment>
-                    </Dropdown>
+                                    <p class="font-semibold px-3 py-3">
+                                        {data.email}
+                                    </p>
+                                    <div
+                                        class="border-b border-gray-500 w-full"
+                                    />
+                                    <a
+                                        href="/profile"
+                                        class="hover:text-secondary-500 transition px-3 py-3"
+                                    >
+                                        Profile
+                                    </a>
+                                    <a
+                                        href="/billing"
+                                        class="hover:text-secondary-500 transition px-3 py-3"
+                                    >
+                                        Billing
+                                    </a>
+                                    <div
+                                        class="border-b border-gray-500 w-full"
+                                    />
+                                    <button
+                                        on:click={onLogout}
+                                        class="w-full text-left hover:text-secondary-500 transition px-3 py-3"
+                                    >
+                                        Sign out
+                                    </button>
+                                </div>
+                            </svelte:fragment>
+                        </Dropdown>
+                    </div>
                 {/if}
             </div>
         </div>

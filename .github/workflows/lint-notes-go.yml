@@ -1,4 +1,4 @@
-name: Lint posts
+name: Lint notes Go
 on:
   workflow_call:
 

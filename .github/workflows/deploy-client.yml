@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - release-client/**
-      - release-users/**
-      - release-notes/**
-      - release-posts/**
-      - release-utils/**
   workflow_call:
     secrets:
       GCP_CREDENTIALS:
@@ -30,10 +26,11 @@ env:
   REGION: europe-north1
   ENV: production
   DOMAIN: https://www.rusve.app
-  URI_USERS: users-cdb5ecy4ia-lz.a.run.app
+  URI_USERS_RUST: users-cdb5ecy4ia-lz.a.run.app
+  URI_USERS_GO: users-go-cdb5ecy4ia-lz.a.run.app
   URI_UTILS: utils-cdb5ecy4ia-lz.a.run.app
   URI_NOTES_RUST: notes-cdb5ecy4ia-lz.a.run.app
-  URI_NOTES_GO: posts-cdb5ecy4ia-lz.a.run.app
+  URI_NOTES_GO: notes-go-cdb5ecy4ia-lz.a.run.app
   URI_DIRECTUS: https://directus-cms.fly.dev
   PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
   PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
@@ -72,7 +69,8 @@ jobs:
           touch ./client/.env.prod
           echo ENV="$ENV" >> ./client/.env.prod
           echo DOMAIN="$DOMAIN" >> ./client/.env.prod
-          echo URI_USERS="$URI_USERS" >> ./client/.env.prod
+          echo URI_USERS_RUST="$URI_USERS_RUST" >> ./client/.env.prod
+          echo URI_USERS_GO="$URI_USERS_GO" >> ./client/.env.prod
           echo URI_UTILS="$URI_UTILS" >> ./client/.env.prod
           echo URI_NOTES_RUST="$URI_NOTES_RUST" >> ./client/.env.prod
           echo URI_NOTES_GO="$URI_NOTES_GO" >> ./client/.env.prod
