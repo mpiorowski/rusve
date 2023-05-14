@@ -1,9 +1,9 @@
-name: Posts Service
+name: Deploy notes Go
 
 on:
   push:
     branches:
-      - release-posts/**
+      - release-notes/**
   workflow_call:
     secrets:
       GCP_CREDENTIALS:
@@ -16,7 +16,7 @@ env:
   PROJECT_ID: rusve-384620
   REPOSITORY: rusve-repo
   DATABASE: rusve-db
-  SERVICE: posts
+  SERVICE: notes-go
   REGION: europe-north1
 
 permissions:
@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   lint:
-    uses: ./.github/workflows/lint-posts.yml
+    uses: ./.github/workflows/lint-notes-go.yml
   deploy:
     needs:
       - lint

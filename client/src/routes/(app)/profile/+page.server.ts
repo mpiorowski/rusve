@@ -1,5 +1,5 @@
-import { URI_USERS, URI_UTILS } from "$env/static/private";
-import { usersClient, utilsClient } from "$lib/grpc";
+import { URI_USERS_GO, URI_USERS_RUST, URI_UTILS } from "$env/static/private";
+import { usersGoClient, usersRustClient, utilsClient } from "$lib/grpc";
 import { createMetadata } from "$lib/metadata";
 import type { File, File__Output } from "$lib/proto/proto/File";
 import type { FileId } from "$lib/proto/proto/FileId";
@@ -11,14 +11,18 @@ import { error, fail } from "@sveltejs/kit";
 import { z } from "zod";
 import type { Actions, PageServerLoad } from "./$types";
 
-export const load = (async ({ locals }) => {
+export const load = (async ({ locals, url }) => {
     try {
         const start = performance.now();
+
+        const isGo = url.searchParams.get("lang") === "go";
+        const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
+        const client = isGo ? usersGoClient : usersRustClient;
         const userId = locals.userId;
         const request: UserId = { userId: userId };
-        let metadata = await createMetadata(URI_USERS);
+        let metadata = await createMetadata(uri);
         const user = await new Promise<User__Output>((resolve, reject) => {
-            usersClient.getUser(request, metadata, (err, response) =>
+            client.getUser(request, metadata, (err, response) =>
                 err || !response ? reject(err) : resolve(response),
             );
         });
@@ -67,8 +71,12 @@ export const load = (async ({ locals }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-    createUser: async ({ request, locals }) => {
+    createUser: async ({ request, locals, url }) => {
         try {
+            const isGo = url.searchParams.get("lang") === "go";
+            const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
+            const client = isGo ? usersGoClient : usersRustClient;
+
             const form = await request.formData();
             const name = form.get("name");
             const avatar = form.get("avatar");
@@ -87,11 +95,13 @@ export const actions = {
             const data: User = {
                 id: locals.userId,
                 name: schema.data.name,
-                avatar: schema.data.avatar ?? undefined,
+                avatar:
+                    schema.data.avatar !== "" ? schema.data.avatar : undefined,
             };
-            const metadata = await createMetadata(URI_USERS);
+            console.log(data);
+            const metadata = await createMetadata(uri);
             const user = await new Promise<User__Output>((resolve, reject) => {
-                usersClient.createUser(data, metadata, (err, response) =>
+                client.createUser(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });
@@ -102,9 +112,13 @@ export const actions = {
             return fail(500, { error: "Could not create user" });
         }
     },
-    createAvatar: async ({ request, locals }) => {
+    createAvatar: async ({ request, locals, url }) => {
         try {
             const start = performance.now();
+
+            const isGo = url.searchParams.get("lang") === "go";
+            const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
+            const client = isGo ? usersGoClient : usersRustClient;
 
             const form = await request.formData();
             const targetId = locals.userId;
@@ -203,9 +217,9 @@ export const actions = {
                 name: schema.data.name,
                 avatar: newFile.id,
             };
-            metadata = await createMetadata(URI_USERS);
+            metadata = await createMetadata(uri);
             const user = await new Promise<User__Output>((resolve, reject) => {
-                usersClient.createUser(data, metadata, (err, response) =>
+                client.createUser(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });
@@ -220,104 +234,121 @@ export const actions = {
             return fail(500, { error: "Could not create avatar" });
         }
     },
-    deleteAvatar: async ({ request, locals }) => {
-        const start = performance.now();
+    deleteAvatar: async ({ request, locals, url }) => {
+        try {
+            const start = performance.now();
 
-        const form = await request.formData();
-        const fileId = form.get("fileId");
-        const targetId = locals.userId;
-        const name = form.get("name");
+            const isGo = url.searchParams.get("lang") === "go";
+            const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
+            const client = isGo ? usersGoClient : usersRustClient;
 
-        const schema = z
-            .object({
-                fileId: z.string().uuid(),
-                targetId: z.string().uuid(),
-                name: z.string().optional(),
-            })
-            .safeParse({
-                fileId,
-                targetId,
-                name,
+            const form = await request.formData();
+            const fileId = form.get("fileId");
+            const targetId = locals.userId;
+            const name = form.get("name");
+
+            const schema = z
+                .object({
+                    fileId: z.string().uuid(),
+                    targetId: z.string().uuid(),
+                    name: z.string().optional(),
+                })
+                .safeParse({
+                    fileId,
+                    targetId,
+                    name,
+                });
+
+            if (!schema.success) {
+                console.error(schema.error);
+                return fail(409, { error: "Invalid request" });
+            }
+
+            const metadata = await createMetadata(uri);
+            const metadataUtils = await createMetadata(URI_UTILS);
+
+            // Delete file
+            const fileData: FileId = {
+                fileId: schema.data.fileId,
+                targetId: schema.data.targetId,
+            };
+            await new Promise<File__Output>((resolve, reject) => {
+                utilsClient.deleteFile(
+                    fileData,
+                    metadataUtils,
+                    (err, response) =>
+                        err || !response ? reject(err) : resolve(response),
+                );
             });
 
-        if (!schema.success) {
-            console.error(schema.error);
-            return fail(409, { error: "Invalid request" });
+            // Update user
+            const data: User = {
+                id: locals.userId,
+                name: schema.data.name,
+            };
+            await new Promise<User__Output>((resolve, reject) => {
+                client.createUser(data, metadata, (err, response) =>
+                    err || !response ? reject(err) : resolve(response),
+                );
+            });
+
+            const end = performance.now();
+            return { duration: end - start };
+        } catch (err) {
+            console.error(err);
+            return error(500, "Could not delete avatar");
         }
-
-        const metadata = await createMetadata(URI_USERS);
-        const metadataUtils = await createMetadata(URI_UTILS);
-
-        // Delete file
-        const fileData: FileId = {
-            fileId: schema.data.fileId,
-            targetId: schema.data.targetId,
-        };
-        await new Promise<File__Output>((resolve, reject) => {
-            utilsClient.deleteFile(fileData, metadataUtils, (err, response) =>
-                err || !response ? reject(err) : resolve(response),
-            );
-        });
-
-        // Update user
-        const data: User = {
-            id: locals.userId,
-            name: schema.data.name,
-        };
-        await new Promise<User__Output>((resolve, reject) => {
-            usersClient.createUser(data, metadata, (err, response) =>
-                err || !response ? reject(err) : resolve(response),
-            );
-        });
-
-        const end = performance.now();
-        return { duration: end - start };
     },
     sendEmail: async ({ request, locals }) => {
-        const start = performance.now();
-
-        const form = await request.formData();
-        const email = locals.email;
-        const subject = form.get("subject");
-        const message = form.get("message");
-
-        const schema = z
-            .object({
-                email: z.string().email(),
-                subject: z.string().min(1),
-                message: z.string().min(1),
-            })
-            .safeParse({
-                email,
-                subject,
-                message,
-            });
-
-        if (!schema.success) {
-            console.error(schema.error);
-            return fail(409, { form: schema.error.flatten().fieldErrors });
-        }
-
-        const data = {
-            email: schema.data.email,
-            subject: schema.data.subject,
-            message: schema.data.message,
-        };
-
         try {
-            const dataBuffer = Buffer.from(JSON.stringify(data));
-            // TODO - cache it
-            const pubSubClient = new PubSub();
-            const messageId = await pubSubClient
-                .topic("email")
-                .publishMessage({ data: dataBuffer });
-            console.log(`Message ${messageId} published.`);
-        } catch (err) {
-            console.error("Received error while publishing: %s", err);
-            return fail(500, { error: "Could not send email" });
-        }
+            const start = performance.now();
 
-        const end = performance.now();
-        return { duration: end - start };
+            const form = await request.formData();
+            const email = locals.email;
+            const subject = form.get("subject");
+            const message = form.get("message");
+
+            const schema = z
+                .object({
+                    email: z.string().email(),
+                    subject: z.string().min(1),
+                    message: z.string().min(1),
+                })
+                .safeParse({
+                    email,
+                    subject,
+                    message,
+                });
+
+            if (!schema.success) {
+                console.error(schema.error);
+                return fail(409, { form: schema.error.flatten().fieldErrors });
+            }
+
+            const data = {
+                email: schema.data.email,
+                subject: schema.data.subject,
+                message: schema.data.message,
+            };
+
+            try {
+                const dataBuffer = Buffer.from(JSON.stringify(data));
+                // TODO - cache it
+                const pubSubClient = new PubSub();
+                const messageId = await pubSubClient
+                    .topic("email")
+                    .publishMessage({ data: dataBuffer });
+                console.log(`Message ${messageId} published.`);
+            } catch (err) {
+                console.error("Received error while publishing: %s", err);
+                return fail(500, { error: "Could not send email" });
+            }
+
+            const end = performance.now();
+            return { duration: end - start };
+        } catch (err) {
+            console.error(err);
+            return error(500, "Could not send email");
+        }
     },
 } satisfies Actions;

@@ -8,6 +8,7 @@
     import type { ActionData } from "./$types";
     import { getContext } from "svelte";
     import type { DrawerContext } from "$lib/types";
+    import { page } from "$app/stores";
 
     export let form: ActionData;
 
@@ -20,6 +21,8 @@
     }
 
     const drawer = getContext<DrawerContext>("drawer");
+
+    const type = $page.url.searchParams.get("lang") ?? "rust";
 </script>
 
 <Drawer>
@@ -41,7 +44,7 @@
                             type: "success",
                         });
                     }
-                    drawer.set({ open: false, data: "" });
+                    drawer.set(false);
                     loading = false;
                 };
             }}
@@ -54,7 +57,7 @@
                     errors={form?.error?.fieldErrors.title ?? []}
                 />
                 <input type="hidden" name="content" bind:value={content} />
-                <input type="hidden" name="type" value={$drawer.data} />
+                <input type="hidden" name="type" value={type} />
                 <TipTap
                     label="Content"
                     {onChange}

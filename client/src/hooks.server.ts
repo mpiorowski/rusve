@@ -1,11 +1,12 @@
 import { redirect, type Handle, type HandleServerError } from "@sveltejs/kit";
 import type { AuthRequest } from "$lib/proto/proto/AuthRequest";
 import { createMetadata } from "$lib/metadata";
-import { usersClient } from "$lib/grpc";
+import { usersGoClient, usersRustClient } from "$lib/grpc";
 import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { getFirebaseServer } from "$lib/firebase/firebase_server";
-import { URI_USERS } from "$env/static/private";
+import { URI_USERS_GO, URI_USERS_RUST } from "$env/static/private";
 import type { User__Output } from "$lib/proto/proto/User";
+import type { Metadata } from "@grpc/grpc-js";
 
 export const handleError: HandleServerError = ({ error }) => {
     console.error("Error: %s", error);
@@ -23,6 +24,7 @@ export const handleError: HandleServerError = ({ error }) => {
 
 export const handle: Handle = async ({ event, resolve }) => {
     const now = performance.now();
+    const isGo = event.url.searchParams.get("lang") === "go";
     const emptySession = {
         userId: "",
         paymentId: "",
@@ -63,12 +65,31 @@ export const handle: Handle = async ({ event, resolve }) => {
                     sub: uid,
                     email: email ?? "",
                 };
-                const metadata = await createMetadata(URI_USERS);
-                const user = await new Promise<User__Output>((res, rej) => {
-                    usersClient.Auth(request, metadata, (err, response) => {
-                        err || !response?.id ? rej(err) : res(response);
+                let metadata: Metadata;
+                let user: User__Output;
+                if (isGo) {
+                    metadata = await createMetadata(URI_USERS_GO);
+                    user = await new Promise<User__Output>((res, rej) => {
+                        usersGoClient.Auth(
+                            request,
+                            metadata,
+                            (err, response) => {
+                                err || !response?.id ? rej(err) : res(response);
+                            },
+                        );
                     });
-                });
+                } else {
+                    metadata = await createMetadata(URI_USERS_RUST);
+                    user = await new Promise<User__Output>((res, rej) => {
+                        usersRustClient.Auth(
+                            request,
+                            metadata,
+                            (err, response) => {
+                                err || !response?.id ? rej(err) : res(response);
+                            },
+                        );
+                    });
+                }
                 event.locals = {
                     userId: user.id,
                     email: user.email,

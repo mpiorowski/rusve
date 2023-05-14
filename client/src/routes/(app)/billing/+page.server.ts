@@ -1,6 +1,6 @@
-import { DOMAIN, URI_USERS } from "$env/static/private";
+import { DOMAIN, URI_USERS_RUST } from "$env/static/private";
 import { checkSubscription, getStripe } from "$lib/apps/stripe";
-import { usersClient } from "$lib/grpc";
+import { usersRustClient } from "$lib/grpc";
 import { createMetadata } from "$lib/metadata";
 import type { PaymentId } from "$lib/proto/proto/PaymentId";
 import { fail, redirect } from "@sveltejs/kit";
@@ -36,9 +36,9 @@ export const actions = {
                 userId: userId,
                 paymentId: customer.id,
             };
-            const metadata = await createMetadata(URI_USERS);
+            const metadata = await createMetadata(URI_USERS_RUST);
             await new Promise((resolve, reject) => {
-                usersClient.updatePaymentId(data, metadata, (err, res) => {
+                usersRustClient.updatePaymentId(data, metadata, (err, res) => {
                     err ? reject(err) : resolve(res);
                 });
             });

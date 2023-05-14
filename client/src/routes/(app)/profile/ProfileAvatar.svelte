@@ -92,7 +92,7 @@
                             <input
                                 type="hidden"
                                 name="name"
-                                value={$profile.user.name || ""}
+                                value={$profile.user.name ?? ""}
                             />
                             <Button variant="error" loading={deleteLoading}>
                                 <span slot="icon">
@@ -134,7 +134,7 @@
             value={$profile.user.avatar ? $profile.user.avatar : ""}
         />
         <input type="hidden" name="type" value={FileType.AVATAR} />
-        <input type="hidden" name="name" value={$profile.user.name || ""} />
+        <input type="hidden" name="name" value={$profile.user.name ?? ""} />
 
         <div class="flex flex-row items-center gap-6">
             <div class="w-28">

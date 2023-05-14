@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 
 	"github.com/go-playground/validator/v10"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -12,20 +13,26 @@ import (
 	"google.golang.org/grpc"
 
 	pb "rusve/proto"
-
-	utils "github.com/mpiorowski/golang"
 )
 
 var db *sql.DB
 
 type server struct {
-	pb.UnimplementedNotesServiceServer
+	pb.UnimplementedUsersServiceServer
+}
+
+func MustGetenv(k string) string {
+	v := os.Getenv(k)
+	if v == "" {
+		log.Fatalf("Error: %s environment variable not set.\n", k)
+	}
+	return v
 }
 
 var (
-	PORT         = utils.MustGetenv("PORT")
-	ENV          = utils.MustGetenv("ENV")
-	DATABASE_URL = utils.MustGetenv("DATABASE_URL")
+	PORT         = MustGetenv("PORT")
+	ENV          = MustGetenv("ENV")
+	DATABASE_URL = MustGetenv("DATABASE_URL")
 )
 
 var validate = validator.New()
@@ -65,7 +72,7 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterNotesServiceServer(s, &server{})
+	pb.RegisterUsersServiceServer(s, &server{})
 	log.Printf("Server listening at: %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
