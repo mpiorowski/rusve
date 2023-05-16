@@ -1,6 +1,5 @@
 import { fail } from "@sveltejs/kit";
 
-// TODO - finish
 export type GrpcError = {
     details: string;
 };

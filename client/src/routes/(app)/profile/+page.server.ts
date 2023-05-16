@@ -333,7 +333,6 @@ export const actions = {
 
             try {
                 const dataBuffer = Buffer.from(JSON.stringify(data));
-                // TODO - cache it
                 const pubSubClient = new PubSub();
                 const messageId = await pubSubClient
                     .topic("email")

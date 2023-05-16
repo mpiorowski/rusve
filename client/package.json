@@ -17,24 +17,24 @@
     "devDependencies": {
         "@playwright/test": "^1.33.0",
         "@sveltejs/adapter-node": "^1.2.4",
-        "@sveltejs/kit": "^1.16.2",
-        "@typescript-eslint/eslint-plugin": "^5.59.2",
-        "@typescript-eslint/parser": "^5.59.2",
+        "@sveltejs/kit": "^1.16.3",
+        "@typescript-eslint/eslint-plugin": "^5.59.6",
+        "@typescript-eslint/parser": "^5.59.6",
         "autoprefixer": "^10.4.14",
         "eslint": "^8.40.0",
-        "eslint-plugin-svelte": "^2.27.4",
+        "eslint-plugin-svelte": "^2.28.0",
         "postcss": "^8.4.23",
         "svelte": "^3.59.1",
         "svelte-check": "^3.3.2",
         "tailwindcss": "^3.3.2",
         "tslib": "^2.5.0",
         "typescript": "^5.0.4",
-        "vite": "^4.3.5",
+        "vite": "^4.3.6",
         "vitest": "^0.31.0"
     },
     "type": "module",
     "dependencies": {
-        "@google-cloud/pubsub": "^3.5.2",
+        "@google-cloud/pubsub": "^3.6.0",
         "@grpc/grpc-js": "^1.8.14",
         "@grpc/proto-loader": "^0.7.7",
         "@tiptap/core": "^2.0.3",
@@ -43,9 +43,9 @@
         "@tiptap/extension-ordered-list": "^2.0.3",
         "@tiptap/pm": "^2.0.3",
         "@tiptap/starter-kit": "^2.0.3",
-        "firebase": "^9.21.0",
+        "firebase": "^9.22.0",
         "firebase-admin": "^11.8.0",
-        "stripe": "^12.4.0",
+        "stripe": "^12.5.0",
         "zod": "^3.21.4"
     }
 }
