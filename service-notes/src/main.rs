@@ -4,7 +4,7 @@ mod proto;
 use std::str::FromStr;
 
 use anyhow::{Context, Result};
-use deadpool_postgres::{Pool};
+use deadpool_postgres::Pool;
 use proto::notes_service_server::NotesServiceServer;
 use sqlx::postgres::PgPoolOptions;
 use tonic::transport::Server;
@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
     let pg_config = tokio_postgres::Config::from_str(&database_url)?;
     let manager = deadpool_postgres::Manager::from_config(
         pg_config,
-        tokio_postgres::NoTls,
+        postgres_native_tls::MakeTlsConnector::new(native_tls::TlsConnector::new()?),
         deadpool_postgres::ManagerConfig {
             recycling_method: deadpool_postgres::RecyclingMethod::Fast,
         },
@@ -48,7 +48,6 @@ async fn main() -> Result<()> {
         .build()
         .context("Failed to create database pool")?;
     println!("Connected to database");
-
 
     let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);

@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     let pg_config = tokio_postgres::Config::from_str(&database_url)?;
     let manager = deadpool_postgres::Manager::from_config(
         pg_config,
-        tokio_postgres::NoTls,
+        postgres_native_tls::MakeTlsConnector::new(native_tls::TlsConnector::new()?),
         deadpool_postgres::ManagerConfig {
             recycling_method: deadpool_postgres::RecyclingMethod::Fast,
         },
