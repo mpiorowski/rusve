@@ -21,7 +21,7 @@ env:
     SERVICE: notes-go
     REGION: europe-north1
     ENV: production
-    DATABASE_URL: ${{ secrets.DATABASE_URL }}/notes
+    DATABASE_URL: ${{ secrets.DATABASE_URL }}/notes?sslmode=require
     # DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
 
 permissions:
