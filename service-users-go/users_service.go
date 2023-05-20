@@ -100,7 +100,7 @@ func (s *server) DeleteUser(ctx context.Context, in *pb.User) (*pb.User, error) 
 	return user, nil
 }
 
-func (s *server) CreateUser(ctx context.Context, in *pb.User) (*pb.User, error) {
+func (s *server) UpdateUser(ctx context.Context, in *pb.User) (*pb.User, error) {
 	row := db.QueryRow(`insert into users (email, role) values ($1, $2) returning *`, in.Email, in.Role)
 	user, err := mapUser(nil, row)
 	if err != nil {

@@ -101,7 +101,7 @@ export const actions = {
             console.log(data);
             const metadata = await createMetadata(uri);
             const user = await new Promise<User__Output>((resolve, reject) => {
-                client.createUser(data, metadata, (err, response) =>
+                client.updateUser(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });
@@ -219,7 +219,7 @@ export const actions = {
             };
             metadata = await createMetadata(uri);
             const user = await new Promise<User__Output>((resolve, reject) => {
-                client.createUser(data, metadata, (err, response) =>
+                client.updateUser(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });
@@ -287,7 +287,7 @@ export const actions = {
                 name: schema.data.name,
             };
             await new Promise<User__Output>((resolve, reject) => {
-                client.createUser(data, metadata, (err, response) =>
+                client.updateUser(data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });

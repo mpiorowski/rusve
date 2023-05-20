@@ -3,12 +3,12 @@ use crate::proto::{AuthRequest, Empty, PaymentId, User, UserIds};
 use crate::proto::{UserId, UserRole};
 use crate::MyService;
 use anyhow::Result;
-use sqlx::types::time::OffsetDateTime;
-use sqlx::{postgres::PgRow, query, types::Uuid, Row};
+use time::OffsetDateTime;
 use tokio::sync::mpsc;
+use tokio_postgres::Row;
 use tokio_stream::wrappers::ReceiverStream;
-use tokio_stream::StreamExt;
 use tonic::{Request, Response, Status};
+use uuid::Uuid;
 
 trait IntoStatus {
     fn into_status(self) -> Status;
@@ -31,10 +31,10 @@ impl IntoStatus for anyhow::Error {
     }
 }
 
-impl TryFrom<Option<PgRow>> for PgUser {
+impl TryFrom<Option<Row>> for PgUser {
     type Error = anyhow::Error;
 
-    fn try_from(value: Option<PgRow>) -> Result<Self> {
+    fn try_from(value: Option<Row>) -> Result<Self> {
         match value {
             Some(row) => {
                 let pg_user = PgUser {
@@ -78,10 +78,10 @@ impl TryFrom<PgUser> for User {
     }
 }
 
-impl TryFrom<Option<PgRow>> for User {
+impl TryFrom<Option<Row>> for User {
     type Error = anyhow::Error;
 
-    fn try_from(value: Option<PgRow>) -> Result<Self> {
+    fn try_from(value: Option<Row>) -> Result<Self> {
         let pg_user = PgUser::try_from(value)?;
         let user = User::try_from(pg_user)?;
         Ok(user)
@@ -106,43 +106,59 @@ impl UsersService for MyService {
     type GetUsersStream = ReceiverStream<Result<User, Status>>;
 
     async fn auth(&self, request: Request<AuthRequest>) -> Result<Response<User>, Status> {
+        #[cfg(debug_assertions)]
+        println!("Auth: {:?}", request);
         let start = std::time::Instant::now();
-        let pool = self.pool.clone();
-        let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
+
+        let mut client = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+        let tx = client
+            .transaction()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
 
-        let row =
-            query("update users set updated = now() where email = $1 and sub = $2 returning *")
-                .bind(&request.email)
-                .bind(&request.sub)
-                .fetch_optional(&mut tx)
-                .await
-                .map_err(sqlx::Error::into_status)?;
+        let row = tx
+            .query_one(
+                "update users set updated = now() where email = $1 and sub = $2 returning *",
+                &[&request.email, &request.sub],
+            )
+            .await;
 
         match row {
-            Some(row) => {
+            Ok(row) => {
                 let user: PgUser = Some(row).try_into().map_err(anyhow::Error::into_status)?;
                 if user.deleted.is_some() {
                     return Err(Status::unauthenticated("Unauthenticated"));
                 }
                 let user: User = user.try_into().map_err(anyhow::Error::into_status)?;
-                tx.commit().await.map_err(sqlx::Error::into_status)?;
+                tx.commit()
+                    .await
+                    .map_err(|e| Status::internal(e.to_string()))?;
                 println!("Elapsed: {:?}", start.elapsed());
                 Ok(Response::new(user))
             }
-            None => {
-                let row =
-                    query("insert into users (email, role, sub) values ($1, $2, $3) returning *")
-                        .bind(&request.email)
-                        .bind(UserRole::as_str_name(&UserRole::RoleUser))
-                        .bind(&request.sub)
-                        .fetch_one(&mut tx)
-                        .await
-                        .map_err(sqlx::Error::into_status)?;
+            Err(_) => {
+                let row = tx
+                    .query_one(
+                        "insert into users (email, role, sub) values ($1, $2, $3) returning *",
+                        &[
+                            &request.email,
+                            &UserRole::as_str_name(&UserRole::RoleUser),
+                            &request.sub,
+                        ],
+                    )
+                    .await
+                    .map_err(|e| Status::internal(e.to_string()))?;
 
                 let user = Some(row).try_into().map_err(anyhow::Error::into_status)?;
-                tx.commit().await.map_err(sqlx::Error::into_status)?;
+                tx.commit()
+                    .await
+                    .map_err(|e| Status::internal(e.to_string()))?;
                 println!("Elapsed: {:?}", start.elapsed());
                 Ok(Response::new(user))
             }
@@ -153,10 +169,15 @@ impl UsersService for MyService {
         &self,
         request: Request<UserIds>,
     ) -> Result<Response<Self::GetUsersStream>, Status> {
+        #[cfg(debug_assertions)]
+        println!("GetUsers: {:?}", request);
         let start = std::time::Instant::now();
 
-        let pool = self.pool.clone();
-        let (tx, rx) = mpsc::channel(4);
+        let client = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let user_ids = request.into_inner().user_ids;
         let user_ids = user_ids
@@ -165,67 +186,78 @@ impl UsersService for MyService {
             .collect::<Result<Vec<Uuid>>>()
             .map_err(anyhow::Error::into_status)?;
 
+        let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
-            let mut stream = query("SELECT * FROM users WHERE id = ANY($1)")
-                .bind(user_ids)
-                .fetch(&pool);
+            let stream = client
+                .query("SELECT * FROM users WHERE id = ANY($1)", &[&user_ids])
+                .await;
 
-            loop {
-                match stream.try_next().await {
-                    Ok(None) => {
-                        let elapsed = start.elapsed();
-                        println!("Elapsed: {:.2?}", elapsed);
-                        break;
-                    }
-                    Ok(user) => {
-                        let user = user.try_into().map_err(anyhow::Error::into_status);
-                        match user {
-                            Err(err) => {
-                                tx.send(Err(Status::internal(err.to_string())))
-                                    .await
-                                    .unwrap();
-                                break;
-                            }
-                            Ok(user) => {
-                                tx.send(Ok(user)).await.unwrap();
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        println!("Error: {:?}", e);
-                        tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                        break;
-                    }
+            let users = match stream {
+                Ok(users) => users,
+                Err(err) => {
+                    tx.send(Err(Status::internal(err.to_string())))
+                        .await
+                        .unwrap();
+                    return;
                 }
+            };
+
+            for user in users {
+                let user: User = match Some(user).try_into() {
+                    Ok(user) => user,
+                    Err(err) => {
+                        tx.send(Err(Status::internal(err.to_string())))
+                            .await
+                            .unwrap();
+                        return;
+                    }
+                };
+                tx.send(Ok(user)).await.unwrap();
             }
+            println!("Elapsed: {:?}", start.elapsed());
         });
         Ok(Response::new(ReceiverStream::new(rx)))
     }
 
     async fn get_user(&self, request: Request<UserId>) -> Result<Response<User>, Status> {
+        #[cfg(debug_assertions)]
+        println!("GetUser: {:?}", request);
         let start = std::time::Instant::now();
-        let pool = self.pool.clone();
+
+        let client = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
         let user_id = request.user_id;
         let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        let row = query("select * from users where id = $1")
-            .bind(user_id)
-            .fetch_optional(&pool)
+        let row = client
+            .query_one("select * from users where id = $1", &[&user_id])
             .await
-            .map_err(sqlx::Error::into_status)?;
+            .map_err(|e| Status::internal(e.to_string()))?;
 
-        let user = row.try_into().map_err(anyhow::Error::into_status)?;
+        let user = Some(row).try_into().map_err(anyhow::Error::into_status)?;
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(user))
     }
 
-    async fn create_user(&self, request: Request<User>) -> Result<Response<User>, Status> {
+    async fn update_user(&self, request: Request<User>) -> Result<Response<User>, Status> {
+        #[cfg(debug_assertions)]
+        println!("UpdateUser: {:?}", request);
         let start = std::time::Instant::now();
 
         let pool = self.pool.clone();
-        let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
+        let mut client = pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+        let tx = client
+            .transaction()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
         let user_uuid =
@@ -240,16 +272,18 @@ impl UsersService for MyService {
             None => None,
         };
 
-        let row = query("update users set name = $1, avatar = $2 where id = $3 returning *")
-            .bind(request.name)
-            .bind(avatar_uuid)
-            .bind(user_uuid)
-            .fetch_one(&mut tx)
+        let row = tx
+            .query_one(
+                "update users set name = $1, avatar = $2 where id = $3 returning *",
+                &[&request.name, &avatar_uuid, &user_uuid],
+            )
             .await
-            .map_err(sqlx::Error::into_status)?;
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let user = Some(row).try_into().map_err(anyhow::Error::into_status)?;
-        tx.commit().await.map_err(sqlx::Error::into_status)?;
+        tx.commit()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(user))
     }
@@ -258,24 +292,35 @@ impl UsersService for MyService {
         &self,
         request: Request<PaymentId>,
     ) -> Result<Response<Empty>, Status> {
+        #[cfg(debug_assertions)]
+        println!("UpdatePaymentId: {:?}", request);
         let start = std::time::Instant::now();
 
-        let pool = self.pool.clone();
-        let mut tx = pool.begin().await.map_err(sqlx::Error::into_status)?;
+        let mut client = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+        let tx = client
+            .transaction()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
         let user_uuid =
             Uuid::parse_str(&request.user_id).map_err(|e| Status::internal(e.to_string()))?;
         let payment_id = request.payment_id;
 
-        query("update users set payment_id = $1 where id = $2")
-            .bind(payment_id)
-            .bind(user_uuid)
-            .execute(&mut tx)
-            .await
-            .map_err(sqlx::Error::into_status)?;
+        tx.query_one(
+            "update users set payment_id = $1 where id = $2",
+            &[&payment_id, &user_uuid],
+        )
+        .await
+        .map_err(|e| Status::internal(e.to_string()))?;
 
-        tx.commit().await.map_err(sqlx::Error::into_status)?;
+        tx.commit()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(Empty {}))
     }
