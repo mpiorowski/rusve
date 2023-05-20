@@ -1,13 +1,11 @@
 mod proto;
 mod users_service;
-mod utils;
 
 use std::str::FromStr;
 
 use crate::proto::users_service_server::UsersServiceServer;
 use anyhow::{Context, Result};
 use tonic::transport::Server;
-use utils::check_env;
 
 #[derive(Debug)]
 pub struct MyService {
@@ -22,7 +20,9 @@ mod embedded {
 #[tokio::main]
 async fn main() -> Result<()> {
     println!("Starting server...");
+
     let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
+    let port = std::env::var("PORT").context("PORT not set")?;
 
     // Leaving sqlx pools for future reference, when the sqlx performance will be fixed
     // Sqlx database
@@ -54,7 +54,6 @@ async fn main() -> Result<()> {
         .context("Failed to create database pool")?;
     println!("Connected to database");
 
-    let port = check_env("PORT")?;
     let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);
 
