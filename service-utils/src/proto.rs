@@ -299,7 +299,7 @@ pub mod users_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        pub async fn create_user(
+        pub async fn update_user(
             &mut self,
             request: impl tonic::IntoRequest<super::User>,
         ) -> Result<tonic::Response<super::User>, tonic::Status> {
@@ -314,7 +314,7 @@ pub mod users_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UsersService/CreateUser",
+                "/proto.UsersService/UpdateUser",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
@@ -645,7 +645,7 @@ pub mod users_service_server {
             &self,
             request: tonic::Request<super::UserId>,
         ) -> Result<tonic::Response<super::User>, tonic::Status>;
-        async fn create_user(
+        async fn update_user(
             &self,
             request: tonic::Request<super::User>,
         ) -> Result<tonic::Response<super::User>, tonic::Status>;
@@ -824,11 +824,11 @@ pub mod users_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/proto.UsersService/CreateUser" => {
+                "/proto.UsersService/UpdateUser" => {
                     #[allow(non_camel_case_types)]
-                    struct CreateUserSvc<T: UsersService>(pub Arc<T>);
+                    struct UpdateUserSvc<T: UsersService>(pub Arc<T>);
                     impl<T: UsersService> tonic::server::UnaryService<super::User>
-                    for CreateUserSvc<T> {
+                    for UpdateUserSvc<T> {
                         type Response = super::User;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
@@ -839,7 +839,7 @@ pub mod users_service_server {
                             request: tonic::Request<super::User>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move { (*inner).create_user(request).await };
+                            let fut = async move { (*inner).update_user(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -848,7 +848,7 @@ pub mod users_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = CreateUserSvc(inner);
+                        let method = UpdateUserSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
