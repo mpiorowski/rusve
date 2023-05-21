@@ -21,7 +21,6 @@ env:
   GAR_LOCATION: europe-north1
   PROJECT_ID: rusve-384620
   REPOSITORY: rusve-repo
-  DATABASE: rusve-db
   SERVICE: client
   REGION: europe-north1
   ENV: production

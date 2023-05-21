@@ -8,8 +8,6 @@ on:
         secrets:
             GCP_CREDENTIALS:
                 required: true
-            DB_PASS:
-                required: true
             DATABASE_URL:
                 required: true
 
@@ -21,7 +19,7 @@ env:
     SERVICE: users-go
     REGION: europe-north1
     ENV: production
-    DATABASE_URL: ${{ secrets.DATABASE_URL }}/users?sslmode=require
+    DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
     # DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
 
 permissions:

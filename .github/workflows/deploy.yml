@@ -24,7 +24,6 @@ jobs:
     uses: ./.github/workflows/deploy-users.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DB_PASS: ${{ secrets.DB_PASS }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
   deploy-users-go:
     needs:
@@ -32,7 +31,6 @@ jobs:
     uses: ./.github/workflows/deploy-users-go.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DB_PASS: ${{ secrets.DB_PASS }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
   deploy-utils:
     needs:
@@ -40,7 +38,6 @@ jobs:
     uses: ./.github/workflows/deploy-utils.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DB_PASS: ${{ secrets.DB_PASS }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
   deploy-notes:
@@ -49,7 +46,6 @@ jobs:
     uses: ./.github/workflows/deploy-notes.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DB_PASS: ${{ secrets.DB_PASS }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
   deploy-notes-go:
     needs:
@@ -57,5 +53,4 @@ jobs:
     uses: ./.github/workflows/deploy-notes-go.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DB_PASS: ${{ secrets.DB_PASS }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
