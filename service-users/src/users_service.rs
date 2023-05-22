@@ -3,12 +3,17 @@ use crate::proto::{AuthRequest, Empty, PaymentId, User, UserIds};
 use crate::proto::{UserId, UserRole};
 use crate::MyService;
 use anyhow::Result;
+use std::iter::Iterator;
 use time::OffsetDateTime;
 use tokio::sync::mpsc;
 use tokio_postgres::Row;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
+
+use diesel::prelude::*;
+use rusve_users::establish_connection;
+use rusve_users::models::*;
 
 trait IntoStatus {
     fn into_status(self) -> Status;
@@ -99,6 +104,27 @@ struct PgUser {
     name: String,
     avatar: Option<Uuid>,
     payment_id: String,
+}
+
+impl TryFrom<DieselUser> for User {
+    type Error = tonic::Status;
+
+    fn try_from(user: DieselUser) -> Result<Self, Self::Error> {
+        Ok(User {
+            id: user.id.to_string(),
+            created: user.created.to_string(),
+            updated: user.updated.to_string(),
+            deleted: user.deleted.map(|d| d.to_string()),
+            email: user.email,
+            role: UserRole::from_str_name(&user.role)
+                .unwrap_or(UserRole::RoleUser)
+                .into(),
+            sub: user.sub,
+            name: Some(user.name),
+            avatar: user.avatar.map(|a| a.to_string()),
+            payment_id: Some(user.payment_id),
+        })
+    }
 }
 
 #[tonic::async_trait]
@@ -221,25 +247,25 @@ impl UsersService for MyService {
 
     async fn get_user(&self, request: Request<UserId>) -> Result<Response<User>, Status> {
         #[cfg(debug_assertions)]
-        println!("GetUser: {:?}", request);
+        println!("GetUserr: {:?}", request);
+
+        use rusve_users::schema::users::dsl::*;
+
         let start = std::time::Instant::now();
 
-        let client = self
-            .pool
-            .get()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
+        let connection = &mut establish_connection();
 
         let request = request.into_inner();
         let user_id = request.user_id;
         let user_id = Uuid::parse_str(&user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        let row = client
-            .query_one("select * from users where id = $1", &[&user_id])
-            .await
+        let user: DieselUser = users
+            .filter(id.eq(user_id))
+            .first(connection)
             .map_err(|e| Status::internal(e.to_string()))?;
 
-        let user = Some(row).try_into().map_err(anyhow::Error::into_status)?;
+        let user: User = user.try_into()?;
+
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(user))
     }

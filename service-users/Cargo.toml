@@ -3,13 +3,15 @@ name = "rusve-users"
 version = "0.1.0"
 edition = "2021"
 
+[build-dependencies]
+tonic-build = "0.8"
+sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "migrate", "postgres", "uuid", "time"] }
+anyhow = "1.0.69"
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "sync", "time"] }
+
 [[bin]]
 name = "main"
 path = "src/main.rs"
-
-[[bin]]
-name = "proto"
-path = "src/build.rs"
 
 [dependencies]
 prost = "0.11.6"
@@ -21,16 +23,17 @@ futures-core = "0.3"
 futures-util = "0.3"
 
 anyhow = "1.0.69"
-sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "migrate", "postgres", "uuid", "time"] }
+sqlx = { version = "0.7.0-alpha.3", features = [ "runtime-tokio-rustls", "migrate", "postgres", "uuid", "time"] }
 time = "0.3.20"
 jsonwebtoken = "8.2.0"
 serde = "1.0.154"
 
 # Database
-refinery = { version = "0.8.10", features = ["tokio-postgres"] }
 tokio-postgres = { version = "0.7.8", features = ["with-time-0_3", "with-uuid-1"] }
 deadpool-postgres = "0.10.5"
 uuid = "1.3.2"
 postgres-openssl = "0.5.0"
 postgres-native-tls = "0.5.0"
 native-tls = "0.2.11"
+diesel = { version = "2.0.4", features = ["postgres", "time", "uuid", "numeric"] }
+dotenvy = "0.15.7"
