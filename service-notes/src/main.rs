@@ -4,18 +4,14 @@ mod proto;
 mod schema;
 
 use anyhow::{Context, Result};
-use diesel_async::{
-    pooled_connection::{bb8::Pool, AsyncDieselConnectionManager},
-    AsyncPgConnection,
-};
+use diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection};
 use proto::notes_service_server::NotesServiceServer;
 use rusve_notes::establish_connection;
-use std::time::Duration;
 use tonic::transport::Server;
 
-#[derive(Debug)]
+type DPool = deadpool::managed::Pool<AsyncDieselConnectionManager<AsyncPgConnection>>;
 pub struct MyService {
-    pool: Pool<AsyncDieselConnectionManager<AsyncPgConnection>>,
+    pool: DPool,
 }
 
 #[tokio::main]
@@ -30,13 +26,7 @@ async fn main() -> Result<()> {
         database_url,
         establish_connection,
     );
-    let pool = Pool::builder()
-        .max_size(10)
-        .min_idle(Some(5))
-        .max_lifetime(Some(Duration::from_secs(60 * 60 * 24)))
-        .idle_timeout(Some(Duration::from_secs(60 * 2)))
-        .build(mgr)
-        .await?;
+    let pool = diesel_async::pooled_connection::deadpool::Pool::builder(mgr).build()?;
 
     let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);

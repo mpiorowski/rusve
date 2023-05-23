@@ -8,9 +8,10 @@ use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
 
+use crate::models::*;
+use crate::schema::notes::dsl::*;
 use diesel::prelude::*;
-use rusve_notes::models::*;
-use rusve_notes::schema::notes::dsl::*;
+use diesel_async::RunQueryDsl;
 
 impl TryFrom<DieselNote> for Note {
     type Error = anyhow::Error;
@@ -42,8 +43,11 @@ impl NotesService for MyService {
         println!("GetNotes = {:?}", request);
         let start = std::time::Instant::now();
 
-        let con = &mut establish_connection();
-
+        let mut con = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
         println!("Connect: {:?}", start.elapsed());
 
         let user_uuid = request.into_inner().user_id;
@@ -53,7 +57,8 @@ impl NotesService for MyService {
             .filter(user_id.eq(user_uuid))
             .filter(deleted.is_null())
             .order(created.desc())
-            .load::<DieselNote>(con)
+            .load(&mut con)
+            .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
         println!("Prepare: {:?}", start.elapsed());
@@ -87,7 +92,11 @@ impl NotesService for MyService {
         println!("CreateNote = {:?}", request);
         let start = std::time::Instant::now();
 
-        let con = &mut establish_connection();
+        let mut con = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let note = request.into_inner();
         let user_uuid =
@@ -101,7 +110,8 @@ impl NotesService for MyService {
 
         let note = diesel::insert_into(notes)
             .values(&new_note)
-            .get_result::<DieselNote>(con)
+            .get_result::<DieselNote>(&mut con)
+            .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let note = Note::try_from(note).map_err(|e| Status::internal(e.to_string()))?;
@@ -114,7 +124,11 @@ impl NotesService for MyService {
         println!("DeleteNote = {:?}", request);
         let start = std::time::Instant::now();
 
-        let con = &mut establish_connection();
+        let mut con = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
         let note_uuid =
@@ -125,8 +139,10 @@ impl NotesService for MyService {
         let note = diesel::update(notes)
             .filter(id.eq(note_uuid))
             .filter(user_id.eq(user_uuid))
-            .set(deleted.eq(diesel::dsl::now))
-            .get_result::<DieselNote>(con)
+            // .set(deleted.eq(diesel::dsl::now))
+            .set(title.eq("deleted"))
+            .get_result::<DieselNote>(&mut con)
+            .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let note = Note::try_from(note).map_err(|e| Status::internal(e.to_string()))?;
