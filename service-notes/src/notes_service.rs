@@ -9,7 +9,6 @@ use tonic::{Request, Response, Status};
 use uuid::Uuid;
 
 use diesel::prelude::*;
-use rusve_notes::establish_connection;
 use rusve_notes::models::*;
 use rusve_notes::schema::notes::dsl::*;
 
