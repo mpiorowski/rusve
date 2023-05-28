@@ -1,8 +1,8 @@
 use diesel::prelude::*;
 
-use crate::proto::{User, UserRole};
-
-#[derive(Queryable)]
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::schema::users)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct DieselUser {
     pub id: uuid::Uuid,
     pub created: time::OffsetDateTime,
@@ -12,6 +12,6 @@ pub struct DieselUser {
     pub role: String,
     pub sub: String,
     pub name: String,
-    pub avatar: Option<uuid::Uuid>,
+    pub avatar_id: Option<uuid::Uuid>,
     pub payment_id: String,
 }

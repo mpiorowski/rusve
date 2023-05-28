@@ -25,8 +25,8 @@ message User {
     UserRole role = 6;
     string sub = 7;
 
-    optional string name = 8;
-    optional string avatar = 9;
+    string name = 8;
+    optional string avatar_id = 9;
     optional string payment_id = 10;
 }
 

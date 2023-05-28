@@ -10,7 +10,7 @@ diesel::table! {
         role -> Text,
         sub -> Text,
         name -> Text,
-        avatar -> Nullable<Uuid>,
+        avatar_id -> Nullable<Uuid>,
         payment_id -> Text,
     }
 }

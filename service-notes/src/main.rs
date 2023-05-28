@@ -4,14 +4,21 @@ mod proto;
 mod schema;
 
 use anyhow::{Context, Result};
-use diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection};
 use proto::notes_service_server::NotesServiceServer;
 use rusve_notes::establish_connection;
 use tonic::transport::Server;
 
-type DPool = deadpool::managed::Pool<AsyncDieselConnectionManager<AsyncPgConnection>>;
 pub struct MyService {
-    pool: DPool,
+    // pool: diesel_async::pooled_connection::deadpool::Pool<
+    //     diesel_async::pooled_connection::AsyncDieselConnectionManager<
+    //         diesel_async::AsyncPgConnection,
+    //     >,
+    // >,
+    pool: deadpool::managed::Pool<
+        diesel_async::pooled_connection::AsyncDieselConnectionManager<
+            diesel_async::AsyncPgConnection,
+        >,
+    >,
 }
 
 #[tokio::main]
@@ -21,12 +28,15 @@ async fn main() -> Result<()> {
     let port = std::env::var("PORT").context("PORT not set")?;
     let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
 
-    // create a new connection pool with the default config
-    let mgr = AsyncDieselConnectionManager::<AsyncPgConnection>::new_with_setup(
-        database_url,
-        establish_connection,
-    );
-    let pool = diesel_async::pooled_connection::deadpool::Pool::builder(mgr).build()?;
+    // Create a connection pool without tls
+    let pool = establish_connection(&database_url)?;
+
+    // Create a connection pool with tls
+    // let mgr = AsyncDieselConnectionManager::<AsyncPgConnection>::new_with_setup(
+    //     database_url,
+    //     establish_connection_tls,
+    // );
+    // let pool = diesel_async::pooled_connection::deadpool::Pool::builder(mgr).build()?;
 
     let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);

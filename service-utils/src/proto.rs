@@ -23,10 +23,10 @@ pub struct User {
     pub role: i32,
     #[prost(string, tag = "7")]
     pub sub: ::prost::alloc::string::String,
-    #[prost(string, optional, tag = "8")]
-    pub name: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, tag = "8")]
+    pub name: ::prost::alloc::string::String,
     #[prost(string, optional, tag = "9")]
-    pub avatar: ::core::option::Option<::prost::alloc::string::String>,
+    pub avatar_id: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag = "10")]
     pub payment_id: ::core::option::Option<::prost::alloc::string::String>,
 }
