@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use diesel::Connection;
 use diesel::{ConnectionError, ConnectionResult};
 use diesel_async::pooled_connection::deadpool::Pool;
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
@@ -12,6 +13,11 @@ pub fn establish_connection(database_url: &str) -> Result<Pool<AsyncPgConnection
         .build()
         .context("Error creating pool")?;
     return Ok(pool);
+}
+
+pub fn establish_connection_sync(database_url: &str) -> Result<diesel::pg::PgConnection> {
+    let conn = diesel::pg::PgConnection::establish(&database_url)?;
+    return Ok(conn);
 }
 
 pub fn establish_connection_tls(config: &str) -> BoxFuture<ConnectionResult<AsyncPgConnection>> {

@@ -11,11 +11,11 @@ func mapUser(rows *sql.Rows, row *sql.Row) (*pb.User, error) {
 	var role string
 	if rows != nil {
 		err = rows.Scan(
-			&user.Id, &user.Created, &user.Updated, &user.Deleted, &user.Email, &role, &user.Sub, &user.Name, &user.Avatar, &user.PaymentId,
+			&user.Id, &user.Created, &user.Updated, &user.Deleted, &user.Email, &role, &user.Sub, &user.Name, &user.AvatarId, &user.PaymentId,
 		)
 	} else if row != nil {
 		err = row.Scan(
-			&user.Id, &user.Created, &user.Updated, &user.Deleted, &user.Email, &role, &user.Sub, &user.Name, &user.Avatar, &user.PaymentId,
+			&user.Id, &user.Created, &user.Updated, &user.Deleted, &user.Email, &role, &user.Sub, &user.Name, &user.AvatarId, &user.PaymentId,
 		)
 	}
 	if err != nil {

@@ -2,7 +2,9 @@ use diesel::prelude::*;
 
 use crate::schema::notes;
 
-#[derive(Queryable)]
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::schema::notes)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct DieselNote {
     pub id: uuid::Uuid,
     pub created: time::OffsetDateTime,

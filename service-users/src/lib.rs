@@ -1,16 +1,20 @@
-use diesel::pg::PgConnection;
-use diesel::prelude::*;
-use dotenvy::dotenv;
-use std::env;
-
+use diesel::Connection;
+use anyhow::{Context, Result};
+use diesel_async::{
+    pooled_connection::{deadpool::Pool, AsyncDieselConnectionManager},
+    AsyncPgConnection,
+};
 mod proto;
-pub mod models;
-pub mod schema;
 
-pub fn establish_connection() -> PgConnection {
-    dotenv().ok();
+pub fn establish_connection(database_url: &str) -> Result<Pool<AsyncPgConnection>> {
+    let config = AsyncDieselConnectionManager::<AsyncPgConnection>::new(database_url);
+    let pool = Pool::builder(config)
+        .build()
+        .context("Error creating pool")?;
+    return Ok(pool);
+}
 
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
+pub fn establish_connection_sync(database_url: &str) -> Result<diesel::pg::PgConnection> {
+    let conn = diesel::pg::PgConnection::establish(&database_url)?;
+    return Ok(conn);
 }

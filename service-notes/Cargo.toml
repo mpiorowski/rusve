@@ -15,17 +15,20 @@ tokio = { version = "1.27.0", features = ["rt-multi-thread", "macros", "sync", "
 tokio-stream = "0.1.12"
 futures-core = "0.3.28"
 futures-util = "0.3.28"
-anyhow = "1.0.69"
-serde = "1.0.154"
 
-# Database
+anyhow = "1.0.69"
 time = "0.3.20"
 uuid = "1.3.2"
-diesel = { version = "2.0.4", features = ["time", "uuid", "numeric"] }
+
+# Database
+diesel = { version = "2.1.0", features = ["postgres", "time", "uuid", "numeric"] }
 dotenvy = "0.15.7"
-diesel-async = { version = "0.2.2", features = ["postgres", "deadpool", "bb8"] }
+diesel-async = { version = "0.3.0", features = ["postgres", "deadpool", "bb8"] }
+deadpool = "0.9.5"
+
+# Tls
 rustls = "0.21.1"
 rustls-native-certs = "0.6.2"
 tokio-postgres = "0.7.8"
 tokio-postgres-rustls = "0.10.0"
-deadpool = "0.9.5"
+diesel_migrations = { version = "2.1.0", features = ["postgres"] }

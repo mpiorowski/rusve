@@ -43,11 +43,12 @@ impl NotesService for MyService {
         println!("GetNotes = {:?}", request);
         let start = std::time::Instant::now();
 
-        let mut con = self
+        let mut conn = self
             .pool
             .get()
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
+
         println!("Connect: {:?}", start.elapsed());
 
         let user_uuid = request.into_inner().user_id;
@@ -57,7 +58,8 @@ impl NotesService for MyService {
             .filter(user_id.eq(user_uuid))
             .filter(deleted.is_null())
             .order(created.desc())
-            .load(&mut con)
+            .select(DieselNote::as_select())
+            .load(&mut conn)
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 

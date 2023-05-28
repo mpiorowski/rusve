@@ -9,10 +9,10 @@ use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
 
+use crate::models::*;
+use crate::schema::users::dsl::*;
 use diesel::prelude::*;
-use rusve_users::establish_connection;
-use rusve_users::models::*;
-use rusve_users::schema::users::dsl::*;
+use diesel_async::RunQueryDsl;
 
 impl TryFrom<DieselUser> for User {
     type Error = tonic::Status;
@@ -44,25 +44,21 @@ impl UsersService for MyService {
         println!("Auth: {:?}", request);
         let start = std::time::Instant::now();
 
-        let conn = self
+        let mut conn = self
             .pool
             .get()
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
         let request = request.into_inner();
 
-        let row = conn
-            .interact(|conn| {
-                return diesel::update(users)
-                    .filter(email.eq(&request.email))
-                    .filter(sub.eq(&request.sub))
-                    .set(updated.eq(diesel::dsl::now))
-                    .get_result::<DieselUser>(conn);
-            })
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
+        let user = diesel::update(users)
+            .filter(email.eq(&request.email))
+            .filter(sub.eq(&request.sub))
+            .set(updated.eq(diesel::dsl::now))
+            .get_result::<DieselUser>(&mut conn)
+            .await;
 
-        match row {
+        match user {
             Ok(row) => {
                 if row.deleted.is_some() {
                     return Err(Status::unauthenticated("Unauthenticated"));
@@ -72,21 +68,15 @@ impl UsersService for MyService {
                 Ok(Response::new(user))
             }
             Err(_) => {
-                let user = conn
-                    .interact(|conn| {
-                        return diesel::insert_into(users)
-                            .values((
-                                email.eq(&request.email),
-                                role.eq(UserRole::as_str_name(&UserRole::RoleUser)),
-                                sub.eq(&request.sub),
-                            ))
-                            .get_result::<DieselUser>(conn);
-                    })
+                let user = diesel::insert_into(users)
+                    .values((
+                        email.eq(&request.email),
+                        role.eq(UserRole::as_str_name(&UserRole::RoleUser)),
+                        sub.eq(&request.sub),
+                    ))
+                    .get_result::<DieselUser>(&mut conn)
                     .await
-                    .map_err(|e| Status::internal(e.to_string()))?
-                    .map_err(|e| {
-                        Status::internal(format!("Error inserting user: {}", e.to_string()))
-                    })?;
+                    .map_err(|e| Status::internal(e.to_string()))?;
                 let user: User = user.try_into()?;
                 println!("Elapsed: {:?}", start.elapsed());
                 Ok(Response::new(user))
@@ -102,7 +92,7 @@ impl UsersService for MyService {
         println!("GetUsers: {:?}", request);
         let start = std::time::Instant::now();
 
-        let conn = self
+        let mut conn = self
             .pool
             .get()
             .await
@@ -115,16 +105,11 @@ impl UsersService for MyService {
             .collect::<Result<Vec<Uuid>>>()
             .map_err(|e| Status::internal(e.to_string()))?;
 
-        let results = conn
-            .interact(|conn| {
-                let results: Result<Vec<DieselUser>, diesel::result::Error> = users
-                    .filter(id.eq_any(&user_ids))
-                    .select(DieselUser::as_select())
-                    .load(conn);
-                return results;
-            })
+        let results = users
+            .filter(id.eq_any(&user_ids))
+            .select(DieselUser::as_select())
+            .load(&mut conn)
             .await
-            .map_err(|e| Status::internal(e.to_string()))?
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let (tx, rx) = mpsc::channel(128);
@@ -150,7 +135,11 @@ impl UsersService for MyService {
 
         let start = std::time::Instant::now();
 
-        let connection = &mut establish_connection();
+        let mut conn = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
         let user_uuid =
@@ -158,7 +147,8 @@ impl UsersService for MyService {
 
         let user: DieselUser = users
             .filter(id.eq(user_uuid))
-            .first(connection)
+            .first(&mut conn)
+            .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let user: User = user.try_into()?;
@@ -172,7 +162,7 @@ impl UsersService for MyService {
         println!("UpdateUser: {:?}", request);
         let start = std::time::Instant::now();
 
-        let conn = self
+        let mut conn = self
             .pool
             .get()
             .await
@@ -190,18 +180,14 @@ impl UsersService for MyService {
             None => None,
         };
 
-        let result = conn
-            .interact(|conn| {
-                return diesel::update(users)
-                    .filter(id.eq(user_uuid))
-                    .set((name.eq(&request.name), avatar_id.eq(avatar_uuid)))
-                    .get_result::<DieselUser>(conn);
-            })
+        let user = diesel::update(users)
+            .filter(id.eq(user_uuid))
+            .set((name.eq(&request.name), avatar_id.eq(avatar_uuid)))
+            .get_result::<DieselUser>(&mut conn)
             .await
-            .map_err(|e| Status::internal(e.to_string()))?
-            .map_err(|e| Status::internal(format!("Error updating user: {}", e.to_string())))?;
+            .map_err(|e| Status::internal(e.to_string()))?;
 
-        let user: User = result.try_into()?;
+        let user: User = user.try_into()?;
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(user))
     }
@@ -214,7 +200,7 @@ impl UsersService for MyService {
         println!("UpdatePaymentId: {:?}", request);
         let start = std::time::Instant::now();
 
-        let conn = self
+        let mut conn = self
             .pool
             .get()
             .await
@@ -224,15 +210,12 @@ impl UsersService for MyService {
         let user_uuid =
             Uuid::parse_str(&request.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        conn.interact(|conn| {
-            diesel::update(users)
-                .filter(id.eq(&user_uuid))
-                .set((payment_id.eq(&request.payment_id),))
-                .execute(conn)
-        })
-        .await
-        .map_err(|e| Status::internal(e.to_string()))?
-        .map_err(|e| Status::internal(format!("Error updating user: {}", e.to_string())))?;
+        diesel::update(users)
+            .filter(id.eq(&user_uuid))
+            .set((payment_id.eq(&request.payment_id),))
+            .execute(&mut conn)
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         println!("Elapsed: {:?}", start.elapsed());
         Ok(Response::new(Empty {}))
