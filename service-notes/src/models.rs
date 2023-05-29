@@ -17,7 +17,8 @@ pub struct DieselNote {
 
 #[derive(Insertable)]
 #[diesel(table_name = notes)]
-pub struct NewNote<'a> {
+pub struct UpsertNote<'a> {
+    pub id: Option<uuid::Uuid>,
     pub user_id: &'a uuid::Uuid,
     pub title: &'a str,
     pub content: &'a str,
