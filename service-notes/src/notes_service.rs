@@ -3,6 +3,8 @@ use crate::{
     MyService,
 };
 use anyhow::Result;
+use deadpool::managed::Object;
+use futures_util::{Stream, StreamExt};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
@@ -11,7 +13,9 @@ use uuid::Uuid;
 use crate::models::*;
 use crate::schema::notes::dsl::*;
 use diesel::prelude::*;
-use diesel_async::RunQueryDsl;
+use diesel_async::{
+    pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection, RunQueryDsl,
+};
 
 impl TryFrom<DieselNote> for Note {
     type Error = anyhow::Error;
@@ -31,6 +35,20 @@ impl TryFrom<DieselNote> for Note {
     }
 }
 
+async fn get_notes(
+    mut conn: Object<AsyncDieselConnectionManager<AsyncPgConnection>>,
+    user_uuid: Uuid,
+) -> Result<impl Stream<Item = QueryResult<DieselNote>>, Status> {
+    return Ok(notes
+        .filter(deleted.is_null())
+        .filter(user_id.eq(&user_uuid))
+        .order(created.desc())
+        .select(DieselNote::as_select())
+        .load_stream(&mut conn)
+        .await
+        .map_err(|e| Status::internal(e.to_string()))?);
+}
+
 #[tonic::async_trait]
 impl NotesService for MyService {
     type GetNotesStream = ReceiverStream<Result<Note, Status>>;
@@ -43,7 +61,7 @@ impl NotesService for MyService {
         println!("GetNotes = {:?}", request);
         let start = std::time::Instant::now();
 
-        let mut conn = self
+        let conn = self
             .pool
             .get()
             .await
@@ -54,21 +72,21 @@ impl NotesService for MyService {
         let user_uuid = request.into_inner().user_id;
         let user_uuid = Uuid::parse_str(&user_uuid).map_err(|e| Status::internal(e.to_string()))?;
 
-        let rows: Vec<DieselNote> = notes
-            .filter(user_id.eq(user_uuid))
-            .filter(deleted.is_null())
-            .order(created.desc())
-            .select(DieselNote::as_select())
-            .load(&mut conn)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
+        let mut rows = get_notes(conn, user_uuid).await?;
 
         println!("Prepare: {:?}", start.elapsed());
 
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
-            for row in rows {
-                let note = match Note::try_from(row) {
+            while let Some(row) = rows.next().await {
+                let note = match row {
+                    Ok(note) => note,
+                    Err(e) => {
+                        println!("Error: {:?}", e);
+                        break;
+                    }
+                };
+                let note: Note = match Note::try_from(note) {
                     Ok(note) => note,
                     Err(e) => {
                         println!("Error: {:?}", e);
@@ -83,8 +101,23 @@ impl NotesService for MyService {
                     }
                 }
             }
-            let elapsed = start.elapsed();
-            println!("Elapsed: {:.2?}", elapsed);
+            // for row in rows {
+            //     let note = match Note::try_from(row) {
+            //         Ok(note) => note,
+            //         Err(e) => {
+            //             println!("Error: {:?}", e);
+            //             break;
+            //         }
+            //     };
+            //     match tx.send(Ok(note)).await {
+            //         Ok(_) => {}
+            //         Err(e) => {
+            //             println!("Error: {:?}", e);
+            //             break;
+            //         }
+            //     }
+            // }
+            println!("Elapsed: {:.2?}", start.elapsed());
         });
         Ok(Response::new(ReceiverStream::new(rx)))
     }
