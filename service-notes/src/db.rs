@@ -16,14 +16,14 @@ pub async fn get_notes_by_user_uuid(
     mut conn: Object<AsyncDieselConnectionManager<AsyncPgConnection>>,
     user_uuid: Uuid,
 ) -> Result<impl Stream<Item = QueryResult<DieselNote>>, Status> {
-    return Ok(notes
+    Ok(notes
         .filter(deleted.is_null())
         .filter(user_id.eq(&user_uuid))
         .order(created.desc())
         .select(DieselNote::as_select())
         .load_stream(&mut conn)
         .await
-        .map_err(|e| Status::internal(e.to_string()))?);
+        .map_err(|e| Status::internal(e.to_string()))?)
 }
 
 pub async fn upsert_note(
