@@ -1,6 +1,6 @@
 mod models;
-mod notes_service;
-mod notes_db;
+mod service;
+mod db;
 mod proto;
 mod schema;
 
