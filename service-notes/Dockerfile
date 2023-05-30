@@ -9,7 +9,7 @@ COPY ./src /app/src
 RUN cargo build --release
 
 # Production image
-FROM debian:buster-slim AS prod
+FROM debian:bookworm-slim AS prod
 COPY --from=build /app/target/release /app
 
 # Add openssl and ca-certificates
