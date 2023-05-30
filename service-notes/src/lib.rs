@@ -12,12 +12,12 @@ pub fn establish_connection(database_url: &str) -> Result<Pool<AsyncPgConnection
     let pool = Pool::builder(config)
         .build()
         .context("Error creating pool")?;
-    return Ok(pool);
+    Ok(pool)
 }
 
 pub fn establish_connection_sync(database_url: &str) -> Result<diesel::pg::PgConnection> {
-    let conn = diesel::pg::PgConnection::establish(&database_url)?;
-    return Ok(conn);
+    let conn = diesel::pg::PgConnection::establish(database_url)?;
+    Ok(conn)
 }
 
 pub fn establish_connection_tls(config: &str) -> BoxFuture<ConnectionResult<AsyncPgConnection>> {

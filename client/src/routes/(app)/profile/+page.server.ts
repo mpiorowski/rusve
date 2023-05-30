@@ -30,9 +30,9 @@ export const load = (async ({ locals, url }) => {
         let file: Promise<
             { id: string; name: string; base64: string } | undefined
         > = Promise.resolve(undefined);
-        if (user.avatar) {
+        if (user.avatarId) {
             const fileId: FileId = {
-                fileId: user.avatar,
+                fileId: user.avatarId,
                 targetId: userId,
             };
             metadata = await createMetadata(URI_UTILS);
@@ -95,7 +95,7 @@ export const actions = {
             const data: User = {
                 id: locals.userId,
                 name: schema.data.name,
-                avatar:
+                avatarId:
                     schema.data.avatar !== "" ? schema.data.avatar : undefined,
             };
             console.log(data);
@@ -215,7 +215,7 @@ export const actions = {
             const data: User = {
                 id: locals.userId,
                 name: schema.data.name,
-                avatar: newFile.id,
+                avatarId: newFile.id,
             };
             metadata = await createMetadata(uri);
             const user = await new Promise<User__Output>((resolve, reject) => {
