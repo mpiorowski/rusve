@@ -1,5 +1,5 @@
 use crate::{
-    notes_db::{delete_note, get_notes_by_user_uuid, upsert_note},
+    db::{delete_note, get_notes_by_user_uuid, upsert_note},
     proto::{notes_service_server::NotesService, Note, NoteId, UserId},
     MyService,
 };
