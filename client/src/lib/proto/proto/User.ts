@@ -11,11 +11,10 @@ export interface User {
   'role'?: (_proto_UserRole);
   'sub'?: (string);
   'name'?: (string);
-  'avatar'?: (string);
+  'avatarId'?: (string);
   'paymentId'?: (string);
   '_deleted'?: "deleted";
-  '_name'?: "name";
-  '_avatar'?: "avatar";
+  '_avatarId'?: "avatarId";
   '_paymentId'?: "paymentId";
 }
 
@@ -27,11 +26,10 @@ export interface User__Output {
   'email': (string);
   'role': (_proto_UserRole__Output);
   'sub': (string);
-  'name'?: (string);
-  'avatar'?: (string);
+  'name': (string);
+  'avatarId'?: (string);
   'paymentId'?: (string);
   '_deleted': "deleted";
-  '_name': "name";
-  '_avatar': "avatar";
+  '_avatarId': "avatarId";
   '_paymentId': "paymentId";
 }

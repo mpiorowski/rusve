@@ -14,7 +14,7 @@
         isSignInWithEmailLink,
         sendSignInLinkToEmail,
         signInWithEmailLink,
-        signInWithRedirect,
+        signInWithPopup,
     } from "firebase/auth";
     import { onMount } from "svelte";
 
@@ -49,14 +49,14 @@
             window.localStorage.setItem("checkRedirect", "true");
 
             /** Sign in with popup */
-            // const cred = await signInWithPopup(auth, provider);
-            // const idToken = await cred.user.getIdToken();
-            // await sendIdToken(idToken);
-            // await auth.signOut();
-            // window.location.reload();
+            const cred = await signInWithPopup(auth, provider);
+            const idToken = await cred.user.getIdToken();
+            await sendIdToken(idToken);
+            await auth.signOut();
+            window.location.reload();
 
             /** Sign in with redirect */
-            await signInWithRedirect(auth, provider);
+            // await signInWithRedirect(auth, provider);
         } catch (err) {
             console.error(err);
             toast({
@@ -121,7 +121,8 @@
         }
         try {
             loading = true;
-            const emailForSignIn = window.localStorage.getItem("emailForSignIn");
+            const emailForSignIn =
+                window.localStorage.getItem("emailForSignIn");
             if (!emailForSignIn) {
                 throw new Error("No email found");
             }

@@ -1,0 +1,32 @@
+version: "3"
+services:
+
+  service-users-db:
+    container_name: rusve-service-users-db
+    image: postgres:15.1
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: users
+
+  service-utils-db:
+    container_name: rusve-service-utils-db
+    image: postgres:15.1
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: utils
+
+  service-notes-db:
+    container_name: rusve-service-notes-db
+    image: postgres:15.1
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: notes

@@ -19,12 +19,10 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./service-users/src:/app/src
-    depends_on:
-      - service-users-db
     environment:
       PORT: 443
       ENV: development
-      DATABASE_URL: postgresql://postgres:12345@service-users-db/users
+      DATABASE_URL: postgresql://?host=service-users-db&user=postgres&password=12345&dbname=users
 
   service-users-go:
     container_name: rusve-service-users-go
@@ -34,22 +32,10 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./service-users-go:/app
-    depends_on:
-      - service-users-db
     environment:
       ENV: development
       PORT: 443
-      DATABASE_URL: postgresql://postgres:12345@service-users-db/users
-
-  service-users-db:
-    container_name: rusve-service-users-db
-    image: postgres:15.1
-    ports:
-      - 5432:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: users
+      DATABASE_URL: postgresql://?host=service-users-db&user=postgres&password=12345&dbname=users
 
   service-utils:
     container_name: rusve-service-utils
@@ -60,24 +46,12 @@ services:
     volumes:
       - ./files:/app/files
       - ./service-utils/src:/app/src
-    depends_on:
-      - service-utils-db
     environment:
       PORT: 443
       ENV: development
       DATABASE_URL: postgresql://?host=service-utils-db&user=postgres&password=12345&dbname=utils
       BUCKET: bucket
       SENDGRID_API_KEY: sendgid-api-key
-
-  service-utils-db:
-    container_name: rusve-service-utils-db
-    image: postgres:15.1
-    ports:
-      - 5433:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: utils
 
   service-notes-rust:
     container_name: rusve-service-notes-rust
@@ -87,12 +61,10 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./service-notes/src:/app/src
-    depends_on:
-      - service-notes-db
     environment:
       ENV: development
       PORT: 443
-      DATABASE_URL: postgresql://postgres:12345@service-notes-db/notes
+      DATABASE_URL: postgresql://?host=service-notes-db&user=postgres&password=12345&dbname=notes
 
   service-notes-go:
     container_name: rusve-service-notes-go
@@ -102,22 +74,10 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./service-notes-go:/app
-    depends_on:
-      - service-notes-db
     environment:
       ENV: development
       PORT: 443
-      DATABASE_URL: postgresql://postgres:12345@service-notes-db/notes
-
-  service-notes-db:
-    container_name: rusve-service-notes-db
-    image: postgres:15.1
-    ports:
-      - 5434:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: notes
+      DATABASE_URL: postgresql://?host=service-notes-db&user=postgres&password=12345&dbname=notes
 
   directus:
     container_name: rusve-directus

@@ -1,58 +1,37 @@
+mod models;
 mod proto;
+mod schema;
 mod users_service;
 
-use std::str::FromStr;
-
 use crate::proto::users_service_server::UsersServiceServer;
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use anyhow::{Context, Result};
+use deadpool::managed::Pool;
+use diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection};
+use rusve_users::{establish_connection, establish_connection_sync};
 use tonic::transport::Server;
 
-#[derive(Debug)]
-pub struct MyService {
-    pool: deadpool_postgres::Pool,
-}
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
-mod embedded {
-    use refinery::embed_migrations;
-    embed_migrations!("./migrations");
+pub struct MyService {
+    pool: Pool<AsyncDieselConnectionManager<AsyncPgConnection>>,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     println!("Starting server...");
 
-    let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
     let port = std::env::var("PORT").context("PORT not set")?;
+    let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
 
-    // Leaving sqlx pools for future reference, when the sqlx performance will be fixed
-    // Sqlx database
-    // Migrations
-    let pool = sqlx::postgres::PgPoolOptions::new()
-        .max_connections(1)
-        .connect(&database_url)
-        .await
-        .with_context(|| format!("Failed to connect to database: {}", database_url))?;
-    sqlx::migrate!("./migrations")
-        .run(&pool)
-        .await
-        .context("Failed to run migrations")?;
-    println!("Migrations ran successfully");
-    pool.close().await;
+    // Run migrations - diesel_async have an open PR to support this
+    let mut conn = establish_connection_sync(&database_url)?;
+    conn.run_pending_migrations(MIGRATIONS)
+        .map_err(|e| anyhow::anyhow!("Error running migrations: {:?}", e.to_string()))?;
+    println!("Migrations run successfully");
 
-    // Database connection pool
-    let pg_config = tokio_postgres::Config::from_str(&database_url)?;
-    let manager = deadpool_postgres::Manager::from_config(
-        pg_config,
-        tokio_postgres::NoTls,
-        deadpool_postgres::ManagerConfig {
-            recycling_method: deadpool_postgres::RecyclingMethod::Fast,
-        },
-    );
-    let pool = deadpool_postgres::Pool::builder(manager)
-        .max_size(20)
-        .build()
-        .context("Failed to create database pool")?;
-    println!("Connected to database");
+    // Create a connection pool without tls
+    let pool = establish_connection(&database_url)?;
 
     let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);
