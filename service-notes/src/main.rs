@@ -1,12 +1,11 @@
-mod models;
-mod service;
 mod db;
+mod models;
 mod proto;
 mod schema;
+mod service;
 
 use anyhow::{Context, Result};
-use deadpool::managed::Pool;
-use diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection};
+use diesel_async::{pooled_connection::deadpool::Pool, AsyncPgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use proto::notes_service_server::NotesServiceServer;
 use rusve_notes::{establish_connection, establish_connection_sync};
@@ -15,12 +14,7 @@ use tonic::transport::Server;
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
 pub struct MyService {
-    pool: Pool<AsyncDieselConnectionManager<AsyncPgConnection>>,
-    // pool: Pool<
-    //     diesel_async::pooled_connection::AsyncDieselConnectionManager<
-    //         diesel_async::AsyncPgConnection,
-    //     >,
-    // >,
+    pool: Pool<AsyncPgConnection>,
 }
 
 #[tokio::main]

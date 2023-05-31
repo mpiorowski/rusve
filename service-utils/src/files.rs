@@ -1,51 +1,37 @@
+use crate::models::DieselFile;
 use crate::proto::utils_service_server::UtilsService;
 use crate::proto::{File, FileId, FileType, TargetId};
 use crate::MyService;
 use anyhow::Result;
-use futures_util::TryStreamExt;
 use google_cloud_default::WithAuthExt;
 use google_cloud_storage::client::{Client, ClientConfig};
 use google_cloud_storage::http::objects::delete::DeleteObjectRequest;
 use google_cloud_storage::http::objects::download::Range;
 use google_cloud_storage::http::objects::get::GetObjectRequest;
 use google_cloud_storage::http::objects::upload::{Media, UploadObjectRequest, UploadType};
-use sqlx::types::time::OffsetDateTime;
-use sqlx::{postgres::PgRow, query, types::Uuid, Row};
 use tokio::io::AsyncWriteExt;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
+use uuid::Uuid;
 
-impl TryFrom<Option<PgRow>> for File {
+impl TryFrom<DieselFile> for File {
     type Error = anyhow::Error;
 
-    fn try_from(row: Option<PgRow>) -> Result<Self, Self::Error> {
-        match row {
-            Some(row) => {
-                let id: Uuid = row.try_get("id")?;
-                let created: OffsetDateTime = row.try_get("created")?;
-                let updated: OffsetDateTime = row.try_get("updated")?;
-                let deleted: Option<OffsetDateTime> = row.try_get("deleted")?;
-                let target_id: Uuid = row.try_get("target_id")?;
-                let name: String = row.try_get("name")?;
-                let r#type: String = row.try_get("type")?;
-                let file_type =
-                    FileType::from_str_name(&r#type).ok_or(anyhow::anyhow!("Invalid file type"))?;
-
-                let file = File {
-                    id: id.to_string(),
-                    created: created.to_string(),
-                    updated: updated.to_string(),
-                    deleted: deleted.map(|d| d.to_string()),
-                    target_id: target_id.to_string(),
-                    name,
-                    r#type: file_type.into(),
-                    buffer: Vec::new(),
-                };
-                Ok(file)
-            }
-            None => Err(anyhow::anyhow!("File not found")),
-        }
+    fn try_from(file: DieselFile) -> Result<Self, Self::Error> {
+        let file = File {
+            id: file.id.to_string(),
+            created: file.created.to_string(),
+            updated: file.updated.to_string(),
+            deleted: file.deleted.map(|d| d.to_string()),
+            target_id: file.target_id.to_string(),
+            name: file.name,
+            r#type: FileType::from_str_name(&file.type_)
+                .ok_or(anyhow::anyhow!("Invalid file type"))?
+                .into(),
+            buffer: Vec::new(),
+        };
+        Ok(file)
     }
 }
 
