@@ -3,6 +3,7 @@ mod files;
 mod proto;
 mod models;
 mod schema;
+mod db;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -14,6 +15,7 @@ use rusve_utils::establish_connection;
 use rusve_utils::establish_connection_sync;
 use tonic::transport::Server;
 
+use crate::emails::subscribe_to_email;
 use crate::proto::utils_service_server::UtilsServiceServer;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
@@ -36,6 +38,8 @@ async fn main() -> Result<()> {
     }
 
     println!("Starting server...");
+
+    subscribe_to_email().await?;
 
     let port = std::env::var("PORT").context("PORT not set")?;
     let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;

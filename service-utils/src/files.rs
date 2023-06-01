@@ -1,8 +1,10 @@
-use crate::models::DieselFile;
+use crate::db::{create_file, delete_file, get_file_by_id, get_files_by_target_id};
+use crate::models::{DieselFile, InsertFile};
 use crate::proto::utils_service_server::UtilsService;
 use crate::proto::{File, FileId, FileType, TargetId};
 use crate::MyService;
 use anyhow::Result;
+use futures_util::StreamExt;
 use google_cloud_default::WithAuthExt;
 use google_cloud_storage::client::{Client, ClientConfig};
 use google_cloud_storage::http::objects::delete::DeleteObjectRequest;
@@ -16,7 +18,7 @@ use tonic::{Request, Response, Status};
 use uuid::Uuid;
 
 impl TryFrom<DieselFile> for File {
-    type Error = anyhow::Error;
+    type Error = Status;
 
     fn try_from(file: DieselFile) -> Result<Self, Self::Error> {
         let file = File {
@@ -27,9 +29,25 @@ impl TryFrom<DieselFile> for File {
             target_id: file.target_id.to_string(),
             name: file.name,
             r#type: FileType::from_str_name(&file.type_)
-                .ok_or(anyhow::anyhow!("Invalid file type"))?
+                .ok_or(Status::internal("Invalid file type"))?
                 .into(),
             buffer: Vec::new(),
+        };
+        Ok(file)
+    }
+}
+
+impl TryFrom<Result<DieselFile, diesel::result::Error>> for File {
+    type Error = Status;
+
+    fn try_from(file: Result<DieselFile, diesel::result::Error>) -> Result<Self, Self::Error> {
+        let file = match file {
+            Ok(file) => file,
+            Err(e) => return Err(Status::internal(e.to_string())),
+        };
+        let file: File = match File::try_from(file) {
+            Ok(file) => file,
+            Err(e) => return Err(e),
         };
         Ok(file)
     }
@@ -46,8 +64,12 @@ impl UtilsService for MyService {
         #[cfg(debug_assertions)]
         println!("GetFiles: {:?}", request);
         let start = std::time::Instant::now();
-        let pool = self.pool.clone();
-        let (tx, rx) = mpsc::channel(4);
+
+        let pool = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
         let target_uuid =
@@ -55,76 +77,127 @@ impl UtilsService for MyService {
         let r#type = FileType::from_i32(request.r#type)
             .ok_or(Status::internal("Invalid file type"))?
             .as_str_name();
+        let mut files = get_files_by_target_id(pool, target_uuid, r#type).await?;
 
+        let (tx, rx) = mpsc::channel(4);
         tokio::spawn(async move {
-            let mut files_stream = query("SELECT * FROM files WHERE target_id = $1 and type = $2 and deleted is null order by created desc")
-                .bind(target_uuid)
-                .bind(r#type)
-                .fetch(&pool);
-
-            loop {
-                match files_stream.try_next().await {
-                    Ok(None) => {
-                        let elapsed = start.elapsed();
-                        println!("Elapsed: {:.2?}", elapsed);
-                        break;
-                    }
-                    Ok(file) => {
-                        let mut file: File = match file.try_into() {
-                            Ok(file) => file,
-                            Err(e) => {
-                                tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                                break;
-                            }
-                        };
-                        let env = std::env::var("ENV").unwrap();
-                        let bucket = std::env::var("BUCKET").unwrap();
-                        let mut buffer = Vec::new();
-                        if env == "development" {
-                            let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
-                            buffer = match std::fs::read(file_path) {
-                                Ok(buffer) => buffer,
-                                Err(e) => {
-                                    tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                                    break;
-                                }
-                            };
-                        } else if env == "production" {
-                            let config = match ClientConfig::default().with_auth().await {
-                                Ok(config) => config,
-                                Err(e) => {
-                                    tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                                    break;
-                                }
-                            };
-                            let client = Client::new(config);
-                            let data = client
-                                .download_object(
-                                    &GetObjectRequest {
-                                        bucket,
-                                        object: format!("{}/{}", &file.id, &file.name),
-                                        ..Default::default()
-                                    },
-                                    &Range::default(),
-                                )
-                                .await;
-                            buffer = match data {
-                                Ok(data) => data,
-                                Err(e) => {
-                                    tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                                    break;
-                                }
-                            };
-                        }
-                        file.buffer = buffer;
-                        tx.send(Ok(file)).await.unwrap();
-                    }
+            while let Some(file) = files.next().await {
+                let mut file: File = match File::try_from(file) {
+                    Ok(file) => file,
                     Err(e) => {
                         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
                         break;
                     }
+                };
+                let env = std::env::var("ENV").unwrap();
+                let bucket = std::env::var("BUCKET").unwrap();
+                let mut buffer = Vec::new();
+                if env == "development" {
+                    let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
+                    buffer = match std::fs::read(file_path) {
+                        Ok(buffer) => buffer,
+                        Err(e) => {
+                            tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                            break;
+                        }
+                    };
+                } else if env == "production" {
+                    let config = match ClientConfig::default().with_auth().await {
+                        Ok(config) => config,
+                        Err(e) => {
+                            tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                            break;
+                        }
+                    };
+                    let client = Client::new(config);
+                    let data = client
+                        .download_object(
+                            &GetObjectRequest {
+                                bucket,
+                                object: format!("{}/{}", &file.id, &file.name),
+                                ..Default::default()
+                            },
+                            &Range::default(),
+                        )
+                        .await;
+                    buffer = match data {
+                        Ok(data) => data,
+                        Err(e) => {
+                            tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                            break;
+                        }
+                    };
                 }
+                file.buffer = buffer;
+                tx.send(Ok(file)).await.unwrap();
             }
+            println!("Elapsed: {:.2?}", start.elapsed());
+            // loop {
+            //     match files.try_next().await {
+            //         Ok(None) => {
+            //             let elapsed = start.elapsed();
+            //             println!("Elapsed: {:.2?}", elapsed);
+            //             break;
+            //         }
+            //         Ok(file) => {
+            //             let file: DieselFile = match file {
+            //                 Some(file) => file,
+            //                 None => {
+            //                     tx.send(Err(Status::internal("No file found")))
+            //                         .await
+            //                         .unwrap();
+            //                     break;
+            //                 }
+            //             };
+
+            //             let env = std::env::var("ENV").unwrap();
+            //             let bucket = std::env::var("BUCKET").unwrap();
+            //             let mut buffer = Vec::new();
+            //             if env == "development" {
+            //                 let file_path = format!("/app/files/{}/{}", &file.id, &file.name);
+            //                 buffer = match std::fs::read(file_path) {
+            //                     Ok(buffer) => buffer,
+            //                     Err(e) => {
+            //                         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+            //                         break;
+            //                     }
+            //                 };
+            //             } else if env == "production" {
+            //                 let config = match ClientConfig::default().with_auth().await {
+            //                     Ok(config) => config,
+            //                     Err(e) => {
+            //                         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+            //                         break;
+            //                     }
+            //                 };
+            //                 let client = Client::new(config);
+            //                 let data = client
+            //                     .download_object(
+            //                         &GetObjectRequest {
+            //                             bucket,
+            //                             object: format!("{}/{}", &file.id, &file.name),
+            //                             ..Default::default()
+            //                         },
+            //                         &Range::default(),
+            //                     )
+            //                     .await;
+            //                 buffer = match data {
+            //                     Ok(data) => data,
+            //                     Err(e) => {
+            //                         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+            //                         break;
+            //                     }
+            //                 };
+            //             }
+            //             file.buffer = buffer;
+            //             tx.send(Ok(file)).await.unwrap();
+            //         }
+            //         Err(e) => {
+            //             tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+            //             break;
+            //         }
+            //     }
+            // }
         });
         Ok(Response::new(ReceiverStream::new(rx)))
     }
@@ -134,23 +207,20 @@ impl UtilsService for MyService {
         println!("GetFile: {:?}", request);
         let start = std::time::Instant::now();
 
-        let pool = self.pool.clone();
-        let request = request.into_inner();
-        let uuid =
-            Uuid::parse_str(&request.file_id).map_err(|e| Status::internal(e.to_string()))?;
-        let target_uuid =
-            Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
-        let row = query("SELECT * FROM files WHERE id = $1 and target_id = $2 and deleted is null")
-            .bind(uuid)
-            .bind(target_uuid)
-            .fetch_one(&pool)
+        let conn = self
+            .pool
+            .get()
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
-        let mut file: File = match Some(row).try_into() {
-            Ok(file) => file,
-            Err(e) => return Err(Status::internal(e.to_string())),
-        };
+        let request = request.into_inner();
+        let file_uuid =
+            Uuid::parse_str(&request.file_id).map_err(|e| Status::internal(e.to_string()))?;
+        let target_uuid =
+            Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
+
+        let file = get_file_by_id(conn, file_uuid, target_uuid).await?;
+        let mut file = File::try_from(file)?;
 
         let env = std::env::var("ENV").unwrap();
         let bucket = std::env::var("BUCKET").unwrap();
@@ -195,35 +265,29 @@ impl UtilsService for MyService {
         println!("CreateFile");
         let start = std::time::Instant::now();
 
-        // start transaction
-        let pool = self.pool.clone();
-        let mut tx = pool
-            .begin()
+        let conn = self
+            .pool
+            .get()
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
         // get file from request
         let file = request.into_inner();
         let file_buffer = file.buffer;
-        let uuid = Uuid::parse_str(&file.target_id).map_err(|e| Status::internal(e.to_string()))?;
+        let target_uuid =
+            Uuid::parse_str(&file.target_id).map_err(|e| Status::internal(e.to_string()))?;
         let r#type = FileType::from_i32(file.r#type)
             .ok_or(anyhow::anyhow!("Invalid file type"))
             .map_err(|e| Status::internal(e.to_string()))?
             .as_str_name();
 
         // save file to db
-        let row =
-            query("INSERT INTO files (target_id, name, type) VALUES ($1, $2, $3) RETURNING *")
-                .bind(uuid)
-                .bind(file.name)
-                .bind(r#type)
-                .fetch_one(&mut tx)
-                .await
-                .map_err(|e| Status::internal(e.to_string()))?;
-        let file: File = match Some(row).try_into() {
-            Ok(file) => file,
-            Err(e) => return Err(Status::internal(e.to_string())),
+        let new_file = InsertFile {
+            name: &file.name,
+            type_: r#type,
+            target_id: &target_uuid,
         };
+        let file: File = create_file(conn, new_file).await?.try_into()?;
 
         let env = std::env::var("ENV").unwrap();
         let bucket = std::env::var("BUCKET").unwrap();
@@ -253,18 +317,10 @@ impl UtilsService for MyService {
                 )
                 .await;
             if let Err(e) = uploaded {
-                // TODO - do i need it? if yes, use it everywhere
-                tx.rollback().await.unwrap();
                 return Err(Status::internal(e.to_string()));
             }
         }
-
-        // commit transaction
-        tx.commit()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
-        let elapsed = start.elapsed();
-        println!("Elapsed: {:.2?}", elapsed);
+        println!("Elapsed: {:.2?}", start.elapsed());
         return Ok(Response::new(file));
     }
 
@@ -273,29 +329,21 @@ impl UtilsService for MyService {
         println!("DeleteFile: {:?}", request);
         let start = std::time::Instant::now();
 
-        // start transaction
-        let pool = self.pool.clone();
-        let mut tx = pool
-            .begin()
+        let conn = self
+            .pool
+            .get()
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
-        let file_id =
+        let file_uuid =
             Uuid::parse_str(&request.file_id).map_err(|e| Status::internal(e.to_string()))?;
-        let target_id =
+        let target_uuid =
             Uuid::parse_str(&request.target_id).map_err(|e| Status::internal(e.to_string()))?;
-        let row =
-            query("UPDATE files SET deleted = now() WHERE id = $1 and target_id = $2 RETURNING *")
-                .bind(file_id)
-                .bind(target_id)
-                .fetch_one(&mut tx)
-                .await
-                .map_err(|e| Status::not_found(e.to_string()))?;
-        let file: File = match Some(row).try_into() {
-            Ok(file) => file,
-            Err(e) => return Err(Status::internal(e.to_string())),
-        };
+
+        let file: File = delete_file(conn, file_uuid, target_uuid)
+            .await?
+            .try_into()?;
 
         let env = std::env::var("ENV").unwrap();
         let bucket = std::env::var("BUCKET").unwrap();
@@ -321,12 +369,7 @@ impl UtilsService for MyService {
             }
         }
 
-        // commit transaction
-        tx.commit()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
-        let elapsed = start.elapsed();
-        println!("Elapsed: {:.2?}", elapsed);
+        println!("Elapsed: {:.2?}", start.elapsed());
         return Ok(Response::new(file));
     }
 }
