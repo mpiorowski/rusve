@@ -13,6 +13,6 @@ FROM debian:bookworm-slim AS prod
 COPY --from=build /app/target/release /app
 
 # Add openssl and ca-certificates
-RUN apt-get update && apt-get install -y openssl ca-certificates && apt-get install -y libpq-dev
+RUN apt-get update && apt-get install -y openssl ca-certificates && apt-get install -y libpq-dev && apt-get install -y libssl1.1
 
 CMD ["/app/main"]
