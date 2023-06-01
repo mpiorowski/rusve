@@ -24,7 +24,6 @@ pub async fn subscribe_to_email() -> Result<(), Status> {
         Err(e) => return Err(Status::internal(e.to_string())),
     };
     let client = Client::new(config).await.unwrap();
-
     let subscription = client.subscription("email-sub");
 
     // Receive blocks until the ctx is cancelled or an error occurs.

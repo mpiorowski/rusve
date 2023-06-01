@@ -1,15 +1,27 @@
+mod emails;
+mod files;
 mod proto;
-mod files_service;
-mod emails_service;
+mod models;
+mod schema;
+mod db;
 
-use crate::{proto::utils_service_server::UtilsServiceServer, emails_service::subscribe_to_email};
-use anyhow::{Context, Result};
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use anyhow::Context;
+use anyhow::Result;
+use diesel_async::{pooled_connection::deadpool::Pool, AsyncPgConnection};
+use diesel_migrations::embed_migrations;
+use diesel_migrations::EmbeddedMigrations;
+use diesel_migrations::MigrationHarness;
+use rusve_utils::establish_connection;
+use rusve_utils::establish_connection_sync;
 use tonic::transport::Server;
 
-#[derive(Debug)]
+use crate::emails::subscribe_to_email;
+use crate::proto::utils_service_server::UtilsServiceServer;
+
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
+
 pub struct MyService {
-    pool: PgPool,
+    pool: Pool<AsyncPgConnection>,
 }
 
 #[tokio::main]
@@ -25,26 +37,22 @@ async fn main() -> Result<()> {
         }
     }
 
-    // Database
-    let database_url = std::env::var("DATABASE_URL")?;
-    let pool = PgPoolOptions::new()
-        .max_connections(20)
-        .connect(&database_url)
-        .await
-        .with_context(|| format!("Failed to connect to database: {}", database_url))?;
-    println!("Connected to database");
+    println!("Starting server...");
 
-    // Migrations
-    sqlx::migrate!("./migrations")
-        .run(&pool)
-        .await
-        .context("Failed to run migrations")?;
-    println!("Migrations ran successfully");
-
-    // Subscribe to email
     subscribe_to_email().await?;
 
-    let port = std::env::var("PORT")?;
+    let port = std::env::var("PORT").context("PORT not set")?;
+    let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
+
+    // Run migrations - diesel_async have an open PR to support this
+    let mut conn = establish_connection_sync(&database_url)?;
+    conn.run_pending_migrations(MIGRATIONS)
+        .map_err(|e| anyhow::anyhow!("Error running migrations: {:?}", e.to_string()))?;
+    println!("Migrations run successfully");
+
+    // Create a connection pool without tls
+    let pool = establish_connection(&database_url)?;
+
     let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);
 

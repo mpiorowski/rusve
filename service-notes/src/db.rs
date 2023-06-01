@@ -1,6 +1,5 @@
-use deadpool::managed::Object;
 use diesel::QueryResult;
-use diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection};
+use diesel_async::{pooled_connection::deadpool::Object, AsyncPgConnection};
 use futures_core::Stream;
 use tonic::Status;
 use uuid::Uuid;
@@ -13,7 +12,7 @@ use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
 
 pub async fn get_notes_by_user_uuid(
-    mut conn: Object<AsyncDieselConnectionManager<AsyncPgConnection>>,
+    mut conn: Object<AsyncPgConnection>,
     user_uuid: Uuid,
 ) -> Result<impl Stream<Item = QueryResult<DieselNote>>, Status> {
     let note = notes
@@ -28,7 +27,7 @@ pub async fn get_notes_by_user_uuid(
 }
 
 pub async fn upsert_note(
-    mut conn: Object<AsyncDieselConnectionManager<AsyncPgConnection>>,
+    mut conn: Object<AsyncPgConnection>,
     new_note: UpsertNote<'_>,
 ) -> Result<DieselNote, Status> {
     let note = diesel::insert_into(notes)
@@ -43,7 +42,7 @@ pub async fn upsert_note(
 }
 
 pub async fn delete_note(
-    mut conn: Object<AsyncDieselConnectionManager<AsyncPgConnection>>,
+    mut conn: Object<AsyncPgConnection>,
     user_uuid: Uuid,
     note_uuid: Uuid,
 ) -> Result<DieselNote, Status> {
