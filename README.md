@@ -25,6 +25,7 @@ https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5`
   - **[gRPC](https://grpc.io/)** - Connection between services using gRPC, which is very fast and gives an option for bi-directional streaming. For Rust using great **[Tonic](https://docs.rs/tonic/latest/tonic/)** create, with first class support of async/await.
   - **[Typesafety](https://protobuf.dev/)** - Thanks to protobuf, amazing typesafety across the whole project, no matter the language (not only for TS, hi tRPC).
   - **Sql Pools and Transactions** - Using the best practice for the best performance and error handling.
+  - **Sql Streams** - Stream data directly from Sql into the gRPC stream.
   - **Dockerized** - Every service is dockerized. Local build ready with one command.
 - **Frontend**
   - **[SvelteKit](https://kit.svelte.dev/)** - Once You try it, it's hard to go back to any other framework.
@@ -85,12 +86,17 @@ sh proto.sh
 Getting the `SERVICE_ACCOUNT` key is a bit [tricky](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments).
 
 
-3. Start docker:
+3. Start databases:
 ```
-docker-compose up --build
+sh start-db.sh up
 ```
 
-4. Access:
+4. Start app:
+```
+sh start-app.sh up
+```
+
+5. Access:
 
 Application - http://localhost:3000  
 CMS         - http://localhost:8055 | Login: `admin@example.com` | Password: `d1r3ctu5` 
