@@ -1,5 +1,5 @@
-import { URI_USERS_GO, URI_USERS_RUST, URI_UTILS } from "$env/static/private";
-import { usersGoClient, usersRustClient, utilsClient } from "$lib/grpc";
+import { URI_USERS_GO, URI_USERS_RUST } from "$env/static/private";
+import { usersGoClient, usersRustClient } from "$lib/grpc";
 import { createMetadata } from "$lib/metadata";
 import type { File, File__Output } from "$lib/proto/proto/File";
 import type { FileId } from "$lib/proto/proto/FileId";
@@ -35,9 +35,9 @@ export const load = (async ({ locals, url }) => {
                 fileId: user.avatarId,
                 targetId: userId,
             };
-            metadata = await createMetadata(URI_UTILS);
+            metadata = await createMetadata(uri);
             file = new Promise((resolve, reject) => {
-                utilsClient.getFile(fileId, metadata, (err, response) => {
+                client.getFile(fileId, metadata, (err, response) => {
                     if (err) {
                         reject(err);
                     } else if (response) {
@@ -71,13 +71,15 @@ export const load = (async ({ locals, url }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-    createUser: async ({ request, locals, url }) => {
+    createUser: async ({ request, locals }) => {
         try {
-            const isGo = url.searchParams.get("lang") === "go";
+            const form = await request.formData();
+
+            const lang = form.get("lang") ?? "rust";
+            const isGo = lang === "go";
             const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
             const client = isGo ? usersGoClient : usersRustClient;
 
-            const form = await request.formData();
             const name = form.get("name");
             const avatar = form.get("avatar");
             const schema = z
@@ -112,15 +114,17 @@ export const actions = {
             return fail(500, { error: "Could not create user" });
         }
     },
-    createAvatar: async ({ request, locals, url }) => {
+    createAvatar: async ({ request, locals }) => {
         try {
             const start = performance.now();
 
-            const isGo = url.searchParams.get("lang") === "go";
+            const form = await request.formData();
+
+            const lang = form.get("lang") ?? "rust";
+            const isGo = lang === "go";
             const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
             const client = isGo ? usersGoClient : usersRustClient;
 
-            const form = await request.formData();
             const targetId = locals.userId;
             const type = form.get("type");
             const file = form.get("file");
@@ -173,7 +177,7 @@ export const actions = {
                 return fail(400, { error: "Invalid request" });
             }
 
-            let metadata = await createMetadata(URI_UTILS);
+            let metadata = await createMetadata(uri);
             // Delete old avatar
             if (schema.data.avatar) {
                 const oldFileId: FileId = {
@@ -181,11 +185,8 @@ export const actions = {
                     targetId: schema.data.targetId,
                 };
                 await new Promise((resolve, reject) => {
-                    utilsClient.deleteFile(
-                        oldFileId,
-                        metadata,
-                        (err, response) =>
-                            err || !response ? reject(err) : resolve(response),
+                    client.deleteFile(oldFileId, metadata, (err, response) =>
+                        err || !response ? reject(err) : resolve(response),
                     );
                 });
             }
@@ -199,11 +200,8 @@ export const actions = {
             };
             const newFile = await new Promise<File__Output>(
                 (resolve, reject) => {
-                    utilsClient.createFile(
-                        newFileData,
-                        metadata,
-                        (err, response) =>
-                            err || !response ? reject(err) : resolve(response),
+                    client.createFile(newFileData, metadata, (err, response) =>
+                        err || !response ? reject(err) : resolve(response),
                     );
                 },
             );
@@ -234,15 +232,17 @@ export const actions = {
             return fail(500, { error: "Could not create avatar" });
         }
     },
-    deleteAvatar: async ({ request, locals, url }) => {
+    deleteAvatar: async ({ request, locals }) => {
         try {
             const start = performance.now();
 
-            const isGo = url.searchParams.get("lang") === "go";
+            const form = await request.formData();
+
+            const lang = form.get("lang") ?? "rust";
+            const isGo = lang === "go";
             const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
             const client = isGo ? usersGoClient : usersRustClient;
 
-            const form = await request.formData();
             const fileId = form.get("fileId");
             const targetId = locals.userId;
             const name = form.get("name");
@@ -265,7 +265,7 @@ export const actions = {
             }
 
             const metadata = await createMetadata(uri);
-            const metadataUtils = await createMetadata(URI_UTILS);
+            const metadataUtils = await createMetadata(uri);
 
             // Delete file
             const fileData: FileId = {
@@ -273,11 +273,8 @@ export const actions = {
                 targetId: schema.data.targetId,
             };
             await new Promise<File__Output>((resolve, reject) => {
-                utilsClient.deleteFile(
-                    fileData,
-                    metadataUtils,
-                    (err, response) =>
-                        err || !response ? reject(err) : resolve(response),
+                client.deleteFile(fileData, metadataUtils, (err, response) =>
+                    err || !response ? reject(err) : resolve(response),
                 );
             });
 

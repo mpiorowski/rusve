@@ -10,10 +10,14 @@
     import FileInput from "$lib/form/FileInput.svelte";
     import DeleteIcon from "$lib/icons/DeleteIcon.svelte";
     import DownloadIcon from "$lib/icons/DownloadIcon.svelte";
+    import { page } from "$app/stores";
+    import LoadingComponent from "$lib/components/LoadingComponent.svelte";
 
     const profile = getContext<ProfileContext>("profile");
     let loading = false;
     let deleteLoading = false;
+
+    const lang = $page.url.searchParams.get("lang") ?? "rust";
 
     async function downloadAvatar(base64: string, name: string) {
         try {
@@ -41,8 +45,8 @@
 <div class="p-4 flex flex-col gap-4">
     <h3>Your avatar</h3>
     {#await $profile.file}
-        <div class="h-16 w-16">
-            <EmptyAvatarIcon />
+        <div class="h-16 w-16 flex justify-center items-center">
+            <LoadingComponent size={40} />
         </div>
     {:then file}
         <span>
@@ -84,6 +88,7 @@
                                 };
                             }}
                         >
+                            <input type="hidden" name="lang" value={lang} />
                             <input
                                 type="hidden"
                                 name="fileId"
@@ -128,6 +133,7 @@
             };
         }}
     >
+        <input type="hidden" name="lang" value={lang} />
         <input
             type="hidden"
             name="avatar"

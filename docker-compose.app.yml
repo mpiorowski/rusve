@@ -19,10 +19,13 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./service-users/src:/app/src
+      - ./files:/app/files
     environment:
       PORT: 443
       ENV: development
       DATABASE_URL: postgresql://?host=service-users-db&user=postgres&password=12345&dbname=users
+      BUCKET: bucket
+      SENDGRID_API_KEY: sendgid-api-key
 
   service-users-go:
     container_name: rusve-service-users-go
@@ -32,24 +35,11 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./service-users-go:/app
+      - ./files:/app/files
     environment:
       ENV: development
       PORT: 443
       DATABASE_URL: postgresql://?host=service-users-db&user=postgres&password=12345&dbname=users
-
-  service-utils:
-    container_name: rusve-service-utils
-    working_dir: /app
-    build:
-      context: ./service-utils
-      dockerfile: Dockerfile.dev
-    volumes:
-      - ./files:/app/files
-      - ./service-utils/src:/app/src
-    environment:
-      PORT: 443
-      ENV: development
-      DATABASE_URL: postgresql://?host=service-utils-db&user=postgres&password=12345&dbname=utils
       BUCKET: bucket
       SENDGRID_API_KEY: sendgid-api-key
 

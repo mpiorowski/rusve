@@ -7,6 +7,8 @@
     import Dropdown from "$lib/components/Dropdown.svelte";
     import AvatarIcon from "$lib/icons/AvatarIcon.svelte";
     import type { LayoutData } from "./$types";
+    import { page } from "$app/stores";
+    import Button from "$lib/form/Button.svelte";
 
     export let data: LayoutData;
 
@@ -17,6 +19,15 @@
         window.location.reload();
     }
 
+    function onRust() {
+        window.location.href = "?lang=rust";
+    }
+
+    function onGo() {
+        window.location.href = "?lang=go";
+    }
+
+    $: isGo = $page.url.searchParams.get("lang") === "go";
 </script>
 
 <svelte:head>
@@ -67,6 +78,22 @@
                         Notes
                     </a>
                     <div class="flex flex-row items-center gap-4">
+                        <div class="flex flex-row gap-2">
+                            <div
+                                class={isGo
+                                    ? ""
+                                    : "ring-2 ring-teal-300 rounded"}
+                            >
+                                <Button on:click={onRust}>Rust</Button>
+                            </div>
+                            <div
+                                class={isGo
+                                    ? "ring-2 ring-teal-300 rounded"
+                                    : ""}
+                            >
+                                <Button on:click={onGo}>Go</Button>
+                            </div>
+                        </div>
                         <Dropdown>
                             <svelte:fragment slot="button">
                                 <div

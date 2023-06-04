@@ -6,9 +6,12 @@
     import { toast } from "$lib/toast/toast";
     import SaveIcon from "$lib/icons/SaveIcon.svelte";
     import type { ProfileContext } from "./profile.types";
+    import { page } from "$app/stores";
 
+    const lang = $page.url.searchParams.get("lang") ?? "rust";
     const profile = getContext<ProfileContext>("profile");
     let loading = false;
+
 </script>
 
 <form
@@ -29,7 +32,8 @@
     }}
     class="p-4"
 >
-    <input type="hidden" name="avatar" value={$profile.user.avatar ?? ""} />
+    <input type="hidden" name="lang" value={lang} />
+    <input type="hidden" name="avatar" value={$profile.user.avatarId ?? ""} />
     <label class="text-xl font-bold" for="name">Your name</label>
     <Input bind:value={$profile.user.name} name="name" />
     <div class="w-28">

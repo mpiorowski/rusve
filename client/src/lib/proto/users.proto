@@ -10,11 +10,6 @@ enum UserRole {
     ROLE_ADMIN = 2;
 }
 
-message AuthRequest {
-    string sub = 1;
-    string email = 2;
-}
-
 message User {
     string id = 1;
     string created = 2;
@@ -30,3 +25,21 @@ message User {
     optional string payment_id = 10;
 }
 
+enum FileType {
+    DOCUMENT = 0;
+    AVATAR = 1;
+}
+
+message File {
+    string id = 1;
+    string created = 2;
+    string updated = 3;
+    optional string deleted = 4;
+
+    string target_id = 5;
+    string name = 6;
+    FileType type = 7;
+
+    bytes buffer = 8;
+    string url = 9;
+}

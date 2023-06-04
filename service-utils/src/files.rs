@@ -32,6 +32,7 @@ impl TryFrom<DieselFile> for File {
                 .ok_or(Status::internal("Invalid file type"))?
                 .into(),
             buffer: Vec::new(),
+            url: "".to_string(),
         };
         Ok(file)
     }

@@ -5,7 +5,6 @@ package proto;
 option go_package = "rusve/proto";
 
 import "users.proto";
-import "utils.proto";
 import "notes.proto";
 
 message Empty {}
@@ -20,12 +19,32 @@ message PaymentId {
     string payment_id = 2;
 }
 
+message TargetId {
+    string target_id = 1;
+    FileType type = 2;
+}
+
+message FileId {
+    string file_id = 1;
+    string target_id = 2;
+}
+
+message AuthRequest {
+    string sub = 1;
+    string email = 2;
+}
+
 service UsersService {
     rpc Auth(AuthRequest) returns (User) {}
     rpc GetUsers(UserIds) returns (stream User) {}
     rpc GetUser(UserId) returns (User) {}
     rpc UpdateUser(User) returns (User) {}
     rpc UpdatePaymentId(PaymentId) returns (Empty) {}
+
+    rpc GetFiles(TargetId) returns (stream File) {}
+    rpc GetFile(FileId) returns (File) {}
+    rpc CreateFile(File) returns (File) {}
+    rpc DeleteFile(FileId) returns (File) {}
 }
 
 service UtilsService {
