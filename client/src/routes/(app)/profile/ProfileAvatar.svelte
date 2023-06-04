@@ -114,6 +114,8 @@
                 </div>
             {/if}
         </span>
+    {:catch error}
+        <p class="text-red-500">{error.message}</p>
     {/await}
     <form
         action="?/createAvatar"

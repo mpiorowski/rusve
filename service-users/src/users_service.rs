@@ -1,7 +1,7 @@
 use crate::proto::users_service_server::UsersService;
-use crate::proto::{AuthRequest, Empty, File, PaymentId, TargetId, User, UserIds, FileId};
+use crate::proto::{AuthRequest, Empty, File, FileId, PaymentId, TargetId, User, UserIds};
 use crate::proto::{UserId, UserRole};
-use crate::MyService;
+use crate::{MyService, files_service};
 use anyhow::Result;
 use std::iter::Iterator;
 use tokio::sync::mpsc;
@@ -44,16 +44,37 @@ impl UsersService for MyService {
         &self,
         _request: Request<TargetId>,
     ) -> Result<Response<Self::GetFilesStream>, Status> {
-        todo!()
+        let pool = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+        return files_service::get_files(pool, _request).await;
     }
     async fn get_file(&self, _request: Request<FileId>) -> Result<Response<File>, Status> {
-        todo!()
+        let pool = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+        return files_service::get_file(pool, _request).await;
+
     }
     async fn create_file(&self, _request: Request<File>) -> Result<Response<File>, Status> {
-        todo!()
+        let pool = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+        return files_service::create_file(pool, _request).await;
     }
     async fn delete_file(&self, _request: Request<FileId>) -> Result<Response<File>, Status> {
-        todo!()
+        let pool = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+        return files_service::delete_file(pool, _request).await;
     }
 
     async fn auth(&self, request: Request<AuthRequest>) -> Result<Response<User>, Status> {

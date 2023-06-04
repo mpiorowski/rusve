@@ -24,5 +24,8 @@ uuid = "1.3.2"
 diesel = { version = "2.1.0", features = ["postgres", "time", "uuid", "numeric"] }
 dotenvy = "0.15.7"
 diesel-async = { version = "0.3.0", features = ["postgres", "deadpool", "bb8"] }
-deadpool = "0.9.5"
 diesel_migrations = { version = "2.1.0", features = ["postgres"] }
+
+# GCP
+google-cloud-storage = "0.11.1"
+google-cloud-default = { version = "0.3.0", features = ["storage", "pubsub"] }
