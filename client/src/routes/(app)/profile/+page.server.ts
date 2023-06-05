@@ -27,9 +27,9 @@ export const load = (async ({ locals, url }) => {
             );
         });
 
-        let file: Promise<
-            { id: string; name: string; base64: string } | undefined
-        > = Promise.resolve(undefined);
+        let file:
+            | Promise<{ id: string; name: string; base64: string }>
+            | undefined = undefined;
         if (user.avatarId) {
             const fileId: FileId = {
                 fileId: user.avatarId,
@@ -38,9 +38,9 @@ export const load = (async ({ locals, url }) => {
             metadata = await createMetadata(uri);
             file = new Promise((resolve, reject) => {
                 client.getFile(fileId, metadata, (err, response) => {
-                    if (err) {
+                    if (!response || err) {
                         reject(err);
-                    } else if (response) {
+                    } else {
                         resolve({
                             id: response.id,
                             name: response.name,
@@ -48,8 +48,6 @@ export const load = (async ({ locals, url }) => {
                                 "base64",
                             ),
                         });
-                    } else {
-                        resolve(undefined);
                     }
                 });
             });
@@ -65,7 +63,6 @@ export const load = (async ({ locals, url }) => {
         };
     } catch (err) {
         console.error(err);
-        // return fail(500, { error: "Could not load user" });
         throw error(500, "Could not load user");
     }
 }) satisfies PageServerLoad;

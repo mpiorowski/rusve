@@ -65,6 +65,10 @@
                 {:else}
                     User not found
                 {/if}
+            {:catch error}
+                <p class="text-3xl text-center text-secondary-500">
+                    {error.message}
+                </p>
             {/await}
         </span>
     </Note>

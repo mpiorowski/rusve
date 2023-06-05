@@ -1,4 +1,4 @@
-import { redirect, type Handle, type HandleServerError } from "@sveltejs/kit";
+import { redirect, type Handle } from "@sveltejs/kit";
 import type { AuthRequest } from "$lib/proto/proto/AuthRequest";
 import { createMetadata } from "$lib/metadata";
 import { usersGoClient, usersRustClient } from "$lib/grpc";

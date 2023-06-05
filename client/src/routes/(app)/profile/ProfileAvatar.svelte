@@ -2,7 +2,7 @@
     import Button from "$lib/form/Button.svelte";
     import EmptyAvatarIcon from "$lib/icons/EmptyAvatarIcon.svelte";
     import { getContext } from "svelte";
-    import type { ProfileContext } from "./profile.types";
+    import type { ProfileContext } from "./profileTypes";
     import SaveIcon from "$lib/icons/SaveIcon.svelte";
     import { FileType } from "$lib/proto/proto/FileType";
     import { enhance } from "$app/forms";
@@ -13,11 +13,15 @@
     import { page } from "$app/stores";
     import LoadingComponent from "$lib/components/LoadingComponent.svelte";
 
-    const profile = getContext<ProfileContext>("profile");
-    let loading = false;
-    let deleteLoading = false;
+    export let file:
+        | Promise<{ id: string; name: string; base64: string }>
+        | undefined;
 
     const lang = $page.url.searchParams.get("lang") ?? "rust";
+    const profile = getContext<ProfileContext>("profile");
+
+    let loading = false;
+    let deleteLoading = false;
 
     async function downloadAvatar(base64: string, name: string) {
         try {
@@ -44,17 +48,17 @@
 
 <div class="p-4 flex flex-col gap-4">
     <h3>Your avatar</h3>
-    {#await $profile.file}
+    {#await file}
         <div class="h-16 w-16 flex justify-center items-center">
             <LoadingComponent size={40} />
         </div>
-    {:then file}
+    {:then el}
         <span>
-            {#if file}
+            {#if el}
                 <div class="flex flex-row items-center gap-4">
                     <div class="h-16 w-16">
                         <img
-                            src={`data:image;base64,${file.base64}`}
+                            src={`data:image;base64,${el.base64}`}
                             alt="Avatar"
                             class="rounded-full object-cover h-full w-full"
                         />
@@ -62,8 +66,7 @@
                     <div class="flex flex-row gap-2">
                         <Button
                             type="button"
-                            on:click={() =>
-                                downloadAvatar(file.base64, file.name)}
+                            on:click={() => downloadAvatar(el.base64, el.name)}
                             variant="secondary"
                         >
                             <span slot="icon">
@@ -89,11 +92,7 @@
                             }}
                         >
                             <input type="hidden" name="lang" value={lang} />
-                            <input
-                                type="hidden"
-                                name="fileId"
-                                value={file.id}
-                            />
+                            <input type="hidden" name="fileId" value={el.id} />
                             <input
                                 type="hidden"
                                 name="name"
