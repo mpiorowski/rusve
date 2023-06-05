@@ -207,7 +207,7 @@ pub async fn create_file(
         }
     }
     println!("Elapsed: {:.2?}", start.elapsed());
-    return Ok(Response::new(file));
+    Ok(Response::new(file))
 }
 
 pub async fn delete_file(
@@ -253,5 +253,5 @@ pub async fn delete_file(
     }
 
     println!("Elapsed: {:.2?}", start.elapsed());
-    return Ok(Response::new(file));
+    Ok(Response::new(file))
 }

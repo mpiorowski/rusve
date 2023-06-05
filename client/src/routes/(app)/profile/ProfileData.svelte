@@ -5,8 +5,8 @@
     import { getContext } from "svelte";
     import { toast } from "$lib/toast/toast";
     import SaveIcon from "$lib/icons/SaveIcon.svelte";
-    import type { ProfileContext } from "./profile.types";
     import { page } from "$app/stores";
+    import type { ProfileContext } from "./profileTypes";
 
     const lang = $page.url.searchParams.get("lang") ?? "rust";
     const profile = getContext<ProfileContext>("profile");

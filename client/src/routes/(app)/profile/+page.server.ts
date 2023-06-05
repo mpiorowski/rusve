@@ -290,7 +290,7 @@ export const actions = {
             return { duration: end - start };
         } catch (err) {
             console.error(err);
-            return error(500, "Could not delete avatar");
+            return fail(500, { error: "Could not delete avatar" });
         }
     },
     sendEmail: async ({ request, locals }) => {
@@ -341,7 +341,7 @@ export const actions = {
             return { duration: end - start };
         } catch (err) {
             console.error(err);
-            return error(500, "Could not send email");
+            return fail(500, { error: "Could not send email" });
         }
     },
 } satisfies Actions;

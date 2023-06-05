@@ -6,7 +6,7 @@
     import { toast } from "$lib/toast/toast";
     import { writable } from "svelte/store";
     import type { ProfileContext, ProfileStore } from "./profileTypes";
-    import type { ActionData, PageData } from "./$types.js";
+    import type { PageData,  ActionData } from "./$types";
 
     export let data: PageData;
     export let form: ActionData;
