@@ -84,6 +84,10 @@ func (s *server) GetFile(ctx context.Context, in *pb.FileId) (*pb.File, error) {
 		log.Printf("downloadFile: %v", err)
 		return nil, err
 	}
+    if buffer == nil {
+        log.Printf("downloadFile: buffer is nil")
+        return nil, err
+    }
 	file.Buffer = buffer
 	return file, nil
 }
