@@ -49,51 +49,46 @@
             class="max-w-7xl mx-auto w-full h-full flex items-center justify-between text-xl px-6"
         >
             <div class="flex w-full items-center justify-between">
-                <a
-                    href="/"
-                    class="flex flex-row md:text-2xl items-center gap-2 font-bold md:mr-4 hover:text-secondary-500 hover:cursor-pointer transition"
-                >
-                    <div class="w-12 h-12">
-                        <LogoIcon />
+                <div class="flex flex-row gap-2 items-center justify-center">
+                    <a
+                        href="/?lang={isGo ? 'go' : 'rust'}"
+                        class="flex flex-row md:text-2xl items-center gap-2 font-bold md:mr-4 hover:text-secondary-500 hover:cursor-pointer transition"
+                    >
+                        <div class="w-12">
+                            <LogoIcon />
+                        </div>
+                        Rusve
+                    </a>
+                    <div class={isGo ? "" : "ring-2 ring-teal-300 rounded"}>
+                        <Button on:click={onRust}>Rust</Button>
                     </div>
-                    Rusve
-                </a>
+                    <div class={isGo ? "ring-2 ring-teal-300 rounded" : ""}>
+                        <Button on:click={onGo}>Go</Button>
+                    </div>
+                </div>
 
                 {#if !data.userId}
-                    <a href="/auth" class="hover:text-secondary-500 transition">
+                    <a
+                        href="/auth?lang{isGo ? 'go' : 'rust'}"
+                        class="hover:text-secondary-500 transition"
+                    >
                         Login
                     </a>
                 {/if}
                 {#if data.userId}
                     <a
-                        href="/profile"
+                        href="/profile?lang={isGo ? 'go' : 'rust'}"
                         class="hover:text-secondary-500 transition"
                     >
                         Profile
                     </a>
                     <a
-                        href="/notes"
+                        href="/notes?lang={isGo ? 'go' : 'rust'}"
                         class="hover:text-secondary-500 transition"
                     >
                         Notes
                     </a>
                     <div class="flex flex-row items-center gap-4">
-                        <div class="flex flex-row gap-2">
-                            <div
-                                class={isGo
-                                    ? ""
-                                    : "ring-2 ring-teal-300 rounded"}
-                            >
-                                <Button on:click={onRust}>Rust</Button>
-                            </div>
-                            <div
-                                class={isGo
-                                    ? "ring-2 ring-teal-300 rounded"
-                                    : ""}
-                            >
-                                <Button on:click={onGo}>Go</Button>
-                            </div>
-                        </div>
                         <Dropdown>
                             <svelte:fragment slot="button">
                                 <div
@@ -113,13 +108,13 @@
                                         class="border-b border-gray-500 w-full"
                                     />
                                     <a
-                                        href="/profile"
+                                        href="/profile?lang={isGo ? 'go' : 'rust'}"
                                         class="hover:text-secondary-500 transition px-3 py-3"
                                     >
                                         Profile
                                     </a>
                                     <a
-                                        href="/billing"
+                                        href="/billing?lang={isGo ? 'go' : 'rust'}"
                                         class="hover:text-secondary-500 transition px-3 py-3"
                                     >
                                         Billing

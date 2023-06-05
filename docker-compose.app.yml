@@ -34,7 +34,7 @@ services:
       context: ./service-users-go
       dockerfile: Dockerfile.dev
     volumes:
-      - ./service-users-go:/app
+      - ./service-users-go/src:/app/src
       - ./files:/app/files
     environment:
       ENV: development

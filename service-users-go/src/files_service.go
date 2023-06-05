@@ -79,7 +79,7 @@ func (s *server) GetFile(ctx context.Context, in *pb.FileId) (*pb.File, error) {
 		return nil, err
 	}
 
-	buffer, err := downloadFile(file.TargetId, file.Name)
+	buffer, err := downloadFile(file.Id, file.Name)
 	if err != nil {
 		log.Printf("downloadFile: %v", err)
 		return nil, err
@@ -104,12 +104,6 @@ func (s *server) CreateFile(ctx context.Context, in *pb.File) (*pb.File, error) 
 		return nil, err
 	}
 
-	err = uploadFile(in.TargetId, in.Name, in.Buffer)
-	if err != nil {
-		log.Printf("uploadFile: %v", err)
-		return nil, err
-	}
-
 	row := db.QueryRow(`insert into files (target_id, name, type) values ($1, $2, $3) returning *`,
 		in.TargetId,
 		in.Name,
@@ -119,6 +113,13 @@ func (s *server) CreateFile(ctx context.Context, in *pb.File) (*pb.File, error) 
 	file, err := mapFile(nil, row)
 	if err != nil {
 		log.Printf("mapFile: %v", err)
+		return nil, err
+	}
+
+	err = uploadFile(file.Id, file.Name, in.Buffer)
+	if err != nil {
+		// TODO - transaction?
+		_, _ = db.Exec(`update files set deleted = now() where id = $1`, file.Id)
 		return nil, err
 	}
 

@@ -5,7 +5,6 @@ go 1.20
 require (
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/jackc/pgx/v5 v5.3.1
-	github.com/rubenv/sql-migrate v1.4.0
 	google.golang.org/grpc v1.54.0
 	google.golang.org/protobuf v1.30.0
 )
@@ -29,7 +28,6 @@ require (
 
 require (
 	cloud.google.com/go/storage v1.30.1
-	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect

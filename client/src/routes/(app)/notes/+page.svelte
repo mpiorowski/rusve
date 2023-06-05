@@ -7,36 +7,17 @@
     import { setContext } from "svelte";
     import type { ActionData, PageData } from "./$types.js";
     import type { DrawerContext } from "$lib/types";
-    import { page } from "$app/stores";
 
     export let data: PageData;
     export let form: ActionData;
 
     const drawer: DrawerContext = writable(false);
     setContext("drawer", drawer);
-
-    function onRust() {
-        window.location.href = "?lang=rust";
-    }
-
-    function onGo() {
-        window.location.href = "?lang=go";
-    }
-
-    $: isGo = $page.url.searchParams.get("lang") === "go";
 </script>
 
 <NoteDrawer {form} />
 
 <div class="mb-6 grid items-center gap-4">
-    <div class="flex flex-row gap-2">
-        <div class={isGo ? "" : "ring-2 ring-teal-300 rounded"}>
-            <Button on:click={onRust}>Rust</Button>
-        </div>
-        <div class={isGo ? "ring-2 ring-teal-300 rounded" : ""}>
-            <Button on:click={onGo}>Go</Button>
-        </div>
-    </div>
     <h3>
         Query: {data.time.toFixed(4)}ms
     </h3>

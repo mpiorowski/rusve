@@ -43,15 +43,15 @@ func mapFile(rows *sql.Rows, row *sql.Row) (*pb.File, error) {
 	return &file, nil
 }
 
-func uploadFile(targetId string, name string, data []byte) error {
+func uploadFile(fileId string, name string, data []byte) error {
 	if ENV == "development" {
 		// save to local disk, inside /files folder
-		err := os.MkdirAll("./files/"+targetId, 0755)
+		err := os.MkdirAll("/app/files/"+fileId, 0755)
 		if err != nil {
 			log.Printf("os.MkdirAll: %v", err)
 			return err
 		}
-		err = os.WriteFile("./files/"+targetId+"/"+name, data, 0644)
+		err = os.WriteFile("/app/files/"+fileId+"/"+name, data, 0644)
 		if err != nil {
 			log.Printf("ioutil.WriteFile: %v", err)
 			return err
@@ -69,7 +69,7 @@ func uploadFile(targetId string, name string, data []byte) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
 
-	o := client.Bucket(BUCKET).Object(targetId + "/" + name)
+	o := client.Bucket(BUCKET).Object(fileId + "/" + name)
 	wc := o.NewWriter(ctx)
 	_, err = wc.Write(data)
 	if err != nil {
@@ -86,10 +86,10 @@ func uploadFile(targetId string, name string, data []byte) error {
 	return nil
 }
 
-func downloadFile(targetId string, name string) ([]byte, error) {
+func downloadFile(fileId string, name string) ([]byte, error) {
 	if ENV == "development" {
 		// download from local disk, inside /files folder
-		data, err := os.ReadFile("./files/" + targetId + "/" + name)
+		data, err := os.ReadFile("/app/files/" + fileId + "/" + name)
 		if err != nil {
 			log.Printf("os.ReadFile: %v", err)
 			return nil, err
@@ -107,7 +107,7 @@ func downloadFile(targetId string, name string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
 
-	rc, err := client.Bucket(BUCKET).Object(targetId + "/" + name).NewReader(ctx)
+	rc, err := client.Bucket(BUCKET).Object(fileId + "/" + name).NewReader(ctx)
 	if err != nil {
 		log.Printf("Object(%q).NewReader: %v", name, err)
 		return nil, err

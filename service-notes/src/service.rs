@@ -1,5 +1,5 @@
 use crate::{
-    db::{delete_note, get_notes_by_user_uuid, upsert_note},
+    db::{delete_note, get_notes_by_user_uuid, upsert_5000_note},
     proto::{notes_service_server::NotesService, Note, NoteId, UserId},
     MyService,
 };
@@ -63,18 +63,14 @@ impl NotesService for MyService {
                 let note = match row {
                     Ok(note) => note,
                     Err(e) => {
-                        tx.send(Err(Status::internal(e.to_string())))
-                            .await
-                            .unwrap();
+                        tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
                         break;
                     }
                 };
                 let note: Note = match Note::try_from(note) {
                     Ok(note) => note,
                     Err(e) => {
-                        tx.send(Err(Status::internal(e.to_string())))
-                            .await
-                            .unwrap();
+                        tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
                         break;
                     }
                 };
@@ -106,13 +102,13 @@ impl NotesService for MyService {
         let user_uuid =
             Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
-        let note = UpsertNote {
+        let new_note = UpsertNote {
             id: None,
             user_id: &user_uuid,
             title: &note.title,
             content: &note.content,
         };
-        let note = upsert_note(conn, note).await?;
+        let note = upsert_5000_note(conn, new_note).await?;
         let note: Note = Note::try_from(note).map_err(|e| Status::internal(e.to_string()))?;
 
         println!("Elapsed: {:.2?}", start.elapsed());
