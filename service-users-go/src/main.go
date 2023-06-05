@@ -33,6 +33,7 @@ var (
 	PORT         = MustGetenv("PORT")
 	ENV          = MustGetenv("ENV")
 	DATABASE_URL = MustGetenv("DATABASE_URL")
+	BUCKET       = MustGetenv("BUCKET")
 )
 
 var validate = validator.New()
@@ -50,7 +51,7 @@ func init() {
 	}
 	log.Println("Connected to database")
 
-    // Example of running migrations
+	// Example of running migrations
 	// var migrationsDir = "./migrations"
 	// if ENV == "production" {
 	// 	migrationsDir = "/migrations"

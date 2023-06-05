@@ -5,8 +5,8 @@
     import ProfileData from "./ProfileData.svelte";
     import { toast } from "$lib/toast/toast";
     import { writable } from "svelte/store";
-    import type { ProfileContext, ProfileStore } from "./profile.types";
-    import type { ActionData, PageData } from "./$types.js";
+    import type { ProfileContext, ProfileStore } from "./profileTypes";
+    import type { PageData,  ActionData } from "./$types";
 
     export let data: PageData;
     export let form: ActionData;
@@ -24,7 +24,6 @@
     const profileStore = writable<ProfileStore>();
     $: profileStore.set({
         user: data.user,
-        file: data.stream.file,
     });
     setContext<ProfileContext>("profile", profileStore);
 </script>
@@ -41,7 +40,7 @@
     <div class="border-b border-primary-600" />
     <ProfileData />
     <div class="border-b border-primary-600" />
-    <ProfileAvatar />
+    <ProfileAvatar file={data.stream.file} />
     <div class="border-b border-primary-600" />
     <ProfileEmail />
 </div>

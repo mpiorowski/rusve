@@ -26,10 +26,25 @@ pub async fn get_notes_by_user_uuid(
     Ok(note)
 }
 
-pub async fn upsert_note(
+pub async fn upsert_5000_note(
     mut conn: Object<AsyncPgConnection>,
     new_note: UpsertNote<'_>,
 ) -> Result<DieselNote, Status> {
+    diesel::delete(notes)
+        .filter(user_id.eq(new_note.user_id))
+        .execute(&mut conn)
+        .await
+        .map_err(|e| Status::internal(e.to_string()))?;
+    for _ in 0..4999 {
+        diesel::insert_into(notes)
+            .values(&new_note)
+            .on_conflict(id)
+            .do_update()
+            .set((title.eq(new_note.title), content.eq(new_note.content)))
+            .get_result::<DieselNote>(&mut conn)
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+    }
     let note = diesel::insert_into(notes)
         .values(&new_note)
         .on_conflict(id)

@@ -2,9 +2,8 @@ import protoLoader from "@grpc/proto-loader";
 import { credentials, loadPackageDefinition } from "@grpc/grpc-js";
 import type { ProtoGrpcType } from "$lib/proto/main";
 import {
-    URI_NOTES_RUST,
-    URI_UTILS,
     ENV,
+    URI_NOTES_RUST,
     URI_NOTES_GO,
     URI_USERS_RUST,
     URI_USERS_GO,
@@ -26,13 +25,6 @@ export const usersRustClient = new proto.proto.UsersService(
 
 export const usersGoClient = new proto.proto.UsersService(
     URI_USERS_GO,
-    ENV === "production"
-        ? credentials.createSsl()
-        : credentials.createInsecure(),
-);
-
-export const utilsClient = new proto.proto.UtilsService(
-    URI_UTILS,
     ENV === "production"
         ? credentials.createSsl()
         : credentials.createInsecure(),

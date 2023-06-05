@@ -30,4 +30,5 @@ message File {
     FileType type = 7;
 
     bytes buffer = 8;
+    optional string url = 9;
 }

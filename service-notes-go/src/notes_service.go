@@ -13,7 +13,8 @@ import (
 )
 
 func (s *server) GetNotes(in *pb.UserId, stream pb.NotesService_GetNotesServer) error {
-	log.Println("GetNotes")
+	log.Printf("GetNotes: %v", in.UserId)
+
 	start := time.Now()
 
 	rows, err := db.Query(`select * from notes where user_id = $1 and deleted is null order by created desc`, in.UserId)
@@ -45,7 +46,7 @@ func (s *server) GetNotes(in *pb.UserId, stream pb.NotesService_GetNotesServer) 
 }
 
 func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Note, error) {
-	log.Println("CreateNote x1000")
+	log.Printf("CreateNote: %v", in)
 
 	rules := map[string]string{
 		"UserId":  "required,max=100",
@@ -92,7 +93,7 @@ func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Note, error) 
 }
 
 func (s *server) DeleteNote(ctx context.Context, in *pb.NoteId) (*pb.Note, error) {
-	log.Println("DeleteNote")
+    log.Printf("DeleteNote: %v", in)
 
 	row := db.QueryRow(`update notes set deleted = now() where id = $1 and user_id = $2 returning *`, in.NoteId, in.UserId)
 	note, err := mapNote(nil, row)

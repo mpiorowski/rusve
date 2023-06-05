@@ -1,6 +1,6 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import type { Categories } from "$lib/types";
+import { Categories } from "$lib/types";
 import { URI_DIRECTUS } from "$env/static/private";
 import { z } from "zod";
 
@@ -20,7 +20,7 @@ async function fetchDashboard(): Promise<DashboardItem[]> {
             z.object({
                 title: z.string(),
                 description: z.string(),
-                category: z.string(),
+                category: z.nativeEnum(Categories),
                 sort: z.number(),
             }),
         ).parse(json.data);

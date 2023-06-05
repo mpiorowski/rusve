@@ -1,4 +1,9 @@
 import type { Writable } from "svelte/store";
 
-export type Categories = ["Backend", "Frontend", "Deployment", "Additional"];
+export enum Categories {
+    Backend = "Backend",
+    Frontend = "Frontend",
+    Deployment = "Deployment",
+    Additional = "Additional",
+}
 export type DrawerContext = Writable<boolean>;

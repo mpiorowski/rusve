@@ -4,6 +4,7 @@
 
 <div role="status">
     <svg
+    role="status"
         aria-hidden="true"
         class="animate-spin fill-secondary-500 text-primary-100 opacity-100 z-20"
         width={size}

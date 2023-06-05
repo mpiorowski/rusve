@@ -21,6 +21,6 @@ func mapUser(rows *sql.Rows, row *sql.Row) (*pb.User, error) {
 	if err != nil {
 		return nil, err
 	}
-    user.Role = pb.UserRole(pb.UserRole_value[role])
+	user.Role = pb.UserRole(pb.UserRole_value[role])
 	return &user, nil
 }

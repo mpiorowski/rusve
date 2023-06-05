@@ -1,4 +1,4 @@
-// Original file: ../proto/utils.proto
+// Original file: ../proto/main.proto
 
 
 export interface FileId {

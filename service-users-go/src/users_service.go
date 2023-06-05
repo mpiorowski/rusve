@@ -54,6 +54,8 @@ func (s *server) Auth(ctx context.Context, in *pb.AuthRequest) (*pb.User, error)
 }
 
 func (s *server) GetUsers(in *pb.UserIds, stream pb.UsersService_GetUsersServer) error {
+	log.Printf("GetUsers: %v", in)
+
 	rows, err := db.Query(`select * from users where id = any($1)`, in.UserIds)
 	if err != nil {
 		log.Printf("db.Query: %v", err)
@@ -81,6 +83,8 @@ func (s *server) GetUsers(in *pb.UserIds, stream pb.UsersService_GetUsersServer)
 }
 
 func (s *server) GetUser(ctx context.Context, in *pb.UserId) (*pb.User, error) {
+	log.Printf("GetUser: %v", in)
+
 	row := db.QueryRow(`select * from users where id = $1`, in.UserId)
 	user, err := mapUser(nil, row)
 	if err != nil {
@@ -91,6 +95,8 @@ func (s *server) GetUser(ctx context.Context, in *pb.UserId) (*pb.User, error) {
 }
 
 func (s *server) DeleteUser(ctx context.Context, in *pb.User) (*pb.User, error) {
+	log.Printf("DeleteUser: %v", in)
+
 	row := db.QueryRow(`update users set deleted = now() where id = $1 and sub = $2 and email = $3 returning *`, in.Id, in.Sub, in.Email)
 	user, err := mapUser(nil, row)
 	if err != nil {
@@ -101,7 +107,9 @@ func (s *server) DeleteUser(ctx context.Context, in *pb.User) (*pb.User, error) 
 }
 
 func (s *server) UpdateUser(ctx context.Context, in *pb.User) (*pb.User, error) {
-	row := db.QueryRow(`insert into users (email, role) values ($1, $2) returning *`, in.Email, in.Role)
+	log.Printf("UpdateUser: %v", in)
+
+	row := db.QueryRow(`update users set name = $1, avatar_id = $2 where id = $3 and deleted is null returning *`, in.Name, in.AvatarId, in.Id)
 	user, err := mapUser(nil, row)
 	if err != nil {
 		log.Printf("mapUser: %v", err)

@@ -1,8 +1,6 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
     import { toast } from "$lib/toast/toast";
-    import { getContext } from "svelte";
-    import type { ProfileContext } from "./profile.types";
     import Input from "$lib/form/Input.svelte";
     import Button from "$lib/form/Button.svelte";
     import SaveIcon from "$lib/icons/SaveIcon.svelte";
@@ -10,7 +8,6 @@
     let loading = false;
     let subject = "Email from your profile";
     let message = "Rusve rocks!";
-    const profile = getContext<ProfileContext>("profile");
 </script>
 
 <form
@@ -32,7 +29,6 @@
     class="p-4"
 >
     <h3 class="mb-4">Send email to Yourself</h3>
-    <input type="hidden" name="avatar" value={$profile.user.avatar ?? ""} />
     <Input name="subject" bind:value={subject} label="Subject" />
     <Input name="message" textarea bind:value={message} label="Message" />
     <div class="w-28">

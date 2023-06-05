@@ -8,4 +8,4 @@ RUN go mod tidy
 RUN go build -v -o /usr/local/bin/ /app/...
 COPY ./migrations /migrations
 
-CMD ["rusve"]
+CMD ["src"]

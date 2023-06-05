@@ -1,20 +1,21 @@
+mod files_db;
+mod files_service;
 mod models;
 mod proto;
 mod schema;
 mod users_service;
 
 use crate::proto::users_service_server::UsersServiceServer;
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use anyhow::{Context, Result};
-use deadpool::managed::Pool;
-use diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection};
+use diesel_async::{pooled_connection::deadpool::Pool, AsyncPgConnection};
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use rusve_users::{establish_connection, establish_connection_sync};
 use tonic::transport::Server;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
 pub struct MyService {
-    pool: Pool<AsyncDieselConnectionManager<AsyncPgConnection>>,
+    pool: Pool<AsyncPgConnection>,
 }
 
 #[tokio::main]
