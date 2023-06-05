@@ -1,17 +1,17 @@
-name: Lint users
+name: Lint Users Rust
 on:
-  workflow_call:
+    workflow_call:
 
 env:
-  RUSTFLAGS: "-Dwarnings"
+    RUSTFLAGS: "-Dwarnings"
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./service-users
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run Clippy
-        run: cargo clippy --all-targets --all-features
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ./service-users
+        steps:
+            - uses: actions/checkout@v3
+            - name: Run Clippy
+              run: cargo clippy --all-targets --all-features

@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
+	"io"
 	"log"
 	"os"
 	"time"
 
-	"cloud.google.com/go/storage"
 	pb "rusve/proto"
+
+	"cloud.google.com/go/storage"
 )
 
 func mapFile(rows *sql.Rows, row *sql.Row) (*pb.File, error) {
@@ -114,8 +116,7 @@ func downloadFile(fileId string, name string) ([]byte, error) {
 	}
 	defer rc.Close()
 
-	var buffer []byte
-	_, err = rc.Read(buffer)
+    buffer, err := io.ReadAll(rc)
 	if err != nil {
 		log.Printf("ioutil.ReadAll: %v", err)
 		return nil, err

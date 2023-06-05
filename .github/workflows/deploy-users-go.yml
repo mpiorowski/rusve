@@ -3,7 +3,7 @@ name: Deploy Users Go
 on:
     push:
         branches:
-            - release-users/**
+            - release-users-go/**
     workflow_call:
         secrets:
             GCP_CREDENTIALS:

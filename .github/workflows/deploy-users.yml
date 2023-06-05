@@ -1,4 +1,4 @@
-name: Deploy Users Service
+name: Deploy Users Rust
 
 on:
     push:

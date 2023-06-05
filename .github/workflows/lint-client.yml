@@ -1,60 +1,61 @@
-name: Lint client
+name: Lint Client
 on:
-  workflow_call:
+    workflow_call:
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./client
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-      - name: Install dependencies
-        run: npm i
-      - name: Copy env file
-        run: cp .env.example .env
-      - name: Run build 
-        run: npm run build
-      - name: Run lint
-        run: npm run lint
-          #- name: Annotate Pull Request
-          #  uses: actions/github-script@v3
-          #  with:
-          #    github-token: ${{ secrets.GITHUB_TOKEN }}
-          #    script: |
-          #      const fs = require('fs');
-          #      const report = fs.readFileSync('eslint-report.json', 'utf-8');
-          #      const annotations = JSON.parse(report).map((error) => ({
-          #        path: error.filePath,
-          #        start_line: error.line,
-          #        end_line: error.line,
-          #        annotation_level: 'failure',
-          #        message: error.message,
-          #      }));
-          #      console.log(annotations);
-          #      const octokit = require('@octokit/rest')();
-          #      octokit.authenticate({
-          #        type: 'token',
-          #        token: process.env.GITHUB_TOKEN,
-          #      });
-          #      for (const annotation of annotations) {
-          #        const res = await octokit.checks.create({
-          #          owner: context.repo.owner,
-          #          repo: context.repo.repo,
-          #          name: 'ESLint Check',
-          #          head_sha: context.payload.pull_request.head.sha,
-          #          conclusion: 'failure',
-          #          output: {
-          #            title: 'ESLint Errors',
-          #            summary: `ESLint found ${annotations.length} errors in your code`,
-          #            annotations: [annotation],
-          #          },
-          #        });
-          #      }
-      #- run: npm run test
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ./client
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v3
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: "18.x"
+            - name: Install dependencies
+              run: npm i
+            - name: Copy env file
+              run: cp .env.example .env
+            - name: Run build
+              run: npm run build
+            - name: Run lint
+              run:
+                  npm run lint
+                  #- name: Annotate Pull Request
+                  #  uses: actions/github-script@v3
+                  #  with:
+                  #    github-token: ${{ secrets.GITHUB_TOKEN }}
+                  #    script: |
+                  #      const fs = require('fs');
+                  #      const report = fs.readFileSync('eslint-report.json', 'utf-8');
+                  #      const annotations = JSON.parse(report).map((error) => ({
+                  #        path: error.filePath,
+                  #        start_line: error.line,
+                  #        end_line: error.line,
+                  #        annotation_level: 'failure',
+                  #        message: error.message,
+                  #      }));
+                  #      console.log(annotations);
+                  #      const octokit = require('@octokit/rest')();
+                  #      octokit.authenticate({
+                  #        type: 'token',
+                  #        token: process.env.GITHUB_TOKEN,
+                  #      });
+                  #      for (const annotation of annotations) {
+                  #        const res = await octokit.checks.create({
+                  #          owner: context.repo.owner,
+                  #          repo: context.repo.repo,
+                  #          name: 'ESLint Check',
+                  #          head_sha: context.payload.pull_request.head.sha,
+                  #          conclusion: 'failure',
+                  #          output: {
+                  #            title: 'ESLint Errors',
+                  #            summary: `ESLint found ${annotations.length} errors in your code`,
+                  #            annotations: [annotation],
+                  #          },
+                  #        });
+                  #      }
+            #- run: npm run test

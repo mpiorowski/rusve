@@ -3,7 +3,7 @@ name: Deploy Notes Go
 on:
     push:
         branches:
-            - release-notes/**
+            - release-notes-go/**
     workflow_call:
         secrets:
             GCP_CREDENTIALS:

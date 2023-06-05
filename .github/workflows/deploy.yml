@@ -1,42 +1,42 @@
 name: Deploy
 on:
-  push:
-    branches:
-      - release/**
+    push:
+        branches:
+            - release/**
 
 permissions:
-  contents: write
-  id-token: write
-  checks: write
+    contents: write
+    id-token: write
+    checks: write
 
 jobs:
-  deploy-client:
-    uses: ./.github/workflows/deploy-client.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
-      PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
-      SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
-      STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
-  deploy-users:
-    uses: ./.github/workflows/deploy-users.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-  deploy-users-go:
-    uses: ./.github/workflows/deploy-users-go.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-  deploy-notes:
-    uses: ./.github/workflows/deploy-notes.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-  deploy-notes-go:
-    uses: ./.github/workflows/deploy-notes-go.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    deploy-client:
+        uses: ./.github/workflows/deploy-client.yml
+        secrets:
+            GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+            PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
+            PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
+            SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
+            STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
+    deploy-users:
+        uses: ./.github/workflows/deploy-users.yml
+        secrets:
+            GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
+            SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+    deploy-users-go:
+        uses: ./.github/workflows/deploy-users-go.yml
+        secrets:
+            GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
+            SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+    deploy-notes:
+        uses: ./.github/workflows/deploy-notes.yml
+        secrets:
+            GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    deploy-notes-go:
+        uses: ./.github/workflows/deploy-notes-go.yml
+        secrets:
+            GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}

@@ -1,4 +1,4 @@
-name: Deploy Notes Service
+name: Deploy Notes Rust
 
 on:
     push:
