@@ -19,31 +19,23 @@ jobs:
       SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
       STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
   deploy-users:
-    needs:
-      - deploy-client
     uses: ./.github/workflows/deploy-users.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
   deploy-users-go:
-    needs:
-      - deploy-client
     uses: ./.github/workflows/deploy-users-go.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
   deploy-notes:
-    needs:
-      - deploy-client
     uses: ./.github/workflows/deploy-notes.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
   deploy-notes-go:
-    needs:
-      - deploy-client
     uses: ./.github/workflows/deploy-notes-go.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
