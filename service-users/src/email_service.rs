@@ -6,7 +6,6 @@ use google_cloud_pubsub::{
 };
 use sendgrid::{Destination, Mail, SGClient};
 use serde::Deserialize;
-use std::time::Duration;
 use tokio_util::sync::CancellationToken;
 
 #[derive(Deserialize, Debug)]
@@ -53,12 +52,12 @@ pub async fn subscribe_to_emails() -> Result<()> {
 
     // Token for cancel.
     let cancel = CancellationToken::new();
-    let cancel2 = cancel.clone();
-    tokio::spawn(async move {
-        // Cancel after 10 seconds.
-        tokio::time::sleep(Duration::from_secs(10)).await;
-        cancel2.cancel();
-    });
+    // Cancel after 10 seconds.
+    // let cancel2 = cancel.clone();
+    // tokio::spawn(async move {
+    //     tokio::time::sleep(Duration::from_secs(10)).await;
+    //     cancel2.cancel();
+    // });
 
     // Receive blocks until the ctx is cancelled or an error occurs.
     // Or simply use the `subscription.subscribe` method.
