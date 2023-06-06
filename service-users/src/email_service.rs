@@ -25,7 +25,7 @@ async fn send_email(message: &ReceivedMessage) -> Result<()> {
             name: email_message.email.as_str(),
         })
         .add_from("email@rusve.app")
-        .add_from_name("Rusve")
+        .add_from_name("Rusve - rust")
         .add_subject(email_message.subject.as_str())
         .add_html(email_message.message.as_str());
 
@@ -70,7 +70,10 @@ pub async fn subscribe_to_emails() -> Result<()> {
                         cancel.cancel();
                         message.nack().await
                     }
-                    Ok(_) => message.ack().await,
+                    Ok(_) => {
+                        println!("Email sent successfully");
+                        message.ack().await
+                    }
                 };
             },
             cancel.clone(),
