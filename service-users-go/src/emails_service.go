@@ -29,7 +29,7 @@ func subscribe_to_emails() error {
 	}
 	defer client.Close()
 
-	sub := client.Subscription("email-sub")
+	sub := client.Subscription("email-sub-go")
 
 	go func() {
 		err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
@@ -58,7 +58,7 @@ func subscribe_to_emails() error {
 			msg.Ack()
 		})
 		if err != nil {
-			log.Printf("Receive: %v", err)
+			log.Printf("Error receiving message: %v", err)
 		}
 	}()
 
