@@ -37,6 +37,8 @@ func subscribe_to_emails() error {
 }
 
 func pull_messages(ctx context.Context, sub *pubsub.Subscription) {
+    log.Printf("Email service started")
+
 	err := sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
 		var email Email
 		err := json.Unmarshal(msg.Data, &email)
@@ -65,4 +67,5 @@ func pull_messages(ctx context.Context, sub *pubsub.Subscription) {
 	if err != nil {
 		log.Printf("Error receiving message: %v", err)
 	}
+    log.Printf("Email service stopped")
 }
