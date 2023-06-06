@@ -1,4 +1,5 @@
 use anyhow::Result;
+use futures_util::StreamExt;
 use google_cloud_default::WithAuthExt;
 use google_cloud_pubsub::{
     client::{Client, ClientConfig},
@@ -59,27 +60,51 @@ pub async fn subscribe_to_emails() -> Result<()> {
     //     cancel2.cancel();
     // });
 
+    tokio::spawn(async move {
+        let mut stream = match subscription.subscribe(None).await {
+            Ok(stream) => stream,
+            Err(e) => {
+                println!("Error subscribing to topic: {:?}", e);
+                cancel.cancel();
+                return;
+            }
+        };
+        while let Some(message) = stream.next().await {
+            let _ = match send_email(&message).await {
+                Err(e) => {
+                    println!("Error sending email: {:?}", e);
+                    cancel.cancel();
+                    message.nack().await
+                }
+                Ok(_) => {
+                    println!("Email sent successfully");
+                    message.ack().await
+                }
+            };
+        }
+    });
+
     // Receive blocks until the ctx is cancelled or an error occurs.
     // Or simply use the `subscription.subscribe` method.
-    subscription
-        .receive(
-            |message, cancel| async move {
-                let _ = match send_email(&message).await {
-                    Err(e) => {
-                        println!("Error sending email: {:?}", e);
-                        cancel.cancel();
-                        message.nack().await
-                    }
-                    Ok(_) => {
-                        println!("Email sent successfully");
-                        message.ack().await
-                    }
-                };
-            },
-            cancel.clone(),
-            None,
-        )
-        .await?;
+    // subscription
+    //     .receive(
+    //         |message, cancel| async move {
+    //             let _ = match send_email(&message).await {
+    //                 Err(e) => {
+    //                     println!("Error sending email: {:?}", e);
+    //                     cancel.cancel();
+    //                     message.nack().await
+    //                 }
+    //                 Ok(_) => {
+    //                     println!("Email sent successfully");
+    //                     message.ack().await
+    //                 }
+    //             };
+    //         },
+    //         cancel.clone(),
+    //         None,
+    //     )
+    //     .await?;
 
     // Delete subscription if needed.
     // subscription.delete(None).await?;
