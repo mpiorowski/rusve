@@ -80,7 +80,7 @@ pub async fn subscribe_to_emails() -> Result<()> {
         .await?;
 
     // Delete subscription if needed.
-    subscription.delete(None).await?;
+    // subscription.delete(None).await?;
 
     Ok(())
 }
