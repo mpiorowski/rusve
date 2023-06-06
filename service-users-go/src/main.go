@@ -51,12 +51,6 @@ func init() {
 	}
 	log.Println("Connected to database")
 
-    err = subscribe_to_emails();
-    if err != nil {
-        log.Fatal(err)
-    }
-    log.Println("Subscribed to emails")
-
 	// Example of running migrations
 	// var migrationsDir = "./migrations"
 	// if ENV == "production" {
@@ -73,6 +67,13 @@ func init() {
 }
 
 func main() {
+
+    err := subscribe_to_emails();
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Println("Subscribed to emails")
+
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", PORT))
 	if err != nil {

@@ -31,36 +31,38 @@ func subscribe_to_emails() error {
 
 	sub := client.Subscription("email-sub-go")
 
-	go func() {
-		err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
-            var email Email
-			err = json.Unmarshal(msg.Data, &email)
-			if err != nil {
-				log.Printf("Unmarshal: %v", err)
-				msg.Nack()
-				return
-			}
-
-			from := mail.NewEmail("Rusve", "Rusve - go")
-			to := mail.NewEmail(email.Email, email.Email)
-            subject := email.Subject
-            body := email.Message
-
-            message := mail.NewSingleEmail(from, subject, to, "", body)
-			client := sendgrid.NewSendClient(SENDGRID_API_KEY);
-			response, err := client.Send(message)
-			if err != nil {
-				log.Printf("client.Send: %v", err)
-                msg.Nack()
-				return
-			}
-            log.Printf("Email sent: %v", response.StatusCode)
-			msg.Ack()
-		})
-		if err != nil {
-			log.Printf("Error receiving message: %v", err)
-		}
-	}()
+	go pull_messages(ctx, sub)
 
 	return nil
+}
+
+func pull_messages(ctx context.Context, sub *pubsub.Subscription) {
+	err := sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
+		var email Email
+		err := json.Unmarshal(msg.Data, &email)
+		if err != nil {
+			log.Printf("Unmarshal: %v", err)
+			msg.Nack()
+			return
+		}
+
+		from := mail.NewEmail("Rusve", "Rusve - go")
+		to := mail.NewEmail(email.Email, email.Email)
+		subject := email.Subject
+		body := email.Message
+
+		message := mail.NewSingleEmail(from, subject, to, "", body)
+		client := sendgrid.NewSendClient(SENDGRID_API_KEY)
+		response, err := client.Send(message)
+		if err != nil {
+			log.Printf("client.Send: %v", err)
+			msg.Nack()
+			return
+		}
+		log.Printf("Email sent: %v", response.StatusCode)
+		msg.Ack()
+	})
+	if err != nil {
+		log.Printf("Error receiving message: %v", err)
+	}
 }
