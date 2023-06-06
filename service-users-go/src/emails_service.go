@@ -27,17 +27,17 @@ func subscribe_to_emails() error {
 		log.Printf("NewClient: %v", err)
 		return err
 	}
-	defer client.Close()
 
-	sub := client.Subscription("email-sub-go")
-
-	go pull_messages(ctx, sub)
+	go pull_messages(ctx, client)
 
 	return nil
 }
 
-func pull_messages(ctx context.Context, sub *pubsub.Subscription) {
-    log.Printf("Email service started")
+func pull_messages(ctx context.Context, client *pubsub.Client) {
+	log.Printf("Email service started")
+
+	sub := client.Subscription("email-sub-go")
+	defer client.Close()
 
 	err := sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
 		var email Email
@@ -65,7 +65,7 @@ func pull_messages(ctx context.Context, sub *pubsub.Subscription) {
 		msg.Ack()
 	})
 	if err != nil {
-		log.Printf("Error receiving message: %v", err)
+		log.Printf("sub.Receive: %v", err)
 	}
-    log.Printf("Email service stopped")
+	log.Printf("Email service stopped")
 }
