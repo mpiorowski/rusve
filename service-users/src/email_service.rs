@@ -35,6 +35,10 @@ async fn send_email(message: &ReceivedMessage) -> Result<()> {
 }
 
 pub async fn subscribe_to_emails() -> Result<()> {
+    let env = std::env::var("ENV").unwrap();
+    if env == "development" {
+        return Ok(());
+    }
     // Create pubsub client.
     let config = ClientConfig::default().with_auth().await?;
     let client = Client::new(config).await?;

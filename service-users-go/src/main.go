@@ -34,12 +34,12 @@ var (
 	ENV          = MustGetenv("ENV")
 	DATABASE_URL = MustGetenv("DATABASE_URL")
 	BUCKET       = MustGetenv("BUCKET")
+    SENDGRID_API_KEY = MustGetenv("SENDGRID_API_KEY")
 )
 
 var validate = validator.New()
 
 func init() {
-	// Db connection
 	var err error
 
 	if db, err = sql.Open("pgx", DATABASE_URL); err != nil {
@@ -50,6 +50,12 @@ func init() {
 		log.Fatal(pingErr)
 	}
 	log.Println("Connected to database")
+
+    err = subscribe_to_emails();
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Println("Subscribed to emails")
 
 	// Example of running migrations
 	// var migrationsDir = "./migrations"
