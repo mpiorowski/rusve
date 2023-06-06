@@ -29,3 +29,8 @@ diesel_migrations = { version = "2.1.0", features = ["postgres"] }
 # GCP
 google-cloud-storage = "0.11.1"
 google-cloud-default = { version = "0.3.0", features = ["storage", "pubsub"] }
+google-cloud-pubsub = "0.15.0"
+tokio-util = "0.7.8"
+serde_json = "1.0.96"
+serde = "1.0.163"
+sendgrid = { version = "0.19.0", features = ["async"] }
