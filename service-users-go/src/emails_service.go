@@ -48,7 +48,7 @@ func pull_messages(ctx context.Context, client *pubsub.Client) {
 			return
 		}
 
-		from := mail.NewEmail("Rusve", "Rusve - go")
+		from := mail.NewEmail("Rusve - go", "email@rusve.app")
 		to := mail.NewEmail(email.Email, email.Email)
 		subject := email.Subject
 		body := email.Message
