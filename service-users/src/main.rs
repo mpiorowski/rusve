@@ -4,6 +4,7 @@ mod models;
 mod proto;
 mod schema;
 mod users_service;
+mod email_service;
 
 use crate::proto::users_service_server::UsersServiceServer;
 use anyhow::{Context, Result};
@@ -24,6 +25,9 @@ async fn main() -> Result<()> {
 
     let port = std::env::var("PORT").context("PORT not set")?;
     let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
+
+    // Subscribe to emails
+    email_service::subscribe_to_emails().await?;
 
     // Run migrations - diesel_async have an open PR to support this
     let mut conn = establish_connection_sync(&database_url)?;
