@@ -13,10 +13,21 @@ services:
 
   service-notes-db:
     container_name: rusve-service-notes-db
-    image: postgres:15.1
+    image: mysql:8.0.33
     ports:
-      - 5434:5432
+      - 3306:3306
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: notes
+      MYSQL_USER: admin
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_PASSWORD: 12345
+      MYSQL_DATABASE: notes
+
+        #service-notes-db:
+        #  container_name: rusve-service-notes-db
+        #  image: postgres:15.1
+        #  ports:
+        #    - 5434:5432
+        #  environment:
+        #    POSTGRES_USER: postgres
+        #    POSTGRES_PASSWORD: 12345
+        #    POSTGRES_DB: notes

@@ -1,11 +1,11 @@
-mod db;
 mod models;
 mod proto;
 mod schema;
-mod service;
+mod notes_service;
+mod notes_db;
 
 use anyhow::{Context, Result};
-use diesel_async::{pooled_connection::deadpool::Pool, AsyncPgConnection};
+use diesel_async::{pooled_connection::deadpool::Pool, AsyncMysqlConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use proto::notes_service_server::NotesServiceServer;
 use rusve_notes::{establish_connection, establish_connection_sync};
@@ -14,7 +14,7 @@ use tonic::transport::Server;
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
 pub struct MyService {
-    pool: Pool<AsyncPgConnection>,
+    pool: Pool<AsyncMysqlConnection>,
 }
 
 #[tokio::main]
@@ -23,6 +23,8 @@ async fn main() -> Result<()> {
 
     let port = std::env::var("PORT").context("PORT not set")?;
     let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
+    let database_url_pool =
+        std::env::var("DATABASE_URL_POOL").context("DATABASE_URL_POOL not set")?;
 
     // Run migrations - diesel_async have an open PR to support this
     let mut conn = establish_connection_sync(&database_url)?;

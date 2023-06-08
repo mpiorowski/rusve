@@ -1,6 +1,6 @@
 use crate::{
-    db::{delete_note, get_notes_by_user_uuid, upsert_5000_note},
-    proto::{notes_service_server::NotesService, Note, NoteId, UserId},
+    notes_db::{delete_note, get_notes_by_user_uuid, upsert_5000_note},
+    proto::{notes_service_server::NotesService, Empty, Note, NoteId, UserId},
     MyService,
 };
 use anyhow::Result;
@@ -8,7 +8,6 @@ use futures_util::StreamExt;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
-use uuid::Uuid;
 
 use crate::models::*;
 
@@ -17,8 +16,8 @@ impl TryFrom<DieselNote> for Note {
 
     fn try_from(note: DieselNote) -> Result<Self, Self::Error> {
         let note = Note {
-            id: note.id.to_string(),
-            user_id: note.user_id.to_string(),
+            id: String::from_utf8(note.id)?,
+            user_id: String::from_utf8(note.user_id)?,
             title: note.title,
             content: note.content,
             created: note.created.to_string(),
@@ -51,7 +50,7 @@ impl NotesService for MyService {
         println!("Connect: {:?}", start.elapsed());
 
         let user_uuid = request.into_inner().user_id;
-        let user_uuid = Uuid::parse_str(&user_uuid).map_err(|e| Status::internal(e.to_string()))?;
+        let user_uuid: Vec<u8> = user_uuid.as_bytes().to_vec();
 
         let mut rows = get_notes_by_user_uuid(conn, user_uuid).await?;
 
@@ -87,7 +86,7 @@ impl NotesService for MyService {
         Ok(Response::new(ReceiverStream::new(rx)))
     }
 
-    async fn create_note(&self, request: Request<Note>) -> Result<Response<Note>, Status> {
+    async fn create_note(&self, request: Request<Note>) -> Result<Response<Empty>, Status> {
         #[cfg(debug_assertions)]
         println!("CreateNote = {:?}", request);
         let start = std::time::Instant::now();
@@ -99,8 +98,7 @@ impl NotesService for MyService {
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let note = request.into_inner();
-        let user_uuid =
-            Uuid::parse_str(&note.user_id).map_err(|e| Status::internal(e.to_string()))?;
+        let user_uuid: Vec<u8> = note.user_id.as_bytes().to_vec();
 
         let new_note = UpsertNote {
             id: None,
@@ -108,14 +106,13 @@ impl NotesService for MyService {
             title: &note.title,
             content: &note.content,
         };
-        let note = upsert_5000_note(conn, new_note).await?;
-        let note: Note = Note::try_from(note).map_err(|e| Status::internal(e.to_string()))?;
+        upsert_5000_note(conn, new_note).await?;
 
         println!("Elapsed: {:.2?}", start.elapsed());
-        return Ok(Response::new(note));
+        return Ok(Response::new(Empty {}));
     }
 
-    async fn delete_note(&self, request: Request<NoteId>) -> Result<Response<Note>, Status> {
+    async fn delete_note(&self, request: Request<NoteId>) -> Result<Response<Empty>, Status> {
         println!("DeleteNote = {:?}", request);
         let start = std::time::Instant::now();
 
@@ -126,15 +123,12 @@ impl NotesService for MyService {
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
-        let note_uuid =
-            Uuid::parse_str(&request.note_id).map_err(|e| Status::internal(e.to_string()))?;
-        let user_uuid =
-            Uuid::parse_str(&request.user_id).map_err(|e| Status::internal(e.to_string()))?;
+        let note_uuid: Vec<u8> = request.note_id.as_bytes().to_vec();
+        let user_uuid: Vec<u8> = request.user_id.as_bytes().to_vec();
 
-        let note = delete_note(conn, user_uuid, note_uuid).await?;
-        let note = Note::try_from(note).map_err(|e| Status::internal(e.to_string()))?;
+        delete_note(conn, user_uuid, note_uuid).await?;
 
         println!("Elapsed: {:.2?}", start.elapsed());
-        return Ok(Response::new(note));
+        return Ok(Response::new(Empty {}));
     }
 }

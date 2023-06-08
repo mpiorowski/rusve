@@ -1,8 +1,7 @@
 use diesel::QueryResult;
-use diesel_async::{pooled_connection::deadpool::Object, AsyncPgConnection};
+use diesel_async::{pooled_connection::deadpool::Object, AsyncMysqlConnection};
 use futures_core::Stream;
 use tonic::Status;
-use uuid::Uuid;
 
 use crate::{
     models::{DieselNote, UpsertNote},
@@ -12,14 +11,14 @@ use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
 
 pub async fn get_notes_by_user_uuid(
-    mut conn: Object<AsyncPgConnection>,
-    user_uuid: Uuid,
+    mut conn: Object<AsyncMysqlConnection>,
+    user_uuid: Vec<u8>,
 ) -> Result<impl Stream<Item = QueryResult<DieselNote>>, Status> {
     let note = notes
-        .filter(deleted.is_null())
-        .filter(user_id.eq(&user_uuid))
-        .order(created.desc())
         .select(DieselNote::as_select())
+        .filter(user_id.eq(user_uuid))
+        .filter(deleted.is_null())
+        .order(created.desc())
         .load_stream(&mut conn)
         .await
         .map_err(|e| Status::internal(e.to_string()))?;
@@ -27,9 +26,9 @@ pub async fn get_notes_by_user_uuid(
 }
 
 pub async fn upsert_5000_note(
-    mut conn: Object<AsyncPgConnection>,
+    mut conn: Object<AsyncMysqlConnection>,
     new_note: UpsertNote<'_>,
-) -> Result<DieselNote, Status> {
+) -> Result<(), Status> {
     diesel::delete(notes)
         .filter(user_id.eq(new_note.user_id))
         .execute(&mut conn)
@@ -38,35 +37,29 @@ pub async fn upsert_5000_note(
     for _ in 0..4999 {
         diesel::insert_into(notes)
             .values(&new_note)
-            .on_conflict(id)
-            .do_update()
-            .set((title.eq(new_note.title), content.eq(new_note.content)))
-            .get_result::<DieselNote>(&mut conn)
+            .execute(&mut conn)
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
     }
-    let note = diesel::insert_into(notes)
+    diesel::insert_into(notes)
         .values(&new_note)
-        .on_conflict(id)
-        .do_update()
-        .set((title.eq(new_note.title), content.eq(new_note.content)))
-        .get_result::<DieselNote>(&mut conn)
+        .execute(&mut conn)
         .await
         .map_err(|e| Status::internal(e.to_string()))?;
-    Ok(note)
+    Ok(())
 }
 
 pub async fn delete_note(
-    mut conn: Object<AsyncPgConnection>,
-    user_uuid: Uuid,
-    note_uuid: Uuid,
-) -> Result<DieselNote, Status> {
-    let note = diesel::update(notes)
+    mut conn: Object<AsyncMysqlConnection>,
+    user_uuid: Vec<u8>,
+    note_uuid: Vec<u8>,
+) -> Result<(), Status> {
+    diesel::update(notes)
         .filter(id.eq(note_uuid))
         .filter(user_id.eq(user_uuid))
         .set(deleted.eq(diesel::dsl::now))
-        .get_result::<DieselNote>(&mut conn)
+        .execute(&mut conn)
         .await
         .map_err(|e| Status::internal(e.to_string()))?;
-    Ok(note)
+    Ok(())
 }

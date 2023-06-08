@@ -2,11 +2,13 @@
 
 diesel::table! {
     notes (id) {
-        id -> Uuid,
-        created -> Timestamptz,
-        updated -> Timestamptz,
-        deleted -> Nullable<Timestamptz>,
-        user_id -> Uuid,
+        #[max_length = 16]
+        id -> Binary,
+        created -> Timestamp,
+        updated -> Timestamp,
+        deleted -> Nullable<Timestamp>,
+        #[max_length = 16]
+        user_id -> Binary,
         title -> Text,
         content -> Text,
     }

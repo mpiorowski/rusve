@@ -674,8 +674,8 @@ var UtilsService_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NotesServiceClient interface {
 	GetNotes(ctx context.Context, in *UserId, opts ...grpc.CallOption) (NotesService_GetNotesClient, error)
-	CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Note, error)
-	DeleteNote(ctx context.Context, in *NoteId, opts ...grpc.CallOption) (*Note, error)
+	CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error)
+	DeleteNote(ctx context.Context, in *NoteId, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type notesServiceClient struct {
@@ -718,8 +718,8 @@ func (x *notesServiceGetNotesClient) Recv() (*Note, error) {
 	return m, nil
 }
 
-func (c *notesServiceClient) CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Note, error) {
-	out := new(Note)
+func (c *notesServiceClient) CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/proto.NotesService/CreateNote", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -727,8 +727,8 @@ func (c *notesServiceClient) CreateNote(ctx context.Context, in *Note, opts ...g
 	return out, nil
 }
 
-func (c *notesServiceClient) DeleteNote(ctx context.Context, in *NoteId, opts ...grpc.CallOption) (*Note, error) {
-	out := new(Note)
+func (c *notesServiceClient) DeleteNote(ctx context.Context, in *NoteId, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/proto.NotesService/DeleteNote", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -741,8 +741,8 @@ func (c *notesServiceClient) DeleteNote(ctx context.Context, in *NoteId, opts ..
 // for forward compatibility
 type NotesServiceServer interface {
 	GetNotes(*UserId, NotesService_GetNotesServer) error
-	CreateNote(context.Context, *Note) (*Note, error)
-	DeleteNote(context.Context, *NoteId) (*Note, error)
+	CreateNote(context.Context, *Note) (*Empty, error)
+	DeleteNote(context.Context, *NoteId) (*Empty, error)
 	mustEmbedUnimplementedNotesServiceServer()
 }
 
@@ -753,10 +753,10 @@ type UnimplementedNotesServiceServer struct {
 func (UnimplementedNotesServiceServer) GetNotes(*UserId, NotesService_GetNotesServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetNotes not implemented")
 }
-func (UnimplementedNotesServiceServer) CreateNote(context.Context, *Note) (*Note, error) {
+func (UnimplementedNotesServiceServer) CreateNote(context.Context, *Note) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateNote not implemented")
 }
-func (UnimplementedNotesServiceServer) DeleteNote(context.Context, *NoteId) (*Note, error) {
+func (UnimplementedNotesServiceServer) DeleteNote(context.Context, *NoteId) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteNote not implemented")
 }
 func (UnimplementedNotesServiceServer) mustEmbedUnimplementedNotesServiceServer() {}

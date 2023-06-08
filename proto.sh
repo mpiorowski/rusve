@@ -4,7 +4,7 @@ cd ../service-users
 cargo run --bin proto
 cd ../service-utils
 cargo run --bin proto
-cd ../service-notes-rust
+cd ../service-notes
 cargo run --bin proto
 cd ../service-users-go
 protoc --go_out=./proto --go_opt=paths=source_relative \
