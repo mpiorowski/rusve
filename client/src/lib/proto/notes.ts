@@ -11,7 +11,6 @@ export interface ProtoGrpcType {
     File: MessageTypeDefinition
     FileType: EnumTypeDefinition
     Note: MessageTypeDefinition
-    NoteId: MessageTypeDefinition
     User: MessageTypeDefinition
     UserRole: EnumTypeDefinition
   }

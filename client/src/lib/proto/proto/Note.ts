@@ -3,11 +3,11 @@
 import type { User as _proto_User, User__Output as _proto_User__Output } from '../proto/User';
 
 export interface Note {
-  'id'?: (string);
+  'id'?: (Buffer | Uint8Array | string);
   'created'?: (string);
   'updated'?: (string);
   'deleted'?: (string);
-  'userId'?: (string);
+  'userId'?: (Buffer | Uint8Array | string);
   'title'?: (string);
   'content'?: (string);
   'user'?: (_proto_User | null);
@@ -15,11 +15,11 @@ export interface Note {
 }
 
 export interface Note__Output {
-  'id': (string);
+  'id': (Buffer);
   'created': (string);
   'updated': (string);
   'deleted'?: (string);
-  'userId': (string);
+  'userId': (Buffer);
   'title': (string);
   'content': (string);
   'user': (_proto_User__Output | null);

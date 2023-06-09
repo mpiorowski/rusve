@@ -7,7 +7,7 @@ import (
 	"net"
 
 	"github.com/go-playground/validator/v10"
-	_ "github.com/jackc/pgx/v5/stdlib"
+    _ "github.com/go-sql-driver/mysql"
 	// migrate "github.com/rubenv/sql-migrate"
 	"google.golang.org/grpc"
 
@@ -34,7 +34,7 @@ func init() {
 	// Db connection
 	var err error
 
-	if db, err = sql.Open("pgx", DATABASE_URL); err != nil {
+	if db, err = sql.Open("mysql", DATABASE_URL); err != nil {
 		log.Fatal(err)
 	}
 	pingErr := db.Ping()

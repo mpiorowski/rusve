@@ -1,13 +1,14 @@
 use crate::{
-    notes_db::{delete_note, get_notes_by_user_uuid, upsert_5000_note},
+    notes_db::{delete_note, get_notes_by_user_uuid, upsert_note},
     proto::{notes_service_server::NotesService, Empty, Note, NoteId, UserId},
     MyService,
 };
 use anyhow::Result;
-use futures_util::StreamExt;
+// use futures_util::StreamExt;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
+use uuid::Uuid;
 
 use crate::models::*;
 
@@ -16,8 +17,8 @@ impl TryFrom<DieselNote> for Note {
 
     fn try_from(note: DieselNote) -> Result<Self, Self::Error> {
         let note = Note {
-            id: String::from_utf8(note.id)?,
-            user_id: String::from_utf8(note.user_id)?,
+            id: note.id,
+            user_id: note.user_id,
             title: note.title,
             content: note.content,
             created: note.created.to_string(),
@@ -49,23 +50,22 @@ impl NotesService for MyService {
 
         println!("Connect: {:?}", start.elapsed());
 
-        let user_uuid = request.into_inner().user_id;
-        let user_uuid: Vec<u8> = user_uuid.as_bytes().to_vec();
-
-        let mut rows = get_notes_by_user_uuid(conn, user_uuid).await?;
+        let request = request.into_inner();
+        let notes = get_notes_by_user_uuid(conn, request.user_id).await?;
 
         println!("Prepare: {:?}", start.elapsed());
 
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
-            while let Some(row) = rows.next().await {
-                let note = match row {
-                    Ok(note) => note,
-                    Err(e) => {
-                        tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                        break;
-                    }
-                };
+            // while let Some(row) = rows.next().await {
+            for note in notes {
+                // let note = match row {
+                //     Ok(note) => note,
+                //     Err(e) => {
+                //         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                //         break;
+                //     }
+                // };
                 let note: Note = match Note::try_from(note) {
                     Ok(note) => note,
                     Err(e) => {
@@ -91,22 +91,23 @@ impl NotesService for MyService {
         println!("CreateNote = {:?}", request);
         let start = std::time::Instant::now();
 
-        let conn = self
+        let mut conn = self
             .pool
             .get()
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let note = request.into_inner();
-        let user_uuid: Vec<u8> = note.user_id.as_bytes().to_vec();
 
-        let new_note = UpsertNote {
-            id: None,
-            user_id: &user_uuid,
-            title: &note.title,
-            content: &note.content,
-        };
-        upsert_5000_note(conn, new_note).await?;
+        for _ in 0..5000 {
+            let new_note = UpsertNote {
+                id: &Uuid::now_v7().as_bytes().to_vec(),
+                user_id: &note.user_id,
+                title: &note.title,
+                content: &note.content,
+            };
+            upsert_note(&mut conn, new_note).await?;
+        }
 
         println!("Elapsed: {:.2?}", start.elapsed());
         return Ok(Response::new(Empty {}));

@@ -1,9 +1,8 @@
 use crate::proto::users_service_server::UsersService;
 use crate::proto::{AuthRequest, Empty, File, FileId, PaymentId, TargetId, User, UserIds};
 use crate::proto::{UserId, UserRole};
-use crate::{MyService, files_service};
+use crate::{files_service, MyService};
 use anyhow::Result;
-use std::iter::Iterator;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
@@ -19,7 +18,7 @@ impl TryFrom<DieselUser> for User {
 
     fn try_from(user: DieselUser) -> Result<Self, Self::Error> {
         Ok(User {
-            id: user.id.to_string(),
+            id: user.id,
             created: user.created.to_string(),
             updated: user.updated.to_string(),
             deleted: user.deleted.map(|d| d.to_string()),
@@ -58,7 +57,6 @@ impl UsersService for MyService {
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
         return files_service::get_file(pool, _request).await;
-
     }
     async fn create_file(&self, _request: Request<File>) -> Result<Response<File>, Status> {
         let pool = self
@@ -108,6 +106,7 @@ impl UsersService for MyService {
             Err(_) => {
                 let user = diesel::insert_into(users)
                     .values((
+                        id.eq(Uuid::now_v7().as_bytes().to_vec()),
                         email.eq(&request.email),
                         role.eq(UserRole::as_str_name(&UserRole::RoleUser)),
                         sub.eq(&request.sub),
@@ -137,11 +136,6 @@ impl UsersService for MyService {
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let user_ids = request.into_inner().user_ids;
-        let user_ids = user_ids
-            .into_iter()
-            .map(|val| Uuid::parse_str(&val).map_err(|e| anyhow::anyhow!(e)))
-            .collect::<Result<Vec<Uuid>>>()
-            .map_err(|e| Status::internal(e.to_string()))?;
 
         let results = users
             .filter(id.eq_any(&user_ids))
@@ -180,11 +174,9 @@ impl UsersService for MyService {
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
-        let user_uuid =
-            Uuid::parse_str(&request.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         let user: DieselUser = users
-            .filter(id.eq(user_uuid))
+            .filter(id.eq(&request.user_id))
             .first(&mut conn)
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
@@ -207,8 +199,6 @@ impl UsersService for MyService {
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
-        let user_uuid =
-            Uuid::parse_str(&request.id).map_err(|e| Status::internal(e.to_string()))?;
 
         let avatar_uuid = match request.avatar_id {
             Some(avatar_uuid) => Some(
@@ -219,7 +209,7 @@ impl UsersService for MyService {
         };
 
         let user = diesel::update(users)
-            .filter(id.eq(user_uuid))
+            .filter(id.eq(&request.id))
             .filter(deleted.is_null())
             .set((name.eq(&request.name), avatar_id.eq(avatar_uuid)))
             .get_result::<DieselUser>(&mut conn)
@@ -246,11 +236,9 @@ impl UsersService for MyService {
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
-        let user_uuid =
-            Uuid::parse_str(&request.user_id).map_err(|e| Status::internal(e.to_string()))?;
 
         diesel::update(users)
-            .filter(id.eq(&user_uuid))
+            .filter(id.eq(&request.user_id))
             .set((payment_id.eq(&request.payment_id),))
             .execute(&mut conn)
             .await

@@ -23,8 +23,6 @@ async fn main() -> Result<()> {
 
     let port = std::env::var("PORT").context("PORT not set")?;
     let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
-    let database_url_pool =
-        std::env::var("DATABASE_URL_POOL").context("DATABASE_URL_POOL not set")?;
 
     // Run migrations - diesel_async have an open PR to support this
     let mut conn = establish_connection_sync(&database_url)?;

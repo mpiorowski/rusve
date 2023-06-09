@@ -18,6 +18,7 @@ import {
     usersRustClient,
 } from "$lib/grpc";
 import { z } from "zod";
+import type { Empty__Output } from "$lib/proto/proto/Empty";
 
 export const load = (async ({ locals, url }) => {
     try {
@@ -31,19 +32,25 @@ export const load = (async ({ locals, url }) => {
 
         const userId = locals.userId;
         const request: UserId = { userId: userId };
-        const userIds = new Set<string>();
+        const userIds = new Set<Buffer>();
 
         /**
          * Get notes
          */
         let metadata = await createMetadata(uriNotes);
         const stream = clientNotes.getNotes(request, metadata);
-        const notes: Note__Output[] = [];
+        const notes: (Note__Output & { id: string } & { userId: string })[] =
+            [];
 
         await new Promise<Note__Output[]>((resolve, reject) => {
             stream.on("data", (note: Note__Output) => {
-                notes.push(note);
-                userIds.add(note.userId);
+                const n = {
+                    ...note,
+                    id: note.id.toString(),
+                    userId: note.userId.toString(),
+                };
+                notes.push(n);
+                userIds.add(n.userId);
             });
             stream.on("end", () => resolve(notes));
             stream.on("error", (err: unknown) => reject(err));
@@ -65,7 +72,11 @@ export const load = (async ({ locals, url }) => {
         });
 
         return {
-            notes: notes.slice(0, 1),
+            notes: notes.slice(0, 1).map((note) => ({
+                ...note,
+                id: note.id.toString(),
+                userId: note.userId.toString(),
+            })),
             time: performance.now() - start,
             length: notes.length,
             stream: {
@@ -97,7 +108,7 @@ export const actions = {
 
             const schema = z
                 .object({
-                    userId: z.string().uuid(),
+                    userId: z.instanceof(Buffer),
                     title: z.string().min(1).max(100),
                     content: z.string().min(1).max(1000),
                     type: z.union([z.literal("go"), z.literal("rust")]),
@@ -113,14 +124,13 @@ export const actions = {
             const clientNotes = isGo ? notesGoClient : notesRustClient;
 
             const metadata = await createMetadata(uriNotes);
-            await new Promise<Note__Output>((resolve, reject) => {
+            await new Promise<Empty__Output>((resolve, reject) => {
                 clientNotes.createNote(schema.data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });
             const end = performance.now();
             return {
-                success: true,
                 duration: end - start,
             };
         } catch (err) {
@@ -155,15 +165,14 @@ export const actions = {
             const clientNotes = isGo ? notesGoClient : notesRustClient;
 
             const metadata = await createMetadata(uriNotes);
-            const note = await new Promise<Note__Output>((resolve, reject) => {
-                clientNotes.deleteNote(data, metadata, (err, response) =>
-                    err || !response ? reject(err) : resolve(response),
+            await new Promise<void>((resolve, reject) => {
+                clientNotes.deleteNote(data, metadata, (err) =>
+                    err ? reject(err) : resolve(),
                 );
             });
 
             const end = performance.now();
             return {
-                note: note,
                 duration: end - start,
             };
         } catch (err) {
