@@ -116,8 +116,6 @@ pub struct Note {
     pub title: ::prost::alloc::string::String,
     #[prost(string, tag = "7")]
     pub content: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "8")]
-    pub user: ::core::option::Option<User>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

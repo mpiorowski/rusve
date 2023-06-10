@@ -76,8 +76,7 @@ impl UsersService for MyService {
     }
 
     async fn auth(&self, request: Request<AuthRequest>) -> Result<Response<User>, Status> {
-        #[cfg(debug_assertions)]
-        println!("Auth: {:?}", request);
+        println!("Auth");
         let start = std::time::Instant::now();
 
         let mut conn = self
@@ -126,7 +125,7 @@ impl UsersService for MyService {
         request: Request<UserIds>,
     ) -> Result<Response<Self::GetUsersStream>, Status> {
         #[cfg(debug_assertions)]
-        println!("GetUsers: {:?}", request);
+        println!("GetUsers");
         let start = std::time::Instant::now();
 
         let mut conn = self
@@ -163,7 +162,7 @@ impl UsersService for MyService {
 
     async fn get_user(&self, request: Request<UserId>) -> Result<Response<User>, Status> {
         #[cfg(debug_assertions)]
-        println!("GetUserr: {:?}", request);
+        println!("GetUser");
 
         let start = std::time::Instant::now();
 
@@ -189,7 +188,7 @@ impl UsersService for MyService {
 
     async fn update_user(&self, request: Request<User>) -> Result<Response<User>, Status> {
         #[cfg(debug_assertions)]
-        println!("UpdateUser: {:?}", request);
+        println!("UpdateUser");
         let start = std::time::Instant::now();
 
         let mut conn = self
@@ -226,7 +225,7 @@ impl UsersService for MyService {
         request: Request<PaymentId>,
     ) -> Result<Response<Empty>, Status> {
         #[cfg(debug_assertions)]
-        println!("UpdatePaymentId: {:?}", request);
+        println!("UpdatePaymentId");
         let start = std::time::Instant::now();
 
         let mut conn = self

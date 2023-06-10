@@ -15,7 +15,5 @@ message Note {
   bytes user_id = 5;
   string title = 6;
   string content = 7;
-
-  User user = 8;
 }
 

@@ -39,20 +39,19 @@ export const load = (async ({ locals, url }) => {
          */
         let metadata = await createMetadata(uriNotes);
         const stream = clientNotes.getNotes(request, metadata);
-        const notes: (Note__Output & { id: string } & { userId: string })[] =
+        const notes: (Note__Output | { id: string } | { userId: string })[] =
             [];
 
-        await new Promise<Note__Output[]>((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
             stream.on("data", (note: Note__Output) => {
-                const n = {
+                userIds.add(note.userId);
+                notes.push({
                     ...note,
                     id: note.id.toString(),
                     userId: note.userId.toString(),
-                };
-                notes.push(n);
-                userIds.add(n.userId);
+                });
             });
-            stream.on("end", () => resolve(notes));
+            stream.on("end", () => resolve());
             stream.on("error", (err: unknown) => reject(err));
         });
 
@@ -64,19 +63,18 @@ export const load = (async ({ locals, url }) => {
             { userIds: Array.from(userIds) },
             metadata,
         );
-        const users: User__Output[] = [];
-        const usersPromise = new Promise<User__Output[]>((resolve, reject) => {
-            usersStream.on("data", (user: User__Output) => users.push(user));
+        type User = User__Output | { id: string };
+        const users: User[] = [];
+        const usersPromise = new Promise<User[]>((resolve, reject) => {
+            usersStream.on("data", (user: User__Output) =>
+                users.push({ ...user, id: user.id.toString() }),
+            );
             usersStream.on("end", () => resolve(users));
             usersStream.on("error", (err: unknown) => reject(err));
         });
 
         return {
-            notes: notes.slice(0, 1).map((note) => ({
-                ...note,
-                id: note.id.toString(),
-                userId: note.userId.toString(),
-            })),
+            notes: notes.slice(0, 1),
             time: performance.now() - start,
             length: notes.length,
             stream: {

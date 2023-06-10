@@ -35,3 +35,6 @@ rustls = "0.21.1"
 rustls-native-certs = "0.6.2"
 tokio-postgres = "0.7.8"
 tokio-postgres-rustls = "0.10.0"
+
+# Mysql
+mysql_async = "0.32.2"

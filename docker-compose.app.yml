@@ -54,7 +54,8 @@ services:
     environment:
       ENV: development
       PORT: 443
-      DATABASE_URL: mysql://admin:12345@service-notes-db:3306/notes
+        # DATABASE_URL: mysql://admin:12345@service-notes-db:3306/notes
+      DATABASE_URL: mysql://znwa3so4cac6an2j9f2j:pscale_pw_FR5ohOOe4217u562VYtdmjwYrecF24Y1L1AcoSnNED8@aws.connect.psdb.cloud/notes
         # DATABASE_URL: postgresql://?host=service-notes-db&user=postgres&password=12345&dbname=notes
 
   service-notes-go:
@@ -68,7 +69,8 @@ services:
     environment:
       ENV: development
       PORT: 443
-      DATABASE_URL: admin:12345@tcp(service-notes-db:3306)/notes
+        # DATABASE_URL: admin:12345@tcp(service-notes-db:3306)/notes
+      DATABASE_URL: znwa3so4cac6an2j9f2j:pscale_pw_FR5ohOOe4217u562VYtdmjwYrecF24Y1L1AcoSnNED8@tcp(aws.connect.psdb.cloud)/notes?tls=true&parseTime=true
         # DATABASE_URL: postgresql://?host=service-notes-db&user=postgres&password=12345&dbname=notes
 
   directus:

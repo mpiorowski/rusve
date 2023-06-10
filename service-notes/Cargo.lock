@@ -1987,6 +1987,7 @@ dependencies = [
  "dotenvy",
  "futures-core",
  "futures-util",
+ "mysql_async",
  "prost",
  "rustls",
  "rustls-native-certs",

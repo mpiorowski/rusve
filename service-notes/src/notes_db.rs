@@ -14,19 +14,30 @@ use diesel_async::RunQueryDsl;
 pub async fn get_notes_by_user_uuid(
     mut conn: Object<AsyncMysqlConnection>,
     user_uuid: Vec<u8>,
-    //) -> Result<impl Stream<Item = QueryResult<DieselNote>>, Status> {
 ) -> Result<Vec<DieselNote>, Status> {
     let note = notes
         .select(DieselNote::as_select())
-        // .filter(user_id.eq(user_uuid))
+        .filter(user_id.eq(user_uuid))
         .filter(deleted.is_null())
-        .order(created.desc())
-        // .load_stream(&mut conn)
         .load(&mut conn)
         .await
         .map_err(|e| Status::internal(e.to_string()))?;
     Ok(note)
 }
+
+// pub async fn get_notes_by_user_uuid_stream_stream(
+//     mut conn: Object<AsyncMysqlConnection>,
+//     user_uuid: Vec<u8>,
+// ) -> Result<impl Stream<Item = QueryResult<DieselNote>>, Status> {
+//     let note = notes
+//         .select(DieselNote::as_select())
+//         .filter(user_id.eq(user_uuid))
+//         .filter(deleted.is_null())
+//         .load_stream(&mut conn)
+//         .await
+//         .map_err(|e| Status::internal(e.to_string()))?;
+//     Ok(note)
+// }
 
 pub async fn upsert_note(
     conn: &mut Object<AsyncMysqlConnection>,

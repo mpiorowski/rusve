@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
     _ "github.com/go-sql-driver/mysql"
-	// migrate "github.com/rubenv/sql-migrate"
+	migrate "github.com/rubenv/sql-migrate"
 	"google.golang.org/grpc"
 
 	pb "rusve/proto"
@@ -44,18 +44,18 @@ func init() {
 	log.Println("Connected to database")
 
     // Example of running migrations
-	// var migrationsDir = "./migrations"
-	// if ENV == "production" {
-	// 	migrationsDir = "/migrations"
-	// }
-	// migrations := &migrate.FileMigrationSource{
-	// 	Dir: migrationsDir,
-	// }
-	// n, err := migrate.Exec(db, "postgres", migrations, migrate.Up)
-	// if err != nil {
-	// 	log.Fatalf("Migrations failed: %v", err)
-	// }
-	// log.Printf("Applied migrations: %d", n)
+	var migrationsDir = "./migrations"
+	if ENV == "production" {
+		migrationsDir = "/migrations"
+	}
+	migrations := &migrate.FileMigrationSource{
+		Dir: migrationsDir,
+	}
+	n, err := migrate.Exec(db, "mysql", migrations, migrate.Up)
+	if err != nil {
+		log.Fatalf("Migrations failed: %v", err)
+	}
+	log.Printf("Applied migrations: %d", n)
 }
 
 func main() {
