@@ -27,14 +27,8 @@ dotenvy = "0.15.7"
 
 # Database
 diesel = { version = "2.1.0", features = ["mysql", "time", "uuid", "numeric"] }
-diesel-async = { version = "0.3.1", features = ["mysql", "deadpool", "bb8"] }
+diesel-async = { version = "0.3.1", features = ["mysql", "deadpool"] }
 diesel_migrations = { version = "2.1.0", features = ["mysql"] }
 
-# Tls
-rustls = "0.21.1"
-rustls-native-certs = "0.6.2"
-tokio-postgres = "0.7.8"
-tokio-postgres-rustls = "0.10.0"
-
 # Mysql
-mysql_async = "0.32.2"
+mysql_async = "*"

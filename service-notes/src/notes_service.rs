@@ -1,11 +1,11 @@
 use crate::{
-    notes_db::{delete_note, upsert_note},
+    notes_db::{delete_note, get_notes_by_user_uuid, upsert_note},
     proto::{notes_service_server::NotesService, Empty, Note, NoteId, UserId},
     MyService,
 };
 use anyhow::Result;
+use futures_util::StreamExt;
 use mysql_async::prelude::WithParams;
-// use futures_util::StreamExt;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
@@ -71,11 +71,11 @@ impl NotesService for MyService {
         println!("GetNotes");
         let start = std::time::Instant::now();
 
-        // let conn = self
-        //     .pool
-        //     .get()
-        //     .await
-        //     .map_err(|e| Status::internal(e.to_string()))?;
+        let conn = self
+            .pool
+            .get()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         let mut mysql_conn = self
             .mysql_pool
@@ -87,32 +87,78 @@ impl NotesService for MyService {
 
         let request = request.into_inner();
 
-        let notes = "SELECT * FROM notes where user_id = :user_id"
-            .with(params! {
-                "user_id" => request.user_id,
-            })
-            .map(
-                &mut mysql_conn,
-                |(id, created, updated, deleted, user_id, title, content)| MysqlNote {
-                    id,
-                    created,
-                    updated,
-                    deleted,
-                    user_id,
-                    title,
-                    content,
-                },
-            )
+        impl FromRow for MysqlNote {
+            fn from_row_opt(
+                row: mysql_async::Row,
+            ) -> std::result::Result<Self, mysql_async::FromRowError> {
+                let note = mysql_async::from_row::<MysqlNote>(row);
+                Ok(MysqlNote {
+                    id: note.id,
+                    created: note.created,
+                    updated: note.updated,
+                    deleted: note.deleted,
+                    user_id: note.user_id,
+                    title: note.title,
+                    content: note.content,
+                })
+            }
+        }
+
+        impl FromRow for Note {
+            fn from_row_opt(
+                row: mysql_async::Row,
+            ) -> std::result::Result<Self, mysql_async::FromRowError> {
+                let note = mysql_async::from_row::<MysqlNote>(row);
+                Ok(Note {
+                    id: note.id,
+                    created: note.created.to_string(),
+                    updated: note.updated.to_string(),
+                    deleted: note.deleted.map(|d| d.to_string()),
+                    user_id: note.user_id,
+                    title: note.title,
+                    content: note.content,
+                })
+            }
+        }
+
+        let notes = get_notes_by_user_uuid(conn, request.user_id)
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
+
+        // let notes = "SELECT * FROM notes where user_id = :user_id"
+        //     .with(params! {
+        //         "user_id" => request.user_id,
+        //     })
+        //     .map(
+        //         &mut mysql_conn,
+        //         |(id, created, updated, deleted, user_id, title, content)| MysqlNote {
+        //             id,
+        //             created,
+        //             updated,
+        //             deleted,
+        //             user_id,
+        //             title,
+        //             content,
+        //         },
+        //     )
+        //     .await
+        //     .map_err(|e| Status::internal(e.to_string()))?;
+
+        // let mut rows = "SELECT * FROM notes where user_id = :user_id"
+        //     .with(params! {
+        //         "user_id" => request.user_id,
+        //     })
+        //     .stream::<Note, _>(mysql_conn)
+        //     .await
+        //     .map_err(|e| Status::internal(e.to_string()))?;
 
         println!("Query: {:?}", start.elapsed());
 
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
-            // while let Some(row) = rows.next().await {
+            // while let Some(note) = notes.next().await {
             for note in notes {
-                // let note = match row {
+                // let note = match note {
                 //     Ok(note) => note,
                 //     Err(e) => {
                 //         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
