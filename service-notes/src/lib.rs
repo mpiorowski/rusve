@@ -8,6 +8,7 @@ use futures_util::future::{BoxFuture, FutureExt};
 pub fn establish_connection(database_url: &str) -> Result<Pool<AsyncMysqlConnection>> {
     let config = AsyncDieselConnectionManager::<AsyncMysqlConnection>::new(database_url);
     let pool = Pool::builder(config)
+        .max_size(10)
         .build()
         .context("Error creating pool")?;
     Ok(pool)

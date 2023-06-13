@@ -5,7 +5,7 @@ use crate::{
 };
 use anyhow::Result;
 use futures_util::StreamExt;
-use mysql_async::prelude::WithParams;
+use mysql_async::{from_row_opt, prelude::WithParams, Row};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
@@ -17,26 +17,43 @@ use crate::models::*;
 
 struct MysqlNote {
     pub id: Vec<u8>,
-    pub created: time::Duration,
-    pub updated: time::Duration,
-    pub deleted: Option<time::Duration>,
+    pub created: time::Date,
+    pub updated: time::Date,
+    pub deleted: Option<time::Date>,
     pub user_id: Vec<u8>,
     pub title: String,
     pub content: String,
 }
 
-impl TryFrom<DieselNote> for Note {
+impl TryFrom<Row> for Note {
     type Error = anyhow::Error;
 
-    fn try_from(note: DieselNote) -> Result<Self, Self::Error> {
+    fn try_from(row: Row) -> Result<Self, Self::Error> {
+        let note = from_row_opt(row)?;
+        Ok(note)
+    }
+}
+
+impl FromRow for Note {
+    fn from_row_opt(row: Row) -> Result<Self, mysql_async::FromRowError> {
+        let (id, created, updated, deleted, user_id, title, content) =
+            mysql_async::from_row_opt::<(
+                Vec<u8>,
+                time::Date,
+                time::Date,
+                Option<time::Date>,
+                Vec<u8>,
+                String,
+                String,
+            )>(row)?;
         let note = Note {
-            id: note.id,
-            user_id: note.user_id,
-            title: note.title,
-            content: note.content,
-            created: note.created.to_string(),
-            updated: note.updated.to_string(),
-            deleted: note.deleted.map(|d| d.to_string()),
+            id,
+            created: created.to_string(),
+            updated: updated.to_string(),
+            deleted: deleted.map(|d| d.to_string()),
+            user_id,
+            title,
+            content,
         };
         Ok(note)
     }
@@ -48,12 +65,29 @@ impl TryFrom<MysqlNote> for Note {
     fn try_from(note: MysqlNote) -> Result<Self, Self::Error> {
         let note = Note {
             id: note.id,
-            user_id: note.user_id,
-            title: note.title,
-            content: note.content,
             created: note.created.to_string(),
             updated: note.updated.to_string(),
             deleted: note.deleted.map(|d| d.to_string()),
+            user_id: note.user_id,
+            title: note.title,
+            content: note.content,
+        };
+        Ok(note)
+    }
+}
+
+impl TryFrom<DieselNote> for Note {
+    type Error = anyhow::Error;
+
+    fn try_from(note: DieselNote) -> Result<Self, Self::Error> {
+        let note = Note {
+            id: note.id,
+            created: note.created.to_string(),
+            updated: note.updated.to_string(),
+            deleted: note.deleted.map(|d| d.to_string()),
+            user_id: note.user_id,
+            title: note.title,
+            content: note.content,
         };
         Ok(note)
     }
@@ -71,59 +105,19 @@ impl NotesService for MyService {
         println!("GetNotes");
         let start = std::time::Instant::now();
 
-        let conn = self
-            .pool
-            .get()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
-
-        let mut mysql_conn = self
-            .mysql_pool
-            .get_conn()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
+        // let conn = self
+        //     .pool
+        //     .get()
+        //     .await
+        //     .map_err(|e| Status::internal(e.to_string()))?;
 
         println!("Connect: {:?}", start.elapsed());
 
         let request = request.into_inner();
 
-        impl FromRow for MysqlNote {
-            fn from_row_opt(
-                row: mysql_async::Row,
-            ) -> std::result::Result<Self, mysql_async::FromRowError> {
-                let note = mysql_async::from_row::<MysqlNote>(row);
-                Ok(MysqlNote {
-                    id: note.id,
-                    created: note.created,
-                    updated: note.updated,
-                    deleted: note.deleted,
-                    user_id: note.user_id,
-                    title: note.title,
-                    content: note.content,
-                })
-            }
-        }
-
-        impl FromRow for Note {
-            fn from_row_opt(
-                row: mysql_async::Row,
-            ) -> std::result::Result<Self, mysql_async::FromRowError> {
-                let note = mysql_async::from_row::<MysqlNote>(row);
-                Ok(Note {
-                    id: note.id,
-                    created: note.created.to_string(),
-                    updated: note.updated.to_string(),
-                    deleted: note.deleted.map(|d| d.to_string()),
-                    user_id: note.user_id,
-                    title: note.title,
-                    content: note.content,
-                })
-            }
-        }
-
-        let notes = get_notes_by_user_uuid(conn, request.user_id)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
+        // let notes = get_notes_by_user_uuid(conn, request.user_id)
+        //     .await
+        //     .map_err(|e| Status::internal(e.to_string()))?;
 
         // let notes = "SELECT * FROM notes where user_id = :user_id"
         //     .with(params! {
@@ -143,21 +137,38 @@ impl NotesService for MyService {
         //     )
         //     .await
         //     .map_err(|e| Status::internal(e.to_string()))?;
+        //
 
-        // let mut rows = "SELECT * FROM notes where user_id = :user_id"
-        //     .with(params! {
-        //         "user_id" => request.user_id,
-        //     })
-        //     .stream::<Note, _>(mysql_conn)
+        let mysql_conn = self
+            .mysql_pool
+            .get_conn()
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+
+        // let mut notes = mysql_conn
+        //     .exec_iter(
+        //         "SELECT * FROM notes where user_id = :user_id",
+        //         params! {
+        //             "user_id" => request.user_id,
+        //         },
+        //     )
         //     .await
         //     .map_err(|e| Status::internal(e.to_string()))?;
+
+        let mut notes = "SELECT * FROM notes where user_id = :user_id"
+            .with(params! {
+                "user_id" => request.user_id,
+            })
+            .stream(mysql_conn)
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         println!("Query: {:?}", start.elapsed());
 
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
-            // while let Some(note) = notes.next().await {
-            for note in notes {
+            loop {
+                let note = notes.next().await;
                 // let note = match note {
                 //     Ok(note) => note,
                 //     Err(e) => {
@@ -165,6 +176,19 @@ impl NotesService for MyService {
                 //         break;
                 //     }
                 // };
+                let note = match note {
+                    Some(note) => note,
+                    None => {
+                        break;
+                    }
+                };
+                let note: Note = match note {
+                    Ok(note) => note,
+                    Err(e) => {
+                        tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                        break;
+                    }
+                };
                 let note: Note = match Note::try_from(note) {
                     Ok(note) => note,
                     Err(e) => {
@@ -172,6 +196,30 @@ impl NotesService for MyService {
                         break;
                     }
                 };
+
+                // let note: Note = match Note::try_from(note) {
+                //     Ok(note) => note,
+                //     Err(e) => {
+                //         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                //         break;
+                //     }
+                // };
+
+                // for note in notes {
+                // let note = match note {
+                //     Ok(note) => note,
+                //     Err(e) => {
+                //         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                //         break;
+                //     }
+                // };
+                // let note: Note = match Note::from_row_opt(note) {
+                //     Ok(note) => note,
+                //     Err(e) => {
+                //         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                //         break;
+                //     }
+                // };
                 match tx.send(Ok(note)).await {
                     Ok(_) => {}
                     Err(e) => {
@@ -231,7 +279,7 @@ impl NotesService for MyService {
 
         let note = request.into_inner();
 
-        for _ in 0..5000 {
+        for _ in 0..50 {
             let new_note = UpsertNote {
                 id: &Uuid::now_v7().as_bytes().to_vec(),
                 user_id: &note.user_id,
