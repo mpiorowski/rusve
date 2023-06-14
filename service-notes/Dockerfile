@@ -10,7 +10,7 @@ COPY ./src /app/src
 RUN RUSTFLAGS="--cfg uuid_unstable" cargo build --release
 
 # Production image
-FROM debian:bookworm-slim AS prod
+FROM debian:bullseye-slim AS prod
 COPY --from=build /app/target/release /app
 
 # Add openssl and ca-certificates
