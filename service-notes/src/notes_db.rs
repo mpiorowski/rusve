@@ -1,8 +1,8 @@
 use diesel_async::{pooled_connection::deadpool::Object, AsyncMysqlConnection};
 use tonic::Status;
 
-// use futures_core::Stream;
-// use diesel::QueryResult;
+use diesel::QueryResult;
+use futures_core::Stream;
 
 use crate::{
     models::{DieselNote, UpsertNote},
@@ -25,19 +25,19 @@ pub async fn get_notes_by_user_uuid(
     Ok(note)
 }
 
-// pub async fn get_notes_by_user_uuid_stream_stream(
-//     mut conn: Object<AsyncMysqlConnection>,
-//     user_uuid: Vec<u8>,
-// ) -> Result<impl Stream<Item = QueryResult<DieselNote>>, Status> {
-//     let note = notes
-//         .select(DieselNote::as_select())
-//         .filter(user_id.eq(user_uuid))
-//         .filter(deleted.is_null())
-//         .load_stream(&mut conn)
-//         .await
-//         .map_err(|e| Status::internal(e.to_string()))?;
-//     Ok(note)
-// }
+pub async fn get_notes_by_user_uuid_stream_stream(
+    mut conn: Object<AsyncMysqlConnection>,
+    user_uuid: Vec<u8>,
+) -> Result<impl Stream<Item = QueryResult<DieselNote>>, Status> {
+    let note = notes
+        .select(DieselNote::as_select())
+        .filter(user_id.eq(user_uuid))
+        .filter(deleted.is_null())
+        .load_stream(&mut conn)
+        .await
+        .map_err(|e| Status::internal(e.to_string()))?;
+    Ok(note)
+}
 
 pub async fn upsert_note(
     conn: &mut Object<AsyncMysqlConnection>,

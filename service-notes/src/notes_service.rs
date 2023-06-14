@@ -1,5 +1,4 @@
 use crate::{
-    notes_db::{delete_note, get_notes_by_user_uuid, upsert_note},
     proto::{notes_service_server::NotesService, Empty, Note, NoteId, UserId},
     MyService,
 };
@@ -12,18 +11,6 @@ use tonic::{Request, Response, Status};
 use uuid::Uuid;
 
 use mysql_async::prelude::*;
-
-use crate::models::*;
-
-struct MysqlNote {
-    pub id: Vec<u8>,
-    pub created: time::Date,
-    pub updated: time::Date,
-    pub deleted: Option<time::Date>,
-    pub user_id: Vec<u8>,
-    pub title: String,
-    pub content: String,
-}
 
 impl TryFrom<Row> for Note {
     type Error = anyhow::Error;
@@ -59,39 +46,22 @@ impl FromRow for Note {
     }
 }
 
-impl TryFrom<MysqlNote> for Note {
-    type Error = anyhow::Error;
-
-    fn try_from(note: MysqlNote) -> Result<Self, Self::Error> {
-        let note = Note {
-            id: note.id,
-            created: note.created.to_string(),
-            updated: note.updated.to_string(),
-            deleted: note.deleted.map(|d| d.to_string()),
-            user_id: note.user_id,
-            title: note.title,
-            content: note.content,
-        };
-        Ok(note)
-    }
-}
-
-impl TryFrom<DieselNote> for Note {
-    type Error = anyhow::Error;
-
-    fn try_from(note: DieselNote) -> Result<Self, Self::Error> {
-        let note = Note {
-            id: note.id,
-            created: note.created.to_string(),
-            updated: note.updated.to_string(),
-            deleted: note.deleted.map(|d| d.to_string()),
-            user_id: note.user_id,
-            title: note.title,
-            content: note.content,
-        };
-        Ok(note)
-    }
-}
+// impl TryFrom<DieselNote> for Note {
+//     type Error = anyhow::Error;
+// 
+//     fn try_from(note: DieselNote) -> Result<Self, Self::Error> {
+//         let note = Note {
+//             id: note.id,
+//             created: note.created.to_string(),
+//             updated: note.updated.to_string(),
+//             deleted: note.deleted.map(|d| d.to_string()),
+//             user_id: note.user_id,
+//             title: note.title,
+//             content: note.content,
+//         };
+//         Ok(note)
+//     }
+// }
 
 #[tonic::async_trait]
 impl NotesService for MyService {
@@ -139,8 +109,8 @@ impl NotesService for MyService {
         //     .map_err(|e| Status::internal(e.to_string()))?;
         //
 
-        let mysql_conn = self
-            .mysql_pool
+        let conn = self
+            .pool
             .get_conn()
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
@@ -159,7 +129,7 @@ impl NotesService for MyService {
             .with(params! {
                 "user_id" => request.user_id,
             })
-            .stream(mysql_conn)
+            .stream(conn)
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
@@ -169,13 +139,6 @@ impl NotesService for MyService {
         tokio::spawn(async move {
             loop {
                 let note = notes.next().await;
-                // let note = match note {
-                //     Ok(note) => note,
-                //     Err(e) => {
-                //         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                //         break;
-                //     }
-                // };
                 let note = match note {
                     Some(note) => note,
                     None => {
@@ -196,30 +159,6 @@ impl NotesService for MyService {
                         break;
                     }
                 };
-
-                // let note: Note = match Note::try_from(note) {
-                //     Ok(note) => note,
-                //     Err(e) => {
-                //         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                //         break;
-                //     }
-                // };
-
-                // for note in notes {
-                // let note = match note {
-                //     Ok(note) => note,
-                //     Err(e) => {
-                //         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                //         break;
-                //     }
-                // };
-                // let note: Note = match Note::from_row_opt(note) {
-                //     Ok(note) => note,
-                //     Err(e) => {
-                //         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-                //         break;
-                //     }
-                // };
                 match tx.send(Ok(note)).await {
                     Ok(_) => {}
                     Err(e) => {
@@ -230,39 +169,6 @@ impl NotesService for MyService {
             }
             println!("Elapsed: {:.2?}", start.elapsed());
         });
-
-        // let notes = get_notes_by_user_uuid(conn, request.user_id).await?;
-
-        // println!("Prepare: {:?}", start.elapsed());
-
-        // let (tx, rx) = mpsc::channel(128);
-        // tokio::spawn(async move {
-        //     // while let Some(row) = rows.next().await {
-        //     for note in notes {
-        //         // let note = match row {
-        //         //     Ok(note) => note,
-        //         //     Err(e) => {
-        //         //         tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-        //         //         break;
-        //         //     }
-        //         // };
-        //         let note: Note = match Note::try_from(note) {
-        //             Ok(note) => note,
-        //             Err(e) => {
-        //                 tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
-        //                 break;
-        //             }
-        //         };
-        //         match tx.send(Ok(note)).await {
-        //             Ok(_) => {}
-        //             Err(e) => {
-        //                 println!("Error: {:?}", e);
-        //                 break;
-        //             }
-        //         }
-        //     }
-        //     println!("Elapsed: {:.2?}", start.elapsed());
-        // });
         Ok(Response::new(ReceiverStream::new(rx)))
     }
 
@@ -273,23 +179,25 @@ impl NotesService for MyService {
 
         let mut conn = self
             .pool
-            .get()
+            .get_conn()
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let note = request.into_inner();
 
         for _ in 0..50 {
-            let new_note = UpsertNote {
-                id: &Uuid::now_v7().as_bytes().to_vec(),
-                user_id: &note.user_id,
-                title: &note.title,
-                content: &note.content,
-            };
-            upsert_note(&mut conn, new_note).await?;
+            r"insert into notes (id, user_id, title, content) values (:id, :user_id, :title, :content) on duplicate key update title = :title, content = :content"
+                .with(
+                    params! {
+                        "id" => &Uuid::now_v7().as_bytes().to_vec(),
+                        "user_id" => &note.user_id,
+                        "title" => &note.title,
+                        "content" => &note.content,
+                    }).run(&mut conn).await.map_err(|e| Status::internal(e.to_string()))?;
         }
 
         println!("Elapsed: {:.2?}", start.elapsed());
+        drop(conn);
         return Ok(Response::new(Empty {}));
     }
 
@@ -298,17 +206,25 @@ impl NotesService for MyService {
         println!("DeleteNote");
         let start = std::time::Instant::now();
 
-        let conn = self
+        let mut conn = self
             .pool
-            .get()
+            .get_conn()
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
         let request = request.into_inner();
 
-        delete_note(conn, request.note_id, request.user_id).await?;
+        r"delete from notes where id = :id and user_id = :user_id"
+            .with(params! {
+                "id" => request.note_id,
+                "user_id" => request.user_id,
+            })
+            .run(&mut conn)
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
 
         println!("Elapsed: {:.2?}", start.elapsed());
+        drop(conn);
         return Ok(Response::new(Empty {}));
     }
 }
