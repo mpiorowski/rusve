@@ -2,22 +2,22 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"time"
 
 	pb "rusve/proto"
 
+	"github.com/gofrs/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (s *server) GetNotes(in *pb.UserId, stream pb.NotesService_GetNotesServer) error {
-	log.Printf("GetNotes: %v", in.UserId)
+	log.Printf("GetNotes")
 
 	start := time.Now()
 
-	rows, err := db.Query(`select * from notes where user_id = $1 and deleted is null order by created desc`, in.UserId)
+	rows, err := db.Query(`select * from notes where user_id = ? and deleted is null`, in.UserId)
 	if err != nil {
 		log.Printf("db.Query: %v", err)
 		return err
@@ -45,8 +45,8 @@ func (s *server) GetNotes(in *pb.UserId, stream pb.NotesService_GetNotesServer) 
 	return nil
 }
 
-func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Note, error) {
-	log.Printf("CreateNote: %v", in)
+func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Empty, error) {
+	log.Printf("CreateNote")
 
 	rules := map[string]string{
 		"UserId":  "required,max=100",
@@ -60,28 +60,29 @@ func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Note, error) 
 		return nil, status.Error(codes.InvalidArgument, "Invalid argument")
 	}
 
-	var row *sql.Row
-	var note *pb.Note
-	if in.Id == "" {
-        // for benchmarks, delete all notes and create 5000 new ones
-		_, err = db.Exec(`delete from notes where user_id = $1`, in.UserId)
-        if err != nil {
-            log.Printf("db.Exec: %v", err)
-            return nil, err
-        }
+	if len(in.Id) == 0 {
+		// for benchmarks, delete all notes and create 5000 new ones
+		_, err = db.Exec(`delete from notes where user_id = ?`, in.UserId)
+		if err != nil {
+			log.Printf("db.Exec: %v", err)
+			return nil, err
+		}
 		for i := 0; i < 5000; i++ {
-			row = db.QueryRow(`insert into notes (user_id, title, content) values ($1, $2, $3) returning *`, in.UserId, in.Title, in.Content)
-			note, err = mapNote(nil, row)
+			uuid, err := uuid.NewV7()
+            if err != nil {
+                log.Printf("uuid.NewV7: %v", err)
+                return nil, err
+            }
+			_, err = db.Exec(`insert into notes (id, user_id, title, content) values (?, ?, ?, ?)`, uuid.Bytes(), in.UserId, in.Title, in.Content)
 			if err != nil {
-				log.Printf("mapNote: %v", err)
+				log.Printf("db.Exec: %v", err)
 				return nil, err
 			}
 		}
 	} else {
-		row = db.QueryRow(`update notes set title = $1, content = $2 where id = $3 and user_id = $4 returning *`, in.Title, in.Content, in.Id, in.UserId)
-		note, err = mapNote(nil, row)
+		_, err = db.Exec(`update notes set title = ?, content = ? where id = ? and user_id = ?`, in.Title, in.Content, in.Id, in.UserId)
 		if err != nil {
-			log.Printf("mapNote: %v", err)
+			log.Printf("db.Exec: %v", err)
 			return nil, err
 		}
 	}
@@ -89,17 +90,17 @@ func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Note, error) 
 		log.Printf("mapNote: %v", err)
 		return nil, err
 	}
-	return note, nil
+	return &pb.Empty{}, nil
 }
 
-func (s *server) DeleteNote(ctx context.Context, in *pb.NoteId) (*pb.Note, error) {
-    log.Printf("DeleteNote: %v", in)
+func (s *server) DeleteNote(ctx context.Context, in *pb.NoteId) (*pb.Empty, error) {
+	log.Printf("DeleteNote")
 
-	row := db.QueryRow(`update notes set deleted = now() where id = $1 and user_id = $2 returning *`, in.NoteId, in.UserId)
-	note, err := mapNote(nil, row)
+	_, err := db.Exec(`update notes set deleted = now() where id = ? and user_id = ?`, in.NoteId, in.UserId)
 	if err != nil {
-		log.Printf("mapNote: %v", err)
+		log.Printf("db.Exec: %v", err)
 		return nil, err
 	}
-	return note, nil
+
+	return &pb.Empty{}, nil
 }

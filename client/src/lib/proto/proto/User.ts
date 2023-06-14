@@ -3,7 +3,7 @@
 import type { UserRole as _proto_UserRole, UserRole__Output as _proto_UserRole__Output } from '../proto/UserRole';
 
 export interface User {
-  'id'?: (string);
+  'id'?: (Buffer | Uint8Array | string);
   'created'?: (string);
   'updated'?: (string);
   'deleted'?: (string);
@@ -19,7 +19,7 @@ export interface User {
 }
 
 export interface User__Output {
-  'id': (string);
+  'id': (Buffer);
   'created': (string);
   'updated': (string);
   'deleted'?: (string);

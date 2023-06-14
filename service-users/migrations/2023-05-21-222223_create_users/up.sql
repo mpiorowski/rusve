@@ -1,6 +1,6 @@
 CREATE TABLE
   users (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid (),
+    id bytea PRIMARY KEY,
     created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted timestamptz,

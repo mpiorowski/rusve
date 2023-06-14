@@ -1,4 +1,4 @@
-import { redirect, type Handle } from "@sveltejs/kit";
+import { redirect, type Handle, type HandleServerError } from "@sveltejs/kit";
 import type { AuthRequest } from "$lib/proto/proto/AuthRequest";
 import { createMetadata } from "$lib/metadata";
 import { usersGoClient, usersRustClient } from "$lib/grpc";
@@ -26,7 +26,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     const now = performance.now();
     const isGo = event.url.searchParams.get("lang") === "go";
     const emptySession = {
-        userId: "",
+        userId: Buffer.from(""),
         paymentId: "",
         email: "",
         role: "",
@@ -114,10 +114,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     const isApiAuth = event.url.pathname === "/api/auth";
     const isAuth = event.url.pathname === "/auth";
-    if (!isAuth && !isApiAuth && !event.locals.userId) {
+    if (!isAuth && !isApiAuth && !event.locals.userId.length) {
         throw redirect(303, "/");
     }
-    if (isAuth && event.locals.userId) {
+    if (isAuth && event.locals.userId.length) {
         throw redirect(303, "/");
     }
 

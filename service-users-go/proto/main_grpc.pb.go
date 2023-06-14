@@ -447,235 +447,13 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 	Metadata: "main.proto",
 }
 
-// UtilsServiceClient is the client API for UtilsService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type UtilsServiceClient interface {
-	GetFiles(ctx context.Context, in *TargetId, opts ...grpc.CallOption) (UtilsService_GetFilesClient, error)
-	GetFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error)
-	CreateFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*File, error)
-	DeleteFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error)
-}
-
-type utilsServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewUtilsServiceClient(cc grpc.ClientConnInterface) UtilsServiceClient {
-	return &utilsServiceClient{cc}
-}
-
-func (c *utilsServiceClient) GetFiles(ctx context.Context, in *TargetId, opts ...grpc.CallOption) (UtilsService_GetFilesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &UtilsService_ServiceDesc.Streams[0], "/proto.UtilsService/GetFiles", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &utilsServiceGetFilesClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type UtilsService_GetFilesClient interface {
-	Recv() (*File, error)
-	grpc.ClientStream
-}
-
-type utilsServiceGetFilesClient struct {
-	grpc.ClientStream
-}
-
-func (x *utilsServiceGetFilesClient) Recv() (*File, error) {
-	m := new(File)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *utilsServiceClient) GetFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error) {
-	out := new(File)
-	err := c.cc.Invoke(ctx, "/proto.UtilsService/GetFile", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *utilsServiceClient) CreateFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*File, error) {
-	out := new(File)
-	err := c.cc.Invoke(ctx, "/proto.UtilsService/CreateFile", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *utilsServiceClient) DeleteFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error) {
-	out := new(File)
-	err := c.cc.Invoke(ctx, "/proto.UtilsService/DeleteFile", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// UtilsServiceServer is the server API for UtilsService service.
-// All implementations must embed UnimplementedUtilsServiceServer
-// for forward compatibility
-type UtilsServiceServer interface {
-	GetFiles(*TargetId, UtilsService_GetFilesServer) error
-	GetFile(context.Context, *FileId) (*File, error)
-	CreateFile(context.Context, *File) (*File, error)
-	DeleteFile(context.Context, *FileId) (*File, error)
-	mustEmbedUnimplementedUtilsServiceServer()
-}
-
-// UnimplementedUtilsServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedUtilsServiceServer struct {
-}
-
-func (UnimplementedUtilsServiceServer) GetFiles(*TargetId, UtilsService_GetFilesServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetFiles not implemented")
-}
-func (UnimplementedUtilsServiceServer) GetFile(context.Context, *FileId) (*File, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFile not implemented")
-}
-func (UnimplementedUtilsServiceServer) CreateFile(context.Context, *File) (*File, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateFile not implemented")
-}
-func (UnimplementedUtilsServiceServer) DeleteFile(context.Context, *FileId) (*File, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
-}
-func (UnimplementedUtilsServiceServer) mustEmbedUnimplementedUtilsServiceServer() {}
-
-// UnsafeUtilsServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to UtilsServiceServer will
-// result in compilation errors.
-type UnsafeUtilsServiceServer interface {
-	mustEmbedUnimplementedUtilsServiceServer()
-}
-
-func RegisterUtilsServiceServer(s grpc.ServiceRegistrar, srv UtilsServiceServer) {
-	s.RegisterService(&UtilsService_ServiceDesc, srv)
-}
-
-func _UtilsService_GetFiles_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(TargetId)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(UtilsServiceServer).GetFiles(m, &utilsServiceGetFilesServer{stream})
-}
-
-type UtilsService_GetFilesServer interface {
-	Send(*File) error
-	grpc.ServerStream
-}
-
-type utilsServiceGetFilesServer struct {
-	grpc.ServerStream
-}
-
-func (x *utilsServiceGetFilesServer) Send(m *File) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _UtilsService_GetFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FileId)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UtilsServiceServer).GetFile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.UtilsService/GetFile",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UtilsServiceServer).GetFile(ctx, req.(*FileId))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UtilsService_CreateFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(File)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UtilsServiceServer).CreateFile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.UtilsService/CreateFile",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UtilsServiceServer).CreateFile(ctx, req.(*File))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UtilsService_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FileId)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UtilsServiceServer).DeleteFile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.UtilsService/DeleteFile",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UtilsServiceServer).DeleteFile(ctx, req.(*FileId))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// UtilsService_ServiceDesc is the grpc.ServiceDesc for UtilsService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var UtilsService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.UtilsService",
-	HandlerType: (*UtilsServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetFile",
-			Handler:    _UtilsService_GetFile_Handler,
-		},
-		{
-			MethodName: "CreateFile",
-			Handler:    _UtilsService_CreateFile_Handler,
-		},
-		{
-			MethodName: "DeleteFile",
-			Handler:    _UtilsService_DeleteFile_Handler,
-		},
-	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "GetFiles",
-			Handler:       _UtilsService_GetFiles_Handler,
-			ServerStreams: true,
-		},
-	},
-	Metadata: "main.proto",
-}
-
 // NotesServiceClient is the client API for NotesService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NotesServiceClient interface {
 	GetNotes(ctx context.Context, in *UserId, opts ...grpc.CallOption) (NotesService_GetNotesClient, error)
-	CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Note, error)
-	DeleteNote(ctx context.Context, in *NoteId, opts ...grpc.CallOption) (*Note, error)
+	CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error)
+	DeleteNote(ctx context.Context, in *NoteId, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type notesServiceClient struct {
@@ -718,8 +496,8 @@ func (x *notesServiceGetNotesClient) Recv() (*Note, error) {
 	return m, nil
 }
 
-func (c *notesServiceClient) CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Note, error) {
-	out := new(Note)
+func (c *notesServiceClient) CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/proto.NotesService/CreateNote", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -727,8 +505,8 @@ func (c *notesServiceClient) CreateNote(ctx context.Context, in *Note, opts ...g
 	return out, nil
 }
 
-func (c *notesServiceClient) DeleteNote(ctx context.Context, in *NoteId, opts ...grpc.CallOption) (*Note, error) {
-	out := new(Note)
+func (c *notesServiceClient) DeleteNote(ctx context.Context, in *NoteId, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/proto.NotesService/DeleteNote", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -741,8 +519,8 @@ func (c *notesServiceClient) DeleteNote(ctx context.Context, in *NoteId, opts ..
 // for forward compatibility
 type NotesServiceServer interface {
 	GetNotes(*UserId, NotesService_GetNotesServer) error
-	CreateNote(context.Context, *Note) (*Note, error)
-	DeleteNote(context.Context, *NoteId) (*Note, error)
+	CreateNote(context.Context, *Note) (*Empty, error)
+	DeleteNote(context.Context, *NoteId) (*Empty, error)
 	mustEmbedUnimplementedNotesServiceServer()
 }
 
@@ -753,10 +531,10 @@ type UnimplementedNotesServiceServer struct {
 func (UnimplementedNotesServiceServer) GetNotes(*UserId, NotesService_GetNotesServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetNotes not implemented")
 }
-func (UnimplementedNotesServiceServer) CreateNote(context.Context, *Note) (*Note, error) {
+func (UnimplementedNotesServiceServer) CreateNote(context.Context, *Note) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateNote not implemented")
 }
-func (UnimplementedNotesServiceServer) DeleteNote(context.Context, *NoteId) (*Note, error) {
+func (UnimplementedNotesServiceServer) DeleteNote(context.Context, *NoteId) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteNote not implemented")
 }
 func (UnimplementedNotesServiceServer) mustEmbedUnimplementedNotesServiceServer() {}

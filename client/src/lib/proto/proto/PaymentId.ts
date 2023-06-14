@@ -2,11 +2,11 @@
 
 
 export interface PaymentId {
-  'userId'?: (string);
+  'userId'?: (Buffer | Uint8Array | string);
   'paymentId'?: (string);
 }
 
 export interface PaymentId__Output {
-  'userId': (string);
+  'userId': (Buffer);
   'paymentId': (string);
 }

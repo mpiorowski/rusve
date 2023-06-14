@@ -15,7 +15,7 @@ diesel::table! {
 
 diesel::table! {
     users (id) {
-        id -> Uuid,
+        id -> Bytea,
         created -> Timestamptz,
         updated -> Timestamptz,
         deleted -> Nullable<Timestamptz>,

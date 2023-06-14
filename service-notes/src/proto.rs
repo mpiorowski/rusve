@@ -1,16 +1,8 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct AuthRequest {
-    #[prost(string, tag = "1")]
-    pub sub: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub email: ::prost::alloc::string::String,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct User {
-    #[prost(string, tag = "1")]
-    pub id: ::prost::alloc::string::String,
+    #[prost(bytes = "vec", tag = "1")]
+    pub id: ::prost::alloc::vec::Vec<u8>,
     #[prost(string, tag = "2")]
     pub created: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
@@ -23,12 +15,34 @@ pub struct User {
     pub role: i32,
     #[prost(string, tag = "7")]
     pub sub: ::prost::alloc::string::String,
-    #[prost(string, optional, tag = "8")]
-    pub name: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, tag = "8")]
+    pub name: ::prost::alloc::string::String,
     #[prost(string, optional, tag = "9")]
-    pub avatar: ::core::option::Option<::prost::alloc::string::String>,
+    pub avatar_id: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag = "10")]
     pub payment_id: ::core::option::Option<::prost::alloc::string::String>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct File {
+    #[prost(string, tag = "1")]
+    pub id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub created: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub updated: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "4")]
+    pub deleted: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, tag = "5")]
+    pub target_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "6")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(enumeration = "FileType", tag = "7")]
+    pub r#type: i32,
+    #[prost(bytes = "vec", tag = "8")]
+    pub buffer: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "9")]
+    pub url: ::prost::alloc::string::String,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -59,42 +73,6 @@ impl UserRole {
         }
     }
 }
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct TargetId {
-    #[prost(string, tag = "1")]
-    pub target_id: ::prost::alloc::string::String,
-    #[prost(enumeration = "FileType", tag = "2")]
-    pub r#type: i32,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FileId {
-    #[prost(string, tag = "1")]
-    pub file_id: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub target_id: ::prost::alloc::string::String,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct File {
-    #[prost(string, tag = "1")]
-    pub id: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub created: ::prost::alloc::string::String,
-    #[prost(string, tag = "3")]
-    pub updated: ::prost::alloc::string::String,
-    #[prost(string, optional, tag = "4")]
-    pub deleted: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, tag = "5")]
-    pub target_id: ::prost::alloc::string::String,
-    #[prost(string, tag = "6")]
-    pub name: ::prost::alloc::string::String,
-    #[prost(enumeration = "FileType", tag = "7")]
-    pub r#type: i32,
-    #[prost(bytes = "vec", tag = "8")]
-    pub buffer: ::prost::alloc::vec::Vec<u8>,
-}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum FileType {
@@ -123,31 +101,21 @@ impl FileType {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct NoteId {
-    #[prost(string, tag = "1")]
-    pub note_id: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub user_id: ::prost::alloc::string::String,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Note {
-    #[prost(string, tag = "1")]
-    pub id: ::prost::alloc::string::String,
+    #[prost(bytes = "vec", tag = "1")]
+    pub id: ::prost::alloc::vec::Vec<u8>,
     #[prost(string, tag = "2")]
     pub created: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub updated: ::prost::alloc::string::String,
     #[prost(string, optional, tag = "4")]
     pub deleted: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, tag = "5")]
-    pub user_id: ::prost::alloc::string::String,
+    #[prost(bytes = "vec", tag = "5")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
     #[prost(string, tag = "6")]
     pub title: ::prost::alloc::string::String,
     #[prost(string, tag = "7")]
     pub content: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "8")]
-    pub user: ::core::option::Option<User>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -155,22 +123,54 @@ pub struct Empty {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserId {
-    #[prost(string, tag = "1")]
-    pub user_id: ::prost::alloc::string::String,
+    #[prost(bytes = "vec", tag = "1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserIds {
-    #[prost(string, repeated, tag = "1")]
-    pub user_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(bytes = "vec", repeated, tag = "1")]
+    pub user_ids: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PaymentId {
-    #[prost(string, tag = "1")]
-    pub user_id: ::prost::alloc::string::String,
+    #[prost(bytes = "vec", tag = "1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
     #[prost(string, tag = "2")]
     pub payment_id: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct TargetId {
+    #[prost(string, tag = "1")]
+    pub target_id: ::prost::alloc::string::String,
+    #[prost(enumeration = "FileType", tag = "2")]
+    pub r#type: i32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FileId {
+    #[prost(string, tag = "1")]
+    pub file_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub target_id: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct AuthRequest {
+    #[prost(string, tag = "1")]
+    pub sub: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub email: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NoteId {
+    #[prost(bytes = "vec", tag = "1")]
+    pub note_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(bytes = "vec", tag = "2")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// Generated client implementations.
 pub mod users_service_client {
@@ -323,7 +323,7 @@ pub mod users_service_client {
                 .insert(GrpcMethod::new("proto.UsersService", "GetUser"));
             self.inner.unary(req, path, codec).await
         }
-        pub async fn create_user(
+        pub async fn update_user(
             &mut self,
             request: impl tonic::IntoRequest<super::User>,
         ) -> std::result::Result<tonic::Response<super::User>, tonic::Status> {
@@ -338,11 +338,11 @@ pub mod users_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UsersService/CreateUser",
+                "/proto.UsersService/UpdateUser",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("proto.UsersService", "CreateUser"));
+                .insert(GrpcMethod::new("proto.UsersService", "UpdateUser"));
             self.inner.unary(req, path, codec).await
         }
         pub async fn update_payment_id(
@@ -367,93 +367,6 @@ pub mod users_service_client {
                 .insert(GrpcMethod::new("proto.UsersService", "UpdatePaymentId"));
             self.inner.unary(req, path, codec).await
         }
-    }
-}
-/// Generated client implementations.
-pub mod utils_service_client {
-    #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
-    use tonic::codegen::*;
-    use tonic::codegen::http::Uri;
-    #[derive(Debug, Clone)]
-    pub struct UtilsServiceClient<T> {
-        inner: tonic::client::Grpc<T>,
-    }
-    impl UtilsServiceClient<tonic::transport::Channel> {
-        /// Attempt to create a new client by connecting to a given endpoint.
-        pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
-        where
-            D: TryInto<tonic::transport::Endpoint>,
-            D::Error: Into<StdError>,
-        {
-            let conn = tonic::transport::Endpoint::new(dst)?.connect().await?;
-            Ok(Self::new(conn))
-        }
-    }
-    impl<T> UtilsServiceClient<T>
-    where
-        T: tonic::client::GrpcService<tonic::body::BoxBody>,
-        T::Error: Into<StdError>,
-        T::ResponseBody: Body<Data = Bytes> + Send + 'static,
-        <T::ResponseBody as Body>::Error: Into<StdError> + Send,
-    {
-        pub fn new(inner: T) -> Self {
-            let inner = tonic::client::Grpc::new(inner);
-            Self { inner }
-        }
-        pub fn with_origin(inner: T, origin: Uri) -> Self {
-            let inner = tonic::client::Grpc::with_origin(inner, origin);
-            Self { inner }
-        }
-        pub fn with_interceptor<F>(
-            inner: T,
-            interceptor: F,
-        ) -> UtilsServiceClient<InterceptedService<T, F>>
-        where
-            F: tonic::service::Interceptor,
-            T::ResponseBody: Default,
-            T: tonic::codegen::Service<
-                http::Request<tonic::body::BoxBody>,
-                Response = http::Response<
-                    <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
-                >,
-            >,
-            <T as tonic::codegen::Service<
-                http::Request<tonic::body::BoxBody>,
-            >>::Error: Into<StdError> + Send + Sync,
-        {
-            UtilsServiceClient::new(InterceptedService::new(inner, interceptor))
-        }
-        /// Compress requests with the given encoding.
-        ///
-        /// This requires the server to support it otherwise it might respond with an
-        /// error.
-        #[must_use]
-        pub fn send_compressed(mut self, encoding: CompressionEncoding) -> Self {
-            self.inner = self.inner.send_compressed(encoding);
-            self
-        }
-        /// Enable decompressing responses.
-        #[must_use]
-        pub fn accept_compressed(mut self, encoding: CompressionEncoding) -> Self {
-            self.inner = self.inner.accept_compressed(encoding);
-            self
-        }
-        /// Limits the maximum size of a decoded message.
-        ///
-        /// Default: `4MB`
-        #[must_use]
-        pub fn max_decoding_message_size(mut self, limit: usize) -> Self {
-            self.inner = self.inner.max_decoding_message_size(limit);
-            self
-        }
-        /// Limits the maximum size of an encoded message.
-        ///
-        /// Default: `usize::MAX`
-        #[must_use]
-        pub fn max_encoding_message_size(mut self, limit: usize) -> Self {
-            self.inner = self.inner.max_encoding_message_size(limit);
-            self
-        }
         pub async fn get_files(
             &mut self,
             request: impl tonic::IntoRequest<super::TargetId>,
@@ -472,11 +385,11 @@ pub mod utils_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UtilsService/GetFiles",
+                "/proto.UsersService/GetFiles",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("proto.UtilsService", "GetFiles"));
+                .insert(GrpcMethod::new("proto.UsersService", "GetFiles"));
             self.inner.server_streaming(req, path, codec).await
         }
         pub async fn get_file(
@@ -494,11 +407,11 @@ pub mod utils_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UtilsService/GetFile",
+                "/proto.UsersService/GetFile",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("proto.UtilsService", "GetFile"));
+                .insert(GrpcMethod::new("proto.UsersService", "GetFile"));
             self.inner.unary(req, path, codec).await
         }
         pub async fn create_file(
@@ -516,11 +429,11 @@ pub mod utils_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UtilsService/CreateFile",
+                "/proto.UsersService/CreateFile",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("proto.UtilsService", "CreateFile"));
+                .insert(GrpcMethod::new("proto.UsersService", "CreateFile"));
             self.inner.unary(req, path, codec).await
         }
         pub async fn delete_file(
@@ -538,11 +451,11 @@ pub mod utils_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UtilsService/DeleteFile",
+                "/proto.UsersService/DeleteFile",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("proto.UtilsService", "DeleteFile"));
+                .insert(GrpcMethod::new("proto.UsersService", "DeleteFile"));
             self.inner.unary(req, path, codec).await
         }
     }
@@ -660,7 +573,7 @@ pub mod notes_service_client {
         pub async fn create_note(
             &mut self,
             request: impl tonic::IntoRequest<super::Note>,
-        ) -> std::result::Result<tonic::Response<super::Note>, tonic::Status> {
+        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -682,7 +595,7 @@ pub mod notes_service_client {
         pub async fn delete_note(
             &mut self,
             request: impl tonic::IntoRequest<super::NoteId>,
-        ) -> std::result::Result<tonic::Response<super::Note>, tonic::Status> {
+        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -728,7 +641,7 @@ pub mod users_service_server {
             &self,
             request: tonic::Request<super::UserId>,
         ) -> std::result::Result<tonic::Response<super::User>, tonic::Status>;
-        async fn create_user(
+        async fn update_user(
             &self,
             request: tonic::Request<super::User>,
         ) -> std::result::Result<tonic::Response<super::User>, tonic::Status>;
@@ -736,6 +649,28 @@ pub mod users_service_server {
             &self,
             request: tonic::Request<super::PaymentId>,
         ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status>;
+        /// Server streaming response type for the GetFiles method.
+        type GetFilesStream: futures_core::Stream<
+                Item = std::result::Result<super::File, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        async fn get_files(
+            &self,
+            request: tonic::Request<super::TargetId>,
+        ) -> std::result::Result<tonic::Response<Self::GetFilesStream>, tonic::Status>;
+        async fn get_file(
+            &self,
+            request: tonic::Request<super::FileId>,
+        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
+        async fn create_file(
+            &self,
+            request: tonic::Request<super::File>,
+        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
+        async fn delete_file(
+            &self,
+            request: tonic::Request<super::FileId>,
+        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct UsersServiceServer<T: UsersService> {
@@ -945,11 +880,11 @@ pub mod users_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/proto.UsersService/CreateUser" => {
+                "/proto.UsersService/UpdateUser" => {
                     #[allow(non_camel_case_types)]
-                    struct CreateUserSvc<T: UsersService>(pub Arc<T>);
+                    struct UpdateUserSvc<T: UsersService>(pub Arc<T>);
                     impl<T: UsersService> tonic::server::UnaryService<super::User>
-                    for CreateUserSvc<T> {
+                    for UpdateUserSvc<T> {
                         type Response = super::User;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
@@ -960,7 +895,7 @@ pub mod users_service_server {
                             request: tonic::Request<super::User>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
-                            let fut = async move { (*inner).create_user(request).await };
+                            let fut = async move { (*inner).update_user(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -971,7 +906,7 @@ pub mod users_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = CreateUserSvc(inner);
+                        let method = UpdateUserSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
@@ -1031,161 +966,11 @@ pub mod users_service_server {
                     };
                     Box::pin(fut)
                 }
-                _ => {
-                    Box::pin(async move {
-                        Ok(
-                            http::Response::builder()
-                                .status(200)
-                                .header("grpc-status", "12")
-                                .header("content-type", "application/grpc")
-                                .body(empty_body())
-                                .unwrap(),
-                        )
-                    })
-                }
-            }
-        }
-    }
-    impl<T: UsersService> Clone for UsersServiceServer<T> {
-        fn clone(&self) -> Self {
-            let inner = self.inner.clone();
-            Self {
-                inner,
-                accept_compression_encodings: self.accept_compression_encodings,
-                send_compression_encodings: self.send_compression_encodings,
-                max_decoding_message_size: self.max_decoding_message_size,
-                max_encoding_message_size: self.max_encoding_message_size,
-            }
-        }
-    }
-    impl<T: UsersService> Clone for _Inner<T> {
-        fn clone(&self) -> Self {
-            Self(Arc::clone(&self.0))
-        }
-    }
-    impl<T: std::fmt::Debug> std::fmt::Debug for _Inner<T> {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "{:?}", self.0)
-        }
-    }
-    impl<T: UsersService> tonic::server::NamedService for UsersServiceServer<T> {
-        const NAME: &'static str = "proto.UsersService";
-    }
-}
-/// Generated server implementations.
-pub mod utils_service_server {
-    #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
-    use tonic::codegen::*;
-    /// Generated trait containing gRPC methods that should be implemented for use with UtilsServiceServer.
-    #[async_trait]
-    pub trait UtilsService: Send + Sync + 'static {
-        /// Server streaming response type for the GetFiles method.
-        type GetFilesStream: futures_core::Stream<
-                Item = std::result::Result<super::File, tonic::Status>,
-            >
-            + Send
-            + 'static;
-        async fn get_files(
-            &self,
-            request: tonic::Request<super::TargetId>,
-        ) -> std::result::Result<tonic::Response<Self::GetFilesStream>, tonic::Status>;
-        async fn get_file(
-            &self,
-            request: tonic::Request<super::FileId>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
-        async fn create_file(
-            &self,
-            request: tonic::Request<super::File>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
-        async fn delete_file(
-            &self,
-            request: tonic::Request<super::FileId>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
-    }
-    #[derive(Debug)]
-    pub struct UtilsServiceServer<T: UtilsService> {
-        inner: _Inner<T>,
-        accept_compression_encodings: EnabledCompressionEncodings,
-        send_compression_encodings: EnabledCompressionEncodings,
-        max_decoding_message_size: Option<usize>,
-        max_encoding_message_size: Option<usize>,
-    }
-    struct _Inner<T>(Arc<T>);
-    impl<T: UtilsService> UtilsServiceServer<T> {
-        pub fn new(inner: T) -> Self {
-            Self::from_arc(Arc::new(inner))
-        }
-        pub fn from_arc(inner: Arc<T>) -> Self {
-            let inner = _Inner(inner);
-            Self {
-                inner,
-                accept_compression_encodings: Default::default(),
-                send_compression_encodings: Default::default(),
-                max_decoding_message_size: None,
-                max_encoding_message_size: None,
-            }
-        }
-        pub fn with_interceptor<F>(
-            inner: T,
-            interceptor: F,
-        ) -> InterceptedService<Self, F>
-        where
-            F: tonic::service::Interceptor,
-        {
-            InterceptedService::new(Self::new(inner), interceptor)
-        }
-        /// Enable decompressing requests with the given encoding.
-        #[must_use]
-        pub fn accept_compressed(mut self, encoding: CompressionEncoding) -> Self {
-            self.accept_compression_encodings.enable(encoding);
-            self
-        }
-        /// Compress responses with the given encoding, if the client supports it.
-        #[must_use]
-        pub fn send_compressed(mut self, encoding: CompressionEncoding) -> Self {
-            self.send_compression_encodings.enable(encoding);
-            self
-        }
-        /// Limits the maximum size of a decoded message.
-        ///
-        /// Default: `4MB`
-        #[must_use]
-        pub fn max_decoding_message_size(mut self, limit: usize) -> Self {
-            self.max_decoding_message_size = Some(limit);
-            self
-        }
-        /// Limits the maximum size of an encoded message.
-        ///
-        /// Default: `usize::MAX`
-        #[must_use]
-        pub fn max_encoding_message_size(mut self, limit: usize) -> Self {
-            self.max_encoding_message_size = Some(limit);
-            self
-        }
-    }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for UtilsServiceServer<T>
-    where
-        T: UtilsService,
-        B: Body + Send + 'static,
-        B::Error: Into<StdError> + Send + 'static,
-    {
-        type Response = http::Response<tonic::body::BoxBody>;
-        type Error = std::convert::Infallible;
-        type Future = BoxFuture<Self::Response, Self::Error>;
-        fn poll_ready(
-            &mut self,
-            _cx: &mut Context<'_>,
-        ) -> Poll<std::result::Result<(), Self::Error>> {
-            Poll::Ready(Ok(()))
-        }
-        fn call(&mut self, req: http::Request<B>) -> Self::Future {
-            let inner = self.inner.clone();
-            match req.uri().path() {
-                "/proto.UtilsService/GetFiles" => {
+                "/proto.UsersService/GetFiles" => {
                     #[allow(non_camel_case_types)]
-                    struct GetFilesSvc<T: UtilsService>(pub Arc<T>);
+                    struct GetFilesSvc<T: UsersService>(pub Arc<T>);
                     impl<
-                        T: UtilsService,
+                        T: UsersService,
                     > tonic::server::ServerStreamingService<super::TargetId>
                     for GetFilesSvc<T> {
                         type Response = super::File;
@@ -1226,10 +1011,10 @@ pub mod utils_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/proto.UtilsService/GetFile" => {
+                "/proto.UsersService/GetFile" => {
                     #[allow(non_camel_case_types)]
-                    struct GetFileSvc<T: UtilsService>(pub Arc<T>);
-                    impl<T: UtilsService> tonic::server::UnaryService<super::FileId>
+                    struct GetFileSvc<T: UsersService>(pub Arc<T>);
+                    impl<T: UsersService> tonic::server::UnaryService<super::FileId>
                     for GetFileSvc<T> {
                         type Response = super::File;
                         type Future = BoxFuture<
@@ -1268,10 +1053,10 @@ pub mod utils_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/proto.UtilsService/CreateFile" => {
+                "/proto.UsersService/CreateFile" => {
                     #[allow(non_camel_case_types)]
-                    struct CreateFileSvc<T: UtilsService>(pub Arc<T>);
-                    impl<T: UtilsService> tonic::server::UnaryService<super::File>
+                    struct CreateFileSvc<T: UsersService>(pub Arc<T>);
+                    impl<T: UsersService> tonic::server::UnaryService<super::File>
                     for CreateFileSvc<T> {
                         type Response = super::File;
                         type Future = BoxFuture<
@@ -1310,10 +1095,10 @@ pub mod utils_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/proto.UtilsService/DeleteFile" => {
+                "/proto.UsersService/DeleteFile" => {
                     #[allow(non_camel_case_types)]
-                    struct DeleteFileSvc<T: UtilsService>(pub Arc<T>);
-                    impl<T: UtilsService> tonic::server::UnaryService<super::FileId>
+                    struct DeleteFileSvc<T: UsersService>(pub Arc<T>);
+                    impl<T: UsersService> tonic::server::UnaryService<super::FileId>
                     for DeleteFileSvc<T> {
                         type Response = super::File;
                         type Future = BoxFuture<
@@ -1367,7 +1152,7 @@ pub mod utils_service_server {
             }
         }
     }
-    impl<T: UtilsService> Clone for UtilsServiceServer<T> {
+    impl<T: UsersService> Clone for UsersServiceServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -1379,7 +1164,7 @@ pub mod utils_service_server {
             }
         }
     }
-    impl<T: UtilsService> Clone for _Inner<T> {
+    impl<T: UsersService> Clone for _Inner<T> {
         fn clone(&self) -> Self {
             Self(Arc::clone(&self.0))
         }
@@ -1389,8 +1174,8 @@ pub mod utils_service_server {
             write!(f, "{:?}", self.0)
         }
     }
-    impl<T: UtilsService> tonic::server::NamedService for UtilsServiceServer<T> {
-        const NAME: &'static str = "proto.UtilsService";
+    impl<T: UsersService> tonic::server::NamedService for UsersServiceServer<T> {
+        const NAME: &'static str = "proto.UsersService";
     }
 }
 /// Generated server implementations.
@@ -1413,11 +1198,11 @@ pub mod notes_service_server {
         async fn create_note(
             &self,
             request: tonic::Request<super::Note>,
-        ) -> std::result::Result<tonic::Response<super::Note>, tonic::Status>;
+        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status>;
         async fn delete_note(
             &self,
             request: tonic::Request<super::NoteId>,
-        ) -> std::result::Result<tonic::Response<super::Note>, tonic::Status>;
+        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct NotesServiceServer<T: NotesService> {
@@ -1548,7 +1333,7 @@ pub mod notes_service_server {
                     struct CreateNoteSvc<T: NotesService>(pub Arc<T>);
                     impl<T: NotesService> tonic::server::UnaryService<super::Note>
                     for CreateNoteSvc<T> {
-                        type Response = super::Note;
+                        type Response = super::Empty;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
@@ -1590,7 +1375,7 @@ pub mod notes_service_server {
                     struct DeleteNoteSvc<T: NotesService>(pub Arc<T>);
                     impl<T: NotesService> tonic::server::UnaryService<super::NoteId>
                     for DeleteNoteSvc<T> {
-                        type Response = super::Note;
+                        type Response = super::Empty;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,

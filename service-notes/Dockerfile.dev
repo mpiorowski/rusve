@@ -7,6 +7,6 @@ COPY ./Cargo.lock /app/Cargo.lock
 COPY ./migrations /app/migrations
 COPY ./src /app/src
 
-RUN cargo build
+RUN RUSTFLAGS="--cfg uuid_unstable" cargo build
 
-CMD cargo run --bin main
+CMD RUSTFLAGS="--cfg uuid_unstable" cargo run --bin main

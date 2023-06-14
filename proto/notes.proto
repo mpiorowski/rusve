@@ -6,21 +6,14 @@ option go_package = "rusve/proto";
 
 import "users.proto";
 
-message NoteId {
-    string note_id = 1;
-    string user_id = 2;
-}
-
 message Note {
-  string id = 1;
+  bytes id = 1;
   string created = 2;
   string updated = 3;
   optional string deleted = 4;
 
-  string user_id = 5;
+  bytes user_id = 5;
   string title = 6;
   string content = 7;
-
-  User user = 8;
 }
 

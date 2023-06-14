@@ -4,7 +4,7 @@ use diesel::prelude::*;
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct DieselUser {
-    pub id: uuid::Uuid,
+    pub id: Vec<u8>,
     pub created: time::OffsetDateTime,
     pub updated: time::OffsetDateTime,
     pub deleted: Option<time::OffsetDateTime>,
