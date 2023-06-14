@@ -5,9 +5,9 @@ WORKDIR /app
 COPY ./Cargo.toml /app/Cargo.toml
 COPY ./Cargo.lock /app/Cargo.lock
 COPY ./migrations /app/migrations
-COPY ./.cargo /app/.cargo
 COPY ./src /app/src
-RUN cargo build --release
+
+RUN RUSTFLAGS="--cfg uuid_unstable" cargo build --release
 
 # Production image
 FROM debian:bookworm-slim AS prod

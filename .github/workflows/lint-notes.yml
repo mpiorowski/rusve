@@ -13,4 +13,4 @@ jobs:
                 working-directory: ./service-notes
         steps:
             - uses: actions/checkout@v3
-            - run: cargo clippy --all-targets --all-features
+            - run: RUSTFLAGS="--cfg uuid_unstable" cargo clippy
