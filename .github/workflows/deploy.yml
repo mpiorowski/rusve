@@ -34,9 +34,9 @@ jobs:
         uses: ./.github/workflows/deploy-notes.yml
         secrets:
             GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-            DATABASE_URL: ${{ secrets.DATABASE_URL }}
+            DATABASE_URL: ${{ secrets.MYSQL_DATABASE_URL_RUST }}
     deploy-notes-go:
         uses: ./.github/workflows/deploy-notes-go.yml
         secrets:
             GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-            DATABASE_URL: ${{ secrets.DATABASE_URL }}
+            DATABASE_URL: ${{ secrets.MYSQL_DATABASE_URL_GO }}

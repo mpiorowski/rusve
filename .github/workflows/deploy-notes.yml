@@ -19,7 +19,7 @@ env:
     SERVICE: notes
     REGION: europe-north1
     ENV: production
-    DATABASE_URL: ${{ secrets.MYSQL_DATABASE_URL_RUST }}/notes?require_ssl=true
+    DATABASE_URL: ${{ secrets.DATABASE_URL }}/notes?require_ssl=true
     # DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
 
 permissions:
