@@ -38,7 +38,7 @@ service UsersService {
     rpc Auth(AuthRequest) returns (User) {}
     rpc GetUsers(UserIds) returns (stream User) {}
     rpc GetUser(UserId) returns (User) {}
-    rpc UpdateUser(User) returns (User) {}
+    rpc UpdateUser(User) returns (Empty) {}
     rpc UpdatePaymentId(PaymentId) returns (Empty) {}
 
     rpc GetFiles(TargetId) returns (stream File) {}

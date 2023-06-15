@@ -77,14 +77,14 @@ export interface UsersServiceClient extends grpc.Client {
   updatePaymentId(argument: _proto_PaymentId, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
   updatePaymentId(argument: _proto_PaymentId, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
   
-  UpdateUser(argument: _proto_User, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
-  UpdateUser(argument: _proto_User, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
-  UpdateUser(argument: _proto_User, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
-  UpdateUser(argument: _proto_User, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
-  updateUser(argument: _proto_User, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
-  updateUser(argument: _proto_User, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
-  updateUser(argument: _proto_User, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
-  updateUser(argument: _proto_User, callback: grpc.requestCallback<_proto_User__Output>): grpc.ClientUnaryCall;
+  UpdateUser(argument: _proto_User, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  UpdateUser(argument: _proto_User, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  UpdateUser(argument: _proto_User, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  UpdateUser(argument: _proto_User, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  updateUser(argument: _proto_User, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  updateUser(argument: _proto_User, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  updateUser(argument: _proto_User, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  updateUser(argument: _proto_User, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
   
 }
 
@@ -105,7 +105,7 @@ export interface UsersServiceHandlers extends grpc.UntypedServiceImplementation 
   
   UpdatePaymentId: grpc.handleUnaryCall<_proto_PaymentId__Output, _proto_Empty>;
   
-  UpdateUser: grpc.handleUnaryCall<_proto_User__Output, _proto_User>;
+  UpdateUser: grpc.handleUnaryCall<_proto_User__Output, _proto_Empty>;
   
 }
 
@@ -118,5 +118,5 @@ export interface UsersServiceDefinition extends grpc.ServiceDefinition {
   GetUser: MethodDefinition<_proto_UserId, _proto_User, _proto_UserId__Output, _proto_User__Output>
   GetUsers: MethodDefinition<_proto_UserIds, _proto_User, _proto_UserIds__Output, _proto_User__Output>
   UpdatePaymentId: MethodDefinition<_proto_PaymentId, _proto_Empty, _proto_PaymentId__Output, _proto_Empty__Output>
-  UpdateUser: MethodDefinition<_proto_User, _proto_User, _proto_User__Output, _proto_User__Output>
+  UpdateUser: MethodDefinition<_proto_User, _proto_Empty, _proto_User__Output, _proto_Empty__Output>
 }

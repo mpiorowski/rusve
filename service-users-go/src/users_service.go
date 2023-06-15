@@ -94,26 +94,24 @@ func (s *server) GetUser(ctx context.Context, in *pb.UserId) (*pb.User, error) {
 	return user, nil
 }
 
-func (s *server) UpdateUser(ctx context.Context, in *pb.User) (*pb.User, error) {
+func (s *server) UpdateUser(ctx context.Context, in *pb.User) (*pb.Empty, error) {
 	log.Printf("UpdateUser")
 
-	row := db.QueryRow(`update users set name = $1, avatar_id = $2 where id = $3 and deleted is null returning *`, in.Name, in.AvatarId, in.Id)
-	user, err := mapUser(nil, row)
+	_, err := db.Exec(`update users set name = $1, avatar_id = $2 where id = $3 and deleted is null`, in.Name, in.AvatarId, in.Id)
 	if err != nil {
 		log.Printf("mapUser: %v", err)
 		return nil, err
 	}
-	return user, nil
+	return &pb.Empty{}, nil
 }
 
-func (s *server) DeleteUser(ctx context.Context, in *pb.User) (*pb.User, error) {
+func (s *server) DeleteUser(ctx context.Context, in *pb.User) (*pb.Empty, error) {
 	log.Printf("DeleteUser")
 
-	row := db.QueryRow(`update users set deleted = now() where id = $1 and sub = $2 and email = $3 returning *`, in.Id, in.Sub, in.Email)
-	user, err := mapUser(nil, row)
+	_, err := db.Exec(`update users set deleted = now() where id = $1 and sub = $2 and email = $3`, in.Id, in.Sub, in.Email)
 	if err != nil {
 		log.Printf("db.Exec: %v", err)
 		return nil, err
 	}
-	return user, nil
+	return &pb.Empty{}, nil
 }

@@ -186,7 +186,7 @@ impl UsersService for MyService {
         Ok(Response::new(user))
     }
 
-    async fn update_user(&self, request: Request<User>) -> Result<Response<User>, Status> {
+    async fn update_user(&self, request: Request<User>) -> Result<Response<Empty>, Status> {
         #[cfg(debug_assertions)]
         println!("UpdateUser");
         let start = std::time::Instant::now();
@@ -207,17 +207,16 @@ impl UsersService for MyService {
             None => None,
         };
 
-        let user = diesel::update(users)
+        diesel::update(users)
             .filter(id.eq(&request.id))
             .filter(deleted.is_null())
             .set((name.eq(&request.name), avatar_id.eq(avatar_uuid)))
-            .get_result::<DieselUser>(&mut conn)
+            .execute(&mut conn)
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
 
-        let user: User = user.try_into()?;
         println!("Elapsed: {:?}", start.elapsed());
-        Ok(Response::new(user))
+        Ok(Response::new(Empty {}))
     }
 
     async fn update_payment_id(

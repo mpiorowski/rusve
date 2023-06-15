@@ -4,8 +4,6 @@ package proto;
 
 option go_package = "rusve/proto";
 
-import "users.proto";
-
 message Note {
   bytes id = 1;
   string created = 2;

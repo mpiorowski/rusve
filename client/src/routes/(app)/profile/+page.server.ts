@@ -33,7 +33,7 @@ export const load = (async ({ locals, url }) => {
         if (user.avatarId) {
             const fileId: FileId = {
                 fileId: user.avatarId,
-                targetId: userId,
+                targetId: String(userId),
             };
             metadata = await createMetadata(uri);
             file = new Promise((resolve, reject) => {
@@ -55,7 +55,10 @@ export const load = (async ({ locals, url }) => {
 
         const end = performance.now();
         return {
-            user: user,
+            user: {
+                ...user,
+                id: String(user.id),
+            },
             duration: end - start,
             stream: {
                 file: file,
@@ -99,13 +102,13 @@ export const actions = {
             };
             console.log(data);
             const metadata = await createMetadata(uri);
-            const user = await new Promise<User__Output>((resolve, reject) => {
-                client.updateUser(data, metadata, (err, response) =>
-                    err || !response ? reject(err) : resolve(response),
+            await new Promise<void>((resolve, reject) => {
+                client.updateUser(data, metadata, (err) =>
+                    err ? reject(err) : resolve(),
                 );
             });
 
-            return { user: user };
+            return { status: 200 };
         } catch (err) {
             console.error(err);
             return fail(500, { error: "Could not create user" });
@@ -213,9 +216,9 @@ export const actions = {
                 avatarId: newFile.id,
             };
             metadata = await createMetadata(uri);
-            const user = await new Promise<User__Output>((resolve, reject) => {
-                client.updateUser(data, metadata, (err, response) =>
-                    err || !response ? reject(err) : resolve(response),
+            const user = await new Promise<void>((resolve, reject) => {
+                client.updateUser(data, metadata, (err) =>
+                    err ? reject(err) : resolve(),
                 );
             });
 
@@ -269,9 +272,9 @@ export const actions = {
                 fileId: schema.data.fileId,
                 targetId: schema.data.targetId,
             };
-            await new Promise<File__Output>((resolve, reject) => {
-                client.deleteFile(fileData, metadataUtils, (err, response) =>
-                    err || !response ? reject(err) : resolve(response),
+            await new Promise<void>((resolve, reject) => {
+                client.deleteFile(fileData, metadataUtils, (err) =>
+                    err ? reject(err) : resolve(),
                 );
             });
 
@@ -280,9 +283,9 @@ export const actions = {
                 id: locals.userId,
                 name: schema.data.name,
             };
-            await new Promise<User__Output>((resolve, reject) => {
-                client.updateUser(data, metadata, (err, response) =>
-                    err || !response ? reject(err) : resolve(response),
+            await new Promise<void>((resolve, reject) => {
+                client.updateUser(data, metadata, (err) =>
+                    err ? reject(err) : resolve(),
                 );
             });
 

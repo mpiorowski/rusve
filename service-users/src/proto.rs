@@ -326,7 +326,7 @@ pub mod users_service_client {
         pub async fn update_user(
             &mut self,
             request: impl tonic::IntoRequest<super::User>,
-        ) -> std::result::Result<tonic::Response<super::User>, tonic::Status> {
+        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -644,7 +644,7 @@ pub mod users_service_server {
         async fn update_user(
             &self,
             request: tonic::Request<super::User>,
-        ) -> std::result::Result<tonic::Response<super::User>, tonic::Status>;
+        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status>;
         async fn update_payment_id(
             &self,
             request: tonic::Request<super::PaymentId>,
@@ -885,7 +885,7 @@ pub mod users_service_server {
                     struct UpdateUserSvc<T: UsersService>(pub Arc<T>);
                     impl<T: UsersService> tonic::server::UnaryService<super::User>
                     for UpdateUserSvc<T> {
-                        type Response = super::User;
+                        type Response = super::Empty;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,

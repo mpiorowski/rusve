@@ -25,7 +25,7 @@ type UsersServiceClient interface {
 	Auth(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*User, error)
 	GetUsers(ctx context.Context, in *UserIds, opts ...grpc.CallOption) (UsersService_GetUsersClient, error)
 	GetUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*User, error)
-	UpdateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*User, error)
+	UpdateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Empty, error)
 	UpdatePaymentId(ctx context.Context, in *PaymentId, opts ...grpc.CallOption) (*Empty, error)
 	GetFiles(ctx context.Context, in *TargetId, opts ...grpc.CallOption) (UsersService_GetFilesClient, error)
 	GetFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error)
@@ -91,8 +91,8 @@ func (c *usersServiceClient) GetUser(ctx context.Context, in *UserId, opts ...gr
 	return out, nil
 }
 
-func (c *usersServiceClient) UpdateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*User, error) {
-	out := new(User)
+func (c *usersServiceClient) UpdateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/proto.UsersService/UpdateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -175,7 +175,7 @@ type UsersServiceServer interface {
 	Auth(context.Context, *AuthRequest) (*User, error)
 	GetUsers(*UserIds, UsersService_GetUsersServer) error
 	GetUser(context.Context, *UserId) (*User, error)
-	UpdateUser(context.Context, *User) (*User, error)
+	UpdateUser(context.Context, *User) (*Empty, error)
 	UpdatePaymentId(context.Context, *PaymentId) (*Empty, error)
 	GetFiles(*TargetId, UsersService_GetFilesServer) error
 	GetFile(context.Context, *FileId) (*File, error)
@@ -197,7 +197,7 @@ func (UnimplementedUsersServiceServer) GetUsers(*UserIds, UsersService_GetUsersS
 func (UnimplementedUsersServiceServer) GetUser(context.Context, *UserId) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
-func (UnimplementedUsersServiceServer) UpdateUser(context.Context, *User) (*User, error) {
+func (UnimplementedUsersServiceServer) UpdateUser(context.Context, *User) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }
 func (UnimplementedUsersServiceServer) UpdatePaymentId(context.Context, *PaymentId) (*Empty, error) {
