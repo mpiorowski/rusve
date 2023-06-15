@@ -32,9 +32,9 @@ async function fetchDashboard(): Promise<DashboardItem[]> {
     }
 }
 
-export const load = (() => {
+export const load = (async () => {
     try {
-        const dashboard = fetchDashboard();
+        const dashboard = await fetchDashboard();
 
         return {
             status: 200,
