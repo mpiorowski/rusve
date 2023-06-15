@@ -81,13 +81,13 @@ export const actions = {
             const client = isGo ? usersGoClient : usersRustClient;
 
             const name = form.get("name");
-            const avatar = form.get("avatar");
+            const avatarId = form.get("avatarId");
             const schema = z
                 .object({
                     name: z.string().max(1000),
                     avatar: z.string().optional(),
                 })
-                .safeParse({ name, avatar });
+                .safeParse({ name, avatarId });
 
             if (!schema.success) {
                 console.error(schema.error);

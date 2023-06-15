@@ -48,7 +48,7 @@ impl FromRow for Note {
 
 // impl TryFrom<DieselNote> for Note {
 //     type Error = anyhow::Error;
-// 
+//
 //     fn try_from(note: DieselNote) -> Result<Self, Self::Error> {
 //         let note = Note {
 //             id: note.id,
@@ -185,7 +185,15 @@ impl NotesService for MyService {
 
         let note = request.into_inner();
 
-        for _ in 0..50 {
+        r"delete from notes where user_id = :user_id"
+            .with(params! {
+                "user_id" => &note.user_id,
+            })
+            .run(&mut conn)
+            .await
+            .map_err(|e| Status::internal(e.to_string()))?;
+
+        for _ in 0..5000 {
             r"insert into notes (id, user_id, title, content) values (:id, :user_id, :title, :content) on duplicate key update title = :title, content = :content"
                 .with(
                     params! {
