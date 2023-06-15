@@ -1,7 +1,7 @@
-import type { PageServerLoad } from "./$types";
+import type { LayoutServerLoad } from "./$types";
 
 export const load = (({ locals }) => {
     return {
         email: locals.email,
     };
-}) satisfies PageServerLoad;
+}) satisfies LayoutServerLoad;
