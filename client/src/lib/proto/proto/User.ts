@@ -11,7 +11,7 @@ export interface User {
   'role'?: (_proto_UserRole);
   'sub'?: (string);
   'name'?: (string);
-  'avatarId'?: (string);
+  'avatarId'?: (Buffer | Uint8Array | string);
   'paymentId'?: (string);
   '_deleted'?: "deleted";
   '_avatarId'?: "avatarId";
@@ -27,7 +27,7 @@ export interface User__Output {
   'role': (_proto_UserRole__Output);
   'sub': (string);
   'name': (string);
-  'avatarId'?: (string);
+  'avatarId'?: (Buffer);
   'paymentId'?: (string);
   '_deleted': "deleted";
   '_avatarId': "avatarId";

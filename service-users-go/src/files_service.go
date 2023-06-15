@@ -5,13 +5,16 @@ import (
 	"log"
 
 	pb "rusve/proto"
+
+	uuidv7 "github.com/gofrs/uuid"
+	"github.com/google/uuid"
 )
 
 func (s *server) GetFiles(in *pb.TargetId, stream pb.UsersService_GetFilesServer) error {
-	log.Printf("GetFiles: %v", in)
+	log.Printf("GetFiles")
 
 	rules := map[string]string{
-		"TargetId": "required,max=100,uuid",
+		"TargetId": "required,max=100",
 		"Type":     "required,max=100",
 	}
 	validate.RegisterStructValidationMapRules(rules, pb.TargetId{})
@@ -35,8 +38,15 @@ func (s *server) GetFiles(in *pb.TargetId, stream pb.UsersService_GetFilesServer
 			return err
 		}
 
+		fileId, err := uuid.FromBytes(file.Id)
+		if err != nil {
+			log.Printf("uuid.FromBytes: %v", err)
+			return err
+		}
+
+		// in go, change byte array to string
 		if ENV == "production" {
-			file.Url, err = generateV4GetObjectSignedURL(file.TargetId + "/" + file.Name)
+			file.Url, err = generateV4GetObjectSignedURL(fileId.String(), file.Name)
 			if err != nil {
 				log.Printf("generateV4GetObjectSignedURL: %v", err)
 				return err
@@ -59,11 +69,11 @@ func (s *server) GetFiles(in *pb.TargetId, stream pb.UsersService_GetFilesServer
 }
 
 func (s *server) GetFile(ctx context.Context, in *pb.FileId) (*pb.File, error) {
-	log.Printf("GetFile: %v", in)
+    log.Printf("GetFile")
 
 	rules := map[string]string{
-		"FileId":   "required,max=100,uuid",
-		"TargetId": "required,max=100,uuid",
+		"FileId":   "required,max=100",
+		"TargetId": "required,max=100",
 	}
 	validate.RegisterStructValidationMapRules(rules, pb.TargetId{})
 	err := validate.Struct(in)
@@ -78,16 +88,21 @@ func (s *server) GetFile(ctx context.Context, in *pb.FileId) (*pb.File, error) {
 		log.Printf("mapFile: %v", err)
 		return nil, err
 	}
+	fileId, err := uuid.FromBytes(file.Id)
+	if err != nil {
+		log.Printf("uuid.FromBytes: %v", err)
+		return nil, err
+	}
 
-	buffer, err := downloadFile(file.Id, file.Name)
+	buffer, err := downloadFile(fileId.String(), file.Name)
 	if err != nil {
 		log.Printf("downloadFile: %v", err)
 		return nil, err
 	}
-    if buffer == nil {
-        log.Printf("downloadFile: buffer is nil")
-        return nil, err
-    }
+	if buffer == nil {
+		log.Printf("downloadFile: buffer is nil")
+		return nil, err
+	}
 	file.Buffer = buffer
 	return file, nil
 }
@@ -96,7 +111,7 @@ func (s *server) CreateFile(ctx context.Context, in *pb.File) (*pb.File, error) 
 	log.Printf("CreateFile")
 
 	rules := map[string]string{
-		"TargetId": "required,max=100,uuid",
+		"TargetId": "required,max=100",
 		"Name":     "required,max=100",
 		"Type":     "required,max=100",
 		"Buffer":   "required",
@@ -108,7 +123,13 @@ func (s *server) CreateFile(ctx context.Context, in *pb.File) (*pb.File, error) 
 		return nil, err
 	}
 
-	row := db.QueryRow(`insert into files (target_id, name, type) values ($1, $2, $3) returning *`,
+	id, err := uuidv7.NewV7()
+	if err != nil {
+		log.Printf("uuidv7.NewV7: %v", err)
+		return nil, err
+	}
+	row := db.QueryRow(`insert into files (id, target_id, name, type) values ($1, $2, $3, $4) returning *`,
+		id.Bytes(),
 		in.TargetId,
 		in.Name,
 		in.Type,
@@ -119,8 +140,13 @@ func (s *server) CreateFile(ctx context.Context, in *pb.File) (*pb.File, error) 
 		log.Printf("mapFile: %v", err)
 		return nil, err
 	}
+	fileId, err := uuid.FromBytes(file.Id)
+	if err != nil {
+		log.Printf("uuid.FromBytes: %v", err)
+		return nil, err
+	}
 
-	err = uploadFile(file.Id, file.Name, in.Buffer)
+	err = uploadFile(fileId.String(), file.Name, in.Buffer)
 	if err != nil {
 		// TODO - transaction?
 		_, _ = db.Exec(`update files set deleted = now() where id = $1`, file.Id)
@@ -132,7 +158,7 @@ func (s *server) CreateFile(ctx context.Context, in *pb.File) (*pb.File, error) 
 
 // TODO - delete form bucket
 func (s *server) DeleteFile(ctx context.Context, in *pb.FileId) (*pb.File, error) {
-	log.Printf("DeleteFile: %v", in)
+	log.Printf("DeleteFile")
 
 	row := db.QueryRow(`update files set deleted = now() where id = $1 and target_id = $2 returning *`, in.FileId, in.TargetId)
 
@@ -141,6 +167,8 @@ func (s *server) DeleteFile(ctx context.Context, in *pb.FileId) (*pb.File, error
 		log.Printf("mapFile: %v", err)
 		return nil, err
 	}
+
+	// TODO - delete form bucket
 
 	return file, nil
 }

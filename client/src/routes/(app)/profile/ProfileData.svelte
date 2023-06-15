@@ -11,7 +11,6 @@
     const lang = $page.url.searchParams.get("lang") ?? "rust";
     const profile = getContext<ProfileContext>("profile");
     let loading = false;
-
 </script>
 
 <form
@@ -22,10 +21,7 @@
         return async ({ result, update }) => {
             await update({ reset: false });
             if (result.type === "success") {
-                toast({
-                    message: "Profile updated",
-                    type: "success",
-                });
+                toast.success("Profile updated");
             }
             loading = false;
         };
@@ -33,9 +29,9 @@
     class="p-4"
 >
     <input type="hidden" name="lang" value={lang} />
-    <input type="hidden" name="avatar" value={$profile.user.avatarId ?? ""} />
+    <input type="hidden" name="avatarId" value={$profile.avatarId ?? ""} />
     <label class="text-xl font-bold" for="name">Your name</label>
-    <Input bind:value={$profile.user.name} name="name" />
+    <Input bind:value={$profile.name} name="name" />
     <div class="w-28">
         <Button type="submit" {loading}>
             <span slot="icon">

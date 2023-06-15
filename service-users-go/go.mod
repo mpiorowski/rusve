@@ -5,6 +5,8 @@ go 1.20
 require (
 	cloud.google.com/go/pubsub v1.31.0
 	github.com/go-playground/validator/v10 v10.12.0
+	github.com/gofrs/uuid v4.4.0+incompatible
+	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/sendgrid/sendgrid-go v3.12.0+incompatible
 	google.golang.org/grpc v1.55.0
@@ -19,7 +21,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.9.1 // indirect
 	github.com/sendgrid/rest v2.6.9+incompatible // indirect

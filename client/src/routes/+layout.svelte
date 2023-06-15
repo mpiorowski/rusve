@@ -67,7 +67,7 @@
                     </div>
                 </div>
 
-                {#if !data.userId}
+                {#if !data.email}
                     <a
                         href="/auth?lang{isGo ? 'go' : 'rust'}"
                         class="hover:text-secondary-500 transition"
@@ -75,7 +75,7 @@
                         Login
                     </a>
                 {/if}
-                {#if data.userId}
+                {#if data.email}
                     <a
                         href="/profile?lang={isGo ? 'go' : 'rust'}"
                         class="hover:text-secondary-500 transition"

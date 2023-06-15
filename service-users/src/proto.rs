@@ -17,24 +17,24 @@ pub struct User {
     pub sub: ::prost::alloc::string::String,
     #[prost(string, tag = "8")]
     pub name: ::prost::alloc::string::String,
-    #[prost(string, optional, tag = "9")]
-    pub avatar_id: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(bytes = "vec", optional, tag = "9")]
+    pub avatar_id: ::core::option::Option<::prost::alloc::vec::Vec<u8>>,
     #[prost(string, optional, tag = "10")]
     pub payment_id: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct File {
-    #[prost(string, tag = "1")]
-    pub id: ::prost::alloc::string::String,
+    #[prost(bytes = "vec", tag = "1")]
+    pub id: ::prost::alloc::vec::Vec<u8>,
     #[prost(string, tag = "2")]
     pub created: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub updated: ::prost::alloc::string::String,
     #[prost(string, optional, tag = "4")]
     pub deleted: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, tag = "5")]
-    pub target_id: ::prost::alloc::string::String,
+    #[prost(bytes = "vec", tag = "5")]
+    pub target_id: ::prost::alloc::vec::Vec<u8>,
     #[prost(string, tag = "6")]
     pub name: ::prost::alloc::string::String,
     #[prost(enumeration = "FileType", tag = "7")]
@@ -143,18 +143,18 @@ pub struct PaymentId {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TargetId {
-    #[prost(string, tag = "1")]
-    pub target_id: ::prost::alloc::string::String,
+    #[prost(bytes = "vec", tag = "1")]
+    pub target_id: ::prost::alloc::vec::Vec<u8>,
     #[prost(enumeration = "FileType", tag = "2")]
     pub r#type: i32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FileId {
-    #[prost(string, tag = "1")]
-    pub file_id: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub target_id: ::prost::alloc::string::String,
+    #[prost(bytes = "vec", tag = "1")]
+    pub file_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(bytes = "vec", tag = "2")]
+    pub target_id: ::prost::alloc::vec::Vec<u8>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

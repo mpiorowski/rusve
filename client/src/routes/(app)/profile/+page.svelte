@@ -5,26 +5,21 @@
     import ProfileData from "./ProfileData.svelte";
     import { toast } from "$lib/toast/toast";
     import { writable } from "svelte/store";
-    import type { ProfileContext, ProfileStore } from "./profileTypes";
-    import type { PageData,  ActionData } from "./$types";
+    import type { ProfileContext } from "./profileTypes";
+    import type { PageData, ActionData } from "./$types";
 
     export let data: PageData;
     export let form: ActionData;
     $: if (form?.error) {
-        toast({
-            message: form.error,
-            type: "error",
-        });
+        toast.error(form.error);
     }
 
     /**
      * Component composition pattern
      * Local store, not shared with other components
      */
-    const profileStore = writable<ProfileStore>();
-    $: profileStore.set({
-        user: data.user,
-    });
+    const profileStore: ProfileContext = writable();
+    $: profileStore.set(data.user);
     setContext<ProfileContext>("profile", profileStore);
 </script>
 
@@ -35,7 +30,7 @@
 <div class="flex flex-col border border-primary-600 rounded">
     <div class="p-4">
         <h3>Your email</h3>
-        <p>{data.email}</p>
+        <p>{data.user.email}</p>
     </div>
     <div class="border-b border-primary-600" />
     <ProfileData />

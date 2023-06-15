@@ -43,7 +43,7 @@ export const load = (() => {
             },
         };
     } catch (err) {
-        console.log(err);
+        console.error(err);
         throw error(500, "Failed to fetch dashboard");
     }
 }) satisfies PageServerLoad;

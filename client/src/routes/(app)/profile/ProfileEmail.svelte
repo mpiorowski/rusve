@@ -18,10 +18,7 @@
         return async ({ result, update }) => {
             await update({ reset: false });
             if (result.type === "success") {
-                toast({
-                    message: "Email sent",
-                    type: "success",
-                });
+                toast.success("Email sent");
             }
             loading = false;
         };

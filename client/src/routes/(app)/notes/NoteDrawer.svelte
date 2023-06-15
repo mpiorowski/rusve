@@ -39,10 +39,7 @@
                 return async ({ result, update }) => {
                     await update({ reset: false });
                     if (result.type === "success") {
-                        toast({
-                            message: "Note created",
-                            type: "success",
-                        });
+                        toast.success("Note created");
                     }
                     drawer.set(false);
                     loading = false;

@@ -124,7 +124,8 @@ func downloadFile(fileId string, name string) ([]byte, error) {
 	return buffer, nil
 }
 
-func generateV4GetObjectSignedURL(object string) (string, error) {
+func generateV4GetObjectSignedURL(fileId string, fileName string) (string, error) {
+    object := fileId + "/" + fileName
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {

@@ -59,10 +59,7 @@
             // await signInWithRedirect(auth, provider);
         } catch (err) {
             console.error(err);
-            toast({
-                message: "Something went wrong",
-                type: "error",
-            });
+            toast.error("Something went wrong");
         } finally {
             loading = false;
         }
@@ -79,10 +76,7 @@
                 handleCodeInApp: true,
             });
             window.localStorage.setItem("emailForSignIn", email);
-            toast({
-                message: "Check your email for a magic link",
-                type: "success",
-            });
+            toast.success("Check your email for a magic link");
         } catch (err) {
             console.error(err);
         }
@@ -104,10 +98,7 @@
             window.location.reload();
         } catch (err) {
             console.error(err);
-            toast({
-                message: "Something went wrong",
-                type: "error",
-            });
+            toast.error("Something went wrong");
             await auth.signOut();
         } finally {
             loading = false;
@@ -137,10 +128,7 @@
             window.location.reload();
         } catch (err) {
             await auth.signOut();
-            toast({
-                message: "Something went wrong",
-                type: "error",
-            });
+            toast.error("Something went wrong");
             console.error(err);
         } finally {
             loading = false;

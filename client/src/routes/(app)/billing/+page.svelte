@@ -8,10 +8,7 @@
     export let form: ActionData;
 
     $: if (form?.error) {
-        toast({
-            message: form.error,
-            type: "error",
-        });
+        toast.error(form.error);
     }
 
     const isPro = data.isSubscribed;
@@ -33,11 +30,7 @@
 
     {#if !isPro}
         <form action="?/checkout" method="POST">
-            <input
-                type="hidden"
-                name="paymentId"
-                value={data.paymentId}
-            />
+            <input type="hidden" name="paymentId" value={data.paymentId} />
             <Button type="submit">
                 <svelte:fragment slot="icon">
                     <DollarIcon />
