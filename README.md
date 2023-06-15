@@ -77,7 +77,7 @@ Be sure to have `protoc` installed.
 sh proto.sh
 ```
 
-2. Fill in missing firebase secrets in `client/.env`
+3. Fill in missing firebase secrets in `client/.env`
 - STRIPE_API_KEY
 - PUBLIC_API_KEY
 - PUBLIC_AUTH_DOMAIN
@@ -86,17 +86,17 @@ sh proto.sh
 Getting the `SERVICE_ACCOUNT` key is a bit [tricky](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments).
 
 
-3. Start databases:
+4. Start databases:
 ```
 sh start-db.sh up
 ```
 
-4. Start app:
+5. Start app:
 ```
 sh start-app.sh up
 ```
 
-5. Access:
+6. Access:
 
 Application - http://localhost:3000  
 CMS         - http://localhost:8055 | Login: `admin@example.com` | Password: `d1r3ctu5` 

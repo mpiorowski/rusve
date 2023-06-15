@@ -21,7 +21,7 @@ message User {
     string sub = 7;
 
     string name = 8;
-    optional string avatar_id = 9;
+    optional bytes avatar_id = 9;
     optional string payment_id = 10;
 }
 
@@ -31,12 +31,12 @@ enum FileType {
 }
 
 message File {
-    string id = 1;
+    bytes id = 1;
     string created = 2;
     string updated = 3;
     optional string deleted = 4;
 
-    string target_id = 5;
+    bytes target_id = 5;
     string name = 6;
     FileType type = 7;
 

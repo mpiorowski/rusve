@@ -8,7 +8,7 @@ CREATE TABLE
     role text NOT NULL,
     sub text UNIQUE NOT NULL,
     name text NOT NULL DEFAULT '',
-    avatar_id uuid,
+    avatar_id bytea,
     payment_id text NOT NULL DEFAULT ''
   );
 

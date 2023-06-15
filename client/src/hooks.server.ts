@@ -102,7 +102,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             }
         }
     }
-    console.debug(`Authorization: ${performance.now() - now}ms`);
+    console.debug(`Authorization: ${(performance.now() - now).toFixed(4)}ms`);
 
     const isMain = event.url.pathname === "/";
     if (isMain) {

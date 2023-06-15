@@ -20,13 +20,13 @@ message PaymentId {
 }
 
 message TargetId {
-    string target_id = 1;
+    bytes target_id = 1;
     FileType type = 2;
 }
 
 message FileId {
-    string file_id = 1;
-    string target_id = 2;
+    bytes file_id = 1;
+    bytes target_id = 2;
 }
 
 message AuthRequest {

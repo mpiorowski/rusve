@@ -38,10 +38,7 @@
             document.body.removeChild(link);
         } catch (e) {
             console.error(e);
-            toast({
-                message: "Failed to download avatar",
-                type: "error",
-            });
+            toast.error("Failed to download avatar");
         }
     }
 </script>
@@ -82,10 +79,7 @@
                                 return async ({ result, update }) => {
                                     await update();
                                     if (result.type === "success") {
-                                        toast({
-                                            message: "Avatar deleted",
-                                            type: "success",
-                                        });
+                                        toast.success("Avatar deleted");
                                     }
                                     deleteLoading = false;
                                 };
@@ -96,7 +90,7 @@
                             <input
                                 type="hidden"
                                 name="name"
-                                value={$profile.user.name}
+                                value={$profile.name}
                             />
                             <Button variant="error" loading={deleteLoading}>
                                 <span slot="icon">
@@ -125,10 +119,7 @@
             return async ({ result, update }) => {
                 await update();
                 if (result.type === "success") {
-                    toast({
-                        message: "Avatar uploaded",
-                        type: "success",
-                    });
+                    toast.success("Avatar uploaded");
                 }
                 loading = false;
             };
@@ -137,11 +128,11 @@
         <input type="hidden" name="lang" value={lang} />
         <input
             type="hidden"
-            name="avatar"
-            value={$profile.user.avatarId ? $profile.user.avatarId : ""}
+            name="avatarId"
+            value={$profile.avatarId ? $profile.avatarId : ""}
         />
         <input type="hidden" name="type" value={FileType.AVATAR} />
-        <input type="hidden" name="name" value={$profile.user.name} />
+        <input type="hidden" name="name" value={$profile.name} />
 
         <div class="flex flex-row items-center gap-6">
             <div class="w-28">

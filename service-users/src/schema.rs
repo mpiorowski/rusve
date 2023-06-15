@@ -2,11 +2,11 @@
 
 diesel::table! {
     files (id) {
-        id -> Uuid,
+        id -> Bytea,
         created -> Timestamptz,
         updated -> Timestamptz,
         deleted -> Nullable<Timestamptz>,
-        target_id -> Uuid,
+        target_id -> Bytea,
         name -> Text,
         #[sql_name = "type"]
         type_ -> Text,
@@ -23,7 +23,7 @@ diesel::table! {
         role -> Text,
         sub -> Text,
         name -> Text,
-        avatar_id -> Nullable<Uuid>,
+        avatar_id -> Nullable<Bytea>,
         payment_id -> Text,
     }
 }

@@ -30,10 +30,7 @@
                 return async ({ result, update }) => {
                     await update();
                     if (result.type === "success") {
-                        toast({
-                            message: "Note deleted",
-                            type: "success",
-                        });
+                        toast.success("Note deleted");
                     }
                 };
             }}

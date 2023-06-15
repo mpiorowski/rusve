@@ -1,11 +1,11 @@
 -- +migrate Up
 CREATE TABLE
   files (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid (),
+    id bytea PRIMARY KEY,
     created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted timestamptz,
-    target_id uuid NOT NULL,
+    target_id bytea NOT NULL,
     name text NOT NULL,
     type text NOT NULL
   );

@@ -7,6 +7,7 @@ import (
 
 	pb "rusve/proto"
 
+	"github.com/gofrs/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -41,8 +42,12 @@ func (s *server) Auth(ctx context.Context, in *pb.AuthRequest) (*pb.User, error)
 
 	if err == sql.ErrNoRows {
 		role := pb.UserRole_ROLE_USER
-		println("role", role)
-		row = db.QueryRow(`insert into users (email, role, sub) values ($1, $2, $3) returning *`, in.Email, role, in.Sub)
+		uuid, err := uuid.NewV7()
+		if err != nil {
+			log.Printf("uuid.NewV7: %v", err)
+			return nil, err
+		}
+		row = db.QueryRow(`insert into users (id, email, role, sub) values ($1, $2, $3, $4) returning *`, uuid.Bytes(), in.Email, role, in.Sub)
 		user, err = mapUser(nil, row)
 		if err != nil {
 			log.Printf("mapUser: %v", err)

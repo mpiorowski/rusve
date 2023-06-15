@@ -32,9 +32,9 @@ async function fetchDashboard(): Promise<DashboardItem[]> {
     }
 }
 
-export const load = (() => {
+export const load = (async () => {
     try {
-        const dashboard = fetchDashboard();
+        const dashboard = await fetchDashboard();
 
         return {
             status: 200,
@@ -43,7 +43,7 @@ export const load = (() => {
             },
         };
     } catch (err) {
-        console.log(err);
+        console.error(err);
         throw error(500, "Failed to fetch dashboard");
     }
 }) satisfies PageServerLoad;

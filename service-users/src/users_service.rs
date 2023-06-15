@@ -28,7 +28,7 @@ impl TryFrom<DieselUser> for User {
                 .into(),
             sub: user.sub,
             name: user.name,
-            avatar_id: user.avatar_id.map(|a| a.to_string()),
+            avatar_id: user.avatar_id,
             payment_id: Some(user.payment_id),
         })
     }
@@ -199,18 +199,10 @@ impl UsersService for MyService {
 
         let request = request.into_inner();
 
-        let avatar_uuid = match request.avatar_id {
-            Some(avatar_uuid) => Some(
-                Uuid::try_parse(&avatar_uuid)
-                    .map_err(|e| Status::invalid_argument(format!("Invalid avatar_id: {}", e)))?,
-            ),
-            None => None,
-        };
-
         diesel::update(users)
             .filter(id.eq(&request.id))
             .filter(deleted.is_null())
-            .set((name.eq(&request.name), avatar_id.eq(avatar_uuid)))
+            .set((name.eq(&request.name), avatar_id.eq(request.avatar_id)))
             .execute(&mut conn)
             .await
             .map_err(|e| Status::internal(e.to_string()))?;

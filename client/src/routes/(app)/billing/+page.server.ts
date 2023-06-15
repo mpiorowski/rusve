@@ -11,6 +11,7 @@ export const load = (async ({ locals }) => {
     const isSub = await checkSubscription(locals.paymentId);
     return {
         isSubscribed: isSub,
+        paymentId: locals.paymentId,
     };
 }) satisfies PageServerLoad;
 
