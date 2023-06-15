@@ -189,7 +189,7 @@ pub async fn create_file(
             .await
             .map_err(|e| Status::internal(e.to_string()))?;
         let client = Client::new(config);
-        let file_path = format!("{:?}/{:?}", &file_id, &file.name);
+        let file_path = format!("{}/{}", &file_id, &file.name);
         let upload_type = UploadType::Simple(Media::new(file_path));
         let uploaded = client
             .upload_object(
