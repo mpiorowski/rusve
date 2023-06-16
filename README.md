@@ -49,7 +49,7 @@ https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5`
   - **[WYSIWYG](https://tiptap.dev/)** - Wyswig text editor thanks to TipTap.
 
 ## Architecture
-![image](https://github.com/mpiorowski/rusve/assets/26543876/39dcd973-5108-45f6-a63d-ac8dd32ea3b4)
+![image](https://github.com/mpiorowski/rusve/assets/26543876/39f383ea-b2c8-4660-95c5-82e74ce88e65)
 
 ## Authorization
 ![image](https://user-images.githubusercontent.com/26543876/235413978-93d49f92-e8bb-47ac-a46d-f0fc08cec350.png)
