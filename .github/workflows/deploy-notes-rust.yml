@@ -3,7 +3,7 @@ name: Deploy Notes Rust
 on:
     push:
         branches:
-            - release-notes/**
+            - release-notes-rust/**
     workflow_call:
         secrets:
             GCP_CREDENTIALS:
@@ -16,7 +16,7 @@ env:
     PROJECT_ID: rusve-384620
     REPOSITORY: rusve-repo
     DATABASE: rusve-db
-    SERVICE: notes
+    SERVICE: notes-rust
     REGION: europe-north1
     ENV: production
     DATABASE_URL: ${{ secrets.DATABASE_URL }}/notes?require_ssl=true
@@ -28,7 +28,7 @@ permissions:
 
 jobs:
     lint:
-        uses: ./.github/workflows/lint-notes.yml
+        uses: ./.github/workflows/lint-notes-rust.yml
     deploy:
         needs:
             - lint

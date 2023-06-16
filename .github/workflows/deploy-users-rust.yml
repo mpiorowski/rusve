@@ -3,7 +3,7 @@ name: Deploy Users Rust
 on:
     push:
         branches:
-            - release-users/**
+            - release-users-rust/**
     workflow_call:
         secrets:
             GCP_CREDENTIALS:
@@ -18,7 +18,7 @@ env:
     PROJECT_ID: rusve-384620
     REPOSITORY: rusve-repo
     DATABASE: rusve-db
-    SERVICE: users
+    SERVICE: users-rust
     REGION: europe-north1
     ENV: production
     BUCKET: rusve-bucket
@@ -32,7 +32,7 @@ permissions:
 
 jobs:
     lint:
-        uses: ./.github/workflows/lint-users.yml
+        uses: ./.github/workflows/lint-users-rust.yml
     deploy:
         needs:
             - lint
@@ -66,7 +66,5 @@ jobs:
                   env_vars: |
                       ENV=${{ env.ENV }}
                       DATABASE_URL=${{ env.DATABASE_URL }}
-                      SENDGRID_API_KEY=${{ env.SENDGRID_API_KEY }}
-                      BUCKET=${{ env.BUCKET }}
             - name: Show Output
               run: echo ${{ steps.deploy.outputs.url }}

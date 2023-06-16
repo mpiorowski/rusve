@@ -33,8 +33,6 @@ var (
 	PORT         = MustGetenv("PORT")
 	ENV          = MustGetenv("ENV")
 	DATABASE_URL = MustGetenv("DATABASE_URL")
-	BUCKET       = MustGetenv("BUCKET")
-    SENDGRID_API_KEY = MustGetenv("SENDGRID_API_KEY")
 )
 
 var validate = validator.New()
@@ -67,14 +65,6 @@ func init() {
 }
 
 func main() {
-
-    err := subscribe_to_emails();
-    if err != nil {
-        log.Fatal(err)
-    }
-    log.Println("Subscribed to emails")
-
-
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", PORT))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)

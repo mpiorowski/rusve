@@ -1,7 +1,7 @@
 use crate::proto::users_service_server::UsersService;
-use crate::proto::{AuthRequest, Empty, File, FileId, PaymentId, TargetId, User, UserIds};
+use crate::proto::{AuthRequest, Empty, PaymentId, User, UserIds};
 use crate::proto::{UserId, UserRole};
-use crate::{files_service, MyService};
+use crate::MyService;
 use anyhow::Result;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
@@ -37,43 +37,6 @@ impl TryFrom<DieselUser> for User {
 #[tonic::async_trait]
 impl UsersService for MyService {
     type GetUsersStream = ReceiverStream<Result<User, Status>>;
-    type GetFilesStream = ReceiverStream<Result<File, Status>>;
-
-    async fn get_files(
-        &self,
-        _request: Request<TargetId>,
-    ) -> Result<Response<Self::GetFilesStream>, Status> {
-        let pool = self
-            .pool
-            .get()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
-        return files_service::get_files(pool, _request).await;
-    }
-    async fn get_file(&self, _request: Request<FileId>) -> Result<Response<File>, Status> {
-        let pool = self
-            .pool
-            .get()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
-        return files_service::get_file(pool, _request).await;
-    }
-    async fn create_file(&self, _request: Request<File>) -> Result<Response<File>, Status> {
-        let pool = self
-            .pool
-            .get()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
-        return files_service::create_file(pool, _request).await;
-    }
-    async fn delete_file(&self, _request: Request<FileId>) -> Result<Response<File>, Status> {
-        let pool = self
-            .pool
-            .get()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
-        return files_service::delete_file(pool, _request).await;
-    }
 
     async fn auth(&self, request: Request<AuthRequest>) -> Result<Response<User>, Status> {
         println!("Auth");

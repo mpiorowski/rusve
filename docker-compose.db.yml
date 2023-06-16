@@ -1,33 +1,32 @@
 version: "3"
 services:
+    db-users:
+        container_name: rusve-db-users
+        image: postgres:15.1
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: 12345
+            POSTGRES_DB: users
 
-  service-users-db:
-    container_name: rusve-service-users-db
-    image: postgres:15.1
-    ports:
-      - 5432:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: users
+    db-utils:
+        container_name: rusve-db-utils
+        image: postgres:15.1
+        ports:
+            - 5433:5432
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: 12345
+            POSTGRES_DB: users
 
-  service-notes-db:
-    container_name: rusve-service-notes-db
-    image: mysql:8.0.33
-    ports:
-      - 3306:3306
-    environment:
-      MYSQL_USER: admin
-      MYSQL_ROOT_PASSWORD: 12345
-      MYSQL_PASSWORD: 12345
-      MYSQL_DATABASE: notes
-
-        #service-notes-db:
-        #  container_name: rusve-service-notes-db
-        #  image: postgres:15.1
-        #  ports:
-        #    - 5434:5432
-        #  environment:
-        #    POSTGRES_USER: postgres
-        #    POSTGRES_PASSWORD: 12345
-        #    POSTGRES_DB: notes
+    db-notes:
+        container_name: rusve-db-notes
+        image: mysql:8.0.33
+        ports:
+            - 3306:3306
+        environment:
+            MYSQL_USER: admin
+            MYSQL_ROOT_PASSWORD: 12345
+            MYSQL_PASSWORD: 12345
+            MYSQL_DATABASE: notes
