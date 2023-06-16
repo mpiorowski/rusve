@@ -1,6 +1,6 @@
 {
     "extends": "./.svelte-kit/tsconfig.json",
-    "exclude": ["node_modules/*", "src/service-worker.js"],
+    "exclude": ["node_modules/*", "src/lib/proto", "src/service-worker.js"],
     "compilerOptions": {
         "allowJs": true,
         "checkJs": true,

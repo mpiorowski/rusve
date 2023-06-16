@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *server) GetFiles(in *pb.TargetId, stream pb.UsersService_GetFilesServer) error {
+func (s *server) GetFiles(in *pb.TargetId, stream pb.UtilsService_GetFilesServer) error {
 	log.Printf("GetFiles")
 
 	rules := map[string]string{

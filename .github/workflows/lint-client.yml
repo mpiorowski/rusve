@@ -15,15 +15,11 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: "18.x"
-            - name: Install dependencies
-              run: npm i
-            - name: Copy env file
-              run: cp .env.example .env
-            - name: Run build
-              run: npm run build
-            - name: Run lint
-              run:
-                  npm run lint
+            - run: cp .env.example .env
+            - run: npm i -g pnpm
+            - run: pnpm i
+            - run: pnpm run build
+            - run: pnpm run lint
                   #- name: Annotate Pull Request
                   #  uses: actions/github-script@v3
                   #  with:

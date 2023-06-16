@@ -1,5 +1,5 @@
 import { URI_USERS_GO, URI_USERS_RUST } from "$env/static/private";
-import { usersGoClient, usersRustClient } from "$lib/grpc";
+import { usersGoClient, usersRustClient, utilsGoClient, utilsRustClient } from "$lib/grpc";
 import { createMetadata } from "$lib/metadata";
 import type { File, File__Output } from "$lib/proto/proto/File";
 import type { FileId } from "$lib/proto/proto/FileId";
@@ -19,6 +19,7 @@ export const load = (async ({ locals, url }) => {
         const isGo = url.searchParams.get("lang") === "go";
         const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
         const client = isGo ? usersGoClient : usersRustClient;
+        const utilsClient = isGo ? utilsGoClient : utilsRustClient;
         const userId = locals.userId;
         const request: UserId = { userId: userId };
         let metadata = await createMetadata(uri);
@@ -38,7 +39,7 @@ export const load = (async ({ locals, url }) => {
             };
             metadata = await createMetadata(uri);
             file = new Promise((resolve, reject) => {
-                client.getFile(fileId, metadata, (err, response) => {
+                utilsClient.getFile(fileId, metadata, (err, response) => {
                     if (!response || err) {
                         reject(err);
                     } else {
@@ -125,6 +126,7 @@ export const actions = {
         const isGo = lang === "go";
         const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
         const client = isGo ? usersGoClient : usersRustClient;
+        const utilsClient = isGo ? utilsGoClient : utilsRustClient;
 
         const targetId = locals.userId;
         const type = form.data.get("type");
@@ -194,7 +196,7 @@ export const actions = {
             };
             const del = await safe(
                 new Promise((resolve, reject) => {
-                    client.deleteFile(oldFileId, metadata, (err, response) =>
+                    utilsClient.deleteFile(oldFileId, metadata, (err, response) =>
                         err || !response ? reject(err) : resolve(response),
                     );
                 }),
@@ -212,7 +214,7 @@ export const actions = {
             buffer: schema.data.buffer,
         };
         const newFile = await new Promise<File__Output>((resolve, reject) => {
-            client.createFile(newFileData, metadata, (err, response) =>
+            utilsClient.createFile(newFileData, metadata, (err, response) =>
                 err || !response ? reject(err) : resolve(response),
             );
         });
@@ -249,6 +251,7 @@ export const actions = {
             const isGo = lang === "go";
             const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
             const client = isGo ? usersGoClient : usersRustClient;
+            const utilsClient = isGo ? utilsGoClient : utilsRustClient;
 
             const fileIdS = form.get("fileId");
             if (typeof fileIdS !== "string") {
@@ -286,7 +289,7 @@ export const actions = {
                 targetId: schema.data.targetId,
             };
             await new Promise<void>((resolve, reject) => {
-                client.deleteFile(fileData, metadataUtils, (err) =>
+                utilsClient.deleteFile(fileData, metadataUtils, (err) =>
                     err ? reject(err) : resolve(),
                 );
             });

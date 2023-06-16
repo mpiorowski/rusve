@@ -27,10 +27,6 @@ type UsersServiceClient interface {
 	GetUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Empty, error)
 	UpdatePaymentId(ctx context.Context, in *PaymentId, opts ...grpc.CallOption) (*Empty, error)
-	GetFiles(ctx context.Context, in *TargetId, opts ...grpc.CallOption) (UsersService_GetFilesClient, error)
-	GetFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error)
-	CreateFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*File, error)
-	DeleteFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error)
 }
 
 type usersServiceClient struct {
@@ -109,65 +105,6 @@ func (c *usersServiceClient) UpdatePaymentId(ctx context.Context, in *PaymentId,
 	return out, nil
 }
 
-func (c *usersServiceClient) GetFiles(ctx context.Context, in *TargetId, opts ...grpc.CallOption) (UsersService_GetFilesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &UsersService_ServiceDesc.Streams[1], "/proto.UsersService/GetFiles", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &usersServiceGetFilesClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type UsersService_GetFilesClient interface {
-	Recv() (*File, error)
-	grpc.ClientStream
-}
-
-type usersServiceGetFilesClient struct {
-	grpc.ClientStream
-}
-
-func (x *usersServiceGetFilesClient) Recv() (*File, error) {
-	m := new(File)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *usersServiceClient) GetFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error) {
-	out := new(File)
-	err := c.cc.Invoke(ctx, "/proto.UsersService/GetFile", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersServiceClient) CreateFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*File, error) {
-	out := new(File)
-	err := c.cc.Invoke(ctx, "/proto.UsersService/CreateFile", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersServiceClient) DeleteFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error) {
-	out := new(File)
-	err := c.cc.Invoke(ctx, "/proto.UsersService/DeleteFile", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // UsersServiceServer is the server API for UsersService service.
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility
@@ -177,10 +114,6 @@ type UsersServiceServer interface {
 	GetUser(context.Context, *UserId) (*User, error)
 	UpdateUser(context.Context, *User) (*Empty, error)
 	UpdatePaymentId(context.Context, *PaymentId) (*Empty, error)
-	GetFiles(*TargetId, UsersService_GetFilesServer) error
-	GetFile(context.Context, *FileId) (*File, error)
-	CreateFile(context.Context, *File) (*File, error)
-	DeleteFile(context.Context, *FileId) (*File, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -202,18 +135,6 @@ func (UnimplementedUsersServiceServer) UpdateUser(context.Context, *User) (*Empt
 }
 func (UnimplementedUsersServiceServer) UpdatePaymentId(context.Context, *PaymentId) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePaymentId not implemented")
-}
-func (UnimplementedUsersServiceServer) GetFiles(*TargetId, UsersService_GetFilesServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetFiles not implemented")
-}
-func (UnimplementedUsersServiceServer) GetFile(context.Context, *FileId) (*File, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFile not implemented")
-}
-func (UnimplementedUsersServiceServer) CreateFile(context.Context, *File) (*File, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateFile not implemented")
-}
-func (UnimplementedUsersServiceServer) DeleteFile(context.Context, *FileId) (*File, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
 
@@ -321,81 +242,6 @@ func _UsersService_UpdatePaymentId_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UsersService_GetFiles_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(TargetId)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(UsersServiceServer).GetFiles(m, &usersServiceGetFilesServer{stream})
-}
-
-type UsersService_GetFilesServer interface {
-	Send(*File) error
-	grpc.ServerStream
-}
-
-type usersServiceGetFilesServer struct {
-	grpc.ServerStream
-}
-
-func (x *usersServiceGetFilesServer) Send(m *File) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _UsersService_GetFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FileId)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServiceServer).GetFile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.UsersService/GetFile",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServiceServer).GetFile(ctx, req.(*FileId))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UsersService_CreateFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(File)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServiceServer).CreateFile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.UsersService/CreateFile",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServiceServer).CreateFile(ctx, req.(*File))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UsersService_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FileId)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServiceServer).DeleteFile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.UsersService/DeleteFile",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServiceServer).DeleteFile(ctx, req.(*FileId))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // UsersService_ServiceDesc is the grpc.ServiceDesc for UsersService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -419,18 +265,6 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "UpdatePaymentId",
 			Handler:    _UsersService_UpdatePaymentId_Handler,
 		},
-		{
-			MethodName: "GetFile",
-			Handler:    _UsersService_GetFile_Handler,
-		},
-		{
-			MethodName: "CreateFile",
-			Handler:    _UsersService_CreateFile_Handler,
-		},
-		{
-			MethodName: "DeleteFile",
-			Handler:    _UsersService_DeleteFile_Handler,
-		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
@@ -438,9 +272,226 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 			Handler:       _UsersService_GetUsers_Handler,
 			ServerStreams: true,
 		},
+	},
+	Metadata: "main.proto",
+}
+
+// UtilsServiceClient is the client API for UtilsService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type UtilsServiceClient interface {
+	GetFiles(ctx context.Context, in *TargetId, opts ...grpc.CallOption) (UtilsService_GetFilesClient, error)
+	GetFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error)
+	CreateFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*File, error)
+	DeleteFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error)
+}
+
+type utilsServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewUtilsServiceClient(cc grpc.ClientConnInterface) UtilsServiceClient {
+	return &utilsServiceClient{cc}
+}
+
+func (c *utilsServiceClient) GetFiles(ctx context.Context, in *TargetId, opts ...grpc.CallOption) (UtilsService_GetFilesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &UtilsService_ServiceDesc.Streams[0], "/proto.UtilsService/GetFiles", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &utilsServiceGetFilesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type UtilsService_GetFilesClient interface {
+	Recv() (*File, error)
+	grpc.ClientStream
+}
+
+type utilsServiceGetFilesClient struct {
+	grpc.ClientStream
+}
+
+func (x *utilsServiceGetFilesClient) Recv() (*File, error) {
+	m := new(File)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *utilsServiceClient) GetFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error) {
+	out := new(File)
+	err := c.cc.Invoke(ctx, "/proto.UtilsService/GetFile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *utilsServiceClient) CreateFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*File, error) {
+	out := new(File)
+	err := c.cc.Invoke(ctx, "/proto.UtilsService/CreateFile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *utilsServiceClient) DeleteFile(ctx context.Context, in *FileId, opts ...grpc.CallOption) (*File, error) {
+	out := new(File)
+	err := c.cc.Invoke(ctx, "/proto.UtilsService/DeleteFile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UtilsServiceServer is the server API for UtilsService service.
+// All implementations must embed UnimplementedUtilsServiceServer
+// for forward compatibility
+type UtilsServiceServer interface {
+	GetFiles(*TargetId, UtilsService_GetFilesServer) error
+	GetFile(context.Context, *FileId) (*File, error)
+	CreateFile(context.Context, *File) (*File, error)
+	DeleteFile(context.Context, *FileId) (*File, error)
+	mustEmbedUnimplementedUtilsServiceServer()
+}
+
+// UnimplementedUtilsServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedUtilsServiceServer struct {
+}
+
+func (UnimplementedUtilsServiceServer) GetFiles(*TargetId, UtilsService_GetFilesServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetFiles not implemented")
+}
+func (UnimplementedUtilsServiceServer) GetFile(context.Context, *FileId) (*File, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFile not implemented")
+}
+func (UnimplementedUtilsServiceServer) CreateFile(context.Context, *File) (*File, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFile not implemented")
+}
+func (UnimplementedUtilsServiceServer) DeleteFile(context.Context, *FileId) (*File, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
+}
+func (UnimplementedUtilsServiceServer) mustEmbedUnimplementedUtilsServiceServer() {}
+
+// UnsafeUtilsServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to UtilsServiceServer will
+// result in compilation errors.
+type UnsafeUtilsServiceServer interface {
+	mustEmbedUnimplementedUtilsServiceServer()
+}
+
+func RegisterUtilsServiceServer(s grpc.ServiceRegistrar, srv UtilsServiceServer) {
+	s.RegisterService(&UtilsService_ServiceDesc, srv)
+}
+
+func _UtilsService_GetFiles_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(TargetId)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(UtilsServiceServer).GetFiles(m, &utilsServiceGetFilesServer{stream})
+}
+
+type UtilsService_GetFilesServer interface {
+	Send(*File) error
+	grpc.ServerStream
+}
+
+type utilsServiceGetFilesServer struct {
+	grpc.ServerStream
+}
+
+func (x *utilsServiceGetFilesServer) Send(m *File) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _UtilsService_GetFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FileId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UtilsServiceServer).GetFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.UtilsService/GetFile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UtilsServiceServer).GetFile(ctx, req.(*FileId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UtilsService_CreateFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(File)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UtilsServiceServer).CreateFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.UtilsService/CreateFile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UtilsServiceServer).CreateFile(ctx, req.(*File))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UtilsService_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FileId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UtilsServiceServer).DeleteFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.UtilsService/DeleteFile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UtilsServiceServer).DeleteFile(ctx, req.(*FileId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// UtilsService_ServiceDesc is the grpc.ServiceDesc for UtilsService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var UtilsService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.UtilsService",
+	HandlerType: (*UtilsServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetFile",
+			Handler:    _UtilsService_GetFile_Handler,
+		},
+		{
+			MethodName: "CreateFile",
+			Handler:    _UtilsService_CreateFile_Handler,
+		},
+		{
+			MethodName: "DeleteFile",
+			Handler:    _UtilsService_DeleteFile_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "GetFiles",
-			Handler:       _UsersService_GetFiles_Handler,
+			Handler:       _UtilsService_GetFiles_Handler,
 			ServerStreams: true,
 		},
 	},

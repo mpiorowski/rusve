@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "rusve/proto";
+
+enum FileType {
+    DOCUMENT = 0;
+    AVATAR = 1;
+}
+
+message File {
+    bytes id = 1;
+    string created = 2;
+    string updated = 3;
+    optional string deleted = 4;
+
+    bytes target_id = 5;
+    string name = 6;
+    FileType type = 7;
+
+    bytes buffer = 8;
+    string url = 9;
+}
