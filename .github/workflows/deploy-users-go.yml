@@ -10,8 +10,6 @@ on:
                 required: true
             DATABASE_URL:
                 required: true
-            SENDGRID_API_KEY:
-                required: true
 
 env:
     GAR_LOCATION: europe-north1
@@ -22,7 +20,6 @@ env:
     REGION: europe-north1
     ENV: production
     BUCKET: rusve-bucket
-    SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
     DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
     # DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
 
