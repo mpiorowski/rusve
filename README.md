@@ -7,6 +7,8 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
 Feel free to ask questions and throw new ideas! Any contribution is also welcome, especially some ux/ui redesigns :)
 
 ### Currently working on...
+- Comment whole codebase :)
+- Add service to service auth using grpc build in system
 - Markdown
 - Telemetry
 - Make it more resistanc to no js
