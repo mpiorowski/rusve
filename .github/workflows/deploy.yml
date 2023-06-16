@@ -41,7 +41,7 @@ jobs:
             DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
             SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
     deploy-notes:
-        uses: ./.github/workflows/deploy-notes.yml
+        uses: ./.github/workflows/deploy-notes-rust.yml
         secrets:
             GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
             DATABASE_URL: ${{ secrets.MYSQL_DATABASE_URL_RUST }}
