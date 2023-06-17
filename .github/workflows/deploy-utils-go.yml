@@ -1,9 +1,9 @@
-name: Deploy Users Go
+name: Deploy Utils Go
 
 on:
     push:
         branches:
-            - release-users-go/**
+            - release-utils-go/**
     workflow_call:
         secrets:
             GCP_CREDENTIALS:
@@ -18,13 +18,12 @@ env:
     PROJECT_ID: rusve-384620
     REPOSITORY: rusve-repo
     DATABASE: rusve-db
-    SERVICE: users-go
+    SERVICE: utils-go
     REGION: europe-north1
     ENV: production
     DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=utils
     BUCKET: rusve-bucket
     SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-    # DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
 
 permissions:
     contents: read
@@ -32,7 +31,7 @@ permissions:
 
 jobs:
     lint:
-        uses: ./.github/workflows/lint-users-go.yml
+        uses: ./.github/workflows/lint-utils-go.yml
     deploy:
         needs:
             - lint
@@ -54,7 +53,7 @@ jobs:
                   password: ${{ secrets.GCP_CREDENTIALS }}
             - name: Build and Push Container
               run: |-
-                  docker build -f ./service-users-go/Dockerfile -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./service-users-go
+                  docker build -f ./service-${{ env.SERVICE }}/Dockerfile -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./service-${{ env.SERVICE }}
                   docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
             - name: Deploy to Cloud Run
               id: deploy

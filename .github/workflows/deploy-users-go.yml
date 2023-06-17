@@ -49,7 +49,7 @@ jobs:
                   password: ${{ secrets.GCP_CREDENTIALS }}
             - name: Build and Push Container
               run: |-
-                  docker build -f ./service-users-go/Dockerfile -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./service-users-go
+                  docker build -f ./service-${{ env.SERVICE }}/Dockerfile -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./service-${{ env.SERVICE }}
                   docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
             - name: Deploy to Cloud Run
               id: deploy
