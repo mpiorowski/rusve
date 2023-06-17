@@ -19,9 +19,7 @@ env:
     SERVICE: users-go
     REGION: europe-north1
     ENV: production
-    BUCKET: rusve-bucket
     DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
-    # DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
 
 permissions:
     contents: read

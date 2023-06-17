@@ -25,10 +25,11 @@ env:
     REGION: europe-north1
     ENV: production
     DOMAIN: https://www.rusve.app
-    URI_USERS_RUST: users-cdb5ecy4ia-lz.a.run.app
+    URI_USERS_RUST: users-rust-cdb5ecy4ia-lz.a.run.app
     URI_USERS_GO: users-go-cdb5ecy4ia-lz.a.run.app
-    URI_UTILS: utils-cdb5ecy4ia-lz.a.run.app
-    URI_NOTES_RUST: notes-cdb5ecy4ia-lz.a.run.app
+    URI_UTILS_RUST: utils-rust-cdb5ecy4ia-lz.a.run.app
+    URI_UTILS_GO: utils-go-cdb5ecy4ia-lz.a.run.app
+    URI_NOTES_RUST: notes-rust-cdb5ecy4ia-lz.a.run.app
     URI_NOTES_GO: notes-go-cdb5ecy4ia-lz.a.run.app
     URI_DIRECTUS: https://directus-cms.fly.dev
     PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
@@ -70,7 +71,8 @@ jobs:
                   echo DOMAIN="$DOMAIN" >> ./client/.env.prod
                   echo URI_USERS_RUST="$URI_USERS_RUST" >> ./client/.env.prod
                   echo URI_USERS_GO="$URI_USERS_GO" >> ./client/.env.prod
-                  echo URI_UTILS="$URI_UTILS" >> ./client/.env.prod
+                  echo URI_UTILS_RUST="$URI_UTILS_RUST" >> ./client/.env.prod
+                  echo URI_UTILS_GO="$URI_UTILS_GO" >> ./client/.env.prod
                   echo URI_NOTES_RUST="$URI_NOTES_RUST" >> ./client/.env.prod
                   echo URI_NOTES_GO="$URI_NOTES_GO" >> ./client/.env.prod
                   echo URI_DIRECTUS="$URI_DIRECTUS" >> ./client/.env.prod
