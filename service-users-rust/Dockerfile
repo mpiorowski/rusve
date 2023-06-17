@@ -5,6 +5,7 @@ WORKDIR /app
 COPY ./Cargo.toml /app/Cargo.toml
 COPY ./Cargo.lock /app/Cargo.lock
 COPY ./migrations /app/migrations
+COPY ./tls /app/tls
 COPY ./src /app/src
 
 RUN RUSTFLAGS="--cfg uuid_unstable" cargo build --release
@@ -12,6 +13,7 @@ RUN RUSTFLAGS="--cfg uuid_unstable" cargo build --release
 # Production image
 FROM debian:bullseye-slim AS prod
 COPY --from=build /app/target/release /app
+COPY --from=build /app/tls /app/tls
 
 # Add openssl and ca-certificates
 RUN apt-get update && apt-get install -y openssl ca-certificates libpq-dev libssl-dev

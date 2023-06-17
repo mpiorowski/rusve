@@ -35,8 +35,8 @@ async fn main() -> Result<()> {
     let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);
 
-    let cert = tokio::fs::read("./src/tls/server.pem").await?;
-    let key = tokio::fs::read("./src/tls/server.key").await?;
+    let cert = tokio::fs::read("/app/tls/server.pem").await?;
+    let key = tokio::fs::read("/app/tls/server.key").await?;
     let server_identity = tonic::transport::Identity::from_pem(cert, key);
 
     // let client_ca_cert = tokio::fs::read("/app/src/tls/ca.pem").await?;
