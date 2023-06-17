@@ -23,9 +23,8 @@ services:
         environment:
             PORT: 443
             ENV: development
-            DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
-            BUCKET: bucket
-            SENDGRID_API_KEY: sendgid-api-key
+              # DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
+            DATABASE_URL: postgres://mpiorowski:GAC7ipPduey6@ep-rough-dream-040893.eu-central-1.aws.neon.tech?sslmode=require&options=endpoint%3Dep-rough-dream-040893&dbname=users
 
     service-users-go:
         container_name: rusve-service-users-go
@@ -53,7 +52,7 @@ services:
         environment:
             PORT: 443
             ENV: development
-            DATABASE_URL: postgresql://?host=db-utilss&user=postgres&password=12345&dbname=users
+            DATABASE_URL: postgresql://?host=db-utils&user=postgres&password=12345&dbname=users
             BUCKET: bucket
             SENDGRID_API_KEY: sendgid-api-key
 
@@ -69,7 +68,7 @@ services:
         environment:
             PORT: 443
             ENV: development
-            DATABASE_URL: postgresql://?host=db-utilss&user=postgres&password=12345&dbname=users
+            DATABASE_URL: postgresql://?host=db-utils&user=postgres&password=12345&dbname=users
             BUCKET: bucket
             SENDGRID_API_KEY: sendgid-api-key
 
@@ -86,7 +85,6 @@ services:
             PORT: 443
             DATABASE_URL:
                 mysql://admin:12345@db-notes:3306/notes
-                # DATABASE_URL: postgresql://?host=service-notes-db&user=postgres&password=12345&dbname=notes
 
     service-notes-go:
         container_name: rusve-service-notes-go
@@ -101,7 +99,6 @@ services:
             PORT: 443
             DATABASE_URL:
                 admin:12345@tcp(db-notes:3306)/notes
-                # DATABASE_URL: postgresql://?host=service-notes-db&user=postgres&password=12345&dbname=notes
 
     directus:
         container_name: rusve-directus

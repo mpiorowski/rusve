@@ -61,7 +61,5 @@ jobs:
                   env_vars: |
                       ENV=${{ env.ENV }}
                       DATABASE_URL=${{ env.DATABASE_URL }}
-                      SENDGRID_API_KEY=${{ env.SENDGRID_API_KEY }}
-                      BUCKET=${{ env.BUCKET }}
             - name: Show Output
               run: echo ${{ steps.deploy.outputs.url }}
