@@ -1,4 +1,4 @@
-import { URI_USERS_GO, URI_USERS_RUST } from "$env/static/private";
+import { URI_USERS_GO, URI_USERS_RUST, URI_UTILS_GO, URI_UTILS_RUST } from "$env/static/private";
 import { usersGoClient, usersRustClient, utilsGoClient, utilsRustClient } from "$lib/grpc";
 import { createMetadata } from "$lib/metadata";
 import type { File, File__Output } from "$lib/proto/proto/File";
@@ -125,6 +125,7 @@ export const actions = {
         const lang = form.data.get("lang") ?? "rust";
         const isGo = lang === "go";
         const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
+        const utilsUri = isGo ? URI_UTILS_GO : URI_UTILS_RUST;
         const client = isGo ? usersGoClient : usersRustClient;
         const utilsClient = isGo ? utilsGoClient : utilsRustClient;
 
@@ -187,7 +188,7 @@ export const actions = {
             return fail(400, { error: "Invalid request" });
         }
 
-        let metadata = await createMetadata(uri);
+        let metadata = await createMetadata(utilsUri);
         // Delete old avatar
         if (schema.data.avatarId.length > 0) {
             const oldFileId: FileId = {
@@ -250,6 +251,7 @@ export const actions = {
             const lang = form.get("lang") ?? "rust";
             const isGo = lang === "go";
             const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
+            const utilsUri = isGo ? URI_UTILS_GO : URI_UTILS_RUST;
             const client = isGo ? usersGoClient : usersRustClient;
             const utilsClient = isGo ? utilsGoClient : utilsRustClient;
 
@@ -259,8 +261,6 @@ export const actions = {
             }
             const fileId = Buffer.from(fileIdS, "hex");
             const targetId = locals.userId;
-            console.log(fileId);
-            console.log(targetId);
             const name = form.get("name");
 
             const schema = z
@@ -281,7 +281,7 @@ export const actions = {
             }
 
             const metadata = await createMetadata(uri);
-            const metadataUtils = await createMetadata(uri);
+            const metadataUtils = await createMetadata(utilsUri);
 
             // Delete file
             const fileData: FileId = {

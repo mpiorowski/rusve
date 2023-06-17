@@ -24,7 +24,7 @@ services:
             PORT: 443
             ENV: development
               # DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
-            DATABASE_URL: postgres://mpiorowski:GAC7ipPduey6@ep-rough-dream-040893.eu-central-1.aws.neon.tech?sslmode=require&options=endpoint%3Dep-rough-dream-040893&dbname=users
+            DATABASE_URL: postgres://mpiorowski:Z3Ts8qmGJiSh@ep-rough-dream-040893.eu-central-1.aws.neon.tech?sslmode=require&options=endpoint%3Dep-rough-dream-040893&dbname=users
 
     service-users-go:
         container_name: rusve-service-users-go
