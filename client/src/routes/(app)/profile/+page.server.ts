@@ -1,5 +1,15 @@
-import { URI_USERS_GO, URI_USERS_RUST, URI_UTILS_GO, URI_UTILS_RUST } from "$env/static/private";
-import { usersGoClient, usersRustClient, utilsGoClient, utilsRustClient } from "$lib/grpc";
+import {
+    URI_USERS_GO,
+    URI_USERS_RUST,
+    URI_UTILS_GO,
+    URI_UTILS_RUST,
+} from "$env/static/private";
+import {
+    usersGoClient,
+    usersRustClient,
+    utilsGoClient,
+    utilsRustClient,
+} from "$lib/grpc";
 import { createMetadata } from "$lib/metadata";
 import type { File, File__Output } from "$lib/proto/proto/File";
 import type { FileId } from "$lib/proto/proto/FileId";
@@ -18,6 +28,7 @@ export const load = (async ({ locals, url }) => {
 
         const isGo = url.searchParams.get("lang") === "go";
         const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
+        const uriUtils = isGo ? URI_UTILS_GO : URI_UTILS_RUST;
         const client = isGo ? usersGoClient : usersRustClient;
         const utilsClient = isGo ? utilsGoClient : utilsRustClient;
         const userId = locals.userId;
@@ -37,7 +48,7 @@ export const load = (async ({ locals, url }) => {
                 fileId: user.avatarId,
                 targetId: userId,
             };
-            metadata = await createMetadata(uri);
+            metadata = await createMetadata(uriUtils);
             file = new Promise((resolve, reject) => {
                 utilsClient.getFile(fileId, metadata, (err, response) => {
                     if (!response || err) {
@@ -197,8 +208,11 @@ export const actions = {
             };
             const del = await safe(
                 new Promise((resolve, reject) => {
-                    utilsClient.deleteFile(oldFileId, metadata, (err, response) =>
-                        err || !response ? reject(err) : resolve(response),
+                    utilsClient.deleteFile(
+                        oldFileId,
+                        metadata,
+                        (err, response) =>
+                            err || !response ? reject(err) : resolve(response),
                     );
                 }),
             );
@@ -214,12 +228,14 @@ export const actions = {
             type: schema.data.type,
             buffer: schema.data.buffer,
         };
-        const newFile = await new Promise<File__Output>((resolve, reject) => {
-            utilsClient.createFile(newFileData, metadata, (err, response) =>
-                err || !response ? reject(err) : resolve(response),
-            );
-        });
-        if (newFile.id.length === 0) {
+        const newFile = await safe(
+            new Promise<File__Output>((resolve, reject) => {
+                utilsClient.createFile(newFileData, metadata, (err, response) =>
+                    err || !response ? reject(err) : resolve(response),
+                );
+            }),
+        );
+        if (!newFile.success || newFile.data.id.length === 0) {
             return fail(500, { error: "Could not create file" });
         }
 
@@ -227,19 +243,23 @@ export const actions = {
         const data: User = {
             id: locals.userId,
             name: schema.data.name,
-            avatarId: newFile.id,
+            avatarId: newFile.data.id,
         };
         metadata = await createMetadata(uri);
-        const user = await new Promise<void>((resolve, reject) => {
-            client.updateUser(data, metadata, (err) =>
-                err ? reject(err) : resolve(),
-            );
-        });
+        const user = await safe(
+            new Promise<void>((resolve, reject) => {
+                client.updateUser(data, metadata, (err) =>
+                    err ? reject(err) : resolve(),
+                );
+            }),
+        );
+        if (!user.success) {
+            return fail(500, { error: "Could not create user" });
+        }
 
-        const end = performance.now();
         return {
-            user: user,
-            duration: end - start,
+            user: user.data,
+            duration: performance.now() - start,
         };
     },
     deleteAvatar: async ({ request, locals }) => {

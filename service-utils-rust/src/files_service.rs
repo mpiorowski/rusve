@@ -63,7 +63,6 @@ impl UtilsService for MyService {
         &self,
         request: Request<TargetId>,
     ) -> Result<Response<Self::GetFilesStream>, Status> {
-        #[cfg(debug_assertions)]
         println!("GetFiles");
         let start = std::time::Instant::now();
 
@@ -98,7 +97,6 @@ impl UtilsService for MyService {
         Ok(Response::new(ReceiverStream::new(rx)))
     }
     async fn get_file(&self, request: Request<FileId>) -> Result<Response<File>, Status> {
-        #[cfg(debug_assertions)]
         println!("GetFile");
         let start = std::time::Instant::now();
 
@@ -154,7 +152,6 @@ impl UtilsService for MyService {
         Ok(Response::new(file))
     }
     async fn create_file(&self, request: Request<File>) -> Result<Response<File>, Status> {
-        #[cfg(debug_assertions)]
         println!("CreateFile");
         let start = std::time::Instant::now();
 
@@ -221,7 +218,6 @@ impl UtilsService for MyService {
         Ok(Response::new(file))
     }
     async fn delete_file(&self, request: Request<FileId>) -> Result<Response<File>, Status> {
-        #[cfg(debug_assertions)]
         println!("DeleteFile");
         let start = std::time::Instant::now();
 
