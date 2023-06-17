@@ -1676,6 +1676,7 @@ dependencies = [
  "google-cloud-default",
  "google-cloud-pubsub",
  "google-cloud-storage",
+ "jsonwebtoken",
  "prost",
  "rustls",
  "rustls-native-certs",

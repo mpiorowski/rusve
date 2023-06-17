@@ -8,7 +8,8 @@ use anyhow::{Context, Result};
 use diesel_async::{pooled_connection::deadpool::Pool, AsyncPgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use rusve_users::{establish_connection_sync, establish_connection_tls};
-use tonic::transport::Server;
+use serde::{Deserialize, Serialize};
+use tonic::{transport::Server, Request, Status};
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
@@ -35,23 +36,37 @@ async fn main() -> Result<()> {
     let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);
 
-    let cert = tokio::fs::read("/app/tls/server.pem").await?;
-    let key = tokio::fs::read("/app/tls/server.key").await?;
-    let server_identity = tonic::transport::Identity::from_pem(cert, key);
-
-    // let client_ca_cert = tokio::fs::read("/app/src/tls/ca.pem").await?;
-    // let client_ca_cert = tonic::transport::Certificate::from_pem(client_ca_cert);
-    let tls = tonic::transport::ServerTlsConfig::new()
-        .identity(server_identity);
-        // .client_ca_root(client_ca_cert);
-
     let server = MyService { pool };
-    let svc = UsersServiceServer::new(server);
-    Server::builder()
-        .tls_config(tls)?
-        .add_service(svc)
-        .serve(addr)
-        .await?;
+    let svc = UsersServiceServer::with_interceptor(server, check_auth);
+    Server::builder().add_service(svc).serve(addr).await?;
 
     Ok(())
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Claims {
+    sub: String,
+}
+fn check_auth(req: Request<()>) -> Result<Request<()>, Status> {
+    let token = match req.metadata().get("x-authorization") {
+        Some(token) => token,
+        None => return Err(Status::unauthenticated("Missing authorization token")),
+    };
+    let token = token
+        .to_str()
+        .map_err(|_| Status::unauthenticated("Invalid authorization token"))?
+        .strip_prefix("bearer ")
+        .ok_or_else(|| Status::unauthenticated("Invalid authorization token"))?;
+
+    let token_message = jsonwebtoken::decode::<Claims>(
+        token,
+        &jsonwebtoken::DecodingKey::from_rsa_pem(include_bytes!("../public.key"))
+            .map_err(|_| Status::unauthenticated("Invalid authorization token"))?,
+        &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::RS256),
+    );
+
+    match token_message {
+        Ok(_) => Ok(req),
+        Err(_) => Err(Status::unauthenticated("Invalid authorization token")),
+    }
 }

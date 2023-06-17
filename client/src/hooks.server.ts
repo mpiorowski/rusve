@@ -1,9 +1,9 @@
 import { redirect, type Handle, type HandleServerError } from "@sveltejs/kit";
 import type { AuthRequest } from "$lib/proto/proto/AuthRequest";
-import { createMetadata } from "$lib/metadata";
+import { createMetadata } from "$lib/auth/metadata";
 import { usersGoClient, usersRustClient } from "$lib/grpc";
 import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { getFirebaseServer } from "$lib/firebase/firebase_server";
+import { getFirebaseServer } from "$lib/auth/firebase_server";
 import { URI_USERS_GO, URI_USERS_RUST } from "$env/static/private";
 import type { User__Output } from "$lib/proto/proto/User";
 import type { Metadata } from "@grpc/grpc-js";

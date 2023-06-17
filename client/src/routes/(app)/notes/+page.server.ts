@@ -10,7 +10,7 @@ import type { UserId } from "$lib/proto/proto/UserId";
 import type { Note__Output } from "$lib/proto/proto/Note";
 import type { User__Output } from "$lib/proto/proto/User";
 import type { NoteId } from "$lib/proto/proto/NoteId";
-import { createMetadata } from "$lib/metadata";
+import { createMetadata } from "$lib/auth/metadata";
 import {
     notesGoClient,
     notesRustClient,

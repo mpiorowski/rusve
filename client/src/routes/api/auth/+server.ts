@@ -1,4 +1,4 @@
-import { getFirebaseServer } from "$lib/firebase/firebase_server";
+import { getFirebaseServer } from "$lib/auth/firebase_server";
 import { redirect } from "@sveltejs/kit";
 
 /** @type {import('./$types').RequestHandler} */

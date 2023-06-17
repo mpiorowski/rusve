@@ -1,14 +1,14 @@
 <script lang="ts">
     import "../app.css";
-    import "$lib/form/TipTap.css";
-    import Toast from "$lib/toast/Toast.svelte";
-    import { toastStore } from "$lib/toast/toast";
+    import "$lib/components/form/TipTap.css";
+    import Toast from "$lib/components/toast/Toast.svelte";
+    import { toastStore } from "$lib/components/toast/toast";
     import LogoIcon from "$lib/icons/LogoIcon.svelte";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import AvatarIcon from "$lib/icons/AvatarIcon.svelte";
     import type { LayoutData } from "./$types";
     import { page } from "$app/stores";
-    import Button from "$lib/form/Button.svelte";
+    import Button from "$lib/components/form/Button.svelte";
 
     export let data: LayoutData;
 
@@ -69,7 +69,7 @@
 
                 {#if !data.email}
                     <a
-                        href="/auth?lang{isGo ? 'go' : 'rust'}"
+                        href="/auth?lang={isGo ? 'go' : 'rust'}"
                         class="hover:text-secondary-500 transition"
                     >
                         Login

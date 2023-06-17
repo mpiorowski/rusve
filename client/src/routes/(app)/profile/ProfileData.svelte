@@ -1,9 +1,9 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
-    import Button from "$lib/form/Button.svelte";
-    import Input from "$lib/form/Input.svelte";
+    import Button from "$lib/components/form/Button.svelte";
+    import Input from "$lib/components/form/Input.svelte";
     import { getContext } from "svelte";
-    import { toast } from "$lib/toast/toast";
+    import { toast } from "$lib/components/toast/toast";
     import SaveIcon from "$lib/icons/SaveIcon.svelte";
     import { page } from "$app/stores";
     import type { ProfileContext } from "./profileTypes";

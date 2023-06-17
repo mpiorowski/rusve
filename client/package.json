@@ -41,8 +41,10 @@
         "@tiptap/extension-ordered-list": "^2.0.3",
         "@tiptap/pm": "^2.0.3",
         "@tiptap/starter-kit": "^2.0.3",
+        "@types/jsonwebtoken": "^9.0.2",
         "firebase": "^9.22.2",
         "firebase-admin": "^11.9.0",
+        "jsonwebtoken": "^9.0.0",
         "stripe": "^12.9.0",
         "zod": "^3.21.4"
     }

@@ -1,10 +1,10 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
     import Drawer from "$lib/components/Drawer.svelte";
-    import TipTap from "$lib/form/TipTap.svelte";
-    import Button from "$lib/form/Button.svelte";
-    import Input from "$lib/form/Input.svelte";
-    import { toast } from "$lib/toast/toast";
+    import TipTap from "$lib/components/form/TipTap.svelte";
+    import Button from "$lib/components/form/Button.svelte";
+    import Input from "$lib/components/form/Input.svelte";
+    import { toast } from "$lib/components/toast/toast";
     import type { ActionData } from "./$types";
     import { getContext } from "svelte";
     import type { DrawerContext } from "$lib/types";

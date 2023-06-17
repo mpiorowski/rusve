@@ -1,5 +1,5 @@
 import protoLoader from "@grpc/proto-loader";
-import { ChannelCredentials, credentials, loadPackageDefinition } from "@grpc/grpc-js";
+import { credentials, loadPackageDefinition } from "@grpc/grpc-js";
 import type { ProtoGrpcType } from "$lib/proto/main";
 import {
     ENV,
@@ -10,7 +10,6 @@ import {
     URI_USERS_RUST,
     URI_USERS_GO,
 } from "$env/static/private";
-import fs from "fs";
 
 export const packageDefinition = protoLoader.loadSync(
     "./src/lib/proto/main.proto",
@@ -19,17 +18,18 @@ export const proto = loadPackageDefinition(
     packageDefinition,
 ) as unknown as ProtoGrpcType;
 
-const rootCert = fs.readFileSync("./src/lib/tls/ca.pem");
-const channelCredentials = ChannelCredentials.createSsl(rootCert);
-
 export const usersRustClient = new proto.proto.UsersService(
     URI_USERS_RUST,
-    channelCredentials,
+    ENV === "production"
+        ? credentials.createSsl()
+        : credentials.createInsecure(),
 );
 
 export const usersGoClient = new proto.proto.UsersService(
     URI_USERS_GO,
-    channelCredentials,
+    ENV === "production"
+        ? credentials.createSsl()
+        : credentials.createInsecure(),
 );
 
 export const utilsRustClient = new proto.proto.UtilsService(

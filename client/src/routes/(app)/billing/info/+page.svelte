@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page } from "$app/stores";
-    import Button from "$lib/form/Button.svelte";
+    import Button from "$lib/components/form/Button.svelte";
 
     let status = $page.url.searchParams.get("status") ?? "";
 </script>

@@ -3,7 +3,7 @@
     import { setContext } from "svelte";
     import ProfileAvatar from "./ProfileAvatar.svelte";
     import ProfileData from "./ProfileData.svelte";
-    import { toast } from "$lib/toast/toast";
+    import { toast } from "$lib/components/toast/toast";
     import { writable } from "svelte/store";
     import type { ProfileContext } from "./profileTypes";
     import type { PageData, ActionData } from "./$types";

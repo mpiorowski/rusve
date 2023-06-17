@@ -32,12 +32,18 @@ dependencies:
   '@tiptap/starter-kit':
     specifier: ^2.0.3
     version: 2.0.3(@tiptap/pm@2.0.3)
+  '@types/jsonwebtoken':
+    specifier: ^9.0.2
+    version: 9.0.2
   firebase:
     specifier: ^9.22.2
     version: 9.22.2
   firebase-admin:
     specifier: ^11.9.0
     version: 11.9.0
+  jsonwebtoken:
+    specifier: ^9.0.0
+    version: 9.0.0
   stripe:
     specifier: ^12.9.0
     version: 12.9.0

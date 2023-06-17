@@ -2,7 +2,7 @@
     import { enhance } from "$app/forms";
     import { page } from "$app/stores";
     import DeleteIcon from "$lib/icons/DeleteIcon.svelte";
-    import { toast } from "$lib/toast/toast";
+    import { toast } from "$lib/components/toast/toast";
 
     export let noteId: string;
 
