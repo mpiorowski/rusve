@@ -71,7 +71,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-	creds, err := credentials.NewServerTLSFromFile("./src/tls/server.pem", "./src/tls/server.key")
+	creds, err := credentials.NewServerTLSFromFile("/app/tls/server.pem", "/app/tls/server.key")
     if err != nil {
         log.Fatalf("Failed to generate credentials %v", err)
     }

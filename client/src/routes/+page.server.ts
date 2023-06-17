@@ -26,7 +26,7 @@ async function fetchDashboard(): Promise<DashboardItem[]> {
         ).safeParse(json.data);
 
         if (!schema.success) {
-            console.error(schema.error);
+            console.error(schema.error.flatten());
             return [];
         }
 
