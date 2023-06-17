@@ -35,9 +35,23 @@ async fn main() -> Result<()> {
     let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);
 
+    let cert = tokio::fs::read("/app/src/tls/server.pem").await?;
+    let key = tokio::fs::read("/app/src/tls/server.key").await?;
+    let server_identity = tonic::transport::Identity::from_pem(cert, key);
+
+    // let client_ca_cert = tokio::fs::read("/app/src/tls/ca.pem").await?;
+    // let client_ca_cert = tonic::transport::Certificate::from_pem(client_ca_cert);
+    let tls = tonic::transport::ServerTlsConfig::new()
+        .identity(server_identity);
+        // .client_ca_root(client_ca_cert);
+
     let server = MyService { pool };
     let svc = UsersServiceServer::new(server);
-    Server::builder().add_service(svc).serve(addr).await?;
+    Server::builder()
+        .tls_config(tls)?
+        .add_service(svc)
+        .serve(addr)
+        .await?;
 
     Ok(())
 }

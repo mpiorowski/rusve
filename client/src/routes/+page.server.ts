@@ -16,14 +16,19 @@ async function fetchDashboard(): Promise<DashboardItem[]> {
         const data = await fetch(URI_DIRECTUS + "/items/dashboard");
 
         const json = (await data.json()) as { data: DashboardItem[] };
-        z.array(
+        const schema = z.array(
             z.object({
                 title: z.string(),
                 description: z.string(),
                 category: z.nativeEnum(Categories),
                 sort: z.number(),
             }),
-        ).parse(json.data);
+        ).safeParse(json.data);
+
+        if (!schema.success) {
+            console.error(schema.error);
+            return [];
+        }
 
         return json.data.sort((a, b) => a.sort - b.sort);
     } catch (err) {
