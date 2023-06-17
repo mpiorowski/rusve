@@ -9,8 +9,10 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	_ "github.com/jackc/pgx/v5/stdlib"
+
 	// migrate "github.com/rubenv/sql-migrate"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	pb "rusve/proto"
 )
@@ -69,7 +71,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+	creds, err := credentials.NewServerTLSFromFile("./src/tls/server.pem", "./src/tls/server.key")
+    if err != nil {
+        log.Fatalf("Failed to generate credentials %v", err)
+    }
+	s := grpc.NewServer(grpc.Creds(creds))
 	pb.RegisterUsersServiceServer(s, &server{})
 	log.Printf("Server listening at: %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
