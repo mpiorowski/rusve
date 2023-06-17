@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Button from "$lib/form/Button.svelte";
+    import Button from "$lib/components/form/Button.svelte";
     import XIcon from "$lib/icons/XIcon.svelte";
     import { getContext } from "svelte";
     import { fade, slide } from "svelte/transition";
