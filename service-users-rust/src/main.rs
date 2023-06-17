@@ -7,7 +7,7 @@ use crate::proto::users_service_server::UsersServiceServer;
 use anyhow::{Context, Result};
 use diesel_async::{pooled_connection::deadpool::Pool, AsyncPgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use rusve_users::{establish_connection, establish_connection_sync};
+use rusve_users::{establish_connection_sync, establish_connection_tls};
 use tonic::transport::Server;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     println!("Migrations run successfully");
 
     // Create a connection pool without tls
-    let pool = establish_connection(&database_url)?;
+    let pool = establish_connection_tls(&database_url)?;
 
     let addr = ("[::]:".to_owned() + &port).parse()?;
     println!("Server started on port: {}", port);

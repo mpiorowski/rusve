@@ -20,9 +20,19 @@ pub fn establish_connection_sync(database_url: &str) -> Result<diesel::pg::PgCon
     Ok(conn)
 }
 
-pub fn establish_connection_tls(
-    config: &str,
-) -> BoxFuture<diesel::ConnectionResult<AsyncPgConnection>> {
+pub fn establish_connection_tls(database_url: &str) -> Result<Pool<AsyncPgConnection>> {
+    let config = AsyncDieselConnectionManager::<AsyncPgConnection>::new_with_setup(
+        database_url,
+        connect_tls,
+    );
+    let pool = Pool::builder(config)
+        .max_size(10)
+        .build()
+        .context("Error creating pool")?;
+    Ok(pool)
+}
+
+fn connect_tls(config: &str) -> BoxFuture<diesel::ConnectionResult<AsyncPgConnection>> {
     let fut = async {
         // We first set up the way we want rustls to work.
         let rustls_config = rustls::ClientConfig::builder()
