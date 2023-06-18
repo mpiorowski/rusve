@@ -1,6 +1,6 @@
 <script lang="ts">
     import Button from "$lib/components/form/Button.svelte";
-    import XIcon from "$lib/icons/XIcon.svelte";
+    import XIcon from "$lib/assets/icons/XIcon.svelte";
     import { getContext } from "svelte";
     import { fade, slide } from "svelte/transition";
     import type { DrawerContext } from "$lib/types";

@@ -1,7 +1,7 @@
 <script lang="ts">
     import Note from "./Note.svelte";
     import Button from "$lib/components/form/Button.svelte";
-    import PlusIcon from "$lib/icons/PlusIcon.svelte";
+    import PlusIcon from "$lib/assets/icons/PlusIcon.svelte";
     import NoteDrawer from "./NoteDrawer.svelte";
     import { writable } from "svelte/store";
     import { setContext } from "svelte";

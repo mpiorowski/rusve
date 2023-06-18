@@ -3,9 +3,9 @@
     import "$lib/components/form/TipTap.css";
     import Toast from "$lib/components/toast/Toast.svelte";
     import { toastStore } from "$lib/components/toast/toast";
-    import LogoIcon from "$lib/icons/LogoIcon.svelte";
+    import LogoIcon from "$lib/assets/icons/LogoIcon.svelte";
     import Dropdown from "$lib/components/Dropdown.svelte";
-    import AvatarIcon from "$lib/icons/AvatarIcon.svelte";
+    import AvatarIcon from "$lib/assets/icons/AvatarIcon.svelte";
     import type { LayoutData } from "./$types";
     import { page } from "$app/stores";
     import Button from "$lib/components/form/Button.svelte";

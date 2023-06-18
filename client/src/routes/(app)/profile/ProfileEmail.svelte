@@ -3,7 +3,7 @@
     import { toast } from "$lib/components/toast/toast";
     import Input from "$lib/components/form/Input.svelte";
     import Button from "$lib/components/form/Button.svelte";
-    import SaveIcon from "$lib/icons/SaveIcon.svelte";
+    import SaveIcon from "$lib/assets/icons/SaveIcon.svelte";
 
     let loading = false;
     let subject = "Email from your profile";

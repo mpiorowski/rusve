@@ -1,5 +1,5 @@
 <script lang="ts">
-    import LogoIcon from "$lib/icons/LogoIcon.svelte";
+    import LogoIcon from "$lib/assets/icons/LogoIcon.svelte";
     import type { PageData } from "./$types";
     import { Categories } from "$lib/types";
 

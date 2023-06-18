@@ -1,7 +1,7 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
     import { page } from "$app/stores";
-    import DeleteIcon from "$lib/icons/DeleteIcon.svelte";
+    import DeleteIcon from "$lib/assets/icons/DeleteIcon.svelte";
     import { toast } from "$lib/components/toast/toast";
 
     export let noteId: string;

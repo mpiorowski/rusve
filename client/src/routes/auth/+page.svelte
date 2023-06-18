@@ -1,11 +1,11 @@
 <script lang="ts">
     import LoadingComponent from "$lib/components/LoadingComponent.svelte";
-    import { getFirebaseClient } from "$lib/auth/firebase_client";
+    import { getFirebaseClient } from "$lib/firebase_client";
     import Button from "$lib/components/form/Button.svelte";
     import Input from "$lib/components/form/Input.svelte";
-    import GithubIcon from "$lib/icons/GithubIcon.svelte";
-    import GmailIcon from "$lib/icons/GmailIcon.svelte";
-    import MailIcon from "$lib/icons/MailIcon.svelte";
+    import GithubIcon from "$lib/assets/icons/GithubIcon.svelte";
+    import GmailIcon from "$lib/assets/icons/GmailIcon.svelte";
+    import MailIcon from "$lib/assets/icons/MailIcon.svelte";
     import { toast } from "$lib/components/toast/toast";
     import {
         GithubAuthProvider,

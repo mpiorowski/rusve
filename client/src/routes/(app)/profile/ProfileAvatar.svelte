@@ -1,15 +1,15 @@
 <script lang="ts">
     import Button from "$lib/components/form/Button.svelte";
-    import EmptyAvatarIcon from "$lib/icons/EmptyAvatarIcon.svelte";
+    import EmptyAvatarIcon from "$lib/assets/icons/EmptyAvatarIcon.svelte";
     import { getContext } from "svelte";
     import type { ProfileContext } from "./profileTypes";
-    import SaveIcon from "$lib/icons/SaveIcon.svelte";
+    import SaveIcon from "$lib/assets/icons/SaveIcon.svelte";
     import { FileType } from "$lib/proto/proto/FileType";
     import { enhance } from "$app/forms";
     import { toast } from "$lib/components/toast/toast";
     import FileInput from "$lib/components/form/FileInput.svelte";
-    import DeleteIcon from "$lib/icons/DeleteIcon.svelte";
-    import DownloadIcon from "$lib/icons/DownloadIcon.svelte";
+    import DeleteIcon from "$lib/assets/icons/DeleteIcon.svelte";
+    import DownloadIcon from "$lib/assets/icons/DownloadIcon.svelte";
     import { page } from "$app/stores";
     import LoadingComponent from "$lib/components/LoadingComponent.svelte";
 

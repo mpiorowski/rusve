@@ -1,6 +1,6 @@
 <script lang="ts">
     import Button from "$lib/components/form/Button.svelte";
-    import DollarIcon from "$lib/icons/DollarIcon.svelte";
+    import DollarIcon from "$lib/assets/icons/DollarIcon.svelte";
     import { toast } from "$lib/components/toast/toast.js";
     import type { ActionData, PageData } from "./$types.js";
 

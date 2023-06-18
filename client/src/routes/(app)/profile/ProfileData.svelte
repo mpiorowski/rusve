@@ -4,7 +4,7 @@
     import Input from "$lib/components/form/Input.svelte";
     import { getContext } from "svelte";
     import { toast } from "$lib/components/toast/toast";
-    import SaveIcon from "$lib/icons/SaveIcon.svelte";
+    import SaveIcon from "$lib/assets/icons/SaveIcon.svelte";
     import { page } from "$app/stores";
     import type { ProfileContext } from "./profileTypes";
 
