@@ -83,7 +83,7 @@ jobs:
                   echo PUBLIC_API_KEY="$PUBLIC_API_KEY" >> ./client/.env.prod
                   echo PUBLIC_AUTH_DOMAIN="$PUBLIC_AUTH_DOMAIN" >> ./client/.env.prod
                   echo SERVICE_ACCOUNT=\'$SERVICE_ACCOUNT\' >> ./client/.env.prod
-                  echo PRIVATE_KEY="$PRIVATE_KEY" >> ./client/.env.prod
+                  echo PRIVATE_KEY=\'$PRIVATE_KEY\' >> ./client/.env.prod
             - name: Build and Push Container
               run: |-
                   docker build -f ./client/Dockerfile -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./client
