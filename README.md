@@ -29,6 +29,7 @@ https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5`
   - **Sql Pools and Transactions** - Using the best practice for the best performance and error handling.
   - **Sql Streams** - Stream data directly from Sql into the gRPC stream.
   - **Dockerized** - Every service is dockerized. Local build ready with one command.
+  - **Security** - In addition to the default GCP auth flow, connections are also secured by an additional layer: bearer token validation. This allows for securing connections between services outside of GCP as well.
 - **Frontend**
   - **[SvelteKit](https://kit.svelte.dev/)** - Once You try it, it's hard to go back to any other framework.
   - **[Typescript](https://www.typescriptlang.org/)** - Fully written in typescript with the [strict](https://typescript-eslint.io/linting/configs#strict) rules enforced. No any or unknown in code.
