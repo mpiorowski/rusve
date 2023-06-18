@@ -37,12 +37,12 @@
     {label}
     <div bind:this={element} role="textbox" id="tiptap" />
 </label>
-{#if editor}
+{#if editor !== undefined}
     <div class="mt-2">
         <button
             type="button"
             class="h-8 w-8 border border-primary-400 rounded hover:bg-primary-600 transition mr-2"
-            on:click={() => editor.chain().focus().setParagraph().run()}
+            on:click={() => editor?.chain().focus().setParagraph().run()}
             class:active={editor.isActive("paragraph")}
         >
             P
@@ -51,7 +51,7 @@
             type="button"
             class="h-8 w-8 border border-primary-400 rounded hover:bg-primary-600 transition mr-2"
             on:click={() =>
-                editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                editor?.chain().focus().toggleHeading({ level: 2 }).run()}
             class:active={editor.isActive("heading", { level: 2 })}
         >
             H2
@@ -60,7 +60,7 @@
             type="button"
             class="h-8 w-8 border border-primary-400 rounded hover:bg-primary-600 transition mr-2"
             on:click={() =>
-                editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                editor?.chain().focus().toggleHeading({ level: 3 }).run()}
             class:active={editor.isActive("heading", { level: 3 })}
         >
             H3
@@ -68,7 +68,7 @@
         <button
             type="button"
             class="h-8 w-8 border border-primary-400 rounded hover:bg-primary-600 transition mr-2"
-            on:click={() => editor.chain().focus().toggleBold().run()}
+            on:click={() => editor?.chain().focus().toggleBold().run()}
             class:active={editor.isActive("bold")}
         >
             B
@@ -76,7 +76,7 @@
         <button
             type="button"
             class="h-8 w-8 border border-primary-400 rounded hover:bg-primary-600 transition mr-2"
-            on:click={() => editor.chain().focus().toggleItalic().run()}
+            on:click={() => editor?.chain().focus().toggleItalic().run()}
             class:active={editor.isActive("italic")}
         >
             I
@@ -84,7 +84,7 @@
         <button
             type="button"
             class="h-8 w-8 border border-primary-400 rounded hover:bg-primary-600 transition mr-2"
-            on:click={() => editor.chain().focus().toggleStrike().run()}
+            on:click={() => editor?.chain().focus().toggleStrike().run()}
             class:active={editor.isActive("strike")}
         >
             S

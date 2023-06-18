@@ -10,27 +10,26 @@ module.exports = {
     ],
     parser: "@typescript-eslint/parser",
     plugins: ["@typescript-eslint"],
-    parserOptions: {
-        project: true,
-        tsconfigRootDir: "./tsconfig.json",
-        extraFileExtensions: [".svelte"],
-    },
+	parserOptions: {
+        project: "./tsconfig.json",
+		sourceType: 'module',
+		ecmaVersion: 2020,
+		extraFileExtensions: ['.svelte']
+	},
     env: {
         browser: true,
         es2017: true,
         node: true,
     },
-    overrides: [
-        {
-            files: ["*.svelte"],
-            parser: "svelte-eslint-parser",
-            parserOptions: {
-                project: true,
-                tsconfigRootDir: "./tsconfig.json",
-                parser: "@typescript-eslint/parser",
-            },
-        },
-    ],
+	overrides: [
+		{
+			files: ['*.svelte'],
+			parser: 'svelte-eslint-parser',
+			parserOptions: {
+				parser: '@typescript-eslint/parser'
+			}
+		}
+	],
     rules: {
         "@typescript-eslint/no-shadow": ["error"],
         "@typescript-eslint/consistent-type-definitions": ["off"],
@@ -42,5 +41,5 @@ module.exports = {
             },
         ],
     },
-    ignorePatterns: ["node_modules", "src/lib/proto", "service-worker.js"],
+    // ignorePatterns: ["node_modules", "src/lib/proto", "service-worker.js"],
 };

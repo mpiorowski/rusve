@@ -39,16 +39,18 @@ export const load = (async ({ locals, url }) => {
          */
         let metadata = await createMetadata(uriNotes);
         const stream = clientNotes.getNotes(request, metadata);
-        const notes: (Note__Output | { id: string } | { userId: string })[] =
-            [];
+        const notes: (Omit<Note__Output, "id" | "userId"> & {
+            id: string;
+            userId: string;
+        })[] = [];
 
         await new Promise<void>((resolve, reject) => {
             stream.on("data", (note: Note__Output) => {
                 userIds.add(note.userId);
                 notes.push({
                     ...note,
-                    id: note.id.toString(),
-                    userId: note.userId.toString(),
+                    id: note.id.toString("hex"),
+                    userId: note.userId.toString("hex"),
                 });
             });
             stream.on("end", () => resolve());
@@ -63,7 +65,7 @@ export const load = (async ({ locals, url }) => {
             { userIds: Array.from(userIds) },
             metadata,
         );
-        type User = User__Output | { id: string };
+        type User = Omit<User__Output, "id"> & { id: string };
         const users: User[] = [];
         const usersPromise = new Promise<User[]>((resolve, reject) => {
             usersStream.on("data", (user: User__Output) =>

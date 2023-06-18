@@ -20,6 +20,7 @@ jobs:
             - run: pnpm i
             - run: pnpm run build
             - run: pnpm run lint
+            - run: pnpm run check
                   #- name: Annotate Pull Request
                   #  uses: actions/github-script@v3
                   #  with:
