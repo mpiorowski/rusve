@@ -5,15 +5,15 @@ mkdir src/lib/proto
 npm run proto
 
 # Service Users Rust
-cd ../service-users
+cd ../service-users-rust
 cargo run --bin proto
 
 # Service Utils Rust
-cd ../service-utils
+cd ../service-utils-rust
 cargo run --bin proto
 
 # Service Notes Rust
-cd ../service-notes
+cd ../service-notes-rust
 cargo run --bin proto
 
 # Service Users Go

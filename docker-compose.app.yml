@@ -82,8 +82,7 @@ services:
         environment:
             ENV: development
             PORT: 443
-            DATABASE_URL:
-                mysql://admin:12345@db-notes:3306/notes
+            DATABASE_URL: mysql://admin:12345@db-notes:3306/notes
 
     service-notes-go:
         container_name: rusve-service-notes-go
@@ -96,8 +95,7 @@ services:
         environment:
             ENV: development
             PORT: 443
-            DATABASE_URL:
-                admin:12345@tcp(db-notes:3306)/notes
+            DATABASE_URL: admin:12345@tcp(db-notes:3306)/notes
 
     directus:
         container_name: rusve-directus
