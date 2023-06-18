@@ -9,8 +9,8 @@ import {
     usersRustClient,
     utilsGoClient,
     utilsRustClient,
-} from "$lib/grpc";
-import { createMetadata } from "$lib/auth/metadata";
+} from "$lib/server/grpc";
+import { createMetadata } from "$lib/server/metadata";
 import type { File, File__Output } from "$lib/proto/proto/File";
 import type { FileId } from "$lib/proto/proto/FileId";
 import { FileType } from "$lib/proto/proto/FileType";

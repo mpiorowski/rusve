@@ -1,7 +1,13 @@
-import { ENV, PRIVATE_KEY } from "$env/static/private";
+import { ENV } from "$env/static/private";
 import { Metadata } from "@grpc/grpc-js";
 import jwt from "jsonwebtoken";
+import fs from "fs";
 
+/**
+ * Cache the tokens for 50 minutes
+ * @param serviceUrl The URL of the service to authorize
+ * @returns A Metadata object with the correct authorization headers
+ */
 const cacheToken = new Map<
     string,
     {
@@ -10,6 +16,11 @@ const cacheToken = new Map<
         oauthToken: string;
     }
 >();
+
+/**
+ * Load the private key from the file system
+ */
+const key = fs.readFileSync("./src/lib/server/private.key");
 
 /**
  * Create a Metadata object with the correct authorization headers
@@ -39,7 +50,7 @@ export async function createMetadata(serviceUrl: string) {
     };
 
     // Generate and sign the OAuth2 token
-    oauthToken = jwt.sign(tokenPayload, PRIVATE_KEY, {
+    oauthToken = jwt.sign(tokenPayload, key, {
         algorithm: "RS256",
         expiresIn: "1h",
     });

@@ -10,13 +10,13 @@ import type { UserId } from "$lib/proto/proto/UserId";
 import type { Note__Output } from "$lib/proto/proto/Note";
 import type { User__Output } from "$lib/proto/proto/User";
 import type { NoteId } from "$lib/proto/proto/NoteId";
-import { createMetadata } from "$lib/auth/metadata";
+import { createMetadata } from "$lib/server/metadata";
 import {
     notesGoClient,
     notesRustClient,
     usersGoClient,
     usersRustClient,
-} from "$lib/grpc";
+} from "$lib/server/grpc";
 import { z } from "zod";
 import type { Empty__Output } from "$lib/proto/proto/Empty";
 

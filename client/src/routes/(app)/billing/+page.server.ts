@@ -1,7 +1,7 @@
 import { DOMAIN, URI_USERS_RUST } from "$env/static/private";
-import { checkSubscription, getStripe } from "$lib/auth/stripe";
-import { usersRustClient } from "$lib/grpc";
-import { createMetadata } from "$lib/auth/metadata";
+import { checkSubscription, getStripe } from "$lib/server/stripe";
+import { usersRustClient } from "$lib/server/grpc";
+import { createMetadata } from "$lib/server/metadata";
 import type { PaymentId } from "$lib/proto/proto/PaymentId";
 import { fail, redirect } from "@sveltejs/kit";
 import { z } from "zod";
