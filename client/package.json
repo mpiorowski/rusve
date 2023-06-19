@@ -6,8 +6,6 @@
         "dev": "vite dev",
         "build": "vite build",
         "preview": "vite preview",
-        "test": "playwright test",
-        "test:unit": "vitest",
         "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
         "lint": "eslint src --max-warnings=0",
         "tsc": "tsc --noEmit",
