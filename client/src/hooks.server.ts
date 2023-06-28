@@ -23,7 +23,7 @@ export const handleError: HandleServerError = ({ error }) => {
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
-    const now = performance.now();
+    const now = perf();
     const isGo = event.url.searchParams.get("lang") === "go";
     const emptySession = {
         userId: Buffer.from(""),
