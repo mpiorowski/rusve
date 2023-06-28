@@ -8,6 +8,7 @@ Feel free to ask questions and throw new ideas! Any contribution is also welcome
 
 ### Currently working on...
 - Comment whole codebase :)
+- TESTS!
 - Add service to service auth using grpc build in system
 - Markdown
 - Telemetry
