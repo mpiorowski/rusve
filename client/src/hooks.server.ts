@@ -7,6 +7,7 @@ import { getFirebaseServer } from "$lib/server/firebase_server";
 import { URI_USERS_GO, URI_USERS_RUST } from "$env/static/private";
 import type { User__Output } from "$lib/proto/proto/User";
 import type { Metadata } from "@grpc/grpc-js";
+import { performanceLogger } from "$lib/logging";
 
 export const handleError: HandleServerError = ({ error }) => {
     console.error("Error: %s", error);
@@ -23,7 +24,7 @@ export const handleError: HandleServerError = ({ error }) => {
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
-    const now = perf();
+    const now = performanceLogger("Authorization");
     const isGo = event.url.searchParams.get("lang") === "go";
     const emptySession = {
         userId: Buffer.from(""),
@@ -102,7 +103,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             }
         }
     }
-    console.debug(`Authorization: ${(performance.now() - now).toFixed(4)}ms`);
+    now();
 
     const isMain = event.url.pathname === "/";
     if (isMain) {
