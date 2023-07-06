@@ -92,12 +92,12 @@ Getting the `SERVICE_ACCOUNT` key is a bit [tricky](https://firebase.google.com/
 
 4. Start databases:
 ```
-sh start-db.sh up
+sh start.sh db
 ```
 
 5. Start app:
 ```
-sh start-app.sh up
+sh start.sh app up --build
 ```
 
 6. Access:

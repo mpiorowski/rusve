@@ -1,4 +1,4 @@
-import { DOMAIN, URI_USERS_RUST } from "$env/static/private";
+import { URI_USERS_RUST } from "$env/static/private";
 import { checkSubscription, getStripe } from "$lib/server/stripe";
 import { usersRustClient } from "$lib/server/grpc";
 import { createMetadata } from "$lib/server/metadata";
@@ -6,6 +6,7 @@ import type { PaymentId } from "$lib/proto/proto/PaymentId";
 import { fail, redirect } from "@sveltejs/kit";
 import { z } from "zod";
 import type { Actions, PageServerLoad } from "./$types";
+import { PUBLIC_DOMAIN } from "$env/static/public";
 
 export const load = (async ({ locals }) => {
     const isSub = await checkSubscription(locals.paymentId);
@@ -66,8 +67,8 @@ export const actions = {
                 },
             ],
             mode: "subscription",
-            success_url: `${DOMAIN}/billing/info?status=success&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${DOMAIN}/billing/info?status=error`,
+            success_url: `${PUBLIC_DOMAIN}/billing/info?status=success&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${PUBLIC_DOMAIN}/billing/info?status=error`,
         });
         if (!session.url) {
             return fail(500, { error: "Session URL not found" });
@@ -78,7 +79,7 @@ export const actions = {
         const stripe = getStripe();
         const portalSession = await stripe.billingPortal.sessions.create({
             customer: locals.paymentId,
-            return_url: `${DOMAIN}/billing`,
+            return_url: `${PUBLIC_DOMAIN}/billing`,
         });
 
         if (!portalSession.url) {

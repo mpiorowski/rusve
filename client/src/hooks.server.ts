@@ -24,8 +24,7 @@ export const handleError: HandleServerError = ({ error }) => {
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
-    const now = performanceLogger("Authorization");
-    const isGo = event.url.searchParams.get("lang") === "go";
+    const log = performanceLogger("Authorization");
     const emptySession = {
         userId: Buffer.from(""),
         paymentId: "",
@@ -33,77 +32,68 @@ export const handle: Handle = async ({ event, resolve }) => {
         role: "",
         isSubscribed: false,
     };
+    if (event.url.pathname === "/auth") {
+        event.cookies.set("session", "");
+        event.locals = emptySession;
+        return await resolve(event);
+    }
+
+    const isGo = event.url.searchParams.get("lang") === "go";
 
     const session = event.cookies.get("session") ?? "";
     if (!session || session === "") {
         console.info("No session found");
-        event.locals = emptySession;
-    } else {
-        let decodedClaims: DecodedIdToken | undefined = undefined;
-        try {
-            const admin = getFirebaseServer();
-            decodedClaims = await admin
-                .auth()
-                .verifySessionCookie(session, false);
-        } catch (err) {
-            console.error("Error verifying session cookie", err);
-            event.locals = emptySession;
-        }
-        if (!decodedClaims) {
-            console.error("No decoded claims found");
-            event.locals = emptySession;
-        } else {
-            console.info("User session verified");
-
-            /**
-             * Authenticate user agains our server
-             * @param {string} uid - Firebase user id
-             * @param {string} email - Firebase user email
-             */
-            try {
-                const { uid, email } = decodedClaims;
-                const request: AuthRequest = {
-                    sub: uid,
-                    email: email ?? "",
-                };
-                let metadata: Metadata;
-                let user: User__Output;
-                if (isGo) {
-                    metadata = await createMetadata(URI_USERS_GO);
-                    user = await new Promise<User__Output>((res, rej) => {
-                        usersGoClient.Auth(
-                            request,
-                            metadata,
-                            (err, response) => {
-                                err || !response?.id ? rej(err) : res(response);
-                            },
-                        );
-                    });
-                } else {
-                    metadata = await createMetadata(URI_USERS_RUST);
-                    user = await new Promise<User__Output>((res, rej) => {
-                        usersRustClient.Auth(
-                            request,
-                            metadata,
-                            (err, response) => {
-                                err || !response?.id ? rej(err) : res(response);
-                            },
-                        );
-                    });
-                }
-                event.locals = {
-                    userId: user.id,
-                    email: user.email,
-                    role: user.role,
-                    paymentId: user.paymentId ?? "",
-                };
-            } catch (err) {
-                console.error("Error authenticating user", err);
-                event.locals = emptySession;
-            }
-        }
+        throw redirect(303, "/auth");
     }
-    now();
+
+    let decodedClaims: DecodedIdToken | undefined = undefined;
+    try {
+        const admin = getFirebaseServer();
+        decodedClaims = await admin.auth().verifySessionCookie(session, false);
+    } catch (err) {
+        console.error("Error verifying session cookie", err);
+        throw redirect(303, "/auth");
+    }
+    console.info("User session verified");
+    /**
+     * Authenticate user agains our server
+     * @param {string} uid - Firebase user id
+     * @param {string} email - Firebase user email
+     */
+    try {
+        const { uid, email } = decodedClaims;
+        const request: AuthRequest = {
+            sub: uid,
+            email: email ?? "",
+        };
+        let metadata: Metadata;
+        let user: User__Output;
+        if (isGo) {
+            metadata = await createMetadata(URI_USERS_GO);
+            user = await new Promise<User__Output>((res, rej) => {
+                usersGoClient.Auth(request, metadata, (err, response) => {
+                    err || !response?.id ? rej(err) : res(response);
+                });
+            });
+        } else {
+            metadata = await createMetadata(URI_USERS_RUST);
+            user = await new Promise<User__Output>((res, rej) => {
+                usersRustClient.Auth(request, metadata, (err, response) => {
+                    err || !response?.id ? rej(err) : res(response);
+                });
+            });
+        }
+        event.locals = {
+            userId: user.id,
+            email: user.email,
+            role: user.role,
+            paymentId: user.paymentId ?? "",
+        };
+    } catch (err) {
+        console.error("Error authenticating user", err);
+        throw redirect(303, "/auth");
+    }
+    log();
 
     const isMain = event.url.pathname === "/";
     if (isMain) {
@@ -113,17 +103,9 @@ export const handle: Handle = async ({ event, resolve }) => {
         return result;
     }
 
-    const isApiAuth = event.url.pathname === "/api/auth";
-    const isAuth = event.url.pathname === "/auth";
-    if (!isAuth && !isApiAuth && !event.locals.userId.length) {
-        throw redirect(303, "/");
-    }
-    if (isAuth && event.locals.userId.length) {
-        throw redirect(303, "/");
+    if (!event.locals.userId.length) {
+        throw redirect(303, "/auth");
     }
 
-    const result = await resolve(event, {
-        transformPageChunk: ({ html }) => html,
-    });
-    return result;
+    return await resolve(event);
 };
