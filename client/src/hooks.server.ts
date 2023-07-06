@@ -6,7 +6,6 @@ import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { getFirebaseServer } from "$lib/server/firebase_server";
 import { URI_USERS_GO, URI_USERS_RUST } from "$env/static/private";
 import type { User__Output } from "$lib/proto/proto/User";
-import type { Metadata } from "@grpc/grpc-js";
 import { performanceLogger } from "$lib/logging";
 
 export const handleError: HandleServerError = ({ error }) => {
@@ -39,6 +38,8 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
 
     const isGo = event.url.searchParams.get("lang") === "go";
+    const client = isGo ? usersGoClient : usersRustClient;
+    const uri = isGo ? URI_USERS_GO : URI_USERS_RUST;
 
     const session = event.cookies.get("session") ?? "";
     if (!session || session === "") {
@@ -66,23 +67,12 @@ export const handle: Handle = async ({ event, resolve }) => {
             sub: uid,
             email: email ?? "",
         };
-        let metadata: Metadata;
-        let user: User__Output;
-        if (isGo) {
-            metadata = await createMetadata(URI_USERS_GO);
-            user = await new Promise<User__Output>((res, rej) => {
-                usersGoClient.Auth(request, metadata, (err, response) => {
-                    err || !response?.id ? rej(err) : res(response);
-                });
+        const metadata = await createMetadata(uri);
+        const user = await new Promise<User__Output>((res, rej) => {
+            client.Auth(request, metadata, (err, response) => {
+                err || !response?.id ? rej(err) : res(response);
             });
-        } else {
-            metadata = await createMetadata(URI_USERS_RUST);
-            user = await new Promise<User__Output>((res, rej) => {
-                usersRustClient.Auth(request, metadata, (err, response) => {
-                    err || !response?.id ? rej(err) : res(response);
-                });
-            });
-        }
+        });
         event.locals = {
             userId: user.id,
             email: user.email,
