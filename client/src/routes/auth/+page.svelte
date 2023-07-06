@@ -10,33 +10,32 @@
     import {
         GithubAuthProvider,
         GoogleAuthProvider,
-        getRedirectResult,
         isSignInWithEmailLink,
         sendSignInLinkToEmail,
         signInWithEmailLink,
         signInWithPopup,
     } from "firebase/auth";
     import { onMount } from "svelte";
+    import { PUBLIC_DOMAIN } from "$env/static/public";
 
     let errors: string[] = [];
     let loading = false;
 
+    let form: HTMLFormElement;
     const auth = getFirebaseClient();
     const googleProvider = new GoogleAuthProvider();
     const githubProvider = new GithubAuthProvider();
 
-    async function sendIdToken(idToken: string): Promise<void> {
+    function sendIdToken(idToken: string): void {
         try {
-            await fetch("/api/auth", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    idToken,
-                }),
-            });
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "idToken";
+            input.value = idToken;
+            form.appendChild(input);
+            form.submit();
         } catch (err) {
+            toast.error("Something went wrong");
             console.error(err);
         }
     }
@@ -46,21 +45,13 @@
     ): Promise<void> {
         try {
             loading = true;
-            window.localStorage.setItem("checkRedirect", "true");
-
-            /** Sign in with popup */
             const cred = await signInWithPopup(auth, provider);
             const idToken = await cred.user.getIdToken();
-            await sendIdToken(idToken);
             await auth.signOut();
-            window.location.reload();
-
-            /** Sign in with redirect */
-            // await signInWithRedirect(auth, provider);
+            sendIdToken(idToken);
         } catch (err) {
             console.error(err);
             toast.error("Something went wrong");
-        } finally {
             loading = false;
         }
     }
@@ -68,9 +59,7 @@
     let email = "";
     async function onSignInWithMagicLink(): Promise<void> {
         try {
-            const url = import.meta.env.DEV
-                ? "http://localhost:3000/auth"
-                : "https://www.rusve.app/auth";
+            const url = PUBLIC_DOMAIN + "/auth";
             await sendSignInLinkToEmail(auth, email, {
                 url: url,
                 handleCodeInApp: true,
@@ -79,30 +68,6 @@
             toast.success("Check your email for a magic link");
         } catch (err) {
             console.error(err);
-        }
-    }
-
-    async function checkRedirect(): Promise<void> {
-        try {
-            if (!window.localStorage.getItem("checkRedirect")) {
-                return;
-            }
-            loading = true;
-            const result = await getRedirectResult(auth);
-            if (!result) {
-                return;
-            }
-            const idToken = await result.user.getIdToken();
-            await sendIdToken(idToken);
-            await auth.signOut();
-            window.location.reload();
-        } catch (err) {
-            console.error(err);
-            toast.error("Something went wrong");
-            await auth.signOut();
-        } finally {
-            loading = false;
-            window.localStorage.removeItem("checkRedirect");
         }
     }
 
@@ -123,20 +88,16 @@
                 window.location.href,
             );
             const idToken = await user.user.getIdToken();
-            await sendIdToken(idToken);
             await auth.signOut();
-            window.location.reload();
+            sendIdToken(idToken);
         } catch (err) {
-            await auth.signOut();
+            loading = false;
             toast.error("Something went wrong");
             console.error(err);
-        } finally {
-            loading = false;
         }
     }
     onMount(() => {
         void checkMagicLink();
-        void checkRedirect();
     });
 </script>
 
@@ -148,7 +109,8 @@
     </div>
 {/if}
 
-<div class="max-w-md m-auto flex flex-col items-center justify-center h-full">
+<form method="post" bind:this={form} />
+<div class="max-w-md m-auto flex flex-col items-center justify-center h-screen">
     <h2 class="text-primary-200">Welcome back</h2>
     <p class="text-primary-300 mb-4 mt-2">
         Sign in so You can say "I use Rust"
