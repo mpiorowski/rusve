@@ -85,14 +85,6 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
     log();
 
-    const isMain = event.url.pathname === "/";
-    if (isMain) {
-        const result = await resolve(event, {
-            transformPageChunk: ({ html }) => html,
-        });
-        return result;
-    }
-
     if (!event.locals.userId.length) {
         throw redirect(303, "/auth");
     }
