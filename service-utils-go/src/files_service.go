@@ -167,8 +167,5 @@ func (s *server) DeleteFile(ctx context.Context, in *pb.FileId) (*pb.File, error
 		log.Printf("mapFile: %v", err)
 		return nil, err
 	}
-
-	// TODO - delete form bucket
-
 	return file, nil
 }
