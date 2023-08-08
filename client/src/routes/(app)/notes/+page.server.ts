@@ -32,13 +32,13 @@ export const load = (async ({ locals, url }) => {
 
         const userId = locals.userId;
         const request: UserId = { userId: userId };
-        const userIds = new Set<Buffer>();
+        const userIds = new Set<string>();
 
         /**
          * Get notes
          */
         let metadata = await createMetadata(uriNotes);
-        const stream = clientNotes.getNotes(request, metadata);
+        const stream = clientNotes.GetNotes(request, metadata);
         const notes: (Omit<Note__Output, "id" | "userId"> & {
             id: string;
             userId: string;
@@ -49,8 +49,8 @@ export const load = (async ({ locals, url }) => {
                 userIds.add(note.userId);
                 notes.push({
                     ...note,
-                    id: note.id.toString("hex"),
-                    userId: note.userId.toString("hex"),
+                    id: note.id,
+                    userId: note.userId,
                 });
             });
             stream.on("end", () => resolve());
@@ -102,16 +102,14 @@ export const actions = {
             const data = {
                 title: title,
                 content: content,
-                type: type,
                 userId: locals.userId,
             };
 
             const schema = z
                 .object({
-                    userId: z.instanceof(Buffer),
+                    userId: z.string().uuid(),
                     title: z.string().min(1).max(100),
                     content: z.string().min(1).max(1000),
-                    type: z.union([z.literal("go"), z.literal("rust")]),
                 })
                 .safeParse(data);
 
@@ -119,13 +117,13 @@ export const actions = {
                 return fail(409, { error: schema.error.flatten() });
             }
 
-            const isGo = schema.data.type === "go";
+            const isGo = type === "go";
             const uriNotes = isGo ? URI_NOTES_GO : URI_NOTES_RUST;
             const clientNotes = isGo ? notesGoClient : notesRustClient;
 
             const metadata = await createMetadata(uriNotes);
             await new Promise<Empty__Output>((resolve, reject) => {
-                clientNotes.createNote(schema.data, metadata, (err, response) =>
+                clientNotes.CreateNote(schema.data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });

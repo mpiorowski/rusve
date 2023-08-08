@@ -55,7 +55,7 @@ export const load = (async ({ locals, url }) => {
                         reject(err);
                     } else {
                         resolve({
-                            id: response.id.toString("hex"),
+                            id: response.id,
                             name: response.name,
                             base64: response.buffer.toString("base64"),
                         });
@@ -68,8 +68,8 @@ export const load = (async ({ locals, url }) => {
         return {
             user: {
                 ...user,
-                id: user.id.toString("hex"),
-                avatarId: user.avatarId ? user.avatarId.toString("hex") : "",
+                id: user.id,
+                avatarId: user.avatarId ? user.avatarId : undefined,
             },
             duration: end - start,
             stream: {
@@ -179,11 +179,11 @@ export const actions = {
 
         const schema = z
             .object({
-                targetId: z.instanceof(Buffer),
+                targetId: z.string().uuid(),
                 fileName: z.string().min(1),
                 type: z.nativeEnum(FileType),
                 buffer: z.instanceof(Buffer),
-                avatarId: z.instanceof(Buffer),
+                avatarId: z.string().uuid(),
                 name: z.string().optional(),
             })
             .safeParse({

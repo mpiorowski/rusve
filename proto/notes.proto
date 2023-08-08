@@ -5,12 +5,12 @@ package proto;
 option go_package = "rusve/proto";
 
 message Note {
-  bytes id = 1;
+  string id = 1;
   string created = 2;
   string updated = 3;
   optional string deleted = 4;
 
-  bytes user_id = 5;
+  string user_id = 5;
   string title = 6;
   string content = 7;
 }

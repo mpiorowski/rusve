@@ -3,11 +3,11 @@
 import type { FileType as _proto_FileType, FileType__Output as _proto_FileType__Output } from '../proto/FileType';
 
 export interface File {
-  'id'?: (Buffer | Uint8Array | string);
+  'id'?: (string);
   'created'?: (string);
   'updated'?: (string);
   'deleted'?: (string);
-  'targetId'?: (Buffer | Uint8Array | string);
+  'targetId'?: (string);
   'name'?: (string);
   'type'?: (_proto_FileType);
   'buffer'?: (Buffer | Uint8Array | string);
@@ -16,11 +16,11 @@ export interface File {
 }
 
 export interface File__Output {
-  'id': (Buffer);
+  'id': (string);
   'created': (string);
   'updated': (string);
   'deleted'?: (string);
-  'targetId': (Buffer);
+  'targetId': (string);
   'name': (string);
   'type': (_proto_FileType__Output);
   'buffer': (Buffer);

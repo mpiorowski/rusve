@@ -9,13 +9,13 @@
     };
 
     // Thank yoo ChatGPT :)
-    function cubicInOut(t: number) {
+    function cubicInOut(t: number): number {
         if (t < 0.5) return 4 * t * t * t;
         return (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
     }
 
-    function useClickOutisde(node: HTMLElement) {
-        const handleClick = (event: MouseEvent) => {
+    function useClickOutisde(node: HTMLElement): { destroy: () => void } {
+        const handleClick = (event: MouseEvent): void => {
             if (!node.contains(event.target as Node)) {
                 open = false;
             }

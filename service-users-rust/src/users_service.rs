@@ -68,7 +68,7 @@ impl UsersService for MyService {
             Err(_) => {
                 let user = diesel::insert_into(users)
                     .values((
-                        id.eq(Uuid::now_v7().as_bytes().to_vec()),
+                        id.eq(Uuid::new_v4()),
                         email.eq(&request.email),
                         role.eq(UserRole::as_str_name(&UserRole::RoleUser)),
                         sub.eq(&request.sub),

@@ -11,7 +11,7 @@ enum UserRole {
 }
 
 message User {
-    bytes id = 1;
+    string id = 1;
     string created = 2;
     string updated = 3;
     optional string deleted = 4;
@@ -21,6 +21,6 @@ message User {
     string sub = 7;
 
     string name = 8;
-    optional bytes avatar_id = 9;
+    optional string avatar_id = 9;
     optional string payment_id = 10;
 }

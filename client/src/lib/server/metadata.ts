@@ -30,7 +30,7 @@ const key = fs.readFileSync("./src/lib/server/private.key");
  * The GCP token is only needed when deploying to their cloud, otherwise delete it.
  * X-authorization is the OAuth2 token, which is used to authenticate with the service, always needed.
  */
-export async function createMetadata(serviceUrl: string) {
+export async function createMetadata(serviceUrl: string): Promise<Metadata> {
     const metadata = new Metadata();
 
     // Check cache for token

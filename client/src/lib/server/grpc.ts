@@ -13,6 +13,13 @@ import {
 
 export const packageDefinition = protoLoader.loadSync(
     "./src/lib/proto/main.proto",
+    {
+        keepCase: false,
+        longs: String,
+        enums: String,
+        defaults: true,
+        oneofs: true,
+    },
 );
 export const proto = loadPackageDefinition(
     packageDefinition,

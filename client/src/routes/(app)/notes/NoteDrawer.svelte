@@ -16,7 +16,7 @@
     let content = "";
     let loading = false;
 
-    function onChange(val: string) {
+    function onChange(val: string): void {
         content = val;
     }
 

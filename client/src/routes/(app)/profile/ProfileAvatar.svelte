@@ -23,7 +23,7 @@
     let loading = false;
     let deleteLoading = false;
 
-    async function downloadAvatar(base64: string, name: string) {
+    async function downloadAvatar(base64: string, name: string): Promise<void> {
         try {
             const response = await fetch(
                 `data:application/octet-stream;base64,${base64}`,
@@ -43,10 +43,10 @@
     }
 </script>
 
-<div class="p-4 flex flex-col gap-4">
+<div class="flex flex-col gap-4 p-4">
     <h3>Your avatar</h3>
     {#await file}
-        <div class="h-16 w-16 flex justify-center items-center">
+        <div class="flex h-16 w-16 items-center justify-center">
             <LoadingComponent size={40} />
         </div>
     {:then el}
@@ -57,7 +57,7 @@
                         <img
                             src={`data:image;base64,${el.base64}`}
                             alt="Avatar"
-                            class="rounded-full object-cover h-full w-full"
+                            class="h-full w-full rounded-full object-cover"
                         />
                     </div>
                     <div class="flex flex-row gap-2">
@@ -145,7 +145,7 @@
             </div>
             <FileInput label="Choose new avatar" name="file" />
         </div>
-        <p class="text-xs mt-2">
+        <p class="mt-2 text-xs">
             Maximum file size is 1MB. Supported formats are JPEG, PNG, GIF, and
             WebP.
         </p>

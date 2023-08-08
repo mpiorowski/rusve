@@ -1,4 +1,6 @@
-export type SafeReturn<T> =
+import type { ServiceError } from "@grpc/grpc-js";
+
+export type Safe<T> =
     | {
           data: T;
           success: true;
@@ -8,21 +10,52 @@ export type SafeReturn<T> =
           error: string;
       };
 
-export async function safe<T>(
-    promise: Promise<T> | T,
-    err?: string,
-): Promise<SafeReturn<T>> {
+export function safe<T>(promise: Promise<T>): Promise<Safe<T>>;
+export function safe<T>(func: () => T): Safe<T>;
+export function safe<T>(
+    promiseOrFunc: Promise<T> | (() => T),
+): Promise<Safe<T>> | Safe<T> {
+    if (promiseOrFunc instanceof Promise) {
+        return safeAsync(promiseOrFunc);
+    }
+    return safeSync(promiseOrFunc);
+}
+
+async function safeAsync<T>(promise: Promise<T>): Promise<Safe<T>> {
     try {
         const data = await promise;
         return { data, success: true };
     } catch (e) {
         console.error(e);
-        if (err !== undefined) {
-            return { error: err, success: false };
-        }
         if (e instanceof Error) {
-            return { error: e.message, success: false };
+            return { success: false, error: e.message };
         }
-        return { error: "Unknown error", success: false };
+        return { success: false, error: "Something went wrong" };
     }
+}
+
+function safeSync<T>(func: () => T): Safe<T> {
+    try {
+        const data = func();
+        return { data, success: true };
+    } catch (e) {
+        console.error(e);
+        if (e instanceof Error) {
+            return { success: false, error: e.message };
+        }
+        return { success: false, error: "Something went wrong" };
+    }
+}
+
+export function grpcSafe<T>(res: (value: Safe<T>) => void) {
+    return (err: ServiceError | null, data: T | undefined) => {
+        if (err || !data) {
+            console.error(err);
+            return res({
+                success: false,
+                error: err?.details ?? "Unknown error",
+            });
+        }
+        res({ success: true, data });
+    };
 }

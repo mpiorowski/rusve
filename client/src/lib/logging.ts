@@ -1,6 +1,6 @@
 import { ENV } from "$env/static/private";
 
-export function performanceLogger(name: string): () => void | void {
+export function perf(name: string): () => void | void {
     if (ENV === "production") {
         return () => {
             // do nothing
@@ -8,9 +8,9 @@ export function performanceLogger(name: string): () => void | void {
     }
     const start = performance.now();
 
-    function end() {
+    function end(): void {
         const duration = performance.now() - start;
-        console.info(`${name} took ${duration}ms`);
+        console.info(`${name} took ${duration.toFixed(4)}ms`);
     }
 
     return end;

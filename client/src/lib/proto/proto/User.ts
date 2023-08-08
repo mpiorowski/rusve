@@ -3,7 +3,7 @@
 import type { UserRole as _proto_UserRole, UserRole__Output as _proto_UserRole__Output } from '../proto/UserRole';
 
 export interface User {
-  'id'?: (Buffer | Uint8Array | string);
+  'id'?: (string);
   'created'?: (string);
   'updated'?: (string);
   'deleted'?: (string);
@@ -11,7 +11,7 @@ export interface User {
   'role'?: (_proto_UserRole);
   'sub'?: (string);
   'name'?: (string);
-  'avatarId'?: (Buffer | Uint8Array | string);
+  'avatarId'?: (string);
   'paymentId'?: (string);
   '_deleted'?: "deleted";
   '_avatarId'?: "avatarId";
@@ -19,7 +19,7 @@ export interface User {
 }
 
 export interface User__Output {
-  'id': (Buffer);
+  'id': (string);
   'created': (string);
   'updated': (string);
   'deleted'?: (string);
@@ -27,7 +27,7 @@ export interface User__Output {
   'role': (_proto_UserRole__Output);
   'sub': (string);
   'name': (string);
-  'avatarId'?: (Buffer);
+  'avatarId'?: (string);
   'paymentId'?: (string);
   '_deleted': "deleted";
   '_avatarId': "avatarId";

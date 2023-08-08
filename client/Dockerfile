@@ -1,13 +1,8 @@
 # Development
 FROM node:19-alpine as dev
 
-
 WORKDIR /app
 COPY package.json /app/package.json
-
-# npm
-# COPY package-lock.json /app/package-lock.json
-# RUN npm ci
 
 # pnpm
 RUN npm install -g pnpm
@@ -16,7 +11,6 @@ RUN pnpm install
 
 COPY . .
 
-# CMD ["npm", "run", "dev"]
 CMD ["pnpm", "dev"]
 
 # Production

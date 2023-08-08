@@ -4,7 +4,7 @@ module.exports = {
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
         "plugin:svelte/recommended",
-
+        // additional typescript rules
         "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
         "plugin:@typescript-eslint/strict",
@@ -35,11 +35,17 @@ module.exports = {
         "@typescript-eslint/no-shadow": ["error"],
         "@typescript-eslint/consistent-type-definitions": ["off"],
         "@typescript-eslint/no-throw-literal": ["off"],
+        "@typescript-eslint/explicit-function-return-type": [
+            "error",
+            { allowExpressions: true },
+        ],
+        "@typescript-eslint/no-unused-vars": [
+            "error",
+            { argsIgnorePattern: "^_" },
+        ],
         "@typescript-eslint/no-misused-promises": [
             "error",
-            {
-                checksVoidReturn: false,
-            },
+            { checksVoidReturn: false },
         ],
     },
 };
