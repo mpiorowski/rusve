@@ -2,9 +2,9 @@
 
 
 export interface UserId {
-  'userId'?: (Buffer | Uint8Array | string);
+  'userId'?: (string);
 }
 
 export interface UserId__Output {
-  'userId': (Buffer);
+  'userId': (string);
 }

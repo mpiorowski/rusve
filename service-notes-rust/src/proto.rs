@@ -123,20 +123,20 @@ pub struct Empty {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserId {
-    #[prost(bytes = "vec", tag = "1")]
-    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub user_id: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserIds {
-    #[prost(bytes = "vec", repeated, tag = "1")]
-    pub user_ids: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+    #[prost(string, repeated, tag = "1")]
+    pub user_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PaymentId {
-    #[prost(bytes = "vec", tag = "1")]
-    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub user_id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub payment_id: ::prost::alloc::string::String,
 }
@@ -151,26 +151,26 @@ pub struct AuthRequest {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TargetId {
-    #[prost(bytes = "vec", tag = "1")]
-    pub target_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub target_id: ::prost::alloc::string::String,
     #[prost(enumeration = "FileType", tag = "2")]
     pub r#type: i32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FileId {
-    #[prost(bytes = "vec", tag = "1")]
-    pub file_id: ::prost::alloc::vec::Vec<u8>,
-    #[prost(bytes = "vec", tag = "2")]
-    pub target_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub file_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub target_id: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NoteId {
-    #[prost(bytes = "vec", tag = "1")]
-    pub note_id: ::prost::alloc::vec::Vec<u8>,
-    #[prost(bytes = "vec", tag = "2")]
-    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub note_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub user_id: ::prost::alloc::string::String,
 }
 /// Generated client implementations.
 pub mod users_service_client {

@@ -2,11 +2,11 @@
 
 
 export interface FileId {
-  'fileId'?: (Buffer | Uint8Array | string);
-  'targetId'?: (Buffer | Uint8Array | string);
+  'fileId'?: (string);
+  'targetId'?: (string);
 }
 
 export interface FileId__Output {
-  'fileId': (Buffer);
-  'targetId': (Buffer);
+  'fileId': (string);
+  'targetId': (string);
 }

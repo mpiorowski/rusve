@@ -22,11 +22,10 @@ services:
 
     db-notes:
         container_name: rusve-db-notes
-        image: mysql:8.0.33
+        image: postgres:15.1
         ports:
             - 3306:3306
         environment:
-            MYSQL_USER: admin
-            MYSQL_ROOT_PASSWORD: 12345
-            MYSQL_PASSWORD: 12345
-            MYSQL_DATABASE: notes
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: 12345
+            POSTGRES_DB: notes

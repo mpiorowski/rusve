@@ -1,44 +1,44 @@
-mod models;
+use std::ops::DerefMut;
 mod proto;
-mod schema;
 mod users_service;
+mod users_db;
 
 use crate::proto::users_service_server::UsersServiceServer;
 use anyhow::{Context, Result};
-use diesel_async::{pooled_connection::deadpool::Pool, AsyncPgConnection};
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use rusve_users::{establish_connection_sync, establish_connection_tls};
 use serde::{Deserialize, Serialize};
-use tonic::{transport::Server, Request, Status};
+use tonic::{Request, Status};
 
-pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
+mod embedded {
+    use refinery::embed_migrations;
+    embed_migrations!("./migrations");
+}
 
 pub struct MyService {
-    pool: Pool<AsyncPgConnection>,
+    pool: deadpool_postgres::Pool,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    println!("Starting server...");
+    tracing_subscriber::fmt().init();
 
     let port = std::env::var("PORT").context("PORT not set")?;
-    let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
+    let pool = rusve_users::connect_to_db().context("Failed to connect to database")?;
+    tracing::info!("Connected to database");
 
-    // Run migrations - diesel_async have an open PR to support this
-    let mut conn = establish_connection_sync(&database_url)?;
-    conn.run_pending_migrations(MIGRATIONS)
-        .map_err(|e| anyhow::anyhow!("Error running migrations: {:?}", e.to_string()))?;
-    println!("Migrations run successfully");
+    let mut conn = pool.get().await?;
+    let client = conn.deref_mut().deref_mut();
+    embedded::migrations::runner().run_async(client).await?;
+    tracing::info!("Migrations run");
 
-    // Create a connection pool without tls
-    let pool = establish_connection_tls(&database_url)?;
-
-    let addr = ("[::]:".to_owned() + &port).parse()?;
-    println!("Server started on port: {}", port);
+    let addr = format!("[::]:{}", port).parse()?;
+    tracing::info!("gRPC server started on port: {:?}", port);
 
     let server = MyService { pool };
     let svc = UsersServiceServer::with_interceptor(server, check_auth);
-    Server::builder().add_service(svc).serve(addr).await?;
+    tonic::transport::Server::builder()
+        .add_service(svc)
+        .serve(addr)
+        .await?;
 
     Ok(())
 }
