@@ -73,7 +73,7 @@ func init() {
 func main() {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", PORT))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("Failed to listen: %v", err)
 	}
 	if err != nil {
 		log.Fatalf("Failed to generate credentials: %v", err)
