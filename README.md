@@ -6,6 +6,10 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
 
 Feel free to ask questions and throw new ideas! Any contribution is also welcome, especially some ux/ui redesigns :)
 
+Also a little bit of self-promotion, i have build an application using this stack, to help kick off projects with files, images and emails. Feel free to try it out :)
+
+https://www.upsend.app
+
 ### Currently working on...
 - Comment whole codebase :)
 - TESTS!
