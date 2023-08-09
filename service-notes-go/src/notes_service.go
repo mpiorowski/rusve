@@ -38,8 +38,7 @@ func (s *server) GetNotes(in *pb.UserId, stream pb.NotesService_GetNotesServer) 
 		slog.Error("rows.Err", "error", err)
 		return err
 	}
-	end := time.Now()
-	slog.Info("GetNotes", "time", end.Sub(start))
+	slog.Info("GetNotes", "time", time.Since(start))
 	return nil
 }
 
@@ -69,8 +68,7 @@ func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Note, error) 
 		return nil, err
 	}
 
-	end := time.Now()
-	slog.Info("CreateNote", "time", end.Sub(start))
+	slog.Info("CreateNote", "time", time.Since(start))
 	return note, nil
 }
 
@@ -83,7 +81,6 @@ func (s *server) DeleteNote(ctx context.Context, in *pb.NoteId) (*pb.Empty, erro
 		return nil, err
 	}
 
-	end := time.Now()
-	slog.Info("DeleteNote", "time", end.Sub(start))
+	slog.Info("DeleteNote", "time", time.Since(start))
 	return &pb.Empty{}, nil
 }

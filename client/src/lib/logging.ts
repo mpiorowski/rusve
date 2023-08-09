@@ -10,8 +10,14 @@ export function perf(name: string): () => void | void {
 
     function end(): void {
         const duration = performance.now() - start;
-        console.info(`${name} took ${duration.toFixed(4)}ms`);
+        console.info(`${name}: ${duration.toFixed(4)}ms`);
     }
 
     return end;
+}
+
+export function debug(...args: unknown[]): void {
+    if (ENV !== "production") {
+        console.debug(...args);
+    }
 }
