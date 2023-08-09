@@ -8,14 +8,14 @@ import type { NoteId as _proto_NoteId, NoteId__Output as _proto_NoteId__Output }
 import type { UserId as _proto_UserId, UserId__Output as _proto_UserId__Output } from '../proto/UserId';
 
 export interface NotesServiceClient extends grpc.Client {
-  CreateNote(argument: _proto_Note, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
-  CreateNote(argument: _proto_Note, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
-  CreateNote(argument: _proto_Note, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
-  CreateNote(argument: _proto_Note, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
-  createNote(argument: _proto_Note, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
-  createNote(argument: _proto_Note, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
-  createNote(argument: _proto_Note, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
-  createNote(argument: _proto_Note, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  CreateNote(argument: _proto_Note, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Note__Output>): grpc.ClientUnaryCall;
+  CreateNote(argument: _proto_Note, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Note__Output>): grpc.ClientUnaryCall;
+  CreateNote(argument: _proto_Note, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Note__Output>): grpc.ClientUnaryCall;
+  CreateNote(argument: _proto_Note, callback: grpc.requestCallback<_proto_Note__Output>): grpc.ClientUnaryCall;
+  createNote(argument: _proto_Note, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Note__Output>): grpc.ClientUnaryCall;
+  createNote(argument: _proto_Note, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Note__Output>): grpc.ClientUnaryCall;
+  createNote(argument: _proto_Note, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Note__Output>): grpc.ClientUnaryCall;
+  createNote(argument: _proto_Note, callback: grpc.requestCallback<_proto_Note__Output>): grpc.ClientUnaryCall;
   
   DeleteNote(argument: _proto_NoteId, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
   DeleteNote(argument: _proto_NoteId, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
@@ -34,7 +34,7 @@ export interface NotesServiceClient extends grpc.Client {
 }
 
 export interface NotesServiceHandlers extends grpc.UntypedServiceImplementation {
-  CreateNote: grpc.handleUnaryCall<_proto_Note__Output, _proto_Empty>;
+  CreateNote: grpc.handleUnaryCall<_proto_Note__Output, _proto_Note>;
   
   DeleteNote: grpc.handleUnaryCall<_proto_NoteId__Output, _proto_Empty>;
   
@@ -43,7 +43,7 @@ export interface NotesServiceHandlers extends grpc.UntypedServiceImplementation 
 }
 
 export interface NotesServiceDefinition extends grpc.ServiceDefinition {
-  CreateNote: MethodDefinition<_proto_Note, _proto_Empty, _proto_Note__Output, _proto_Empty__Output>
+  CreateNote: MethodDefinition<_proto_Note, _proto_Note, _proto_Note__Output, _proto_Note__Output>
   DeleteNote: MethodDefinition<_proto_NoteId, _proto_Empty, _proto_NoteId__Output, _proto_Empty__Output>
   GetNotes: MethodDefinition<_proto_UserId, _proto_Note, _proto_UserId__Output, _proto_Note__Output>
 }

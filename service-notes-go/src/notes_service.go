@@ -2,24 +2,22 @@ package main
 
 import (
 	"context"
-	"log"
+	"database/sql"
+	"log/slog"
 	"time"
 
 	pb "rusve/proto"
 
-	"github.com/gofrs/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (s *server) GetNotes(in *pb.UserId, stream pb.NotesService_GetNotesServer) error {
-	log.Printf("GetNotes")
-
 	start := time.Now()
 
-	rows, err := db.Query(`select * from notes where user_id = ? and deleted is null`, in.UserId)
+	rows, err := db.Query(`select * from notes where user_id = $1 and deleted is null`, in.UserId)
 	if err != nil {
-		log.Printf("db.Query: %v", err)
+		slog.Error("db.Query", "error", err)
 		return err
 	}
 	defer rows.Close()
@@ -27,27 +25,26 @@ func (s *server) GetNotes(in *pb.UserId, stream pb.NotesService_GetNotesServer) 
 	for rows.Next() {
 		note, err := mapNote(rows, nil)
 		if err != nil {
-			log.Printf("mapNote: %v", err)
+			slog.Error("mapNote", "error", err)
 			return err
 		}
 		err = stream.Send(note)
 		if err != nil {
-			log.Printf("stream.Send: %v", err)
+			slog.Error("stream.Send", "error", err)
 			return err
 		}
 	}
-	end := time.Now()
-	log.Printf("Elapsed: %v", end.Sub(start))
 	if rows.Err() != nil {
-		log.Printf("rows.Err: %v", err)
+		slog.Error("rows.Err", "error", err)
 		return err
 	}
+	end := time.Now()
+	slog.Info("GetNotes", "time", end.Sub(start))
 	return nil
 }
 
-func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Empty, error) {
-	log.Printf("CreateNote")
-
+func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Note, error) {
+	start := time.Now()
 	rules := map[string]string{
 		"UserId":  "required,max=100",
 		"Title":   "required,max=100",
@@ -56,51 +53,37 @@ func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Empty, error)
 	validate.RegisterStructValidationMapRules(rules, pb.Note{})
 	err := validate.Struct(in)
 	if err != nil {
-		log.Printf("validate.Struct: %v", err)
+		slog.Error("validate.Struct", "error", err)
 		return nil, status.Error(codes.InvalidArgument, "Invalid argument")
 	}
 
-	if len(in.Id) == 0 {
-		// for benchmarks, delete all notes and create 5000 new ones
-		_, err = db.Exec(`delete from notes where user_id = ?`, in.UserId)
-		if err != nil {
-			log.Printf("db.Exec: %v", err)
-			return nil, err
-		}
-		for i := 0; i < 5000; i++ {
-			uuid, err := uuid.NewV7()
-            if err != nil {
-                log.Printf("uuid.NewV7: %v", err)
-                return nil, err
-            }
-			_, err = db.Exec(`insert into notes (id, user_id, title, content) values (?, ?, ?, ?)`, uuid.Bytes(), in.UserId, in.Title, in.Content)
-			if err != nil {
-				log.Printf("db.Exec: %v", err)
-				return nil, err
-			}
-		}
+	var row *sql.Row
+	if in.Id == "" {
+		row = db.QueryRow(`insert into notes (user_id, title, content) values ($1, $2, $3) returning *`, in.UserId, in.Title, in.Content)
 	} else {
-		_, err = db.Exec(`update notes set title = ?, content = ? where id = ? and user_id = ?`, in.Title, in.Content, in.Id, in.UserId)
-		if err != nil {
-			log.Printf("db.Exec: %v", err)
-			return nil, err
-		}
+		row = db.QueryRow(`update notes set title = $1, content = $2 where id = $3 and user_id = $4 returning *`, in.Title, in.Content, in.Id, in.UserId)
 	}
+	note, err := mapNote(nil, row)
 	if err != nil {
-		log.Printf("mapNote: %v", err)
+		slog.Error("mapNote", "error", err)
 		return nil, err
 	}
-	return &pb.Empty{}, nil
+
+	end := time.Now()
+	slog.Info("CreateNote", "time", end.Sub(start))
+	return note, nil
 }
 
 func (s *server) DeleteNote(ctx context.Context, in *pb.NoteId) (*pb.Empty, error) {
-	log.Printf("DeleteNote")
+	start := time.Now()
 
-	_, err := db.Exec(`update notes set deleted = now() where id = ? and user_id = ?`, in.NoteId, in.UserId)
+	_, err := db.Exec(`update notes set deleted = now() where id = $1 and user_id = $2`, in.NoteId, in.UserId)
 	if err != nil {
-		log.Printf("db.Exec: %v", err)
+		slog.Error("db.Exec", "error", err)
 		return nil, err
 	}
 
+	end := time.Now()
+	slog.Info("DeleteNote", "time", end.Sub(start))
 	return &pb.Empty{}, nil
 }

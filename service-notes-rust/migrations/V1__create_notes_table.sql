@@ -1,9 +1,13 @@
 CREATE TABLE notes (
-    id BINARY(16) NOT NULL PRIMARY KEY,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted TIMESTAMP NULL,
-    user_id BINARY(16) NOT NULL,
-    title TEXT NOT NULL,
-    content TEXT NOT NULL
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted timestamptz,
+    user_id uuid NOT NULL,
+    title text NOT NULL,
+    content text NOT NULL
 );
+
+CREATE TRIGGER set_timestamp BEFORE
+UPDATE
+ON notes FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp ();

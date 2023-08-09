@@ -1,3 +1,4 @@
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct User {
@@ -22,6 +23,7 @@ pub struct User {
     #[prost(string, optional, tag = "10")]
     pub payment_id: ::core::option::Option<::prost::alloc::string::String>,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum UserRole {
@@ -51,6 +53,7 @@ impl UserRole {
         }
     }
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct File {
@@ -73,6 +76,7 @@ pub struct File {
     #[prost(string, tag = "9")]
     pub url: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum FileType {
@@ -99,6 +103,7 @@ impl FileType {
         }
     }
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Note {
@@ -117,21 +122,25 @@ pub struct Note {
     #[prost(string, tag = "7")]
     pub content: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Empty {}
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserId {
     #[prost(string, tag = "1")]
     pub user_id: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserIds {
     #[prost(string, repeated, tag = "1")]
     pub user_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PaymentId {
@@ -140,6 +149,7 @@ pub struct PaymentId {
     #[prost(string, tag = "2")]
     pub payment_id: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct AuthRequest {
@@ -148,6 +158,7 @@ pub struct AuthRequest {
     #[prost(string, tag = "2")]
     pub email: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TargetId {
@@ -156,6 +167,7 @@ pub struct TargetId {
     #[prost(enumeration = "FileType", tag = "2")]
     pub r#type: i32,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FileId {
@@ -164,6 +176,7 @@ pub struct FileId {
     #[prost(string, tag = "2")]
     pub target_id: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NoteId {
@@ -660,7 +673,7 @@ pub mod notes_service_client {
         pub async fn create_note(
             &mut self,
             request: impl tonic::IntoRequest<super::Note>,
-        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status> {
+        ) -> std::result::Result<tonic::Response<super::Note>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -1413,7 +1426,7 @@ pub mod notes_service_server {
         async fn create_note(
             &self,
             request: tonic::Request<super::Note>,
-        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status>;
+        ) -> std::result::Result<tonic::Response<super::Note>, tonic::Status>;
         async fn delete_note(
             &self,
             request: tonic::Request<super::NoteId>,
@@ -1548,7 +1561,7 @@ pub mod notes_service_server {
                     struct CreateNoteSvc<T: NotesService>(pub Arc<T>);
                     impl<T: NotesService> tonic::server::UnaryService<super::Note>
                     for CreateNoteSvc<T> {
-                        type Response = super::Empty;
+                        type Response = super::Note;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,

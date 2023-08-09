@@ -1,72 +1,80 @@
-use diesel_async::{pooled_connection::deadpool::Object, AsyncMysqlConnection};
-use tonic::Status;
+use anyhow::Result;
+use deadpool_postgres::Object;
+use time::format_description::well_known::Iso8601;
+use tokio_postgres::RowStream;
+use uuid::Uuid;
 
-use diesel::QueryResult;
-use futures_core::Stream;
+use crate::proto::Note;
 
-use crate::{
-    models::{DieselNote, UpsertNote},
-    schema::notes::dsl::*,
-};
-use diesel::prelude::*;
-use diesel_async::RunQueryDsl;
+impl TryFrom<tokio_postgres::Row> for Note {
+    type Error = anyhow::Error;
 
-pub async fn get_notes_by_user_uuid(
-    mut conn: Object<AsyncMysqlConnection>,
-    user_uuid: Vec<u8>,
-) -> Result<Vec<DieselNote>, Status> {
-    let note = notes
-        .select(DieselNote::as_select())
-        .filter(user_id.eq(user_uuid))
-        .filter(deleted.is_null())
-        .load(&mut conn)
-        .await
-        .map_err(|e| Status::internal(e.to_string()))?;
+    fn try_from(value: tokio_postgres::Row) -> std::result::Result<Self, Self::Error> {
+        let id: Uuid = value.try_get("id")?;
+        let created: time::OffsetDateTime = value.try_get("created")?;
+        let updated: time::OffsetDateTime = value.try_get("updated")?;
+        let deleted: Option<time::OffsetDateTime> = value.try_get("deleted")?;
+        let user_id: Uuid = value.try_get("user_id")?;
+        let title: String = value.try_get("title")?;
+        let content: String = value.try_get("content")?;
+
+        let created: String = created.format(&Iso8601::DEFAULT)?.to_string();
+        let updated: String = updated.format(&Iso8601::DEFAULT)?.to_string();
+        let deleted: Option<String> = deleted
+            .map(|d| d.format(&Iso8601::DEFAULT))
+            .transpose()?
+            .map(|d| d.to_string());
+
+        Ok(Note {
+            id: id.to_string(),
+            created,
+            updated,
+            deleted,
+            user_id: user_id.to_string(),
+            title,
+            content,
+        })
+    }
+}
+
+pub async fn get_notes(conn: &Object, user_id: &Uuid) -> Result<RowStream> {
+    let stmt = conn
+        .prepare("select * from notes where user_id = $1 and deleted is null")
+        .await?;
+    let rows = conn.query_raw(&stmt, &[&user_id]).await?;
+    Ok(rows)
+}
+
+pub async fn create_note(conn: &Object, note: &Note) -> Result<Note> {
+    let res: tokio_postgres::Row;
+    let user_id: Uuid = note.user_id.parse()?;
+    if note.id.is_empty() {
+        res = conn
+            .query_one(
+                "insert into notes (user_id, title, content) values ($1, $2, $3) returning *",
+                &[&user_id, &note.title, &note.content],
+            )
+            .await?;
+    } else {
+        let id: Uuid = note.id.parse()?;
+        res = conn
+            .query_one(
+                "update notes set title = $1, content = $2 where id = $3 and user_id = $4 returning *",
+                &[&note.title, &note.content, &id, &user_id],
+            )
+            .await?;
+    }
+    let note = Note::try_from(res)?;
     Ok(note)
 }
 
-pub async fn get_notes_by_user_uuid_stream_stream(
-    mut conn: Object<AsyncMysqlConnection>,
-    user_uuid: Vec<u8>,
-) -> Result<impl Stream<Item = QueryResult<DieselNote>>, Status> {
-    let note = notes
-        .select(DieselNote::as_select())
-        .filter(user_id.eq(user_uuid))
-        .filter(deleted.is_null())
-        .load_stream(&mut conn)
-        .await
-        .map_err(|e| Status::internal(e.to_string()))?;
+pub async fn delete_note(conn: &Object, id: &Uuid) -> Result<Note> {
+    let res = conn
+        .query_one(
+            "update notes set deleted = now() where id = $1 returning *",
+            &[&id],
+        )
+        .await?;
+    let note = Note::try_from(res)?;
     Ok(note)
-}
-
-pub async fn upsert_note(
-    conn: &mut Object<AsyncMysqlConnection>,
-    new_note: UpsertNote<'_>,
-) -> Result<(), Status> {
-    // diesel::delete(notes)
-    //     .filter(user_id.eq(new_note.user_id))
-    //     .execute(conn)
-    //     .await
-    //     .map_err(|e| Status::internal(e.to_string()))?;
-    diesel::insert_into(notes)
-        .values(&new_note)
-        .execute(conn)
-        .await
-        .map_err(|e| Status::internal(e.to_string()))?;
-    Ok(())
-}
-
-pub async fn delete_note(
-    mut conn: Object<AsyncMysqlConnection>,
-    user_uuid: Vec<u8>,
-    note_uuid: Vec<u8>,
-) -> Result<(), Status> {
-    diesel::update(notes)
-        .filter(id.eq(note_uuid))
-        .filter(user_id.eq(user_uuid))
-        .set(deleted.eq(diesel::dsl::now))
-        .execute(&mut conn)
-        .await
-        .map_err(|e| Status::internal(e.to_string()))?;
-    Ok(())
 }

@@ -21,6 +21,9 @@ tokio = { version = "1.27.0", features = ["rt-multi-thread", "macros", "sync", "
 tokio-stream = "0.1.12"
 futures-core = "0.3.28"
 futures-util = "0.3.28"
+serde_json = "1.0.96"
+serde = "1.0.163"
+jsonwebtoken = "8.3.0"
 
 # Trace
 tracing = "0.1.37"
@@ -40,13 +43,3 @@ deadpool-postgres = "0.10.5"
 
 # Migration
 refinery = { version = "0.8.10", features = ["tokio-postgres"] }
-
-# GCP
-google-cloud-storage = "0.11.1"
-google-cloud-default = { version = "0.3.0", features = ["storage", "pubsub"] }
-google-cloud-pubsub = "0.15.0"
-tokio-util = "0.7.8"
-serde_json = "1.0.96"
-serde = "1.0.163"
-sendgrid = { version = "0.19.0", features = ["async"] }
-jsonwebtoken = "8.3.0"

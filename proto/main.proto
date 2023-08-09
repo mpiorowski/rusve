@@ -57,6 +57,6 @@ message NoteId {
 
 service NotesService {
     rpc GetNotes(UserId) returns (stream Note) {}
-    rpc CreateNote(Note) returns (Empty) {}
+    rpc CreateNote(Note) returns (Note) {}
     rpc DeleteNote(NoteId) returns (Empty) {}
 }

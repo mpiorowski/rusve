@@ -673,7 +673,7 @@ pub mod notes_service_client {
         pub async fn create_note(
             &mut self,
             request: impl tonic::IntoRequest<super::Note>,
-        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status> {
+        ) -> std::result::Result<tonic::Response<super::Note>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -1426,7 +1426,7 @@ pub mod notes_service_server {
         async fn create_note(
             &self,
             request: tonic::Request<super::Note>,
-        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status>;
+        ) -> std::result::Result<tonic::Response<super::Note>, tonic::Status>;
         async fn delete_note(
             &self,
             request: tonic::Request<super::NoteId>,
@@ -1561,7 +1561,7 @@ pub mod notes_service_server {
                     struct CreateNoteSvc<T: NotesService>(pub Arc<T>);
                     impl<T: NotesService> tonic::server::UnaryService<super::Note>
                     for CreateNoteSvc<T> {
-                        type Response = super::Empty;
+                        type Response = super::Note;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,

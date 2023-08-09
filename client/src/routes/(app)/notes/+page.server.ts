@@ -94,6 +94,8 @@ export const actions = {
         try {
             const start = performance.now();
 
+            console.log(locals);
+
             const form = await request.formData();
             const title = form.get("title");
             const content = form.get("content");
