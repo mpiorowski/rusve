@@ -2,22 +2,22 @@
 
 
 export interface Note {
-  'id'?: (Buffer | Uint8Array | string);
+  'id'?: (string);
   'created'?: (string);
   'updated'?: (string);
   'deleted'?: (string);
-  'userId'?: (Buffer | Uint8Array | string);
+  'userId'?: (string);
   'title'?: (string);
   'content'?: (string);
   '_deleted'?: "deleted";
 }
 
 export interface Note__Output {
-  'id': (Buffer);
+  'id': (string);
   'created': (string);
   'updated': (string);
   'deleted'?: (string);
-  'userId': (Buffer);
+  'userId': (string);
   'title': (string);
   'content': (string);
   '_deleted': "deleted";

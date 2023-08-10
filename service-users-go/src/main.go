@@ -5,15 +5,16 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+    "log/slog"
 	"net"
 	"os"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v5"
 	_ "github.com/jackc/pgx/v5/stdlib"
 
 	// migrate "github.com/rubenv/sql-migrate"
-	"github.com/golang-jwt/jwt/v5"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
@@ -52,7 +53,7 @@ func init() {
 	if pingErr != nil {
 		log.Fatal(pingErr)
 	}
-	log.Println("Connected to database")
+	slog.Info("Connected to database")
 
 	// Example of running migrations
 	// var migrationsDir = "./migrations"
@@ -75,11 +76,11 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 	if err != nil {
-		log.Fatalf("Failed to generate credentials %v", err)
+        log.Fatalf("Failed to generate credentials: %v", err)
 	}
 	s := grpc.NewServer(grpc.UnaryInterceptor(check_auth))
 	pb.RegisterUsersServiceServer(s, &server{})
-	log.Printf("Server listening at: %v", lis.Addr())
+	slog.Info("Server listening at", "address", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}

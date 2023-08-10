@@ -1,59 +1,13 @@
 use crate::files_db::{get_file_by_id, get_files_by_target_id};
 use crate::proto::utils_service_server::UtilsService;
-use crate::proto::{File, FileId, FileType, TargetId};
-use crate::MyService;
+use crate::proto::{File, FileId, TargetId};
+use crate::{files_utils, MyService};
 use anyhow::Result;
-use google_cloud_default::WithAuthExt;
-use google_cloud_storage::client::{Client, ClientConfig};
-use google_cloud_storage::http::objects::delete::DeleteObjectRequest;
-use google_cloud_storage::http::objects::download::Range;
-use google_cloud_storage::http::objects::get::GetObjectRequest;
-use google_cloud_storage::http::objects::upload::{Media, UploadObjectRequest, UploadType};
-use tokio::io::AsyncWriteExt;
+use futures_util::stream::TryStreamExt;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
-use futures_util::stream::StreamExt;
-
-use crate::models::*;
-
-impl TryFrom<DieselFile> for File {
-    type Error = Status;
-
-    fn try_from(file: DieselFile) -> Result<Self, Self::Error> {
-        let file = File {
-            id: file.id,
-            created: file.created.to_string(),
-            updated: file.updated.to_string(),
-            deleted: file.deleted.map(|d| d.to_string()),
-            target_id: file.target_id,
-            name: file.name,
-            r#type: FileType::from_str_name(&file.type_)
-                .ok_or(Status::internal("Invalid file type"))?
-                .into(),
-            buffer: Vec::new(),
-            url: "".to_string(),
-        };
-        Ok(file)
-    }
-}
-
-impl TryFrom<Result<DieselFile, diesel::result::Error>> for File {
-    type Error = Status;
-
-    fn try_from(file: Result<DieselFile, diesel::result::Error>) -> Result<Self, Self::Error> {
-        let file = match file {
-            Ok(file) => file,
-            Err(e) => return Err(Status::internal(e.to_string())),
-        };
-        let file: File = match File::try_from(file) {
-            Ok(file) => file,
-            Err(e) => return Err(e),
-        };
-        Ok(file)
-    }
-}
 
 #[tonic::async_trait]
 impl UtilsService for MyService {
@@ -63,206 +17,176 @@ impl UtilsService for MyService {
         &self,
         request: Request<TargetId>,
     ) -> Result<Response<Self::GetFilesStream>, Status> {
-        println!("GetFiles");
         let start = std::time::Instant::now();
 
-        let conn = self
-            .pool
-            .get()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
+        let conn = self.pool.get().await.map_err(|e| {
+            tracing::error!("Failed to get connection from pool: {:?}", e);
+            Status::internal("Failed to get connection from pool")
+        })?;
 
         let request = request.into_inner();
-        let r#type = FileType::from_i32(request.r#type)
-            .ok_or(Status::internal("Invalid file type"))?
-            .as_str_name();
-        let mut rows = get_files_by_target_id(conn, request.target_id, r#type).await?;
+        let target_id = Uuid::parse_str(&request.target_id).map_err(|e| {
+            tracing::error!("Invalid target id: {:?}", e);
+            Status::invalid_argument("Invalid target id")
+        })?;
+        let files = get_files_by_target_id(&conn, &target_id)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to get files by target id: {:?}", e);
+                Status::internal("Failed to get files by target id")
+            })?;
 
-        let (tx, rx) = mpsc::channel(4);
+        let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
-            while let Some(file) = rows.next().await {
-                let mut file: File = match File::try_from(file) {
-                    Ok(file) => file,
+            futures_util::pin_mut!(files);
+            loop {
+                let file = match files.try_next().await {
+                    Ok(Some(file)) => file,
+                    Ok(None) => break,
                     Err(e) => {
-                        tx.send(Err(Status::internal(e.to_string()))).await.unwrap();
+                        tracing::error!("Failed to get file: {:?}", e);
+                        if let Err(e) = tx.send(Err(Status::internal("Failed to get file"))).await {
+                            tracing::error!("Failed to send error: {:?}", e);
+                        }
                         break;
                     }
                 };
-                let buffer = Vec::new();
-                file.buffer = buffer;
-                tx.send(Ok(file)).await.unwrap();
+                let file: File = match file.try_into() {
+                    Ok(file) => file,
+                    Err(e) => {
+                        tracing::error!("Failed to convert file: {:?}", e);
+                        if let Err(e) = tx.send(Err(Status::internal("Failed to convert file"))).await {
+                            tracing::error!("Failed to send error: {:?}", e);
+                        }
+                        break;
+                    }
+                };
+                if let Err(e) = tx.send(Ok(file)).await {
+                    tracing::error!("Failed to send file: {:?}", e);
+                    break;
+                }
             }
-            println!("Elapsed: {:.2?}", start.elapsed());
+            tracing::info!("GetFiles: {:?}", start.elapsed());
         });
         Ok(Response::new(ReceiverStream::new(rx)))
     }
     async fn get_file(&self, request: Request<FileId>) -> Result<Response<File>, Status> {
-        println!("GetFile");
         let start = std::time::Instant::now();
 
-        let conn = self
-            .pool
-            .get()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
+        let conn = self.pool.get().await.map_err(|e| {
+            tracing::error!("Failed to get connection from pool: {:?}", e);
+            Status::internal("Failed to get connection from pool")
+        })?;
 
         let request = request.into_inner();
 
-        let file = get_file_by_id(conn, request.file_id, request.target_id).await?;
-        let mut file = File::try_from(file)?;
+        let file_id = Uuid::parse_str(&request.file_id).map_err(|e| {
+            tracing::error!("Invalid file id: {:?}", e);
+            Status::invalid_argument("Invalid file id")
+        })?;
+        let target_id = Uuid::parse_str(&request.target_id).map_err(|e| {
+            tracing::error!("Invalid target id: {:?}", e);
+            Status::invalid_argument("Invalid target id")
+        })?;
+        let mut file = get_file_by_id(&conn, &file_id, &target_id)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to get file by id: {:?}", e);
+                Status::internal("Failed to get file by id")
+            })?;
 
-        let env = std::env::var("ENV").unwrap();
-        let bucket = std::env::var("BUCKET").unwrap();
-        let mut buffer = Vec::new();
+        let file_buffer = files_utils::get_file_buffer(&file.id, &file.name)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to get file buffer: {:?}", e);
+                Status::internal("Failed to get file buffer")
+            })?;
 
-        let file_id = Uuid::from_slice(&file.id)
-            .map_err(|e| Status::internal(e.to_string()))?
-            .to_string();
-        if env == "development" {
-            let file_path = format!("/app/files/{}/{}", &file_id, &file.name);
-            buffer = match std::fs::read(file_path) {
-                Ok(buffer) => buffer,
-                Err(e) => return Err(Status::internal(e.to_string())),
-            };
-        } else if env == "production" {
-            let config = match ClientConfig::default().with_auth().await {
-                Ok(config) => config,
-                Err(e) => return Err(Status::internal(e.to_string())),
-            };
-            let client = Client::new(config);
-            let data = client
-                .download_object(
-                    &GetObjectRequest {
-                        bucket,
-                        object: format!("{}/{}", &file_id, &file.name),
-                        ..Default::default()
-                    },
-                    &Range::default(),
-                )
-                .await;
-            buffer = match data {
-                Ok(data) => data,
-                Err(e) => return Err(Status::internal(e.to_string())),
-            };
-        }
-        file.buffer = buffer;
+        file.buffer = file_buffer;
 
-        let elapsed = start.elapsed();
-        println!("Elapsed: {:.2?}", elapsed);
+        tracing::info!("GetFile: {:?}", start.elapsed());
         Ok(Response::new(file))
     }
     async fn create_file(&self, request: Request<File>) -> Result<Response<File>, Status> {
-        println!("CreateFile");
         let start = std::time::Instant::now();
 
-        let conn = self
-            .pool
-            .get()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
+        let mut conn = self.pool.get().await.map_err(|e| {
+            tracing::error!("Failed to get connection from pool: {:?}", e);
+            Status::internal("Failed to get connection from pool")
+        })?;
+        let tx = conn.transaction().await.map_err(|e| {
+            tracing::error!("Failed to start transaction: {:?}", e);
+            Status::internal("Failed to start transaction")
+        })?;
 
         // get file from request
         let file = request.into_inner();
-        let file_buffer = file.buffer;
-        let r#type = FileType::from_i32(file.r#type)
-            .ok_or(anyhow::anyhow!("Invalid file type"))
-            .map_err(|e| Status::internal(e.to_string()))?
-            .as_str_name();
+        let file_buffer = file.buffer.to_owned();
 
-        // save file to db
-        let new_file = InsertFile {
-            id: Uuid::now_v7().as_bytes().to_vec(),
-            name: &file.name,
-            type_: r#type,
-            target_id: file.target_id,
-        };
-        let file: File = crate::files_db::create_file(conn, new_file)
-            .await?
-            .try_into()?;
+        let file = crate::files_db::create_file(&tx, &file)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to create file: {:?}", e);
+                Status::internal("Failed to create file")
+            })?;
 
-        let env = std::env::var("ENV").unwrap();
-        let bucket = std::env::var("BUCKET").unwrap();
-        let file_id = Uuid::from_slice(&file.id)
-            .map_err(|e| Status::internal(e.to_string()))?
-            .to_string();
-        if env == "development" {
-            // save file to disk
-            tokio::fs::create_dir_all(format!("/app/files/{}", &file_id)).await?;
-            let file_path = format!("/app/files/{}/{}", &file_id, &file.name);
-            let mut new_file = tokio::fs::File::create(file_path).await?;
-            new_file.write_all(&file_buffer).await?;
-        } else if env == "production" {
-            // save to GCP storage
-            let config = ClientConfig::default()
-                .with_auth()
-                .await
-                .map_err(|e| Status::internal(e.to_string()))?;
-            let client = Client::new(config);
-            let file_path = format!("{}/{}", &file_id, &file.name);
-            let upload_type = UploadType::Simple(Media::new(file_path));
-            let uploaded = client
-                .upload_object(
-                    &UploadObjectRequest {
-                        bucket: bucket.to_string(),
-                        ..Default::default()
-                    },
-                    file_buffer,
-                    &upload_type,
-                )
-                .await;
-            if let Err(e) = uploaded {
-                return Err(Status::internal(e.to_string()));
-            }
-        }
-        println!("Elapsed: {:.2?}", start.elapsed());
+        files_utils::upload_file(&file.id, &file.name, file_buffer)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to upload file: {:?}", e);
+                Status::internal("Failed to upload file")
+            })?;
+
+        tx.commit().await.map_err(|e| {
+            tracing::error!("Failed to commit transaction: {:?}", e);
+            Status::internal("Failed to commit transaction")
+        })?;
+
+        tracing::info!("CreateFile: {:?}", start.elapsed());
         Ok(Response::new(file))
     }
     async fn delete_file(&self, request: Request<FileId>) -> Result<Response<File>, Status> {
-        println!("DeleteFile");
         let start = std::time::Instant::now();
 
-        let conn = self
-            .pool
-            .get()
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?;
+        let mut conn = self.pool.get().await.map_err(|e| {
+            tracing::error!("Failed to get connection from pool: {:?}", e);
+            Status::internal("Failed to get connection from pool")
+        })?;
+        let tx = conn.transaction().await.map_err(|e| {
+            tracing::error!("Failed to start transaction: {:?}", e);
+            Status::internal("Failed to start transaction")
+        })?;
 
         let request = request.into_inner();
 
-        let file: File = crate::files_db::delete_file(conn, request.file_id, request.target_id)
-            .await?
-            .try_into()?;
+        let file_id = Uuid::parse_str(&request.file_id).map_err(|e| {
+            tracing::error!("Invalid file id: {:?}", e);
+            Status::invalid_argument("Invalid file id")
+        })?;
+        let target_id = Uuid::parse_str(&request.target_id).map_err(|e| {
+            tracing::error!("Invalid target id: {:?}", e);
+            Status::invalid_argument("Invalid target id")
+        })?;
+        let file: File = crate::files_db::delete_file(&tx, &file_id, &target_id)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to delete file: {:?}", e);
+                Status::internal("Failed to delete file")
+            })?;
 
-        let env = std::env::var("ENV").unwrap();
-        let bucket = std::env::var("BUCKET").unwrap();
+        files_utils::delete_file(&file.id, &file.name)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to delete file: {:?}", e);
+                Status::internal("Failed to delete file")
+            })?;
 
-        let file_id = Uuid::from_slice(&file.id)
-            .map_err(|e| Status::internal(e.to_string()))?
-            .to_string();
+        tx.commit().await.map_err(|e| {
+            tracing::error!("Failed to commit transaction: {:?}", e);
+            Status::internal("Failed to commit transaction")
+        })?;
 
-        if env == "development" {
-            // delete file from disk
-            tokio::fs::remove_dir_all(format!("/app/files/{}", &file_id)).await?;
-        } else if env == "production" {
-            // delete from GCP storage
-            let config = ClientConfig::default()
-                .with_auth()
-                .await
-                .map_err(|e| Status::internal(e.to_string()))?;
-            let client = Client::new(config);
-            let del = client
-                .delete_object(&DeleteObjectRequest {
-                    bucket: bucket.to_string(),
-                    object: format!("{}/{}", &file_id, &file.name),
-                    ..Default::default()
-                })
-                .await;
-            if let Err(e) = del {
-                return Err(Status::internal(e.to_string()));
-            }
-        }
-
-        println!("Elapsed: {:.2?}", start.elapsed());
+        tracing::info!("DeleteFile: {:?}", start.elapsed());
         Ok(Response::new(file))
     }
 }

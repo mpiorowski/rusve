@@ -12,15 +12,15 @@
 
     export let data: LayoutData;
 
-    async function onLogout() {
+    async function onLogout(): Promise<void> {
         await goto("/auth");
     }
 
-    function onRust() {
+    function onRust(): void {
         window.location.href = "?lang=rust";
     }
 
-    function onGo() {
+    function onGo(): void {
         window.location.href = "?lang=go";
     }
 
@@ -35,31 +35,31 @@
     />
 </svelte:head>
 
-<div class="absolute top-10 right-10 flex flex-col gap-2">
+<div class="absolute right-10 top-10 flex flex-col gap-2">
     {#each $toastStore as toast}
         <Toast {toast} />
     {/each}
 </div>
 <main>
-    <nav class="border-b border-gray-600 h-[60px]">
+    <nav class="h-[60px] border-b border-gray-600">
         <div
-            class="max-w-7xl mx-auto w-full h-full flex items-center justify-between text-xl px-6"
+            class="mx-auto flex h-full w-full max-w-7xl items-center justify-between px-6 text-xl"
         >
             <div class="flex w-full items-center justify-between">
-                <div class="flex flex-row gap-2 items-center justify-center">
+                <div class="flex flex-row items-center justify-center gap-2">
                     <a
                         href="/?lang={isGo ? 'go' : 'rust'}"
-                        class="flex flex-row md:text-2xl items-center gap-2 font-bold md:mr-4 hover:text-secondary-500 hover:cursor-pointer transition"
+                        class="flex flex-row items-center gap-2 font-bold transition hover:cursor-pointer hover:text-secondary-500 md:mr-4 md:text-2xl"
                     >
                         <div class="w-12">
                             <LogoIcon />
                         </div>
                         Rusve
                     </a>
-                    <div class={isGo ? "" : "ring-2 ring-teal-300 rounded"}>
+                    <div class={isGo ? "" : "rounded ring-2 ring-teal-300"}>
                         <Button on:click={onRust}>Rust</Button>
                     </div>
-                    <div class={isGo ? "ring-2 ring-teal-300 rounded" : ""}>
+                    <div class={isGo ? "rounded ring-2 ring-teal-300" : ""}>
                         <Button on:click={onGo}>Go</Button>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
                 {#if !data.email}
                     <a
                         href="/auth?lang={isGo ? 'go' : 'rust'}"
-                        class="hover:text-secondary-500 transition"
+                        class="transition hover:text-secondary-500"
                     >
                         Login
                     </a>
@@ -75,13 +75,13 @@
                 {#if data.email}
                     <a
                         href="/profile?lang={isGo ? 'go' : 'rust'}"
-                        class="hover:text-secondary-500 transition"
+                        class="transition hover:text-secondary-500"
                     >
                         Profile
                     </a>
                     <a
                         href="/notes?lang={isGo ? 'go' : 'rust'}"
-                        class="hover:text-secondary-500 transition"
+                        class="transition hover:text-secondary-500"
                     >
                         Notes
                     </a>
@@ -89,39 +89,43 @@
                         <Dropdown>
                             <svelte:fragment slot="button">
                                 <div
-                                    class="w-6 hover:cursor-pointer hover:text-secondary-500 transition"
+                                    class="w-6 transition hover:cursor-pointer hover:text-secondary-500"
                                 >
                                     <AvatarIcon />
                                 </div>
                             </svelte:fragment>
                             <svelte:fragment slot="dropdown">
                                 <div
-                                    class="flex flex-col bg-primary-600 min-w-[120px] rounded"
+                                    class="flex min-w-[120px] flex-col rounded bg-primary-600"
                                 >
-                                    <p class="font-semibold px-3 py-3">
+                                    <p class="px-3 py-3 font-semibold">
                                         {data.email}
                                     </p>
                                     <div
-                                        class="border-b border-gray-500 w-full"
+                                        class="w-full border-b border-gray-500"
                                     />
                                     <a
-                                        href="/profile?lang={isGo ? 'go' : 'rust'}"
-                                        class="hover:text-secondary-500 transition px-3 py-3"
+                                        href="/profile?lang={isGo
+                                            ? 'go'
+                                            : 'rust'}"
+                                        class="px-3 py-3 transition hover:text-secondary-500"
                                     >
                                         Profile
                                     </a>
                                     <a
-                                        href="/billing?lang={isGo ? 'go' : 'rust'}"
-                                        class="hover:text-secondary-500 transition px-3 py-3"
+                                        href="/billing?lang={isGo
+                                            ? 'go'
+                                            : 'rust'}"
+                                        class="px-3 py-3 transition hover:text-secondary-500"
                                     >
                                         Billing
                                     </a>
                                     <div
-                                        class="border-b border-gray-500 w-full"
+                                        class="w-full border-b border-gray-500"
                                     />
                                     <button
                                         on:click={onLogout}
-                                        class="w-full text-left hover:text-secondary-500 transition px-3 py-3"
+                                        class="w-full px-3 py-3 text-left transition hover:text-secondary-500"
                                     >
                                         Sign out
                                     </button>
@@ -134,7 +138,7 @@
         </div>
     </nav>
     <section class="h-[calc(100dvh-60px)] overflow-auto">
-        <div class="max-w-4xl mx-auto px-6 py-8">
+        <div class="mx-auto max-w-4xl px-6 py-8">
             <slot />
         </div>
     </section>

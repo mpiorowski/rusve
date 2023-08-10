@@ -7,36 +7,46 @@ edition = "2021"
 name = "main"
 path = "src/main.rs"
 
+[[bin]]
+name = "proto"
+path = "src/proto_build.rs"
+
 [dependencies]
-prost = "0.11.9"
-tonic = "0.9.2"
-tonic-build = "0.9.2"
+# General
+dotenvy = "0.15.7"
+anyhow = "1.0.69"
+time = "0.3.20"
+uuid = { version = "1.3.2", features = ["std"] }
 tokio = { version = "1.27.0", features = ["rt-multi-thread", "macros", "sync", "time"] }
 tokio-stream = "0.1.12"
 futures-core = "0.3.28"
 futures-util = "0.3.28"
+serde_json = "1.0.96"
+serde = "1.0.163"
+jsonwebtoken = "8.3.0"
 
-anyhow = "1.0.69"
-time = "0.3.20"
-uuid = { version = "1.3.2", features = ["v7", "std"] }
+# Trace
+tracing = "0.1.37"
+tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
+
+# gRPC
+prost = "0.11.9"
+tonic = "0.9.2"
+tonic-build = "0.9.2"
 
 # Database
-diesel = { version = "2.1.0", features = ["postgres", "time", "uuid", "numeric"] }
-dotenvy = "0.15.7"
-diesel-async = { version = "0.3.0", features = ["postgres", "deadpool", "bb8"] }
-diesel_migrations = { version = "2.1.0", features = ["postgres"] }
-
-# Tls
-rustls = "0.21.1"
-rustls-native-certs = "0.6.2"
-tokio-postgres = "0.7.8"
+tokio-postgres = { version = "0.7.8", features = ["with-uuid-1", "with-time-0_3", "array-impls"] }
 tokio-postgres-rustls = "0.10.0"
+rustls = "0.21.5"
+rustls-native-certs = "0.6.3"
+deadpool-postgres = "0.10.5"
+
+# Migration
+refinery = { version = "0.8.10", features = ["tokio-postgres"] }
 
 # GCP
 google-cloud-storage = "0.11.1"
 google-cloud-default = { version = "0.3.0", features = ["storage", "pubsub"] }
 google-cloud-pubsub = "0.15.0"
 tokio-util = "0.7.8"
-serde_json = "1.0.96"
-serde = "1.0.163"
 sendgrid = { version = "0.19.0", features = ["async"] }

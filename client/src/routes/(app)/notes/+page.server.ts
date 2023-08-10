@@ -19,6 +19,7 @@ import {
 } from "$lib/server/grpc";
 import { z } from "zod";
 import type { Empty__Output } from "$lib/proto/proto/Empty";
+import { logger } from "$lib/logging";
 
 export const load = (async ({ locals, url }) => {
     try {
@@ -32,13 +33,13 @@ export const load = (async ({ locals, url }) => {
 
         const userId = locals.userId;
         const request: UserId = { userId: userId };
-        const userIds = new Set<Buffer>();
+        const userIds = new Set<string>();
 
         /**
          * Get notes
          */
         let metadata = await createMetadata(uriNotes);
-        const stream = clientNotes.getNotes(request, metadata);
+        const stream = clientNotes.GetNotes(request, metadata);
         const notes: (Omit<Note__Output, "id" | "userId"> & {
             id: string;
             userId: string;
@@ -49,8 +50,8 @@ export const load = (async ({ locals, url }) => {
                 userIds.add(note.userId);
                 notes.push({
                     ...note,
-                    id: note.id.toString("hex"),
-                    userId: note.userId.toString("hex"),
+                    id: note.id,
+                    userId: note.userId,
                 });
             });
             stream.on("end", () => resolve());
@@ -76,7 +77,7 @@ export const load = (async ({ locals, url }) => {
         });
 
         return {
-            notes: notes.slice(0, 1),
+            notes: notes,
             time: performance.now() - start,
             length: notes.length,
             stream: {
@@ -84,7 +85,7 @@ export const load = (async ({ locals, url }) => {
             },
         };
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         throw error(500, "Could not load notes");
     }
 }) satisfies PageServerLoad;
@@ -95,23 +96,24 @@ export const actions = {
             const start = performance.now();
 
             const form = await request.formData();
+            const id = form.get("id");
             const title = form.get("title");
             const content = form.get("content");
             const type = form.get("type");
 
             const data = {
+                id: id,
                 title: title,
                 content: content,
-                type: type,
                 userId: locals.userId,
             };
 
             const schema = z
                 .object({
-                    userId: z.instanceof(Buffer),
+                    id: z.string().uuid().or(z.literal("")),
+                    userId: z.string().uuid(),
                     title: z.string().min(1).max(100),
                     content: z.string().min(1).max(1000),
-                    type: z.union([z.literal("go"), z.literal("rust")]),
                 })
                 .safeParse(data);
 
@@ -119,13 +121,13 @@ export const actions = {
                 return fail(409, { error: schema.error.flatten() });
             }
 
-            const isGo = schema.data.type === "go";
+            const isGo = type === "go";
             const uriNotes = isGo ? URI_NOTES_GO : URI_NOTES_RUST;
             const clientNotes = isGo ? notesGoClient : notesRustClient;
 
             const metadata = await createMetadata(uriNotes);
             await new Promise<Empty__Output>((resolve, reject) => {
-                clientNotes.createNote(schema.data, metadata, (err, response) =>
+                clientNotes.CreateNote(schema.data, metadata, (err, response) =>
                     err || !response ? reject(err) : resolve(response),
                 );
             });
@@ -134,7 +136,7 @@ export const actions = {
                 duration: end - start,
             };
         } catch (err) {
-            console.error(err);
+            logger.error(err);
             throw error(500, "Could not create note");
         }
     },
@@ -176,7 +178,7 @@ export const actions = {
                 duration: end - start,
             };
         } catch (err) {
-            console.error(err);
+            logger.error(err);
             throw error(500, "Failed to delete note");
         }
     },

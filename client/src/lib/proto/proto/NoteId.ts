@@ -2,11 +2,11 @@
 
 
 export interface NoteId {
-  'noteId'?: (Buffer | Uint8Array | string);
-  'userId'?: (Buffer | Uint8Array | string);
+  'noteId'?: (string);
+  'userId'?: (string);
 }
 
 export interface NoteId__Output {
-  'noteId': (Buffer);
-  'userId': (Buffer);
+  'noteId': (string);
+  'userId': (string);
 }

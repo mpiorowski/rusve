@@ -2,7 +2,7 @@ import { PUBLIC_API_KEY, PUBLIC_AUTH_DOMAIN } from "$env/static/public";
 import { initializeApp } from "firebase/app";
 import { getAuth, setPersistence, type Persistence } from "firebase/auth";
 
-export function getFirebaseClient() {
+export function getFirebaseClient(): ReturnType<typeof getAuth> {
     const persistance: Persistence = { type: "NONE" };
     const firebaseConfig = {
         apiKey: PUBLIC_API_KEY,

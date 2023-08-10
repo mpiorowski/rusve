@@ -1,8 +1,8 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct User {
-    #[prost(bytes = "vec", tag = "1")]
-    pub id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub created: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
@@ -17,8 +17,8 @@ pub struct User {
     pub sub: ::prost::alloc::string::String,
     #[prost(string, tag = "8")]
     pub name: ::prost::alloc::string::String,
-    #[prost(bytes = "vec", optional, tag = "9")]
-    pub avatar_id: ::core::option::Option<::prost::alloc::vec::Vec<u8>>,
+    #[prost(string, optional, tag = "9")]
+    pub avatar_id: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag = "10")]
     pub payment_id: ::core::option::Option<::prost::alloc::string::String>,
 }
@@ -54,16 +54,16 @@ impl UserRole {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct File {
-    #[prost(bytes = "vec", tag = "1")]
-    pub id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub created: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub updated: ::prost::alloc::string::String,
     #[prost(string, optional, tag = "4")]
     pub deleted: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(bytes = "vec", tag = "5")]
-    pub target_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "5")]
+    pub target_id: ::prost::alloc::string::String,
     #[prost(string, tag = "6")]
     pub name: ::prost::alloc::string::String,
     #[prost(enumeration = "FileType", tag = "7")]
@@ -102,16 +102,16 @@ impl FileType {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Note {
-    #[prost(bytes = "vec", tag = "1")]
-    pub id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub created: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub updated: ::prost::alloc::string::String,
     #[prost(string, optional, tag = "4")]
     pub deleted: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(bytes = "vec", tag = "5")]
-    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "5")]
+    pub user_id: ::prost::alloc::string::String,
     #[prost(string, tag = "6")]
     pub title: ::prost::alloc::string::String,
     #[prost(string, tag = "7")]
@@ -123,20 +123,20 @@ pub struct Empty {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserId {
-    #[prost(bytes = "vec", tag = "1")]
-    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub user_id: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserIds {
-    #[prost(bytes = "vec", repeated, tag = "1")]
-    pub user_ids: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+    #[prost(string, repeated, tag = "1")]
+    pub user_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PaymentId {
-    #[prost(bytes = "vec", tag = "1")]
-    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub user_id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub payment_id: ::prost::alloc::string::String,
 }
@@ -151,26 +151,26 @@ pub struct AuthRequest {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TargetId {
-    #[prost(bytes = "vec", tag = "1")]
-    pub target_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub target_id: ::prost::alloc::string::String,
     #[prost(enumeration = "FileType", tag = "2")]
     pub r#type: i32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FileId {
-    #[prost(bytes = "vec", tag = "1")]
-    pub file_id: ::prost::alloc::vec::Vec<u8>,
-    #[prost(bytes = "vec", tag = "2")]
-    pub target_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub file_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub target_id: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NoteId {
-    #[prost(bytes = "vec", tag = "1")]
-    pub note_id: ::prost::alloc::vec::Vec<u8>,
-    #[prost(bytes = "vec", tag = "2")]
-    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "1")]
+    pub note_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub user_id: ::prost::alloc::string::String,
 }
 /// Generated client implementations.
 pub mod users_service_client {
@@ -660,7 +660,7 @@ pub mod notes_service_client {
         pub async fn create_note(
             &mut self,
             request: impl tonic::IntoRequest<super::Note>,
-        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status> {
+        ) -> std::result::Result<tonic::Response<super::Note>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -1413,7 +1413,7 @@ pub mod notes_service_server {
         async fn create_note(
             &self,
             request: tonic::Request<super::Note>,
-        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status>;
+        ) -> std::result::Result<tonic::Response<super::Note>, tonic::Status>;
         async fn delete_note(
             &self,
             request: tonic::Request<super::NoteId>,
@@ -1548,7 +1548,7 @@ pub mod notes_service_server {
                     struct CreateNoteSvc<T: NotesService>(pub Arc<T>);
                     impl<T: NotesService> tonic::server::UnaryService<super::Note>
                     for CreateNoteSvc<T> {
-                        type Response = super::Empty;
+                        type Response = super::Note;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,

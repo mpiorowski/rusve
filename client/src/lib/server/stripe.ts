@@ -1,7 +1,8 @@
 import { STRIPE_API_KEY } from "$env/static/private";
 import Stripe from "stripe";
+import { safe } from "./safe";
 
-export function getStripe() {
+export function getStripe(): Stripe {
     const stripe = new Stripe(STRIPE_API_KEY, {
         apiVersion: "2022-11-15",
         typescript: true,
@@ -14,7 +15,7 @@ const cache = new Map<string, Date>();
  * Check subscription only for certain pages
  * Cache it for 1 hour
  */
-export async function checkSubscription(paymentId: string) {
+export async function checkSubscription(paymentId: string): Promise<boolean> {
     if (!paymentId) {
         return false;
     }
@@ -27,14 +28,15 @@ export async function checkSubscription(paymentId: string) {
         }
     }
 
-    const stripeCustomer = (await stripe.customers.retrieve(paymentId, {
-        expand: ["subscriptions"],
-    })) as {
-        subscriptions: {
-            data: Stripe.Subscription[];
-        };
-    };
-    const isSubscribed = stripeCustomer.subscriptions.data.some(
+    const subscriptions = await safe(
+        stripe.subscriptions.list({
+            customer: paymentId,
+        }),
+    );
+    if (!subscriptions.success) {
+        return false;
+    }
+    const isSubscribed = subscriptions.data.data.some(
         (sub) => sub.status === "active",
     );
     if (isSubscribed) {

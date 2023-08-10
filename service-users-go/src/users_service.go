@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"database/sql"
-	"log"
+	"log/slog"
+	"time"
 
 	pb "rusve/proto"
 
-	"github.com/gofrs/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -16,8 +16,7 @@ import (
 * Check if user exists, if not create new user
  */
 func (s *server) Auth(ctx context.Context, in *pb.AuthRequest) (*pb.User, error) {
-	log.Println("Auth")
-
+	start := time.Now()
 	rules := map[string]string{
 		"Email": "required,max=100,email",
 		"Sub":   "required,max=100",
@@ -25,14 +24,14 @@ func (s *server) Auth(ctx context.Context, in *pb.AuthRequest) (*pb.User, error)
 	validate.RegisterStructValidationMapRules(rules, pb.AuthRequest{})
 	err := validate.Struct(in)
 	if err != nil {
-		log.Printf("validate.Struct: %v", err)
+		slog.Error("Auth", "validate.Struct", err)
 		return nil, status.Error(codes.InvalidArgument, "Invalid email or code")
 	}
 
 	row := db.QueryRow(`select * from users where email = $1`, in.Email)
 	user, err := mapUser(nil, row)
 	if err != nil && err != sql.ErrNoRows {
-		log.Printf("mapUser: %v", err)
+		slog.Error("Auth", "mapUser", err)
 		return nil, err
 	}
 
@@ -42,28 +41,24 @@ func (s *server) Auth(ctx context.Context, in *pb.AuthRequest) (*pb.User, error)
 
 	if err == sql.ErrNoRows {
 		role := pb.UserRole_ROLE_USER
-		uuid, err := uuid.NewV7()
-		if err != nil {
-			log.Printf("uuid.NewV7: %v", err)
-			return nil, err
-		}
-		row = db.QueryRow(`insert into users (id, email, role, sub) values ($1, $2, $3, $4) returning *`, uuid.Bytes(), in.Email, role, in.Sub)
+		row = db.QueryRow(`insert into users (email, role, sub) values ($1, $2, $3) returning *`, in.Email, role, in.Sub)
 		user, err = mapUser(nil, row)
 		if err != nil {
-			log.Printf("mapUser: %v", err)
+			slog.Error("Auth", "mapUser", err)
 			return nil, err
 		}
 	}
 
+	slog.Info("Auth", "time", time.Since(start))
 	return user, nil
 }
 
 func (s *server) GetUsers(in *pb.UserIds, stream pb.UsersService_GetUsersServer) error {
-	log.Printf("GetUsers")
+	start := time.Now()
 
 	rows, err := db.Query(`select * from users where id = any($1)`, in.UserIds)
 	if err != nil {
-		log.Printf("db.Query: %v", err)
+		slog.Error("GetUsers", "db.Query", err)
 		return err
 	}
 	defer rows.Close()
@@ -71,52 +66,60 @@ func (s *server) GetUsers(in *pb.UserIds, stream pb.UsersService_GetUsersServer)
 	for rows.Next() {
 		user, err := mapUser(rows, nil)
 		if err != nil {
-			log.Printf("mapUser: %v", err)
+			slog.Error("GetUsers", "mapUser", err)
 			return err
 		}
 		err = stream.Send(user)
 		if err != nil {
-			log.Printf("stream.Send: %v", err)
+			slog.Error("GetUsers", "stream.Send", err)
 			return err
 		}
 	}
 	if rows.Err() != nil {
-		log.Printf("rows.Err: %v", err)
+		slog.Error("GetUsers", "rows.Err", err)
 		return err
 	}
+
+	slog.Info("GetUsers", "time", time.Since(start))
 	return nil
 }
 
 func (s *server) GetUser(ctx context.Context, in *pb.UserId) (*pb.User, error) {
-	log.Printf("GetUser")
+	start := time.Now()
 
 	row := db.QueryRow(`select * from users where id = $1`, in.UserId)
 	user, err := mapUser(nil, row)
 	if err != nil {
-		log.Printf("mapUser: %v", err)
+		slog.Error("GetUser", "mapUser", err)
 		return nil, err
 	}
+
+	slog.Info("GetUser", "time", time.Since(start))
 	return user, nil
 }
 
 func (s *server) UpdateUser(ctx context.Context, in *pb.User) (*pb.Empty, error) {
-	log.Printf("UpdateUser")
+	start := time.Now()
 
 	_, err := db.Exec(`update users set name = $1, avatar_id = $2 where id = $3 and deleted is null`, in.Name, in.AvatarId, in.Id)
 	if err != nil {
-		log.Printf("mapUser: %v", err)
+		slog.Error("UpdateUser", "db.Exec", err)
 		return nil, err
 	}
+
+	slog.Info("UpdateUser", "time", time.Since(start))
 	return &pb.Empty{}, nil
 }
 
 func (s *server) DeleteUser(ctx context.Context, in *pb.User) (*pb.Empty, error) {
-	log.Printf("DeleteUser")
+	start := time.Now()
 
 	_, err := db.Exec(`update users set deleted = now() where id = $1 and sub = $2 and email = $3`, in.Id, in.Sub, in.Email)
 	if err != nil {
-		log.Printf("db.Exec: %v", err)
+		slog.Error("DeleteUser", "db.Exec", err)
 		return nil, err
 	}
+
+	slog.Info("DeleteUser", "time", time.Since(start))
 	return &pb.Empty{}, nil
 }

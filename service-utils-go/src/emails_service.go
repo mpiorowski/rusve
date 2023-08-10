@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/sendgrid/sendgrid-go"
@@ -24,7 +24,7 @@ func subscribe_to_emails() error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, "rusve-384620")
 	if err != nil {
-		log.Printf("NewClient: %v", err)
+		slog.Error("subscribe_to_emails", "pubsub.NewClient", err)
 		return err
 	}
 
@@ -34,7 +34,7 @@ func subscribe_to_emails() error {
 }
 
 func pull_messages(ctx context.Context, client *pubsub.Client) {
-	log.Printf("Email service started")
+	slog.Info("Email service started")
 
 	sub := client.Subscription("email-sub-go")
 	defer client.Close()
@@ -43,7 +43,7 @@ func pull_messages(ctx context.Context, client *pubsub.Client) {
 		var email Email
 		err := json.Unmarshal(msg.Data, &email)
 		if err != nil {
-			log.Printf("Unmarshal: %v", err)
+			slog.Error("pull_messages", "json.Unmarshal", err)
 			msg.Nack()
 			return
 		}
@@ -57,15 +57,16 @@ func pull_messages(ctx context.Context, client *pubsub.Client) {
 		client := sendgrid.NewSendClient(SENDGRID_API_KEY)
 		response, err := client.Send(message)
 		if err != nil {
-			log.Printf("client.Send: %v", err)
+            slog.Error("pull_messages", "client.Send", err)
 			msg.Nack()
 			return
 		}
-		log.Printf("Email sent: %v", response.StatusCode)
+		slog.Info("pull_messages", "response.StatusCode", response.StatusCode)
 		msg.Ack()
 	})
 	if err != nil {
-		log.Printf("sub.Receive: %v", err)
+        slog.Error("pull_messages", "sub.Receive", err)
+		return
 	}
-	log.Printf("Email service stopped")
+	slog.Info("Email service stopped")
 }

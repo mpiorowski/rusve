@@ -8,7 +8,7 @@
     export let textarea = false;
 
     $: haveErrors = errors.length > 0;
-    function typeAction(node: HTMLInputElement) {
+    function typeAction(node: HTMLInputElement): void {
         node.type = type;
     }
 </script>

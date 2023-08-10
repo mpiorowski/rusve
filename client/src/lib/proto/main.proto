@@ -10,13 +10,13 @@ import "notes.proto";
 
 message Empty {}
 message UserId {
-    bytes user_id = 1;
+    string user_id = 1;
 }
 message UserIds {
-    repeated bytes user_ids = 1;
+    repeated string user_ids = 1;
 }
 message PaymentId {
-    bytes user_id = 1;
+    string user_id = 1;
     string payment_id = 2;
 }
 
@@ -34,13 +34,13 @@ service UsersService {
 }
 
 message TargetId {
-    bytes target_id = 1;
+    string target_id = 1;
     FileType type = 2;
 }
 
 message FileId {
-    bytes file_id = 1;
-    bytes target_id = 2;
+    string file_id = 1;
+    string target_id = 2;
 }
 
 service UtilsService {
@@ -51,12 +51,12 @@ service UtilsService {
 }
 
 message NoteId {
-    bytes note_id = 1;
-    bytes user_id = 2;
+    string note_id = 1;
+    string user_id = 2;
 }
 
 service NotesService {
     rpc GetNotes(UserId) returns (stream Note) {}
-    rpc CreateNote(Note) returns (Empty) {}
+    rpc CreateNote(Note) returns (Note) {}
     rpc DeleteNote(NoteId) returns (Empty) {}
 }

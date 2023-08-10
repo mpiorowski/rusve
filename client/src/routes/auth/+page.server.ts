@@ -1,6 +1,7 @@
 import { redirect } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 import { getFirebaseServer } from "$lib/server/firebase_server";
+import { safe } from "$lib/server/safe";
 
 export const actions = {
     default: async ({ request, cookies }) => {
@@ -13,18 +14,18 @@ export const actions = {
         // Cookie expires in 5 days
         const expiresIn = 60 * 60 * 24 * 5 * 1000;
         const admin = getFirebaseServer();
-
-        let sessionCookie = "";
-        try {
-            sessionCookie = await admin
-                .auth()
-                .createSessionCookie(idToken, { expiresIn });
-        } catch (err) {
-            console.error("Error creating session cookie", err);
+        if (!admin.success) {
             throw redirect(303, "/auth");
         }
 
-        cookies.set("session", sessionCookie, {
+        const sessionCookie = await safe(
+            admin.data.auth().createSessionCookie(idToken, { expiresIn }),
+        );
+        if (!sessionCookie.success) {
+            throw redirect(303, "/auth");
+        }
+
+        cookies.set("session", sessionCookie.data, {
             maxAge: 60 * 60 * 24 * 30, // 30 days
             path: "/",
             httpOnly: true,

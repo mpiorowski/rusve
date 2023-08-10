@@ -1,7 +1,6 @@
--- +migrate Up
 CREATE TABLE
   users (
-    id bytea PRIMARY KEY,
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted timestamptz,
@@ -9,7 +8,7 @@ CREATE TABLE
     role text NOT NULL,
     sub text UNIQUE NOT NULL,
     name text NOT NULL DEFAULT '',
-    avatar_id bytea,
+    avatar_id uuid,
     payment_id text NOT NULL DEFAULT ''
   );
 

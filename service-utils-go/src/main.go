@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"os"
 
@@ -49,7 +50,7 @@ func init() {
 	if pingErr != nil {
 		log.Fatal(pingErr)
 	}
-	log.Println("Connected to database")
+	slog.Info("Connected to database")
 
 	// Example of running migrations
 	// var migrationsDir = "./migrations"
@@ -72,7 +73,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Subscribed to emails")
+	slog.Info("Subscribed to emails")
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", PORT))
 	if err != nil {
@@ -80,7 +81,7 @@ func main() {
 	}
 	s := grpc.NewServer()
 	pb.RegisterUtilsServiceServer(s, &server{})
-	log.Printf("Server listening at: %v", lis.Addr())
+	slog.Info("Server listening at", "address", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}

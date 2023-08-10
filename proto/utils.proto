@@ -10,12 +10,12 @@ enum FileType {
 }
 
 message File {
-    bytes id = 1;
+    string id = 1;
     string created = 2;
     string updated = 3;
     optional string deleted = 4;
 
-    bytes target_id = 5;
+    string target_id = 5;
     string name = 6;
     FileType type = 7;
 
