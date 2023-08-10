@@ -36,3 +36,5 @@ COPY  ./migrations /migrations
 COPY  ./public.key ./public.key
 
 RUN apt-get update && apt-get install -y openssl ca-certificates # libpq-dev libssl-dev
+
+CMD ["/app/main"]
