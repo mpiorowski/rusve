@@ -21,9 +21,11 @@ import { error, fail } from "@sveltejs/kit";
 import { z } from "zod";
 import type { Actions, PageServerLoad } from "./$types";
 import { safe } from "$lib/server/safe";
+import { logger, perf } from "$lib/logging";
 
 export const load = (async ({ locals, url }) => {
     try {
+        const end = perf("LoadProfile");
         const start = performance.now();
 
         const isGo = url.searchParams.get("lang") === "go";
@@ -64,20 +66,20 @@ export const load = (async ({ locals, url }) => {
             });
         }
 
-        const end = performance.now();
+        end();
         return {
             user: {
                 ...user,
                 id: user.id,
                 avatarId: user.avatarId ? user.avatarId : undefined,
             },
-            duration: end - start,
+            duration: performance.now() - start,
             stream: {
                 file: file,
             },
         };
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         throw error(500, "Could not load user");
     }
 }) satisfies PageServerLoad;
@@ -85,6 +87,7 @@ export const load = (async ({ locals, url }) => {
 export const actions = {
     createUser: async ({ request, locals }) => {
         try {
+            const end = perf("CreateUser");
             const form = await request.formData();
 
             const lang = form.get("lang") ?? "rust";
@@ -93,7 +96,7 @@ export const actions = {
             const client = isGo ? usersGoClient : usersRustClient;
 
             const name = form.get("name");
-            const avatarId = form.get("avatarId");
+            const avatarId = form.get("avatarId") ?? undefined;
             const schema = z
                 .object({
                     name: z.string().max(1000),
@@ -102,7 +105,7 @@ export const actions = {
                 .safeParse({ name, avatarId });
 
             if (!schema.success) {
-                console.error(schema.error);
+                logger.error(schema.error);
                 return fail(409, { form: schema.error.flatten() });
             }
 
@@ -119,13 +122,15 @@ export const actions = {
                 );
             });
 
+            end();
             return { status: 200 };
         } catch (err) {
-            console.error(err);
+            logger.error(err);
             return fail(500, { error: "Could not create user" });
         }
     },
     createAvatar: async ({ request, locals }) => {
+        const end = perf("CreateAvatar");
         const start = performance.now();
 
         const form = await safe(request.formData());
@@ -144,11 +149,7 @@ export const actions = {
         const type = form.data.get("type");
         const file = form.data.get("file");
         const name = form.data.get("name");
-        const avatarIdS = form.data.get("avatarId");
-        if (typeof avatarIdS !== "string") {
-            return fail(400, { error: "Invalid avatarId" });
-        }
-        const avatarId = Buffer.from(avatarIdS, "hex");
+        const avatarId = form.data.get("avatarId");
 
         if (!(file instanceof File) || file.size === 0) {
             return fail(400, { error: "Invalid file" });
@@ -183,7 +184,7 @@ export const actions = {
                 fileName: z.string().min(1),
                 type: z.nativeEnum(FileType),
                 buffer: z.instanceof(Buffer),
-                avatarId: z.string().uuid(),
+                avatarId: z.string().uuid().or(z.literal("")),
                 name: z.string().optional(),
             })
             .safeParse({
@@ -195,13 +196,13 @@ export const actions = {
                 name,
             });
         if (!schema.success) {
-            console.error(schema.error);
+            logger.error(schema.error);
             return fail(400, { error: "Invalid request" });
         }
 
         let metadata = await createMetadata(utilsUri);
         // Delete old avatar
-        if (schema.data.avatarId.length > 0) {
+        if (schema.data.avatarId) {
             const oldFileId: FileId = {
                 fileId: schema.data.avatarId,
                 targetId: schema.data.targetId,
@@ -257,6 +258,7 @@ export const actions = {
             return fail(500, { error: "Could not create user" });
         }
 
+        end();
         return {
             user: user.data,
             duration: performance.now() - start,
@@ -264,6 +266,7 @@ export const actions = {
     },
     deleteAvatar: async ({ request, locals }) => {
         try {
+            const end = perf("DeleteAvatar");
             const start = performance.now();
 
             const form = await request.formData();
@@ -275,18 +278,14 @@ export const actions = {
             const client = isGo ? usersGoClient : usersRustClient;
             const utilsClient = isGo ? utilsGoClient : utilsRustClient;
 
-            const fileIdS = form.get("fileId");
-            if (typeof fileIdS !== "string") {
-                return fail(400, { error: "Invalid fileId" });
-            }
-            const fileId = Buffer.from(fileIdS, "hex");
             const targetId = locals.userId;
+            const fileId = form.get("fileId");
             const name = form.get("name");
 
             const schema = z
                 .object({
-                    fileId: z.instanceof(Buffer),
-                    targetId: z.instanceof(Buffer),
+                    fileId: z.string().uuid(),
+                    targetId: z.string().uuid(),
                     name: z.string().optional(),
                 })
                 .safeParse({
@@ -296,7 +295,7 @@ export const actions = {
                 });
 
             if (!schema.success) {
-                console.error(schema.error);
+                logger.error(schema.error);
                 return fail(409, { error: "Invalid request" });
             }
 
@@ -325,15 +324,16 @@ export const actions = {
                 );
             });
 
-            const end = performance.now();
-            return { duration: end - start };
+            end();
+            return { duration: performance.now() - start };
         } catch (err) {
-            console.error(err);
+            logger.error(err);
             return fail(500, { error: "Could not delete avatar" });
         }
     },
     sendEmail: async ({ request, locals }) => {
         try {
+            const end = perf("SendEmail");
             const start = performance.now();
 
             const form = await request.formData();
@@ -354,7 +354,7 @@ export const actions = {
                 });
 
             if (!schema.success) {
-                console.error(schema.error);
+                logger.error(schema.error);
                 return fail(409, { form: schema.error.flatten().fieldErrors });
             }
 
@@ -370,16 +370,15 @@ export const actions = {
                 const messageId = await pubSubClient
                     .topic("email")
                     .publishMessage({ data: dataBuffer });
-                console.log(`Message ${messageId} published.`);
+                logger.info(`Message ${messageId} published.`);
             } catch (err) {
-                console.error("Received error while publishing: %s", err);
+                logger.error("Received error while publishing: %s", err);
                 return fail(500, { error: "Could not send email" });
             }
-
-            const end = performance.now();
-            return { duration: end - start };
+            end();
+            return { duration: performance.now() - start };
         } catch (err) {
-            console.error(err);
+            logger.error(err);
             return fail(500, { error: "Could not send email" });
         }
     },

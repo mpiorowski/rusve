@@ -3,6 +3,7 @@ import type { PageServerLoad } from "./$types";
 import { Categories } from "$lib/types";
 import { URI_DIRECTUS } from "$env/static/private";
 import { z } from "zod";
+import { logger } from "$lib/logging";
 
 type DashboardItem = {
     title: string;
@@ -26,13 +27,13 @@ async function fetchDashboard(): Promise<DashboardItem[]> {
         ).safeParse(json.data);
 
         if (!schema.success) {
-            console.error(schema.error.flatten());
+            logger.error(schema.error.flatten());
             return [];
         }
 
         return json.data.sort((a, b) => a.sort - b.sort);
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         return [];
     }
 }
@@ -48,7 +49,7 @@ export const load = (() => {
             },
         };
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         throw error(500, "Failed to fetch dashboard");
     }
 }) satisfies PageServerLoad;

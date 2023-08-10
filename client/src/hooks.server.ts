@@ -9,7 +9,7 @@ import { logger, perf } from "$lib/logging";
 import { grpcSafe, safe, type Safe } from "$lib/server/safe";
 
 export const handleError: HandleServerError = ({ error }) => {
-    console.error("Error: %s", error);
+    logger.error(error);
     if (error instanceof Error) {
         return {
             message: error.message,

@@ -36,8 +36,8 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        } catch (e) {
-            console.error(e);
+        } catch (err) {
+            console.error(err);
             toast.error("Failed to download avatar");
         }
     }

@@ -106,7 +106,8 @@ services:
 
   directus:
     container_name: rusve-directus
-    image: directus/directus:latest
+    build:
+      context: ./directus
     ports:
       - 8055:8055
     environment:

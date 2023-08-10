@@ -2,6 +2,7 @@ import { ENV } from "$env/static/private";
 import { Metadata } from "@grpc/grpc-js";
 import jwt from "jsonwebtoken";
 import fs from "fs";
+import { logger } from "$lib/logging";
 
 /**
  * Cache the tokens for 50 minutes
@@ -68,7 +69,7 @@ export async function createMetadata(serviceUrl: string): Promise<Metadata> {
             );
             gcpToken = await tokenFetch.text();
         } catch (err) {
-            console.error("Failed to fetch GCP token", err);
+            logger.error(err);
         }
     }
 

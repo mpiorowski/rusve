@@ -7,27 +7,35 @@
     import { toast } from "$lib/components/toast/toast";
     import type { ActionData } from "./$types";
     import { getContext } from "svelte";
-    import type { DrawerContext } from "$lib/types";
+    import type { NoteContext } from "$lib/types";
     import { page } from "$app/stores";
 
     export let form: ActionData;
 
-    let title = "";
-    let content = "";
     let loading = false;
+    const drawer = getContext<NoteContext>("drawer");
+    const type = $page.url.searchParams.get("lang") ?? "rust";
 
     function onChange(val: string): void {
-        content = val;
+        drawer.set({
+            open: true,
+            data: {
+                ...$drawer.data,
+                content: val,
+            },
+        });
     }
-
-    const drawer = getContext<DrawerContext>("drawer");
-
-    const type = $page.url.searchParams.get("lang") ?? "rust";
 </script>
 
 <Drawer>
     <span slot="header">
-        <h2>Create note</h2>
+        <h2>
+            {#if $drawer.data.id}
+                Edit note
+            {:else}
+                Create note
+            {/if}
+        </h2>
     </span>
     <span slot="content">
         <form
@@ -41,22 +49,31 @@
                     if (result.type === "success") {
                         toast.success("Note created");
                     }
-                    drawer.set(false);
+                    drawer.set({
+                        open: false,
+                        data: { id: "", title: "", content: "" },
+                    });
                     loading = false;
                 };
             }}
         >
             <div class="p-6">
+                <input type="hidden" name="id" value={$drawer.data.id} />
+                <input type="hidden" name="type" value={type} />
                 <Input
                     name="title"
-                    bind:value={title}
+                    bind:value={$drawer.data.title}
                     label="Title"
                     errors={form?.error?.fieldErrors.title ?? []}
                 />
-                <input type="hidden" name="content" bind:value={content} />
-                <input type="hidden" name="type" value={type} />
+                <input
+                    type="hidden"
+                    name="content"
+                    bind:value={$drawer.data.content}
+                />
                 <TipTap
                     label="Content"
+                    content={$drawer.data.content}
                     {onChange}
                     errors={form?.error?.fieldErrors.content ?? []}
                 />

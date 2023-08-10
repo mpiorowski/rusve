@@ -136,7 +136,6 @@ func (s *server) CreateFile(ctx context.Context, in *pb.File) (*pb.File, error) 
 	return file, nil
 }
 
-// TODO - delete form bucket
 func (s *server) DeleteFile(ctx context.Context, in *pb.FileId) (*pb.File, error) {
     start := time.Now()
 
@@ -147,6 +146,12 @@ func (s *server) DeleteFile(ctx context.Context, in *pb.FileId) (*pb.File, error
         slog.Error("DeleteFile", "mapFile", err)
 		return nil, err
 	}
+
+    err = deleteFile(file.Id, file.Name)
+    if err != nil {
+        slog.Error("DeleteFile", "deleteFile", err)
+        return nil, err
+    }
 
     slog.Info("DeleteFile", "time", time.Since(start))
 	return file, nil

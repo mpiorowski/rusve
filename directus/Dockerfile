@@ -1,3 +1,3 @@
-FROM directus/directus:10.0.0
+FROM directus/directus:10.5.2
 
 EXPOSE 8055

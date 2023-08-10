@@ -9,14 +9,14 @@
     const type = $page.url.searchParams.get("lang") ?? "rust";
 </script>
 
-<div class="flex flex-col gap-2 p-4 shadow-inner rounded bg-slate-600 mb-4">
+<div class="mb-4 flex flex-col gap-2 rounded bg-slate-600 p-4 shadow-inner">
     <h1>
         <slot name="title" />
     </h1>
     <div class="whitespace-pre-wrap">
         <slot name="content" />
     </div>
-    <div class="flex text-xs justify-between mt-4">
+    <div class="mt-4 flex justify-between text-xs">
         <p>
             Created by:
             <br />
@@ -41,7 +41,7 @@
                 type="submit"
                 form={noteId}
                 aria-label="Delete note"
-                class="h-5 w-5 text-error-500 hover:text-error-400 transition"
+                class="h-5 w-5 text-error-500 transition hover:text-error-400"
             >
                 <DeleteIcon />
             </button>

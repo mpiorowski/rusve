@@ -6,4 +6,15 @@ export enum Categories {
     Deployment = "Deployment",
     Additional = "Additional",
 }
-export type DrawerContext = Writable<boolean>;
+export type DrawerContext<T> = Writable<{
+    open: boolean;
+    data: T;
+}>;
+export type NoteContext = Writable<{
+    open: boolean;
+    data: {
+        id: string;
+        title: string;
+        content: string;
+    };
+}>;

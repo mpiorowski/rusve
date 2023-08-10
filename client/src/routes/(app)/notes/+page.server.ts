@@ -19,6 +19,7 @@ import {
 } from "$lib/server/grpc";
 import { z } from "zod";
 import type { Empty__Output } from "$lib/proto/proto/Empty";
+import { logger } from "$lib/logging";
 
 export const load = (async ({ locals, url }) => {
     try {
@@ -76,7 +77,7 @@ export const load = (async ({ locals, url }) => {
         });
 
         return {
-            notes: notes.slice(0, 1),
+            notes: notes,
             time: performance.now() - start,
             length: notes.length,
             stream: {
@@ -84,7 +85,7 @@ export const load = (async ({ locals, url }) => {
             },
         };
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         throw error(500, "Could not load notes");
     }
 }) satisfies PageServerLoad;
@@ -94,14 +95,14 @@ export const actions = {
         try {
             const start = performance.now();
 
-            console.log(locals);
-
             const form = await request.formData();
+            const id = form.get("id");
             const title = form.get("title");
             const content = form.get("content");
             const type = form.get("type");
 
             const data = {
+                id: id,
                 title: title,
                 content: content,
                 userId: locals.userId,
@@ -109,6 +110,7 @@ export const actions = {
 
             const schema = z
                 .object({
+                    id: z.string().uuid().or(z.literal("")),
                     userId: z.string().uuid(),
                     title: z.string().min(1).max(100),
                     content: z.string().min(1).max(1000),
@@ -134,7 +136,7 @@ export const actions = {
                 duration: end - start,
             };
         } catch (err) {
-            console.error(err);
+            logger.error(err);
             throw error(500, "Could not create note");
         }
     },
@@ -176,7 +178,7 @@ export const actions = {
                 duration: end - start,
             };
         } catch (err) {
-            console.error(err);
+            logger.error(err);
             throw error(500, "Failed to delete note");
         }
     },

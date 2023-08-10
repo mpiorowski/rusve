@@ -42,10 +42,7 @@ impl TryFrom<tokio_postgres::Row> for File {
     }
 }
 
-pub async fn get_files_by_target_id(
-    conn: &Object,
-    target_id: &Uuid,
-) -> Result<RowStream> {
+pub async fn get_files_by_target_id(conn: &Object, target_id: &Uuid) -> Result<RowStream> {
     let stmt = conn
         .prepare(
             "select * from files where target_id = $1 and deleted is null order by created desc",
@@ -69,10 +66,13 @@ pub async fn get_file_by_id(conn: &Object, file_id: &Uuid, target_id: &Uuid) -> 
 
 pub async fn create_file(conn: &Transaction<'_>, file: &File) -> Result<File> {
     let target_id = Uuid::parse_str(&file.target_id)?;
+    let r#type = FileType::from_i32(file.r#type);
+    let r#type = r#type.ok_or(anyhow::anyhow!("Invalid file type: {}", file.r#type))?;
+    let r#type: &str = r#type.as_str_name();
     let file = conn
         .query_one(
             "insert into files (target_id, name, type) values ($1, $2, $3) returning *",
-            &[&target_id, &file.name, &file.r#type],
+            &[&target_id, &file.name, &r#type],
         )
         .await?;
 
