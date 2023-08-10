@@ -44,7 +44,7 @@ https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5`
   - **PWA with service workers** - Turn off the internet and check how resiliant the app is.
   - **[Firebase SSR Authentication](https://firebase.google.com/docs/auth)** - Battle-tested OAuth, Magic Link, Phone Number. And by doint it on Svelte server, it's much more [secure](https://firebase.google.com/docs/auth/admin/manage-cookies).
   - **[TailwindCSS](https://tailwindcss.com/)** - Used for styling, no other UI library needed. 
-  - **Minimal external libraries** - With Svelte animation and stores builing custom components is very easy. Checkout `Toast`, `Drawer`, `Modal`, `Dropdown` and see for yourself.
+  - **Minimal external libraries** - With Svelte animation and stores out of the box the dependency list is very small.
 - **Deployment**
   - **[Github Action](https://docs.github.com/en/actions)** - Ready to use github actions for deployment, each service is linted and checked. Possible to deploy all services or a single one.
   - **[Google Cloud Platform](https://cloud.google.com/)** - Easy to deploy, easy to scale, easy to maintain, and still cheap.
