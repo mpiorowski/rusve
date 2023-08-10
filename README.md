@@ -6,7 +6,7 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
 
 Feel free to ask questions, throw new ideas and propose changes. Any contribution is also welcome, especially some ux/ui redesigns.
 
-Also, a little bit of self-promotion, i have build an application using this stack. It goal is to take care of **files**, **images**, and **emails** for you. Feel free to give it a try, as it's free :)
+Also, a little bit of self-promotion, i am building an application using this stack. Its goal is to take care of **files**, **images**, and **emails** for you. Feel free to give it a try, as it's free :)
 
 https://www.upsend.app
 
