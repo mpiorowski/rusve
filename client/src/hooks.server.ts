@@ -5,7 +5,7 @@ import { usersGoClient, usersRustClient } from "$lib/server/grpc";
 import { getFirebaseServer } from "$lib/server/firebase_server";
 import { URI_USERS_GO, URI_USERS_RUST } from "$env/static/private";
 import type { User__Output } from "$lib/proto/proto/User";
-import { perf } from "$lib/logging";
+import { logger, perf } from "$lib/logging";
 import { grpcSafe, safe, type Safe } from "$lib/server/safe";
 
 export const handleError: HandleServerError = ({ error }) => {
@@ -43,7 +43,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     const session = event.cookies.get("session") ?? "";
     if (!session || session === "") {
-        console.info("No session found");
+        logger.info("No session cookie");
         throw redirect(303, "/auth");
     }
 
@@ -62,8 +62,6 @@ export const handle: Handle = async ({ event, resolve }) => {
     if (!decodedClaims.success) {
         throw redirect(303, "/auth");
     }
-    console.info("User session verified");
-
     /**
      * Authenticate user agains our server
      * @param {string} uid - Firebase user id
@@ -90,6 +88,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     log();
     if (!event.locals.userId.length) {
+        logger.info("No user id");
         throw redirect(303, "/auth");
     }
     return await resolve(event);

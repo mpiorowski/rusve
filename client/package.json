@@ -21,6 +21,7 @@
         "eslint": "^8.46.0",
         "eslint-config-prettier": "^8.8.0",
         "eslint-plugin-svelte": "^2.32.4",
+        "pino-pretty": "^10.2.0",
         "postcss": "^8.4.27",
         "prettier": "^2.8.8",
         "prettier-plugin-svelte": "^2.10.1",
@@ -48,6 +49,7 @@
         "firebase": "^9.23.0",
         "firebase-admin": "^11.10.1",
         "jsonwebtoken": "^9.0.1",
+        "pino": "^8.15.0",
         "stripe": "^12.17.0",
         "zod": "^3.21.4"
     }

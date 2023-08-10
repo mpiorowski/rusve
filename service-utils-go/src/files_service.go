@@ -2,16 +2,14 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
+	"time"
 
 	pb "rusve/proto"
-
-	uuidv7 "github.com/gofrs/uuid"
-	"github.com/google/uuid"
 )
 
 func (s *server) GetFiles(in *pb.TargetId, stream pb.UtilsService_GetFilesServer) error {
-	log.Printf("GetFiles")
+	start := time.Now()
 
 	rules := map[string]string{
 		"TargetId": "required,max=100",
@@ -20,13 +18,13 @@ func (s *server) GetFiles(in *pb.TargetId, stream pb.UtilsService_GetFilesServer
 	validate.RegisterStructValidationMapRules(rules, pb.TargetId{})
 	err := validate.Struct(in)
 	if err != nil {
-		log.Printf("validate.Struct: %v", err)
+		slog.Error("GetFiles", "validate.Struct", err)
 		return err
 	}
 
 	rows, err := db.Query(`select * from files where target_id = $1 and type = $2 and deleted is null`, in.TargetId, in.Type)
 	if err != nil {
-		log.Printf("db.Query: %v", err)
+		slog.Error("GetFiles", "db.Query", err)
 		return err
 	}
 	defer rows.Close()
@@ -34,21 +32,15 @@ func (s *server) GetFiles(in *pb.TargetId, stream pb.UtilsService_GetFilesServer
 	for rows.Next() {
 		file, err := mapFile(rows, nil)
 		if err != nil {
-			log.Printf("mapFile: %v", err)
-			return err
-		}
-
-		fileId, err := uuid.FromBytes(file.Id)
-		if err != nil {
-			log.Printf("uuid.FromBytes: %v", err)
+			slog.Error("GetFiles", "mapFile", err)
 			return err
 		}
 
 		// in go, change byte array to string
 		if ENV == "production" {
-			file.Url, err = generateV4GetObjectSignedURL(fileId.String(), file.Name)
+			file.Url, err = generateV4GetObjectSignedURL(file.Id, file.Name)
 			if err != nil {
-				log.Printf("generateV4GetObjectSignedURL: %v", err)
+				slog.Error("GetFiles", "generateV4GetObjectSignedURL", err)
 				return err
 			}
 		} else {
@@ -57,19 +49,20 @@ func (s *server) GetFiles(in *pb.TargetId, stream pb.UtilsService_GetFilesServer
 
 		err = stream.Send(file)
 		if err != nil {
-			log.Printf("stream.Send: %v", err)
+			slog.Error("GetFiles", "stream.Send", err)
 			return err
 		}
 	}
 	if rows.Err() != nil {
-		log.Printf("rows.Err: %v", err)
+		slog.Error("GetFiles", "rows.Err", err)
 		return rows.Err()
 	}
+	slog.Info("GetFiles", "time", time.Since(start))
 	return nil
 }
 
 func (s *server) GetFile(ctx context.Context, in *pb.FileId) (*pb.File, error) {
-    log.Printf("GetFile")
+	start := time.Now()
 
 	rules := map[string]string{
 		"FileId":   "required,max=100",
@@ -78,37 +71,34 @@ func (s *server) GetFile(ctx context.Context, in *pb.FileId) (*pb.File, error) {
 	validate.RegisterStructValidationMapRules(rules, pb.TargetId{})
 	err := validate.Struct(in)
 	if err != nil {
-		log.Printf("validate.Struct: %v", err)
+		slog.Error("GetFile", "validate.Struct", err)
 		return nil, err
 	}
 
 	row := db.QueryRow(`select * from files where id = $1 and target_id = $2 and deleted is null`, in.FileId, in.TargetId)
 	file, err := mapFile(nil, row)
 	if err != nil {
-		log.Printf("mapFile: %v", err)
-		return nil, err
-	}
-	fileId, err := uuid.FromBytes(file.Id)
-	if err != nil {
-		log.Printf("uuid.FromBytes: %v", err)
+		slog.Error("GetFile", "mapFile", err)
 		return nil, err
 	}
 
-	buffer, err := downloadFile(fileId.String(), file.Name)
+	buffer, err := downloadFile(file.Id, file.Name)
 	if err != nil {
-		log.Printf("downloadFile: %v", err)
+		slog.Error("GetFile", "downloadFile", err)
 		return nil, err
 	}
 	if buffer == nil {
-		log.Printf("downloadFile: buffer is nil")
+		slog.Error("GetFile", "buffer", "nil")
 		return nil, err
 	}
 	file.Buffer = buffer
+
+	slog.Info("GetFile", "time", time.Since(start))
 	return file, nil
 }
 
 func (s *server) CreateFile(ctx context.Context, in *pb.File) (*pb.File, error) {
-	log.Printf("CreateFile")
+	start := time.Now()
 
 	rules := map[string]string{
 		"TargetId": "required,max=100",
@@ -119,17 +109,12 @@ func (s *server) CreateFile(ctx context.Context, in *pb.File) (*pb.File, error) 
 	validate.RegisterStructValidationMapRules(rules, pb.File{})
 	err := validate.Struct(in)
 	if err != nil {
-		log.Printf("validate.Struct: %v", err)
+		slog.Error("CreateFile", "validate.Struct", err)
 		return nil, err
 	}
 
-	id, err := uuidv7.NewV7()
-	if err != nil {
-		log.Printf("uuidv7.NewV7: %v", err)
-		return nil, err
-	}
-	row := db.QueryRow(`insert into files (id, target_id, name, type) values ($1, $2, $3, $4) returning *`,
-		id.Bytes(),
+	// TODO - transaction?
+	row := db.QueryRow(`insert into files (target_id, name, type) values ($1, $2, $3) returning *`,
 		in.TargetId,
 		in.Name,
 		in.Type,
@@ -137,35 +122,32 @@ func (s *server) CreateFile(ctx context.Context, in *pb.File) (*pb.File, error) 
 
 	file, err := mapFile(nil, row)
 	if err != nil {
-		log.Printf("mapFile: %v", err)
-		return nil, err
-	}
-	fileId, err := uuid.FromBytes(file.Id)
-	if err != nil {
-		log.Printf("uuid.FromBytes: %v", err)
+		slog.Error("CreateFile", "mapFile", err)
 		return nil, err
 	}
 
-	err = uploadFile(fileId.String(), file.Name, in.Buffer)
+	err = uploadFile(file.Id, file.Name, in.Buffer)
 	if err != nil {
-		// TODO - transaction?
 		_, _ = db.Exec(`update files set deleted = now() where id = $1`, file.Id)
 		return nil, err
 	}
 
+	slog.Info("CreateFile", "time", time.Since(start))
 	return file, nil
 }
 
 // TODO - delete form bucket
 func (s *server) DeleteFile(ctx context.Context, in *pb.FileId) (*pb.File, error) {
-	log.Printf("DeleteFile")
+    start := time.Now()
 
 	row := db.QueryRow(`update files set deleted = now() where id = $1 and target_id = $2 returning *`, in.FileId, in.TargetId)
 
 	file, err := mapFile(nil, row)
 	if err != nil {
-		log.Printf("mapFile: %v", err)
+        slog.Error("DeleteFile", "mapFile", err)
 		return nil, err
 	}
+
+    slog.Info("DeleteFile", "time", time.Since(start))
 	return file, nil
 }

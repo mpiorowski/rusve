@@ -1,10 +1,10 @@
 CREATE TABLE
   files (
-    id bytea PRIMARY KEY,
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted timestamptz,
-    target_id bytea NOT NULL,
+    target_id uuid NOT NULL,
     name text NOT NULL,
     type text NOT NULL
   );

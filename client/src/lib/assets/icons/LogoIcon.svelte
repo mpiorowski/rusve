@@ -2,7 +2,7 @@
     id="Warstwa_2"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 249.45 249.4"
-    fill="currentColor"
+    fill="red"
     color="currentColor"
 >
     <g id="Warstwa_1-2">

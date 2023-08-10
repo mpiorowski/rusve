@@ -1,3 +1,4 @@
+import { logger } from "$lib/logging";
 import type { ServiceError } from "@grpc/grpc-js";
 
 export type Safe<T> =
@@ -26,7 +27,7 @@ async function safeAsync<T>(promise: Promise<T>): Promise<Safe<T>> {
         const data = await promise;
         return { data, success: true };
     } catch (e) {
-        console.error(e);
+        logger.error(e);
         if (e instanceof Error) {
             return { success: false, error: e.message };
         }
@@ -39,7 +40,7 @@ function safeSync<T>(func: () => T): Safe<T> {
         const data = func();
         return { data, success: true };
     } catch (e) {
-        console.error(e);
+        logger.error(e);
         if (e instanceof Error) {
             return { success: false, error: e.message };
         }
@@ -50,7 +51,7 @@ function safeSync<T>(func: () => T): Safe<T> {
 export function grpcSafe<T>(res: (value: Safe<T>) => void) {
     return (err: ServiceError | null, data: T | undefined) => {
         if (err || !data) {
-            console.error(err);
+            logger.error(err);
             return res({
                 success: false,
                 error: err?.details ?? "Unknown error",

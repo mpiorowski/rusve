@@ -1,4 +1,14 @@
 import { ENV } from "$env/static/private";
+import { pino } from "pino";
+
+export const logger = pino({
+    transport: {
+        target: "pino-pretty",
+        options: {
+            colorize: true,
+        },
+    },
+});
 
 export function perf(name: string): () => void | void {
     if (ENV === "production") {
@@ -10,14 +20,14 @@ export function perf(name: string): () => void | void {
 
     function end(): void {
         const duration = performance.now() - start;
-        console.info(`${name}: ${duration.toFixed(4)}ms`);
+        logger.info(`${name}: ${duration.toFixed(4)}ms`);
     }
 
     return end;
 }
 
-export function debug(...args: unknown[]): void {
+export function debug(msg: string): void {
     if (ENV !== "production") {
-        console.debug(...args);
+        logger.debug(msg);
     }
 }

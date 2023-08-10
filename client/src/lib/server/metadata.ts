@@ -2,7 +2,6 @@ import { ENV } from "$env/static/private";
 import { Metadata } from "@grpc/grpc-js";
 import jwt from "jsonwebtoken";
 import fs from "fs";
-import { debug } from "$lib/logging";
 
 /**
  * Cache the tokens for 50 minutes
@@ -37,7 +36,6 @@ export async function createMetadata(serviceUrl: string): Promise<Metadata> {
     // Check cache for token
     const cached = cacheToken.get(serviceUrl);
     if (cached && cached.expires > new Date()) {
-        debug("Using cached token");
         metadata.set("authorization", `bearer ${cached.gcpToken}`);
         metadata.set("x-authorization", `bearer ${cached.oauthToken}`);
         return metadata;

@@ -37,9 +37,9 @@ async function fetchDashboard(): Promise<DashboardItem[]> {
     }
 }
 
-export const load = (async () => {
+export const load = (() => {
     try {
-        const dashboard = await fetchDashboard();
+        const dashboard = fetchDashboard();
 
         return {
             status: 200,

@@ -46,29 +46,17 @@ pub async fn subscribe_to_emails() -> Result<()> {
 
     // Check if subscription exists.
     if !subscription.exists(None).await? {
-        // let config = SubscriptionConfig {
-        //     // Enable message ordering if needed (https://cloud.google.com/pubsub/docs/ordering)
-        //     enable_message_ordering: true,
-        //     ..Default::default()
-        // };
-        // subscription.create(topic.fully_qualified_name(), config, None).await?;
         return Err(anyhow::anyhow!("Subscription does not exist"));
     }
 
     // Token for cancel.
     let cancel = CancellationToken::new();
-    // Cancel after 10 seconds.
-    // let cancel2 = cancel.clone();
-    // tokio::spawn(async move {
-    //     tokio::time::sleep(Duration::from_secs(10)).await;
-    //     cancel2.cancel();
-    // });
 
     tokio::spawn(async move {
         let mut stream = match subscription.subscribe(None).await {
             Ok(stream) => stream,
             Err(e) => {
-                println!("Error subscribing to topic: {:?}", e);
+                tracing::error!("Error subscribing to pubsub: {:?}", e);
                 cancel.cancel();
                 return;
             }
@@ -76,12 +64,12 @@ pub async fn subscribe_to_emails() -> Result<()> {
         while let Some(message) = stream.next().await {
             let _ = match send_email(&message).await {
                 Err(e) => {
-                    println!("Error sending email: {:?}", e);
+                    tracing::error!("Error sending email: {:?}", e);
                     cancel.cancel();
                     message.nack().await
                 }
                 Ok(_) => {
-                    println!("Email sent successfully");
+                    tracing::info!("Email sent successfully");
                     message.ack().await
                 }
             };
