@@ -18,7 +18,6 @@ jobs:
       PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
       SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
       STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
-      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
   deploy-users-rust:
     uses: ./.github/workflows/deploy-users-rust.yml
     secrets:
