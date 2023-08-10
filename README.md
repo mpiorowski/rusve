@@ -57,16 +57,17 @@ https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5`
   - **[WYSIWYG](https://tiptap.dev/)** - Wyswig text editor thanks to TipTap.
 
 ## Architecture
-![image](https://github.com/mpiorowski/rusve/assets/26543876/39f383ea-b2c8-4660-95c5-82e74ce88e65)
+![image](https://github.com/mpiorowski/rusve/assets/26543876/ce687350-a827-44d0-94d2-723001f44ad6)
 
 ## Authorization
 ![image](https://user-images.githubusercontent.com/26543876/235413978-93d49f92-e8bb-47ac-a46d-f0fc08cec350.png)
 
 ## Github action deployment
 ### Release all
-![image](https://github.com/mpiorowski/rusve/assets/26543876/07189f9e-e20e-42e6-a637-1a086b9c82ec)
+![image](https://github.com/mpiorowski/rusve/assets/26543876/6e601880-2f7f-4a08-9e68-f48b2d515e00)
+
 ### Release single
-![image](https://github.com/mpiorowski/rusve/assets/26543876/1072fc17-4c99-4af0-a25e-8b9b9077f6f3)
+![image](https://github.com/mpiorowski/rusve/assets/26543876/360833a8-7283-46d8-b5ce-9864e8a2966f)
 
 ## Aria and PWA with offline service workers
 ![image](https://user-images.githubusercontent.com/26543876/236647026-0db54439-b841-4e69-8a2f-6976e423b453.png)
