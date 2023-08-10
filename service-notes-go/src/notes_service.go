@@ -17,7 +17,7 @@ func (s *server) GetNotes(in *pb.UserId, stream pb.NotesService_GetNotesServer) 
 
 	rows, err := db.Query(`select * from notes where user_id = $1 and deleted is null`, in.UserId)
 	if err != nil {
-		slog.Error("db.Query", "error", err)
+		slog.Error("GetNotes", "db.Query", err)
 		return err
 	}
 	defer rows.Close()
@@ -25,17 +25,17 @@ func (s *server) GetNotes(in *pb.UserId, stream pb.NotesService_GetNotesServer) 
 	for rows.Next() {
 		note, err := mapNote(rows, nil)
 		if err != nil {
-			slog.Error("mapNote", "error", err)
+			slog.Error("GetNotes", "mapNote", err)
 			return err
 		}
 		err = stream.Send(note)
 		if err != nil {
-			slog.Error("stream.Send", "error", err)
+			slog.Error("GetNotes", "stream.Send", err)
 			return err
 		}
 	}
 	if rows.Err() != nil {
-		slog.Error("rows.Err", "error", err)
+		slog.Error("GetNotes", "rows.Err", err)
 		return err
 	}
 	slog.Info("GetNotes", "time", time.Since(start))
@@ -52,7 +52,7 @@ func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Note, error) 
 	validate.RegisterStructValidationMapRules(rules, pb.Note{})
 	err := validate.Struct(in)
 	if err != nil {
-		slog.Error("validate.Struct", "error", err)
+		slog.Error("CreateNote", "validate.Struct", err)
 		return nil, status.Error(codes.InvalidArgument, "Invalid argument")
 	}
 
@@ -64,7 +64,7 @@ func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Note, error) 
 	}
 	note, err := mapNote(nil, row)
 	if err != nil {
-		slog.Error("mapNote", "error", err)
+		slog.Error("CreateNote", "mapNote", err)
 		return nil, err
 	}
 
@@ -77,7 +77,7 @@ func (s *server) DeleteNote(ctx context.Context, in *pb.NoteId) (*pb.Empty, erro
 
 	_, err := db.Exec(`update notes set deleted = now() where id = $1 and user_id = $2`, in.NoteId, in.UserId)
 	if err != nil {
-		slog.Error("db.Exec", "error", err)
+		slog.Error("DeleteNote", "db.Exec", err)
 		return nil, err
 	}
 

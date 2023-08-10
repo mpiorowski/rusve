@@ -24,14 +24,14 @@ func (s *server) Auth(ctx context.Context, in *pb.AuthRequest) (*pb.User, error)
 	validate.RegisterStructValidationMapRules(rules, pb.AuthRequest{})
 	err := validate.Struct(in)
 	if err != nil {
-		slog.Error("validate.Struct", "error", err)
+		slog.Error("Auth", "validate.Struct", err)
 		return nil, status.Error(codes.InvalidArgument, "Invalid email or code")
 	}
 
 	row := db.QueryRow(`select * from users where email = $1`, in.Email)
 	user, err := mapUser(nil, row)
 	if err != nil && err != sql.ErrNoRows {
-		slog.Error("mapUser", "error", err)
+		slog.Error("Auth", "mapUser", err)
 		return nil, err
 	}
 
@@ -44,7 +44,7 @@ func (s *server) Auth(ctx context.Context, in *pb.AuthRequest) (*pb.User, error)
 		row = db.QueryRow(`insert into users (email, role, sub) values ($1, $2, $3) returning *`, in.Email, role, in.Sub)
 		user, err = mapUser(nil, row)
 		if err != nil {
-			slog.Error("mapUser", "error", err)
+			slog.Error("Auth", "mapUser", err)
 			return nil, err
 		}
 	}
@@ -58,7 +58,7 @@ func (s *server) GetUsers(in *pb.UserIds, stream pb.UsersService_GetUsersServer)
 
 	rows, err := db.Query(`select * from users where id = any($1)`, in.UserIds)
 	if err != nil {
-		slog.Error("db.Query", "error", err)
+		slog.Error("GetUsers", "db.Query", err)
 		return err
 	}
 	defer rows.Close()
@@ -66,17 +66,17 @@ func (s *server) GetUsers(in *pb.UserIds, stream pb.UsersService_GetUsersServer)
 	for rows.Next() {
 		user, err := mapUser(rows, nil)
 		if err != nil {
-			slog.Error("mapUser", "error", err)
+			slog.Error("GetUsers", "mapUser", err)
 			return err
 		}
 		err = stream.Send(user)
 		if err != nil {
-			slog.Error("stream.Send", "error", err)
+			slog.Error("GetUsers", "stream.Send", err)
 			return err
 		}
 	}
 	if rows.Err() != nil {
-		slog.Error("rows.Err", "error", err)
+		slog.Error("GetUsers", "rows.Err", err)
 		return err
 	}
 
@@ -90,7 +90,7 @@ func (s *server) GetUser(ctx context.Context, in *pb.UserId) (*pb.User, error) {
 	row := db.QueryRow(`select * from users where id = $1`, in.UserId)
 	user, err := mapUser(nil, row)
 	if err != nil {
-		slog.Error("mapUser", "error", err)
+		slog.Error("GetUser", "mapUser", err)
 		return nil, err
 	}
 
@@ -103,7 +103,7 @@ func (s *server) UpdateUser(ctx context.Context, in *pb.User) (*pb.Empty, error)
 
 	_, err := db.Exec(`update users set name = $1, avatar_id = $2 where id = $3 and deleted is null`, in.Name, in.AvatarId, in.Id)
 	if err != nil {
-		slog.Error("db.Exec", "error", err)
+		slog.Error("UpdateUser", "db.Exec", err)
 		return nil, err
 	}
 
@@ -116,7 +116,7 @@ func (s *server) DeleteUser(ctx context.Context, in *pb.User) (*pb.Empty, error)
 
 	_, err := db.Exec(`update users set deleted = now() where id = $1 and sub = $2 and email = $3`, in.Id, in.Sub, in.Email)
 	if err != nil {
-		slog.Error("db.Exec", "error", err)
+		slog.Error("DeleteUser", "db.Exec", err)
 		return nil, err
 	}
 

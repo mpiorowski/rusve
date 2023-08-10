@@ -21,18 +21,18 @@ impl NotesService for MyService {
 
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to get connection")
         })?;
 
         let request = request.into_inner();
         let user_id = uuid::Uuid::parse_str(&request.user_id).map_err(|e| {
             tracing::error!("Failed to parse user_id: {:?}", e);
-            Status::invalid_argument(e.to_string())
+            Status::invalid_argument("Failed to parse user_id")
         })?;
 
         let notes = notes_db::get_notes(&conn, &user_id).await.map_err(|e| {
             tracing::error!("Failed to get notes: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to get notes")
         })?;
 
         let (tx, rx) = mpsc::channel(128);
@@ -44,7 +44,7 @@ impl NotesService for MyService {
                     Ok(None) => break,
                     Err(e) => {
                         tracing::error!("Failed to get note: {:?}", e);
-                        if let Err(e) = tx.send(Err(Status::internal(e.to_string()))).await {
+                        if let Err(e) = tx.send(Err(Status::internal("Failed to get note"))).await {
                             tracing::error!("Failed to send error: {:?}", e);
                         }
                         break;
@@ -54,7 +54,7 @@ impl NotesService for MyService {
                     Ok(note) => note,
                     Err(e) => {
                         tracing::error!("Failed to convert note: {:?}", e);
-                        if let Err(e) = tx.send(Err(Status::internal(e.to_string()))).await {
+                        if let Err(e) = tx.send(Err(Status::internal("Failed to convert note"))).await {
                             tracing::error!("Failed to send error: {:?}", e);
                         }
                         break;
@@ -75,13 +75,13 @@ impl NotesService for MyService {
 
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to get connection")
         })?;
 
         let note = request.into_inner();
         let note = notes_db::create_note(&conn, &note).await.map_err(|e| {
             tracing::error!("Failed to insert note: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to insert note")
         })?;
 
         tracing::info!("CreateNote: {:?}", start.elapsed());
@@ -93,18 +93,18 @@ impl NotesService for MyService {
 
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to get connection")
         })?;
 
         let note = request.into_inner();
         let note_id = uuid::Uuid::parse_str(&note.note_id).map_err(|e| {
             tracing::error!("Failed to parse note_id: {:?}", e);
-            Status::invalid_argument(e.to_string())
+            Status::invalid_argument("Failed to parse note_id")
         })?;
 
         notes_db::delete_note(&conn, &note_id).await.map_err(|e| {
             tracing::error!("Failed to delete note: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to delete note")
         })?;
 
         tracing::info!("DeleteNote: {:?}", start.elapsed());

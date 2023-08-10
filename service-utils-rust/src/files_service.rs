@@ -45,7 +45,7 @@ impl UtilsService for MyService {
                     Ok(None) => break,
                     Err(e) => {
                         tracing::error!("Failed to get file: {:?}", e);
-                        if let Err(e) = tx.send(Err(Status::internal(e.to_string()))).await {
+                        if let Err(e) = tx.send(Err(Status::internal("Failed to get file"))).await {
                             tracing::error!("Failed to send error: {:?}", e);
                         }
                         break;
@@ -55,7 +55,7 @@ impl UtilsService for MyService {
                     Ok(file) => file,
                     Err(e) => {
                         tracing::error!("Failed to convert file: {:?}", e);
-                        if let Err(e) = tx.send(Err(Status::internal(e.to_string()))).await {
+                        if let Err(e) = tx.send(Err(Status::internal("Failed to convert file"))).await {
                             tracing::error!("Failed to send error: {:?}", e);
                         }
                         break;

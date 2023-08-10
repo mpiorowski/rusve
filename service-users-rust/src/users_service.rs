@@ -20,15 +20,16 @@ impl UsersService for MyService {
 
         let mut conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to get connection")
         })?;
         let request = request.into_inner();
 
         let user = users_db::auth_user(&mut conn, request).await.map_err(|e| {
             tracing::error!("Failed to auth user: {:?}", e);
-            Status::unauthenticated(e.to_string())
+            Status::unauthenticated("Failed to auth user")
         })?;
         if user.deleted.is_some() {
+            tracing::error!("User is deleted");
             return Err(Status::unauthenticated("Unauthenticated"));
         }
 
@@ -44,7 +45,7 @@ impl UsersService for MyService {
 
         let mut conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to get connection")
         })?;
 
         let user_ids: Vec<Uuid> = request
@@ -55,14 +56,14 @@ impl UsersService for MyService {
             .collect::<Result<Vec<Uuid>, _>>()
             .map_err(|e| {
                 tracing::error!("Failed to parse user ids: {:?}", e);
-                Status::invalid_argument(e.to_string())
+                Status::invalid_argument("Failed to parse user ids")
             })?;
 
         let users = users_db::get_users(&mut conn, user_ids)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to get users: {:?}", e);
-                Status::internal(e.to_string())
+                Status::internal("Failed to get users")
             })?;
 
         let (tx, rx) = mpsc::channel(128);
@@ -74,7 +75,7 @@ impl UsersService for MyService {
                     Ok(None) => break,
                     Err(e) => {
                         tracing::error!("Failed to get user: {:?}", e);
-                        if let Err(e) = tx.send(Err(Status::internal(e.to_string()))).await {
+                        if let Err(e) = tx.send(Err(Status::internal("Falied to get user"))).await {
                             tracing::error!("Failed to send error: {:?}", e);
                         }
                         break;
@@ -84,7 +85,7 @@ impl UsersService for MyService {
                     Ok(user) => user,
                     Err(e) => {
                         tracing::error!("Failed to convert user: {:?}", e);
-                        if let Err(e) = tx.send(Err(Status::internal(e.to_string()))).await {
+                        if let Err(e) = tx.send(Err(Status::internal("Failed to convert user"))).await {
                             tracing::error!("Failed to send error: {:?}", e);
                         }
                         break;
@@ -105,16 +106,16 @@ impl UsersService for MyService {
 
         let mut conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to get connection")
         })?;
 
         let user_id = Uuid::from_str(&request.into_inner().user_id).map_err(|e| {
             tracing::error!("Failed to parse user id: {:?}", e);
-            Status::invalid_argument(e.to_string())
+            Status::invalid_argument("Failed to parse user id")
         })?;
         let user = users_db::get_user(&mut conn, &user_id).await.map_err(|e| {
             tracing::error!("Failed to get user: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to get user")
         })?;
 
         tracing::info!("GetUser: {:?}", start.elapsed());
@@ -126,18 +127,18 @@ impl UsersService for MyService {
 
         let mut conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to get connection")
         })?;
 
         let request = request.into_inner();
         let user_id = Uuid::from_str(&request.id).map_err(|e| {
             tracing::error!("Failed to parse user id: {:?}", e);
-            Status::invalid_argument(e.to_string())
+            Status::invalid_argument("Failed to parse user id")
         })?;
         let avatar_id = if let Some(avatar_id) = request.avatar_id {
             Some(Uuid::from_str(&avatar_id).map_err(|e| {
                 tracing::error!("Failed to parse avatar id: {:?}", e);
-                Status::invalid_argument(e.to_string())
+                Status::invalid_argument("Failed to parse avatar id")
             })?)
         } else {
             None
@@ -146,7 +147,7 @@ impl UsersService for MyService {
             .await
             .map_err(|e| {
                 tracing::error!("Failed to update user: {:?}", e);
-                Status::internal(e.to_string())
+                Status::internal("Failed to update user")
             })?;
 
         tracing::info!("UpdateUser: {:?}", start.elapsed());
@@ -161,29 +162,29 @@ impl UsersService for MyService {
 
         let mut conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to get connection")
         })?;
         let tx = conn.transaction().await.map_err(|e| {
             tracing::error!("Failed to start transaction: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to start transaction")
         })?;
 
         let request = request.into_inner();
         let user_id = Uuid::from_str(&request.user_id).map_err(|e| {
             tracing::error!("Failed to parse user id: {:?}", e);
-            Status::invalid_argument(e.to_string())
+            Status::invalid_argument("Failed to parse user id")
         })?;
 
         users_db::update_payment_id(&tx, &user_id, &request.payment_id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to update payment id: {:?}", e);
-                Status::internal(e.to_string())
+                Status::internal("Failed to update payment id")
             })?;
 
         tx.commit().await.map_err(|e| {
             tracing::error!("Failed to commit transaction: {:?}", e);
-            Status::internal(e.to_string())
+            Status::internal("Failed to commit transaction")
         })?;
 
         tracing::info!("UpdatePaymentId: {:?}", start.elapsed());
