@@ -1,16 +1,16 @@
 name: Lint Utils Rust
 on:
-    workflow_call:
+  workflow_call:
 
 env:
-    RUSTFLAGS: "-Dwarnings"
+  RUSTFLAGS: "-Dwarnings"
 
 jobs:
-    lint:
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: ./service-utils-rust
-        steps:
-            - uses: actions/checkout@v3
-            - run: RUSTFLAGS="--cfg uuid_unstable" cargo clippy
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./service-utils-rust
+    steps:
+      - uses: actions/checkout@v3
+      - run: RUSTFLAGS="--cfg uuid_unstable" cargo clippy
