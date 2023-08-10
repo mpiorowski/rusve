@@ -6,7 +6,7 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
 
 Feel free to ask questions and throw new ideas! Any contribution is also welcome, especially some ux/ui redesigns :)
 
-Also a little bit of self-promotion, i have build an application using this stack, to help kick off projects with files, images and emails. Feel free to try it out :)
+Also a little bit of self-promotion, i have build an application using this stack. It aims to take care of files, images, and emails for you. Feel free to try it out, cos it's free :)
 
 https://www.upsend.app
 
@@ -26,7 +26,7 @@ https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5`
 
 ## Features
 - **Backend**
-  - **Microservices** - Splitted into smaller parts, very easy to scale, and allows using any combination of languages and databases. Project have ready to use both Go and Rust services, also working PostgreSQL and MySQL connections.
+  - **Microservices** - Splitted into smaller parts, very easy to scale, and allows using any combination of languages and databases. Project have ready to use both Go and Rust services.
   - **[Go](https://go.dev/)** - Very easy to work with while still having an amazing performance. Out of the box support for gRPC. Recommended to start with.
   - **[Rust](https://www.rust-lang.org/)** - For more complex services use Rust, hard but amazing language. Almost impossible to write code that will not start.
   - **[gRPC](https://grpc.io/)** - Connection between services using gRPC, which is very fast and gives an option for bi-directional streaming. For Rust using great **[Tonic](https://docs.rs/tonic/latest/tonic/)** create, with first class support of async/await.
@@ -80,7 +80,7 @@ npm i --prefix client
 ```
 
 2. Run proto generation
-Be sure to have `protoc` installed.
+Be sure to have `protoc`, `protoc-gen-go` and `protoc-gen-go-grpc` libs installed.
 ```
 sh proto.sh
 ```
@@ -115,7 +115,7 @@ CMS         - http://localhost:8055 | Login: `admin@example.com` | Password: `d1
 
 2. Add secrets to github
 - GCP_CREDENTIALS 
-- DB_PASS
+- POSTGRES_DATABASE_URL
 - STRIPE_API_KEY
 - SENDGRID_API_KEY
 - PUBLIC_API_KEY
