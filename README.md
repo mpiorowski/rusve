@@ -11,12 +11,11 @@ Also, a little bit of self-promotion, i am building an application using this st
 https://www.upsend.app
 
 ### Currently working on...
-- Comment whole codebase :)
-- TESTS!
-- Add service to service auth using grpc build in system
-- Markdown
 - Telemetry
-- Make it more resistanc to no js
+- Markdown
+- TESTS!
+- Build in gRPC auth
+- Comment whole codebase
 - **Any other feature You will request :)**
 
 ## Application
