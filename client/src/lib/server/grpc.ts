@@ -25,44 +25,37 @@ export const proto = loadPackageDefinition(
     packageDefinition,
 ) as unknown as ProtoGrpcType;
 
-export const usersRustClient = new proto.proto.UsersService(
-    URI_USERS_RUST,
+const getCertificate = () =>
     ENV === "production"
         ? credentials.createSsl()
-        : credentials.createInsecure(),
+        : credentials.createInsecure();
+
+export const usersRustClient = new proto.proto.UsersService(
+    URI_USERS_RUST,
+    getCertificate(),
 );
 
 export const usersGoClient = new proto.proto.UsersService(
     URI_USERS_GO,
-    ENV === "production"
-        ? credentials.createSsl()
-        : credentials.createInsecure(),
+    getCertificate(),
 );
 
 export const utilsRustClient = new proto.proto.UtilsService(
     URI_UTILS_RUST,
-    ENV === "production"
-        ? credentials.createSsl()
-        : credentials.createInsecure(),
+    getCertificate(),
 );
 
 export const utilsGoClient = new proto.proto.UtilsService(
     URI_UTILS_GO,
-    ENV === "production"
-        ? credentials.createSsl()
-        : credentials.createInsecure(),
+    getCertificate(),
 );
 
 export const notesRustClient = new proto.proto.NotesService(
     URI_NOTES_RUST,
-    ENV === "production"
-        ? credentials.createSsl()
-        : credentials.createInsecure(),
+    getCertificate(),
 );
 
 export const notesGoClient = new proto.proto.NotesService(
     URI_NOTES_GO,
-    ENV === "production"
-        ? credentials.createSsl()
-        : credentials.createInsecure(),
+    getCertificate(),
 );
