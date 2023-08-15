@@ -1,5 +1,9 @@
 import protoLoader from "@grpc/proto-loader";
-import { credentials, loadPackageDefinition } from "@grpc/grpc-js";
+import {
+    ChannelCredentials,
+    credentials,
+    loadPackageDefinition,
+} from "@grpc/grpc-js";
 import type { ProtoGrpcType } from "$lib/proto/main";
 import {
     ENV,
@@ -25,37 +29,19 @@ export const proto = loadPackageDefinition(
     packageDefinition,
 ) as unknown as ProtoGrpcType;
 
-const getCertificate = () =>
+const cr: ChannelCredentials =
     ENV === "production"
         ? credentials.createSsl()
         : credentials.createInsecure();
 
-export const usersRustClient = new proto.proto.UsersService(
-    URI_USERS_RUST,
-    getCertificate(),
-);
+export const usersRustClient = new proto.proto.UsersService(URI_USERS_RUST, cr);
 
-export const usersGoClient = new proto.proto.UsersService(
-    URI_USERS_GO,
-    getCertificate(),
-);
+export const usersGoClient = new proto.proto.UsersService(URI_USERS_GO, cr);
 
-export const utilsRustClient = new proto.proto.UtilsService(
-    URI_UTILS_RUST,
-    getCertificate(),
-);
+export const utilsRustClient = new proto.proto.UtilsService(URI_UTILS_RUST, cr);
 
-export const utilsGoClient = new proto.proto.UtilsService(
-    URI_UTILS_GO,
-    getCertificate(),
-);
+export const utilsGoClient = new proto.proto.UtilsService(URI_UTILS_GO, cr);
 
-export const notesRustClient = new proto.proto.NotesService(
-    URI_NOTES_RUST,
-    getCertificate(),
-);
+export const notesRustClient = new proto.proto.NotesService(URI_NOTES_RUST, cr);
 
-export const notesGoClient = new proto.proto.NotesService(
-    URI_NOTES_GO,
-    getCertificate(),
-);
+export const notesGoClient = new proto.proto.NotesService(URI_NOTES_GO, cr);
