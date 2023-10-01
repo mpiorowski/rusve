@@ -48,7 +48,7 @@ function safeSync<T>(func: () => T): Safe<T> {
     }
 }
 
-export function grpcSafe<T>(res: (value: Safe<T>) => void) {
+export function grpcSafe<T>(res: (value: Safe<T>) => void): (err: ServiceError | null, data: T | undefined) => void {
     return (err: ServiceError | null, data: T | undefined) => {
         if (err || !data) {
             logger.error(err);
