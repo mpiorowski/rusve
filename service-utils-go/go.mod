@@ -5,8 +5,6 @@ go 1.21
 require (
 	cloud.google.com/go/pubsub v1.31.0
 	github.com/go-playground/validator/v10 v10.12.0
-	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/sendgrid/sendgrid-go v3.12.0+incompatible
 	google.golang.org/grpc v1.55.0
@@ -21,6 +19,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.9.1 // indirect
 	github.com/sendgrid/rest v2.6.9+incompatible // indirect
@@ -40,9 +39,9 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect
-	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 )
