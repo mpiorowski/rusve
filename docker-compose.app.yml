@@ -2,7 +2,7 @@ version: "3"
 services:
   client:
     container_name: rusve-client
-    working_dir: /app
+    working_dir: /client
     build:
       context: ./client
       target: dev
@@ -21,9 +21,11 @@ services:
         STRIPE_API_KEY: STRIPE_KEY
         SERVICE_ACCOUNT: SERVICE_ACCOUNT
     volumes:
-      - ./client:/app
+      - ./client/src:/client/src
+      - ./client/.svelte-kit:/client/.svelte-kit
     ports:
       - 3000:3000
+    command: sh -c "npm run dev"
 
   service-users-rust:
     container_name: rusve-service-users-rust

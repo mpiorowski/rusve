@@ -1,9 +1,9 @@
 # Development
 FROM node:19-alpine as dev
 
-WORKDIR /app
-COPY package.json /app/package.json
-COPY package-lock.json /app/package-lock.json
+WORKDIR /client
+COPY package.json /client/package.json
+COPY package-lock.json /client/package-lock.json
 
 ARG ENV
 ARG PUBLIC_DOMAIN
@@ -18,6 +18,10 @@ ARG URI_NOTES_GO
 ARG STRIPE_API_KEY
 ARG SERVICE_ACCOUNT
 
+RUN npm install
+
+COPY . .
+
 RUN echo "ENV=${ENV}" >> .env
 RUN echo "PUBLIC_DOMAIN=${PUBLIC_DOMAIN}" >> .env
 RUN echo "PUBLIC_API_KEY=${PUBLIC_API_KEY}" >> .env
@@ -31,17 +35,11 @@ RUN echo "URI_NOTES_GO=${URI_NOTES_GO}" >> .env
 RUN echo "STRIPE_API_KEY=${STRIPE_API_KEY}" >> .env
 RUN echo "SERVICE_ACCOUNT=${SERVICE_ACCOUNT}" >> .env
 
-RUN npm install
-
-COPY . .
-
-CMD ["npm", "run", "dev"]
-
 # Production
 FROM node:19-alpine as prod
-WORKDIR /app
-COPY --from=dev /app /app
-COPY .env.prod /app/.env
+WORKDIR /client
+COPY --from=dev /client /client
+COPY .env.prod /client/.env
 
 RUN npm run build
 
