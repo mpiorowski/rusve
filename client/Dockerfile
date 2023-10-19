@@ -19,7 +19,6 @@ ARG STRIPE_API_KEY
 ARG SERVICE_ACCOUNT
 
 RUN npm install
-
 COPY . .
 
 RUN echo "ENV=${ENV}" >> .env
@@ -34,6 +33,10 @@ RUN echo "URI_NOTES_RUST=${URI_NOTES_RUST}" >> .env
 RUN echo "URI_NOTES_GO=${URI_NOTES_GO}" >> .env
 RUN echo "STRIPE_API_KEY=${STRIPE_API_KEY}" >> .env
 RUN echo "SERVICE_ACCOUNT=${SERVICE_ACCOUNT}" >> .env
+
+RUN npm run lint
+RUN npm run check
+RUN npm run tsc
 
 # Production
 FROM node:19-alpine as prod
