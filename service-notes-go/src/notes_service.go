@@ -57,7 +57,7 @@ func (s *server) CreateNote(ctx context.Context, in *pb.Note) (*pb.Note, error) 
 	}
 
 	var row *sql.Row
-	if in.Id == "" {
+	if in.GetId() == "" {
 		row = db.QueryRow(`insert into notes (user_id, title, content) values ($1, $2, $3) returning *`, in.UserId, in.Title, in.Content)
 	} else {
 		row = db.QueryRow(`update notes set title = $1, content = $2 where id = $3 and user_id = $4 returning *`, in.Title, in.Content, in.Id, in.UserId)
