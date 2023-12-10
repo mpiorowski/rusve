@@ -14,7 +14,7 @@ https://www.upsend.app
 If you need something a little more simple (Go, SQLite, server deployment), feel free to check out the second project I am running:
 **[SGSG](https://github.com/mpiorowski/sgsg)**
 
-### Currently working on...
+## Currently working on...
 - Telemetry
 - Markdown
 - TESTS!
