@@ -12,7 +12,7 @@ https://www.upsend.app
 
 ## Alternative
 If you need something a little more simple (Go, SQLite, server deployment), feel free to check out the second project I am running:
-**[Sgsg](https://github.com/mpiorowski/sgsg)**
+**[SGSG](https://github.com/mpiorowski/sgsg)**
 
 ### Currently working on...
 - Telemetry
