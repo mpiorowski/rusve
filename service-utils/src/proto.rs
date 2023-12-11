@@ -1,3 +1,4 @@
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct User {
@@ -22,10 +23,11 @@ pub struct User {
     #[prost(string, optional, tag = "10")]
     pub payment_id: ::core::option::Option<::prost::alloc::string::String>,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum UserRole {
-    Unset = 0,
+    RoleUnset = 0,
     RoleUser = 1,
     RoleAdmin = 2,
 }
@@ -36,7 +38,7 @@ impl UserRole {
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
-            UserRole::Unset => "UNSET",
+            UserRole::RoleUnset => "ROLE_UNSET",
             UserRole::RoleUser => "ROLE_USER",
             UserRole::RoleAdmin => "ROLE_ADMIN",
         }
@@ -44,13 +46,14 @@ impl UserRole {
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
-            "UNSET" => Some(Self::Unset),
+            "ROLE_UNSET" => Some(Self::RoleUnset),
             "ROLE_USER" => Some(Self::RoleUser),
             "ROLE_ADMIN" => Some(Self::RoleAdmin),
             _ => None,
         }
     }
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct File {
@@ -73,6 +76,7 @@ pub struct File {
     #[prost(string, tag = "9")]
     pub url: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum FileType {
@@ -99,6 +103,7 @@ impl FileType {
         }
     }
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Note {
@@ -117,21 +122,25 @@ pub struct Note {
     #[prost(string, tag = "7")]
     pub content: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Empty {}
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserId {
     #[prost(string, tag = "1")]
     pub user_id: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserIds {
     #[prost(string, repeated, tag = "1")]
     pub user_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PaymentId {
@@ -140,6 +149,7 @@ pub struct PaymentId {
     #[prost(string, tag = "2")]
     pub payment_id: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct AuthRequest {
@@ -148,6 +158,7 @@ pub struct AuthRequest {
     #[prost(string, tag = "2")]
     pub email: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TargetId {
@@ -156,6 +167,7 @@ pub struct TargetId {
     #[prost(enumeration = "FileType", tag = "2")]
     pub r#type: i32,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FileId {
@@ -164,6 +176,7 @@ pub struct FileId {
     #[prost(string, tag = "2")]
     pub target_id: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NoteId {
