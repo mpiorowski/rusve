@@ -3,14 +3,6 @@ name = "rusve-notes"
 version = "0.1.0"
 edition = "2021"
 
-[[bin]]
-name = "main"
-path = "src/main.rs"
-
-[[bin]]
-name = "proto"
-path = "src/proto_build.rs"
-
 [dependencies]
 # General
 dotenvy = "0.15.7"

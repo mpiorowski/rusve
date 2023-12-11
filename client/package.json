@@ -8,8 +8,7 @@
         "preview": "vite preview",
         "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
         "lint": "eslint src --max-warnings=0",
-        "tsc": "tsc --noEmit",
-        "proto": "proto-loader-gen-types --longs=String --enums=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=./src/lib/proto ../proto/*.proto && cp ../proto/*.proto ./src/lib/proto/"
+        "tsc": "tsc --noEmit"
     },
     "devDependencies": {
         "@playwright/test": "^1.36.2",

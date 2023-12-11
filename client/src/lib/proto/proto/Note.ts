@@ -1,4 +1,4 @@
-// Original file: ../proto/notes.proto
+// Original file: notes.proto
 
 
 export interface Note {

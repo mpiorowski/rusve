@@ -1,8 +1,8 @@
-// Original file: ../proto/utils.proto
+// Original file: utils.proto
 
 export const FileType = {
-  DOCUMENT: 'DOCUMENT',
-  AVATAR: 'AVATAR',
+  DOCUMENT: 0,
+  AVATAR: 1,
 } as const;
 
 export type FileType =
