@@ -1,9 +1,5 @@
 <script lang="ts">
     import LogoIcon from "$lib/assets/icons/LogoIcon.svelte";
-    import type { PageData } from "./$types";
-    import { Categories } from "$lib/types";
-
-    export let data: PageData;
 </script>
 
 <h1 class="text-center text-5xl text-secondary-500">
@@ -36,23 +32,5 @@
 </p>
 
 <div class="m-auto max-w-xl">
-    {#await data.stream.dashboard then dashboard}
-        {#each Object.values(Categories) as category}
-            {#if dashboard.some((el) => el.category === category)}
-                <h1 class="mb-2 mt-6 text-3xl text-secondary-500">
-                    {category}
-                </h1>
-                {#each dashboard.filter((el) => el.category === category) as { title, description }}
-                    <div class="mb-2 w-full rounded-xl p-6 shadow-inner">
-                        <h2 class="mb-2 text-secondary-500">{title}</h2>
-                        <h3>{description}</h3>
-                    </div>
-                {/each}
-            {/if}
-        {/each}
-    {:catch error}
-        <p class="text-center text-3xl text-secondary-500">
-            {error.message}
-        </p>
-    {/await}
+    <h1>Rusve</h1>
 </div>

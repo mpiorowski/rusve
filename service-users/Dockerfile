@@ -1,21 +1,12 @@
-# Chef image
-FROM rust:1.71 as chef
-
-WORKDIR /app
-
-RUN cargo install cargo-chef
-COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
-
 # Development image
-FROM chef as dev
+FROM rust:1.74 as dev
 
 WORKDIR /app
 
-COPY --from=chef /app/recipe.json recipe.json
-RUN cargo chef cook --recipe-path recipe.json
 COPY . .
 RUN apt-get update && apt-get install -y protobuf-compiler
+
+CMD ["cargo", "run", "--bin", "main"]
 
 # Build image
 FROM rust:1.71 as build

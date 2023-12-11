@@ -5,41 +5,13 @@ mkdir src/lib/proto
 npm run proto
 
 # Service Users Rust
-cd ../service-users-rust
+cd ../service-users
 cargo run --bin proto
 
 # Service Utils Rust
-cd ../service-utils-rust
+cd ../service-utils
 cargo run --bin proto
 
 # Service Notes Rust
-cd ../service-notes-rust
+cd ../service-notes
 cargo run --bin proto
-
-# Service Users Go
-cd ../service-users-go
-rm -rf proto
-mkdir proto
-protoc --go_out=./proto --go_opt=paths=source_relative \
-    --go-grpc_out=./proto --go-grpc_opt=paths=source_relative \
-    --proto_path=../proto \
-    ../proto/*.proto
-
-# Service Utils Go
-cd ../service-utils-go
-rm -rf proto
-mkdir proto
-protoc --go_out=./proto --go_opt=paths=source_relative \
-    --go-grpc_out=./proto --go-grpc_opt=paths=source_relative \
-    --proto_path=../proto \
-    ../proto/*.proto
-
-# Service Notes Go
-cd ../service-notes-go
-rm -rf proto
-mkdir proto
-protoc --go_out=./proto --go_opt=paths=source_relative \
-    --go-grpc_out=./proto --go-grpc_opt=paths=source_relative \
-    --proto_path=../proto \
-    ../proto/*.proto
-
