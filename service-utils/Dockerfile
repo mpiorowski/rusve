@@ -4,16 +4,14 @@ FROM rust:1.74 as dev
 WORKDIR /app
 
 COPY . .
-RUN apt-get update && apt-get install -y protobuf-compiler
 
-CMD ["cargo", "run", "--bin", "main"]
+CMD ["cargo", "run"]
 
 # Build image
 FROM rust:1.71 as build
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y protobuf-compiler
 COPY . .
 RUN cargo build --release
 

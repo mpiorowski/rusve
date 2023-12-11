@@ -7,6 +7,7 @@ rm -rf ./service-utils/src/proto
 cd ./proto
 
 # Client
+npm i
 npm run proto
 
 # Server
