@@ -8,7 +8,7 @@ COPY . .
 CMD ["cargo", "run"]
 
 # Build image
-FROM rust:1.71 as build
+FROM rust:1.74 as build
 
 WORKDIR /app
 
