@@ -1,4 +1,4 @@
-# Development image
+# Development
 FROM rust:1.74 as dev
 
 WORKDIR /app
@@ -7,7 +7,7 @@ COPY . .
 
 CMD ["cargo", "run"]
 
-# Build image
+# Build
 FROM rust:1.74 as build
 
 WORKDIR /app
@@ -15,7 +15,7 @@ WORKDIR /app
 COPY . .
 RUN cargo build --release
 
-# Production image
+# Production
 FROM debian:bullseye-slim AS prod
 
 WORKDIR /app

@@ -22,6 +22,24 @@ services:
     ports:
       - 3000:3000
 
+  service-oauth:
+    container_name: rusve-service-oauth
+    working_dir: /app
+    build:
+      context: ./service-oauth
+      target: dev
+    volumes:
+      - ./service-oauth:/app
+    environment:
+      PORT: 443
+      ENV: development
+      RUST_LOG: info
+      DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+    ports:
+      - 8090:443
+
   service-user:
     container_name: rusve-service-users
     working_dir: /app
