@@ -16,12 +16,6 @@ use crate::{
     AppState,
 };
 
-struct OAuthCallbackQuery {
-    code: String,
-    pkce_verifier: String,
-    state: String,
-}
-
 pub fn build_oauth_client(client_id: String, client_secret: String) -> BasicClient {
     // In prod, http://localhost:8000 would get replaced by whatever your production URL is
     let redirect_url = "http://127.0.0.1:8090/oauth-callback/google".to_string();
@@ -53,7 +47,7 @@ pub async fn oauth_auth(
         .authorize_url(CsrfToken::new_random)
         // Set the desired scopes.
         .add_scope(Scope::new("openid".to_string()))
-        // .add_scope(Scope::new("write".to_string()))
+        .add_scope(Scope::new("email".to_string()))
         // Set the PKCE code challenge.
         .set_pkce_challenge(pkce_challenge)
         .url();
@@ -106,11 +100,43 @@ pub async fn oauth_callback(
         .request_async(oauth2::reqwest::async_http_client)
         .await;
 
-    match token_result {
-        Ok(token) => Ok((StatusCode::OK, Json(format!("{:?}", token)))),
+    let auth_token = match token_result {
+        Ok(token) => token,
         Err(err) => {
-            tracing::error!("Failed to exchange code for token: {:?}", err);
-            Err(StatusCode::INTERNAL_SERVER_ERROR)
+            tracing::error!("Failed to exchange code with token: {:?}", err);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
-    }
+    };
+
+    tracing::debug!("Got auth token: {:?}", auth_token.expires_in());
+    tracing::debug!("Got auth token: {:?}", auth_token.access_token());
+    tracing::debug!("Got auth token: {:?}", auth_token.refresh_token());
+
+    // Get the user's profile.
+    let user_profile = reqwest::Client::new()
+        .get("https://www.googleapis.com/oauth2/v3/userinfo")
+        .header(
+            reqwest::header::AUTHORIZATION,
+            format!("Bearer {}", auth_token.access_token().secret()),
+        )
+        .send()
+        .await;
+
+    let user_profile = match user_profile {
+        Ok(response) => response,
+        Err(err) => {
+            tracing::error!("Failed to get user profile: {:?}", err);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    };
+
+    let user_profile = match user_profile.json::<serde_json::Value>().await {
+        Ok(profile) => profile,
+        Err(err) => {
+            tracing::error!("Failed to parse user profile: {:?}", err);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    };
+
+    Ok((StatusCode::OK, Json(user_profile.to_string())))
 }

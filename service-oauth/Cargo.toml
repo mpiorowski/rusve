@@ -36,3 +36,4 @@ deadpool-postgres = "0.10.5"
 
 # OAuth
 oauth2 = "4.4.2"
+reqwest = { version = "0.11.22", features = ["default", "json"] }

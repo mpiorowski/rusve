@@ -1,6 +1,6 @@
 mod migrations;
-mod oauth_service;
 mod oauth_db;
+mod oauth_service;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -21,7 +21,8 @@ struct AppState {
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initialize tracing
-    tracing_subscriber::fmt().init();
+    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_owned());
+    tracing_subscriber::fmt().with_env_filter(filter).init();
     let port = std::env::var("PORT").context("PORT not set")?;
 
     let db_pool = rusve_oauth::connect_to_db().context("Failed to connect to database")?;
