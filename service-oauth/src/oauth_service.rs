@@ -12,9 +12,18 @@ use oauth2::{
 };
 
 use crate::{
-    oauth_db::{create_pkce, select_pkce_by_csrf},
+    oauth_db::{create_pkce, delete_pkce_by_id, delete_token_by_user_id, select_pkce_by_csrf},
+    proto::users_service_client::UsersServiceClient,
     AppState,
 };
+
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+struct GoogleUser {
+    sub: String,
+    email: String,
+    email_verified: bool,
+    picture: String,
+}
 
 pub fn build_oauth_client(client_id: String, client_secret: String) -> BasicClient {
     // In prod, http://localhost:8000 would get replaced by whatever your production URL is
@@ -92,6 +101,21 @@ pub async fn oauth_callback(
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
+
+    // Delete the PKCE verifier from the database asynchronously.
+    // If this fails, it's not a big deal.
+    tokio::spawn(async move {
+        if let Err(err) = delete_pkce_by_id(&state.db_pool, pkce.id).await {
+            tracing::error!("Failed to delete PKCE verifier: {:?}", err);
+        }
+    });
+
+    // check if the `created` field is older than 10 minutes
+    let diff = time::OffsetDateTime::now_utc() - pkce.created;
+    if diff.whole_minutes() > 10 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
     // Exchange the code with a token.
     let token_result = client
         .exchange_code(oauth2::AuthorizationCode::new(code.to_string()))
@@ -107,10 +131,6 @@ pub async fn oauth_callback(
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
-
-    tracing::debug!("Got auth token: {:?}", auth_token.expires_in());
-    tracing::debug!("Got auth token: {:?}", auth_token.access_token());
-    tracing::debug!("Got auth token: {:?}", auth_token.refresh_token());
 
     // Get the user's profile.
     let user_profile = reqwest::Client::new()
@@ -130,7 +150,7 @@ pub async fn oauth_callback(
         }
     };
 
-    let user_profile = match user_profile.json::<serde_json::Value>().await {
+    let user_profile = match user_profile.json::<GoogleUser>().await {
         Ok(profile) => profile,
         Err(err) => {
             tracing::error!("Failed to parse user profile: {:?}", err);
@@ -138,5 +158,29 @@ pub async fn oauth_callback(
         }
     };
 
-    Ok((StatusCode::OK, Json(user_profile.to_string())))
+    let mut client = match UsersServiceClient::connect("http://service-grpc:443").await {
+        Ok(client) => client,
+        Err(err) => {
+            tracing::error!("Failed to connect to users service: {:?}", err);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    };
+
+    let request = tonic::Request::new(crate::proto::AuthRequest {
+        email: user_profile.email,
+        sub: user_profile.sub,
+    });
+    let user = match client.auth(request).await {
+        Ok(user) => user.into_inner(),
+        Err(err) => {
+            tracing::error!("Failed to authenticate user: {:?}", err);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    };
+    if let Err(err) = delete_token_by_user_id(&state.db_pool, user.id).await {
+        tracing::error!("Failed to delete token: {:?}", err);
+        return Err(StatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    Ok((StatusCode::OK, Json(format!("{:?}", user_profile))))
 }

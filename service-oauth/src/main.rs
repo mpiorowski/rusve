@@ -1,6 +1,7 @@
 mod migrations;
 mod oauth_db;
 mod oauth_service;
+mod proto;
 
 use anyhow::Context;
 use anyhow::Result;
