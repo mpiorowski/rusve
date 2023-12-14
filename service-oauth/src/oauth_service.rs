@@ -12,7 +12,9 @@ use oauth2::{
 };
 
 use crate::{
-    oauth_db::{create_pkce, delete_pkce_by_id, delete_token_by_user_id, select_pkce_by_csrf},
+    oauth_db::{
+        create_pkce, create_token, delete_pkce_by_id, delete_token_by_user_id, select_pkce_by_csrf,
+    },
     proto::users_service_client::UsersServiceClient,
     AppState,
 };
@@ -48,6 +50,11 @@ pub async fn oauth_auth(
     State(state): State<Arc<AppState>>,
     Extension(client): Extension<BasicClient>,
 ) -> Result<Redirect, StatusCode> {
+    let conn = state.db_pool.get().await.map_err(|err| {
+        tracing::error!("Failed to get DB connection: {:?}", err);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
     // Generate a PKCE challenge.
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
@@ -62,13 +69,7 @@ pub async fn oauth_auth(
         .url();
 
     // Save the CSRF token to the database.
-    match create_pkce(
-        &state.db_pool,
-        &csrf_token.secret(),
-        &pkce_verifier.secret(),
-    )
-    .await
-    {
+    match create_pkce(&conn, &csrf_token.secret(), &pkce_verifier.secret()).await {
         Ok(_) => {}
         Err(err) => {
             tracing::error!("Failed to save PKCE verifier: {:?}", err);
@@ -84,6 +85,11 @@ pub async fn oauth_callback(
     Query(query): Query<HashMap<String, String>>,
     Extension(client): Extension<BasicClient>,
 ) -> Result<(StatusCode, Json<String>), StatusCode> {
+    let conn = state.db_pool.get().await.map_err(|err| {
+        tracing::error!("Failed to get DB connection: {:?}", err);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
     let code = match query.get("code") {
         Some(code) => code,
         None => return Err(StatusCode::BAD_REQUEST),
@@ -93,7 +99,7 @@ pub async fn oauth_callback(
         None => return Err(StatusCode::BAD_REQUEST),
     };
 
-    let pkce = match select_pkce_by_csrf(&state.db_pool, csrf).await {
+    let pkce = match select_pkce_by_csrf(&conn, csrf).await {
         Ok(Some(pkce)) => pkce,
         Ok(None) => return Err(StatusCode::BAD_REQUEST),
         Err(err) => {
@@ -105,7 +111,7 @@ pub async fn oauth_callback(
     // Delete the PKCE verifier from the database asynchronously.
     // If this fails, it's not a big deal.
     tokio::spawn(async move {
-        if let Err(err) = delete_pkce_by_id(&state.db_pool, pkce.id).await {
+        if let Err(err) = delete_pkce_by_id(&conn, pkce.id).await {
             tracing::error!("Failed to delete PKCE verifier: {:?}", err);
         }
     });
@@ -177,10 +183,25 @@ pub async fn oauth_callback(
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
-    if let Err(err) = delete_token_by_user_id(&state.db_pool, user.id).await {
+    if let Err(err) = delete_token_by_user_id(&conn, &user.id).await {
         tracing::error!("Failed to delete token: {:?}", err);
         return Err(StatusCode::INTERNAL_SERVER_ERROR);
     }
+    let token = match create_token(
+        &conn,
+        &user.id,
+        auth_token.access_token().secret(),
+        "",
+        auth_token.expires_in().as_secs() as i64,
+    )
+    .await
+    {
+        Ok(token) => token,
+        Err(err) => {
+            tracing::error!("Failed to create token: {:?}", err);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    };
 
-    Ok((StatusCode::OK, Json(format!("{:?}", user_profile))))
+    Ok((StatusCode::OK, Json("".to_string())))
 }

@@ -1,4 +1,5 @@
 use anyhow::Result;
+use deadpool_postgres::Object;
 use time::{format_description::well_known::Iso8601, OffsetDateTime};
 use uuid::Uuid;
 
@@ -61,11 +62,7 @@ impl TryFrom<tokio_postgres::Row> for Token {
     }
 }
 
-pub async fn select_pkce_by_csrf(
-    pool: &deadpool_postgres::Pool,
-    csrf_token: &str,
-) -> Result<Option<Pkce>> {
-    let client = pool.get().await?;
+pub async fn select_pkce_by_csrf(client: &Object, csrf_token: &str) -> Result<Option<Pkce>> {
     let row = client
         .query_opt("select * from pkce where csrf_token = $1", &[&csrf_token])
         .await?;
@@ -75,12 +72,7 @@ pub async fn select_pkce_by_csrf(
     }
 }
 
-pub async fn create_pkce(
-    pool: &deadpool_postgres::Pool,
-    csrf_token: &str,
-    pkce_verifier: &str,
-) -> Result<Pkce> {
-    let client = pool.get().await?;
+pub async fn create_pkce(client: &Object, csrf_token: &str, pkce_verifier: &str) -> Result<Pkce> {
     let uuid = Uuid::now_v7();
     let row = client
         .query_one(
@@ -91,16 +83,14 @@ pub async fn create_pkce(
     Ok(Pkce::try_from(row)?)
 }
 
-pub async fn delete_pkce_by_id(pool: &deadpool_postgres::Pool, id: Uuid) -> Result<()> {
-    let client = pool.get().await?;
+pub async fn delete_pkce_by_id(client: &Object, id: Uuid) -> Result<()> {
     client
         .execute("delete from pkce where id = $1", &[&id])
         .await?;
     Ok(())
 }
 
-pub async fn select_token_by_id(pool: &deadpool_postgres::Pool, id: Uuid) -> Result<Option<Token>> {
-    let client = pool.get().await?;
+pub async fn select_token_by_id(client: &Object, id: Uuid) -> Result<Option<Token>> {
     let row = client
         .query_opt("select * from tokens where id = $1", &[&id])
         .await?;
@@ -111,25 +101,24 @@ pub async fn select_token_by_id(pool: &deadpool_postgres::Pool, id: Uuid) -> Res
 }
 
 pub async fn create_token(
-    pool: &deadpool_postgres::Pool,
-    user_id: Uuid,
+    client: &Object,
+    user_id: &str,
     access_token: &str,
     refresh_token: &str,
     expires_in: i64,
 ) -> Result<Token> {
-    let client = pool.get().await?;
-    let uuid = Uuid::now_v7();
+    let id = Uuid::now_v7();
+    let user_id = Uuid::parse_str(user_id)?;
     let row = client
         .query_one(
             "insert into tokens (id, user_id, access_token, refresh_token, expires_in) values ($1, $2, $3, $4, $5) returning *",
-            &[&uuid, &user_id, &access_token, &refresh_token, &expires_in],
+            &[&id, &user_id, &access_token, &refresh_token, &expires_in],
         )
         .await?;
     Ok(Token::try_from(row)?)
 }
 
-pub async fn delete_token_by_user_id(pool: &deadpool_postgres::Pool, user_id: &str) -> Result<()> {
-    let client = pool.get().await?;
+pub async fn delete_token_by_user_id(client: &Object, user_id: &str) -> Result<()> {
     client
         .execute("delete from tokens where user_id = $1", &[&user_id])
         .await?;
