@@ -1,42 +1,69 @@
 # Development
-FROM node:19-alpine as dev
+FROM node:20-slim AS dev
 
 WORKDIR /client
+
 COPY package.json /client/package.json
 COPY package-lock.json /client/package-lock.json
 
 ARG ENV
-ARG PUBLIC_DOMAIN
-ARG PUBLIC_API_KEY
-ARG PUBLIC_AUTH_DOMAIN
+ARG COOKIE_DOMAIN
+ARG PUBLIC_SERVER_HTTP
 ARG USERS_URI
 ARG NOTES_URI
 ARG UTILS_URI
-ARG STRIPE_API_KEY
-ARG SERVICE_ACCOUNT
+ARG UPSEND_KEY
+RUN echo "ENV=${ENV}" >> .env
+RUN echo "COOKIE_DOMAIN=${COOKIE_DOMAIN}" >> .env
+RUN echo "PUBLIC_SERVER_HTTP=${PUBLIC_SERVER_HTTP}" >> .env
+RUN echo "USERS_URI=${USERS_URI}" >> .env
+RUN echo "NOTES_URI=${NOTES_URI}" >> .env
+RUN echo "UTILS_URI=${UTILS_URI}" >> .env
+RUN echo "UPSEND_KEY=${UPSEND_KEY}" >> .env
+
+RUN npm install
+
+COPY . .
+
+CMD npm run dev
+
+# Build
+FROM node:20-slim AS build
+WORKDIR /client
+
+COPY package.json /client/package.json
+COPY package-lock.json /client/package-lock.json
+
+ARG ENV
+ARG PUBLIC_SERVER_HTTP
+ARG SERVER_HTTP
+ARG SERVER_GRPC
+ARG COOKIE_DOMAIN
+ARG UPSEND_KEY
+RUN echo "ENV=${ENV}" >> .env
+RUN echo "COOKIE_DOMAIN=${COOKIE_DOMAIN}" >> .env
+RUN echo "PUBLIC_SERVER_HTTP=${PUBLIC_SERVER_HTTP}" >> .env
+RUN echo "USERS_URI=${USERS_URI}" >> .env
+RUN echo "NOTES_URI=${NOTES_URI}" >> .env
+RUN echo "UTILS_URI=${UTILS_URI}" >> .env
+RUN echo "UPSEND_KEY=${UPSEND_KEY}" >> .env
 
 RUN npm install
 COPY . .
 
-RUN echo "ENV=${ENV}" >> .env
-RUN echo "PUBLIC_DOMAIN=${PUBLIC_DOMAIN}" >> .env
-RUN echo "PUBLIC_API_KEY=${PUBLIC_API_KEY}" >> .env
-RUN echo "PUBLIC_AUTH_DOMAIN=${PUBLIC_AUTH_DOMAIN}" >> .env
-RUN echo "USERS_URI=${USERS_URI}" >> .env
-RUN echo "NOTES_URI=${NOTES_URI}" >> .env
-RUN echo "UTILS_URI=${UTILS_URI}" >> .env
-RUN echo "STRIPE_API_KEY=${STRIPE_API_KEY}" >> .env
-RUN echo "SERVICE_ACCOUNT=${SERVICE_ACCOUNT}" >> .env
-
-CMD npm run dev
-
-# Production
-FROM node:19-alpine as prod
-WORKDIR /client
-COPY --from=dev /client /client
-COPY .env.prod /client/.env
-
 RUN npm run build
 
-CMD PORT=8080 node build
+# Production
+FROM node:20-slim AS prod
+WORKDIR /client
+
+COPY package.json /client/package.json
+COPY package-lock.json /client/package-lock.json
+RUN npm install --production
+
+COPY --from=build /client/build /client/build
+COPY --from=build /client/src/lib/proto/ /client/src/lib/proto/
+COPY --from=build /client/src/lib/server/private.key /client/src/lib/server/private.key
+
+CMD PORT=3000 node build
 

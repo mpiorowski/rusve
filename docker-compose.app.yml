@@ -8,9 +8,8 @@ services:
       target: dev
       args:
         ENV: development
-        PUBLIC_DOMAIN: http://127.0.0.1:3000
-        PUBLIC_API_KEY: PUBLIC_API_KEY
-        PUBLIC_AUTH_DOMAIN: PUBLIC_AUTH_DOMAIN
+        COOKIE_DOMAIN: .127.0.0.1
+        PUBLIC_SERVER_HTTP: http://127.0.0.1:8090
         USERS_URI: service-users
         UTILS_URI: service-utils
         NOTES_URI: service-notes
@@ -40,7 +39,7 @@ services:
     ports:
       - 8090:443
 
-  service-user:
+  service-users:
     container_name: rusve-service-users
     working_dir: /app
     build:

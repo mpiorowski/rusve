@@ -1,7 +1,6 @@
 mod migrations;
 mod oauth_db;
 mod oauth_service;
-mod proto;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -24,12 +23,13 @@ async fn main() -> Result<()> {
     // Initialize tracing
     let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_owned());
     tracing_subscriber::fmt().with_env_filter(filter).init();
-    let port = std::env::var("PORT").context("PORT not set")?;
 
+    // Connect to database
     let db_pool = rusve_oauth::connect_to_db().context("Failed to connect to database")?;
     let shared_state = Arc::new(AppState { db_pool });
     tracing::info!("Connected to database");
 
+    // Run migrations
     migrations::run_migrations(&shared_state.db_pool)
         .await
         .context("Failed to run migrations")?;
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
 
     let app = Router::new()
         .route("/", get(root))
-        .route("/oauth/google", get(oauth_service::oauth_auth))
+        .route("/oauth-login/google", get(oauth_service::oauth_login))
         .route("/oauth-callback/google", get(oauth_service::oauth_callback))
         .with_state(shared_state)
         .layer(ServiceBuilder::new().layer(cors))
@@ -52,6 +52,7 @@ async fn main() -> Result<()> {
             std::env::var("GOOGLE_CLIENT_SECRET").context("GOOGLE_CLIENT_SECRET not set")?,
         )));
 
+    let port = std::env::var("PORT").context("PORT not set")?;
     let addr = format!("0.0.0.0:{}", port);
     tracing::info!("Api server started on {}", addr);
     let listener = tokio::net::TcpListener::bind(&addr).await?;

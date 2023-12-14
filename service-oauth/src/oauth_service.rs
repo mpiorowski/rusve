@@ -1,21 +1,20 @@
-use std::{collections::HashMap, sync::Arc};
-
 use axum::{
     extract::{Query, State},
-    response::Redirect,
-    Extension, Json,
+    response::{Redirect, Response},
+    Extension,
 };
-use http::StatusCode;
+use http::{header, StatusCode};
 use oauth2::{
     basic::BasicClient, AuthUrl, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge, RedirectUrl,
     Scope, TokenResponse, TokenUrl,
 };
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use crate::{
     oauth_db::{
-        create_pkce, create_token, delete_pkce_by_id, delete_token_by_user_id, select_pkce_by_csrf,
+        auth_user, create_pkce, create_token, delete_pkce_by_id, delete_token_by_user_id,
+        select_pkce_by_csrf,
     },
-    proto::users_service_client::UsersServiceClient,
     AppState,
 };
 
@@ -46,7 +45,7 @@ pub fn build_oauth_client(client_id: String, client_secret: String) -> BasicClie
     .set_redirect_uri(RedirectUrl::new(redirect_url).unwrap())
 }
 
-pub async fn oauth_auth(
+pub async fn oauth_login(
     State(state): State<Arc<AppState>>,
     Extension(client): Extension<BasicClient>,
 ) -> Result<Redirect, StatusCode> {
@@ -77,14 +76,14 @@ pub async fn oauth_auth(
         }
     }
 
-    Ok(Redirect::temporary(&auth_url.to_string()))
+    Ok(Redirect::to(&auth_url.to_string()))
 }
 
 pub async fn oauth_callback(
     State(state): State<Arc<AppState>>,
     Query(query): Query<HashMap<String, String>>,
     Extension(client): Extension<BasicClient>,
-) -> Result<(StatusCode, Json<String>), StatusCode> {
+) -> Result<Response, StatusCode> {
     let conn = state.db_pool.get().await.map_err(|err| {
         tracing::error!("Failed to get DB connection: {:?}", err);
         StatusCode::INTERNAL_SERVER_ERROR
@@ -111,6 +110,13 @@ pub async fn oauth_callback(
     // Delete the PKCE verifier from the database asynchronously.
     // If this fails, it's not a big deal.
     tokio::spawn(async move {
+        let conn = match state.db_pool.get().await {
+            Ok(conn) => conn,
+            Err(err) => {
+                tracing::error!("Failed to get DB connection: {:?}", err);
+                return;
+            }
+        };
         if let Err(err) = delete_pkce_by_id(&conn, pkce.id).await {
             tracing::error!("Failed to delete PKCE verifier: {:?}", err);
         }
@@ -164,35 +170,47 @@ pub async fn oauth_callback(
         }
     };
 
-    let mut client = match UsersServiceClient::connect("http://service-grpc:443").await {
-        Ok(client) => client,
-        Err(err) => {
-            tracing::error!("Failed to connect to users service: {:?}", err);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
-        }
-    };
+    // let mut client = match UsersServiceClient::connect("http://service-users:443").await {
+    //     Ok(client) => client,
+    //     Err(err) => {
+    //         tracing::error!("Failed to connect to users service: {:?}", err);
+    //         return Err(StatusCode::INTERNAL_SERVER_ERROR);
+    //     }
+    // };
+    // let request = tonic::Request::new(crate::proto::AuthRequest {
+    //     email: user_profile.email,
+    //     sub: user_profile.sub,
+    // });
+    // let user = match client.auth(request).await {
+    //     Ok(user) => user.into_inner(),
+    //     Err(err) => {
+    //         tracing::error!("Failed to authenticate user: {:?}", err);
+    //         return Err(StatusCode::INTERNAL_SERVER_ERROR);
+    //     }
+    // };
 
-    let request = tonic::Request::new(crate::proto::AuthRequest {
-        email: user_profile.email,
-        sub: user_profile.sub,
-    });
-    let user = match client.auth(request).await {
-        Ok(user) => user.into_inner(),
+    // Create a new user if one doesn't exist, otherwise update the existing user.
+    let user = match auth_user(&conn, &user_profile.sub, &user_profile.email).await {
+        Ok(user) => user,
         Err(err) => {
             tracing::error!("Failed to authenticate user: {:?}", err);
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
+
+    // Delete the user's existing token.
     if let Err(err) = delete_token_by_user_id(&conn, &user.id).await {
         tracing::error!("Failed to delete token: {:?}", err);
         return Err(StatusCode::INTERNAL_SERVER_ERROR);
     }
+    // Create a new token.
+    let expires_in = auth_token.expires_in().unwrap_or(Duration::from_secs(3600));
     let token = match create_token(
         &conn,
         &user.id,
         auth_token.access_token().secret(),
         "",
-        auth_token.expires_in().as_secs() as i64,
+        expires_in.as_secs_f32() as i32,
     )
     .await
     {
@@ -203,5 +221,20 @@ pub async fn oauth_callback(
         }
     };
 
-    Ok((StatusCode::OK, Json("".to_string())))
+    tracing::info!("User authenticated: {:?}", user);
+
+    Ok(Response::builder()
+        .status(StatusCode::PERMANENT_REDIRECT)
+        .header(
+            header::SET_COOKIE,
+            format!(
+                "token={}; HttpOnly; Max-Age={}; Path=/; SameSite=Lax",
+                token.access_token,
+                // 7 days
+                3600 * 24 * 7
+            ),
+        )
+        .header(header::LOCATION, "http://127.0.0.1:3000")
+        .body("".into())
+        .unwrap())
 }

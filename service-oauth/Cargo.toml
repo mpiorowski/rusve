@@ -29,10 +29,6 @@ tower-http = { version = "0.5.0", features = ["cors"] }
 http = "1.0.0"
 reqwest = { version = "0.11.22", features = ["default", "json"] }
 
-# gRPC
-prost = "0.12.3"
-tonic = "0.10.2"
-
 # Database
 tokio-postgres = { version = "0.7.8", features = ["with-uuid-1", "with-time-0_3", "array-impls"] }
 tokio-postgres-rustls = "0.10.0"
