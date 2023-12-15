@@ -1,14 +1,17 @@
 // Original file: utils.proto
 
 export const FileType = {
-  DOCUMENT: 0,
-  AVATAR: 1,
+  FILE_UNSET: 0,
+  DOCUMENT: 1,
+  AVATAR: 2,
 } as const;
 
 export type FileType =
-  | 'DOCUMENT'
+  | 'FILE_UNSET'
   | 0
-  | 'AVATAR'
+  | 'DOCUMENT'
   | 1
+  | 'AVATAR'
+  | 2
 
 export type FileType__Output = typeof FileType[keyof typeof FileType]

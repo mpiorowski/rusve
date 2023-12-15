@@ -6,8 +6,8 @@ option go_package = "sgsg/proto";
 
 enum UserRole {
     ROLE_UNSET = 0;
-    ROLE_USER = 1;
-    ROLE_ADMIN = 2;
+    USER = 1;
+    ADMIN = 2;
 }
 
 message User {

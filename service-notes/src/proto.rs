@@ -26,8 +26,8 @@ pub struct User {
 #[repr(i32)]
 pub enum UserRole {
     RoleUnset = 0,
-    RoleUser = 1,
-    RoleAdmin = 2,
+    User = 1,
+    Admin = 2,
 }
 impl UserRole {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -37,16 +37,16 @@ impl UserRole {
     pub fn as_str_name(&self) -> &'static str {
         match self {
             UserRole::RoleUnset => "ROLE_UNSET",
-            UserRole::RoleUser => "ROLE_USER",
-            UserRole::RoleAdmin => "ROLE_ADMIN",
+            UserRole::User => "USER",
+            UserRole::Admin => "ADMIN",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
             "ROLE_UNSET" => Some(Self::RoleUnset),
-            "ROLE_USER" => Some(Self::RoleUser),
-            "ROLE_ADMIN" => Some(Self::RoleAdmin),
+            "USER" => Some(Self::User),
+            "ADMIN" => Some(Self::Admin),
             _ => None,
         }
     }
@@ -126,8 +126,9 @@ pub struct File {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum FileType {
-    Document = 0,
-    Avatar = 1,
+    FileUnset = 0,
+    Document = 1,
+    Avatar = 2,
 }
 impl FileType {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -136,6 +137,7 @@ impl FileType {
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
+            FileType::FileUnset => "FILE_UNSET",
             FileType::Document => "DOCUMENT",
             FileType::Avatar => "AVATAR",
         }
@@ -143,6 +145,7 @@ impl FileType {
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
+            "FILE_UNSET" => Some(Self::FileUnset),
             "DOCUMENT" => Some(Self::Document),
             "AVATAR" => Some(Self::Avatar),
             _ => None,
