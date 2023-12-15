@@ -35,6 +35,9 @@ export async function handle({ event, resolve }) {
         throw redirect(302, "/auth");
     }
 
+    logger.info("Token found");
+    logger.info("Token: %s", token);
+
     const metadata = createMetadata(token);
     /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/AuthResponse").AuthResponse__Output>} */
     const auth = await new Promise((res) => {
@@ -42,7 +45,7 @@ export async function handle({ event, resolve }) {
     });
     if (auth.error || !auth.data.token || !auth.data.user) {
         logger.error("Error during auth");
-        throw redirect(302, "/auth");
+        throw redirect(302, "/auth?error=1");
     }
 
     event.locals.user = auth.data.user;

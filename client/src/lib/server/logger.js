@@ -1,3 +1,4 @@
+import { ENV } from "$env/static/private";
 import pino from "pino";
 
 export const logger = pino({
@@ -7,6 +8,7 @@ export const logger = pino({
             colorize: true,
         },
     },
+    level: ENV === "production" ? "info" : "debug",
     // transport:
     //     ENV === "production"
     //         ? undefined

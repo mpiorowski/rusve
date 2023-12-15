@@ -225,7 +225,7 @@ pub async fn oauth_callback(
             header::SET_COOKIE,
             format!(
                 "token={}; HttpOnly; Max-Age={}; Path=/; SameSite=Lax",
-                token.access_token,
+                token.id,
                 // 7 days
                 3600 * 24 * 7
             ),

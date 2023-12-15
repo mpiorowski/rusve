@@ -43,14 +43,14 @@ impl UsersService for MyService {
                 tracing::error!("Failed to auth user: {:?}", e);
                 Status::unauthenticated("Failed to auth user")
             })?;
-        if user.deleted != "-infinity" {
+        if user.deleted != "infinity" {
             tracing::error!("User is deleted");
             return Err(Status::unauthenticated("Unauthenticated"));
         }
 
         tracing::info!("Auth: {:?}", start.elapsed());
         Ok(Response::new(AuthResponse {
-            user: Some(user.into()),
+            user: user.into(),
             token: token_id.to_string(),
         }))
     }
@@ -84,7 +84,7 @@ impl UsersService for MyService {
         let metadata = request.metadata();
         let user_id = rusve_users::auth(&metadata)?.user_id;
 
-        let mut conn = self.pool.get().await.map_err(|e| {
+        let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
             Status::internal("Failed to get connection")
         })?;

@@ -18,7 +18,7 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
                 id uuid primary key,
                 created timestamptz not null default current_timestamp,
                 updated timestamptz not null default current_timestamp,
-                deleted timestamptz not null default '-infinity',
+                deleted timestamptz not null default 'infinity',
                 email text unique not null,
                 sub text unique not null,
                 role int not null,
@@ -39,7 +39,7 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
                 avatar_id text not null default '',
                 avatar_url text not null default '',
                 cover_id text not null default '',
-                cover_url text not null default ''
+                cover_url text not null default '',
                 resume_id text not null default ''
             );
             drop trigger if exists set_timestamp on profiles;

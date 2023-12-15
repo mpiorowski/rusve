@@ -3,9 +3,26 @@ use std::str::FromStr;
 use anyhow::Result;
 use deadpool_postgres::Object;
 use time::format_description::well_known::Iso8601;
+use tokio_postgres::types::{Date, Timestamp};
 use uuid::Uuid;
 
 use crate::proto::{Profile, User};
+
+pub struct Token {
+    pub id: Uuid,
+    pub created: time::OffsetDateTime,
+    pub user_id: Uuid,
+}
+impl TryFrom<tokio_postgres::Row> for Token {
+    type Error = anyhow::Error;
+    fn try_from(value: tokio_postgres::Row) -> std::result::Result<Self, Self::Error> {
+        Ok(Token {
+            id: value.try_get("id")?,
+            created: value.try_get("created")?,
+            user_id: value.try_get("user_id")?,
+        })
+    }
+}
 
 impl TryFrom<tokio_postgres::Row> for User {
     type Error = anyhow::Error;
@@ -16,15 +33,24 @@ impl TryFrom<tokio_postgres::Row> for User {
         let created: String = created.format(&Iso8601::DEFAULT)?.to_string();
         let updated: time::OffsetDateTime = value.try_get("updated")?;
         let updated: String = updated.format(&Iso8601::DEFAULT)?.to_string();
-        let deleted: time::OffsetDateTime = value.try_get("deleted")?;
-        let deleted: String = deleted.format(&Iso8601::DEFAULT)?.to_string();
+        let deleted: Timestamp<time::OffsetDateTime> = value.try_get("deleted")?;
+        let deleted: String = match deleted {
+            Timestamp::PosInfinity => "infinity".to_string(),
+            Timestamp::NegInfinity => "-infinity".to_string(),
+            Timestamp::Value(date) => date.format(&Iso8601::DEFAULT)?.to_string(),
+        };
 
         let email: String = value.try_get("email")?;
         let sub: String = value.try_get("sub")?;
         let role: i32 = value.try_get("role")?;
         let subscription_id: String = value.try_get("subscription_id")?;
-        let subscription_end: time::OffsetDateTime = value.try_get("subscription_end")?;
-        let subscription_end: String = subscription_end.format(&Iso8601::DEFAULT)?.to_string();
+        let subscription_end: Timestamp<time::OffsetDateTime> =
+            value.try_get("subscription_end")?;
+        let subscription_end: String = match subscription_end {
+            Timestamp::PosInfinity => "infinity".to_string(),
+            Timestamp::NegInfinity => "-infinity".to_string(),
+            Timestamp::Value(date) => date.format(&Iso8601::DEFAULT)?.to_string(),
+        };
 
         Ok(User {
             id: id.to_string(),
@@ -78,22 +104,6 @@ impl TryFrom<tokio_postgres::Row> for Profile {
             cover_id,
             cover_url,
             resume_id,
-        })
-    }
-}
-
-pub struct Token {
-    pub id: Uuid,
-    pub created: time::OffsetDateTime,
-    pub user_id: Uuid,
-}
-impl TryFrom<tokio_postgres::Row> for Token {
-    type Error = anyhow::Error;
-    fn try_from(value: tokio_postgres::Row) -> std::result::Result<Self, Self::Error> {
-        Ok(Token {
-            id: value.try_get("id")?,
-            created: value.try_get("created")?,
-            user_id: value.try_get("user_id")?,
         })
     }
 }
