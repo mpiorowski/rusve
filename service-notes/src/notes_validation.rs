@@ -40,16 +40,14 @@ impl Validation for Note {
             });
         }
         if validators.is_empty() {
-            return Ok(());
+            Ok(())
         } else {
             let json = serde_json::to_string(&validators);
             match json {
-                Ok(json) => {
-                    return Err(Status::invalid_argument(json));
-                }
+                Ok(json) => Err(Status::invalid_argument(json)),
                 Err(e) => {
                     tracing::error!("Failed to serialize validators: {:?}", e);
-                    return Err(Status::internal("Failed to serialize validators"));
+                    Err(Status::internal("Failed to serialize validators"))
                 }
             }
         }

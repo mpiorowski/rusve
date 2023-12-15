@@ -61,7 +61,7 @@ pub async fn get_file_by_id(conn: &Object, file_id: &Uuid, target_id: &Uuid) -> 
         )
         .await?;
 
-    Ok(file.try_into()?)
+    file.try_into()
 }
 
 pub async fn create_file(conn: &Transaction<'_>, file: &File) -> Result<File> {
@@ -76,7 +76,7 @@ pub async fn create_file(conn: &Transaction<'_>, file: &File) -> Result<File> {
         )
         .await?;
 
-    Ok(file.try_into()?)
+    file.try_into()
 }
 
 pub async fn delete_file(conn: &Transaction<'_>, file_id: &Uuid, target_id: &Uuid) -> Result<File> {
@@ -87,5 +87,5 @@ pub async fn delete_file(conn: &Transaction<'_>, file_id: &Uuid, target_id: &Uui
         )
         .await?;
 
-    Ok(file.try_into()?)
+    file.try_into()
 }

@@ -12,7 +12,7 @@ impl UsersService for MyService {
         let metadata = request.metadata();
         let token = rusve_users::auth(metadata)?.token;
 
-        let mut conn = self.pool.get().await.map_err(|e| {
+        let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
             Status::internal("Failed to get connection")
         })?;
@@ -37,7 +37,7 @@ impl UsersService for MyService {
             })?;
 
         // get user
-        let user = users_db::select_user_by_uuid(&mut conn, token.user_id)
+        let user = users_db::select_user_by_uuid(&conn, token.user_id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to auth user: {:?}", e);
@@ -61,14 +61,14 @@ impl UsersService for MyService {
     ) -> Result<Response<crate::proto::Profile>, Status> {
         let start = std::time::Instant::now();
         let metadata = request.metadata();
-        let user_id = rusve_users::auth(&metadata)?.user_id;
+        let user_id = rusve_users::auth(metadata)?.user_id;
 
-        let mut conn = self.pool.get().await.map_err(|e| {
+        let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
             Status::internal("Failed to get connection")
         })?;
 
-        let profile = users_db::select_profile_by_user_id(&mut conn, &user_id)
+        let profile = users_db::select_profile_by_user_id(&conn, &user_id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to get profile: {:?}", e);
@@ -82,7 +82,7 @@ impl UsersService for MyService {
     async fn create_profile(&self, request: Request<Profile>) -> Result<Response<Profile>, Status> {
         let start = std::time::Instant::now();
         let metadata = request.metadata();
-        let user_id = rusve_users::auth(&metadata)?.user_id;
+        let user_id = rusve_users::auth(metadata)?.user_id;
 
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
@@ -90,19 +90,19 @@ impl UsersService for MyService {
         })?;
 
         let mut profile = request.into_inner();
-        if profile.id != "" {
-            profile = users_db::update_profile(&conn, &user_id, &profile)
-                .await
-                .map_err(|e| {
-                    tracing::error!("Failed to update profile: {:?}", e);
-                    Status::internal("Failed to update profile")
-                })?;
-        } else {
+        if profile.id.is_empty() {
             profile = users_db::insert_profile(&conn, &user_id, &profile)
                 .await
                 .map_err(|e| {
                     tracing::error!("Failed to insert profile: {:?}", e);
                     Status::internal("Failed to insert profile")
+                })?;
+        } else {
+            profile = users_db::update_profile(&conn, &user_id, &profile)
+                .await
+                .map_err(|e| {
+                    tracing::error!("Failed to update profile: {:?}", e);
+                    Status::internal("Failed to update profile")
                 })?;
         }
 
