@@ -26,3 +26,48 @@ pub fn connect_to_db() -> Result<deadpool_postgres::Pool> {
     let pool = Pool::builder(mgr).build()?;
     Ok(pool)
 }
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct Claims {
+    pub token: String,
+    pub user_id: String,
+}
+pub fn auth(metadata: &tonic::metadata::MetadataMap) -> Result<Claims, tonic::Status> {
+    let token = match metadata.get("x-authorization") {
+        Some(token) => token,
+        None => {
+            tracing::error!("Missing authorization token");
+            return Err(tonic::Status::unauthenticated(
+                "Missing authorization token",
+            ));
+        }
+    };
+    let token = token
+        .to_str()
+        .map_err(|e| {
+            tracing::error!("Failed to parse authorization token: {:?}", e);
+            tonic::Status::unauthenticated("Invalid authorization token")
+        })?
+        .strip_prefix("bearer ")
+        .ok_or_else(|| {
+            tracing::error!("Failed to parse authorization token");
+            tonic::Status::unauthenticated("Invalid authorization token")
+        })?;
+
+    let decoding_key = jsonwebtoken::DecodingKey::from_rsa_pem(include_bytes!("../public.key"))
+        .map_err(|e| {
+            tracing::error!("Failed to parse public key: {:?}", e);
+            tonic::Status::unauthenticated("Invalid authorization token")
+        })?;
+    let token_message = jsonwebtoken::decode::<Claims>(
+        token,
+        &decoding_key,
+        &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::RS256),
+    )
+    .map_err(|e| {
+        tracing::error!("Failed to decode authorization token: {:?}", e);
+        tonic::Status::unauthenticated("Invalid authorization token")
+    })?;
+
+    Ok(token_message.claims)
+}

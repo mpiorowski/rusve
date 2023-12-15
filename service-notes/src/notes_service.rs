@@ -1,6 +1,6 @@
 use crate::{
-    notes_db,
-    proto::{notes_service_server::NotesService, Empty, Note, NoteId, UserId},
+    notes_db::{self, insert_note},
+    proto::{notes_service_server::NotesService, Empty, Id, Note},
     MyService,
 };
 use anyhow::Result;
@@ -11,13 +11,15 @@ use tonic::{Request, Response, Status};
 
 #[tonic::async_trait]
 impl NotesService for MyService {
-    type GetNotesStream = ReceiverStream<Result<Note, Status>>;
+    type GetNotesByUserIdStream = ReceiverStream<Result<Note, Status>>;
 
-    async fn get_notes(
+    async fn get_notes_by_user_id(
         &self,
-        request: Request<UserId>,
-    ) -> Result<Response<Self::GetNotesStream>, Status> {
+        request: Request<Empty>,
+    ) -> Result<Response<Self::GetNotesByUserIdStream>, Status> {
         let start = std::time::Instant::now();
+        let metadata = request.metadata();
+        let user_id = rusve_notes::auth(&metadata)?.user_id;
 
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
@@ -25,21 +27,19 @@ impl NotesService for MyService {
         })?;
 
         let request = request.into_inner();
-        let user_id = uuid::Uuid::parse_str(&request.user_id).map_err(|e| {
-            tracing::error!("Failed to parse user_id: {:?}", e);
-            Status::invalid_argument("Failed to parse user_id")
-        })?;
 
-        let notes = notes_db::get_notes(&conn, &user_id).await.map_err(|e| {
-            tracing::error!("Failed to get notes: {:?}", e);
-            Status::internal("Failed to get notes")
-        })?;
+        let notesStream = notes_db::get_notes_by_user_id(&conn, &user_id)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to get notes: {:?}", e);
+                Status::internal("Failed to get notes")
+            })?;
 
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
-            futures_util::pin_mut!(notes);
+            futures_util::pin_mut!(notesStream);
             loop {
-                let note = match notes.try_next().await {
+                let note = match notesStream.try_next().await {
                     Ok(Some(note)) => note,
                     Ok(None) => break,
                     Err(e) => {
@@ -54,7 +54,10 @@ impl NotesService for MyService {
                     Ok(note) => note,
                     Err(e) => {
                         tracing::error!("Failed to convert note: {:?}", e);
-                        if let Err(e) = tx.send(Err(Status::internal("Failed to convert note"))).await {
+                        if let Err(e) = tx
+                            .send(Err(Status::internal("Failed to convert note")))
+                            .await
+                        {
                             tracing::error!("Failed to send error: {:?}", e);
                         }
                         break;
@@ -65,47 +68,80 @@ impl NotesService for MyService {
                     break;
                 }
             }
-            tracing::info!("GetNotes: {:?}", start.elapsed());
+            tracing::info!("GetNotesByUserId: {:?}", start.elapsed());
         });
         Ok(Response::new(ReceiverStream::new(rx)))
     }
 
-    async fn create_note(&self, request: Request<Note>) -> Result<Response<Note>, Status> {
+    async fn get_note_by_id(&self, request: Request<Id>) -> Result<Response<Note>, Status> {
         let start = std::time::Instant::now();
+        let metadata = request.metadata();
+        let user_id = rusve_notes::auth(&metadata)?.user_id;
 
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
             Status::internal("Failed to get connection")
         })?;
 
-        let note = request.into_inner();
-        let note = notes_db::create_note(&conn, &note).await.map_err(|e| {
-            tracing::error!("Failed to insert note: {:?}", e);
-            Status::internal("Failed to insert note")
+        let id = request.into_inner();
+
+        let note = notes_db::get_note_by_id(&conn, &id.id, &user_id)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to get note: {:?}", e);
+                Status::internal("Failed to get note")
+            })?;
+
+        tracing::info!("GetNote: {:?}", start.elapsed());
+        return Ok(Response::new(note));
+    }
+
+    async fn create_note(&self, request: Request<Note>) -> Result<Response<Note>, Status> {
+        let start = std::time::Instant::now();
+        let metadata = request.metadata();
+        let user_id = rusve_notes::auth(&metadata)?.user_id;
+
+        let conn = self.pool.get().await.map_err(|e| {
+            tracing::error!("Failed to get connection: {:?}", e);
+            Status::internal("Failed to get connection")
         })?;
+
+        let mut note = request.into_inner();
+        if note.id.is_empty() {
+            note = insert_note(&conn, &user_id, &note).await.map_err(|e| {
+                tracing::error!("Failed to insert note: {:?}", e);
+                Status::internal("Failed to insert note")
+            })?;
+        } else {
+            note = notes_db::update_note(&conn, &user_id, &note)
+                .await
+                .map_err(|e| {
+                    tracing::error!("Failed to update note: {:?}", e);
+                    Status::internal("Failed to update note")
+                })?;
+        }
 
         tracing::info!("CreateNote: {:?}", start.elapsed());
         return Ok(Response::new(note));
     }
 
-    async fn delete_note(&self, request: Request<NoteId>) -> Result<Response<Empty>, Status> {
+    async fn delete_note_by_id(&self, request: Request<Id>) -> Result<Response<Empty>, Status> {
         let start = std::time::Instant::now();
+        let metadata = request.metadata();
+        let user_id = rusve_notes::auth(&metadata)?.user_id;
 
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
             Status::internal("Failed to get connection")
         })?;
 
-        let note = request.into_inner();
-        let note_id = uuid::Uuid::parse_str(&note.note_id).map_err(|e| {
-            tracing::error!("Failed to parse note_id: {:?}", e);
-            Status::invalid_argument("Failed to parse note_id")
-        })?;
-
-        notes_db::delete_note(&conn, &note_id).await.map_err(|e| {
-            tracing::error!("Failed to delete note: {:?}", e);
-            Status::internal("Failed to delete note")
-        })?;
+        let id = request.into_inner();
+        notes_db::delete_note_by_id(&conn, &id.id, &user_id)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to delete note: {:?}", e);
+                Status::internal("Failed to delete note")
+            })?;
 
         tracing::info!("DeleteNote: {:?}", start.elapsed());
         return Ok(Response::new(Empty {}));

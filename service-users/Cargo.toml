@@ -24,7 +24,6 @@ tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
 # gRPC
 prost = "0.11.9"
 tonic = "0.9.2"
-tonic-build = "0.9.2"
 
 # Database
 tokio-postgres = { version = "0.7.8", features = ["with-uuid-1", "with-time-0_3", "array-impls"] }
@@ -32,6 +31,3 @@ tokio-postgres-rustls = "0.10.0"
 rustls = "0.21.5"
 rustls-native-certs = "0.6.3"
 deadpool-postgres = "0.10.5"
-
-# Migration
-refinery = { version = "0.8.10", features = ["tokio-postgres"] }

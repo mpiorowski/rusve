@@ -86,11 +86,11 @@
             <input type="hidden" name="id" bind:value={data.profile.id} />
             <div class="sm:col-span-4">
                 <Input
-                    name="username"
-                    label="Username"
-                    autocomplete="username"
-                    bind:value={data.profile.username}
-                    error={extractError(form?.fields, "username")}
+                    name="name"
+                    label="Name"
+                    autocomplete="name"
+                    bind:value={data.profile.name}
+                    error={extractError(form?.fields, "name")}
                 />
             </div>
 

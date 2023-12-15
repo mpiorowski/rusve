@@ -32,7 +32,7 @@ services:
     environment:
       PORT: 443
       ENV: development
-      RUST_LOG: debug
+      RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
@@ -50,7 +50,7 @@ services:
     environment:
       PORT: 443
       ENV: development
-      RUST_LOG: debug
+      RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
 
   service-notes:

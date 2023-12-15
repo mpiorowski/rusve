@@ -76,7 +76,7 @@ impl UsersService for MyService {
             })?;
 
         tracing::info!("GetProfileByUserId: {:?}", start.elapsed());
-        Ok(Response::new(profile))
+        Ok(Response::new(profile.unwrap_or_default()))
     }
 
     async fn create_profile(&self, request: Request<Profile>) -> Result<Response<Profile>, Status> {
@@ -89,21 +89,20 @@ impl UsersService for MyService {
             Status::internal("Failed to get connection")
         })?;
 
-        let request = request.into_inner();
-        let profile: Profile;
-        if request.id != "" {
-            profile = users_db::update_profile(&conn, &request)
+        let mut profile = request.into_inner();
+        if profile.id != "" {
+            profile = users_db::update_profile(&conn, &user_id, &profile)
                 .await
                 .map_err(|e| {
-                    tracing::error!("Failed to get profile: {:?}", e);
-                    Status::internal("Failed to get profile")
+                    tracing::error!("Failed to update profile: {:?}", e);
+                    Status::internal("Failed to update profile")
                 })?;
         } else {
-            profile = users_db::insert_profile(&conn, &request)
+            profile = users_db::insert_profile(&conn, &user_id, &profile)
                 .await
                 .map_err(|e| {
-                    tracing::error!("Failed to get profile: {:?}", e);
-                    Status::internal("Failed to get profile")
+                    tracing::error!("Failed to insert profile: {:?}", e);
+                    Status::internal("Failed to insert profile")
                 })?;
         }
 

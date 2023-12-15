@@ -2,7 +2,7 @@ import { getFormValue } from "$lib/helpers";
 import { safe } from "$lib/safe";
 import { grpcSafe } from "$lib/safe";
 import { upsendApi } from "$lib/server/api";
-import { server } from "$lib/server/grpc";
+import { usersService } from "$lib/server/grpc";
 import { perf } from "$lib/server/logger";
 import { createMetadata } from "$lib/server/metadata";
 import { error, fail } from "@sveltejs/kit";
@@ -16,9 +16,9 @@ export async function load({ locals }) {
 
     /** @type {import('$lib/safe').Safe<import('$lib/proto/proto/Profile').Profile__Output>} */
     const profile = await new Promise((r) => {
-        server.GetProfileByUserId(
+        usersService.GetProfileByUserId(
             {},
-            createMetadata(locals.token),
+            createMetadata(locals.token, locals.user.id),
             grpcSafe(r),
         );
     });
@@ -139,7 +139,7 @@ export const actions = {
         /** @type {import('$lib/proto/proto/Profile').Profile} */
         const data = {
             id: getFormValue(form, "id"),
-            username: getFormValue(form, "username"),
+            name: getFormValue(form, "name"),
             about: getFormValue(form, "about"),
             resumeId: resumeId,
             coverId: coverId,
@@ -148,9 +148,9 @@ export const actions = {
 
         /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Profile").Profile__Output>} */
         const res = await new Promise((r) => {
-            server.CreateProfile(
+            usersService.CreateProfile(
                 data,
-                createMetadata(locals.token),
+                createMetadata("", locals.user.id),
                 grpcSafe(r),
             );
         });
@@ -172,10 +172,10 @@ export const actions = {
                 method: "POST",
                 email: {
                     email_to: locals.user.email,
-                    email_name: res.data.username,
+                    email_name: res.data.name,
                     email_subject: "You've updated your profile",
                     email_html: `
-                <p>Hi ${res.data.username},</p>
+                <p>Hi ${res.data.name},</p>
                 <p>You've updated your profile. You can view it <a href="https://sgsg.bearbyte.org/profile">here</a>.</p>
                 <p>Thanks!</p>
                 `,

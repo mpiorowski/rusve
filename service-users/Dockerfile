@@ -27,7 +27,6 @@ FROM debian:bullseye-slim AS prod
 WORKDIR /app
 
 COPY --from=build /app/target/release /app
-COPY  ./migrations /migrations
 COPY  ./public.key ./public.key
 
 RUN apt-get update && apt-get install -y openssl ca-certificates # libpq-dev libssl-dev

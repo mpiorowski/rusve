@@ -90,8 +90,8 @@ pub struct Note {
     pub created: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub updated: ::prost::alloc::string::String,
-    #[prost(string, optional, tag = "4")]
-    pub deleted: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, tag = "4")]
+    pub deleted: ::prost::alloc::string::String,
     #[prost(string, tag = "5")]
     pub user_id: ::prost::alloc::string::String,
     #[prost(string, tag = "6")]
