@@ -14,15 +14,9 @@ permissions:
 jobs:
   lint-client:
     uses: ./.github/workflows/lint-client.yml
-  lint-users-rust:
-    uses: ./.github/workflows/lint-users-rust.yml
-  lint-users-go:
-    uses: ./.github/workflows/lint-users-go.yml
-  lint-utils-rust:
-    uses: ./.github/workflows/lint-utils-rust.yml
-  lint-utils-go:
-    uses: ./.github/workflows/lint-utils-go.yml
-  lint-notes-rust:
-    uses: ./.github/workflows/lint-notes-rust.yml
-  lint-notes-go:
-    uses: ./.github/workflows/lint-notes-go.yml
+  lint-users:
+    uses: ./.github/workflows/lint-users.yml
+  lint-utils:
+    uses: ./.github/workflows/lint-utils.yml
+  lint-notes:
+    uses: ./.github/workflows/lint-notes.yml

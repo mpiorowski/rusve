@@ -1,4 +1,4 @@
-name: Lint Notes Rust
+name: Lint Users
 on:
   workflow_call:
 
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./service-notes-rust
+        working-directory: ./service-users
     steps:
       - uses: actions/checkout@v3
       - run: RUSTFLAGS="--cfg uuid_unstable" cargo clippy

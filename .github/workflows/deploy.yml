@@ -18,35 +18,19 @@ jobs:
       PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
       SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
       STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
-  deploy-users-rust:
-    uses: ./.github/workflows/deploy-users-rust.yml
+  deploy-users:
+    uses: ./.github/workflows/deploy-users.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-  deploy-users-go:
-    uses: ./.github/workflows/deploy-users-go.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-  deploy-utils-rust:
-    uses: ./.github/workflows/deploy-utils-rust.yml
+  deploy-utils:
+    uses: ./.github/workflows/deploy-utils.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
       SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-  deploy-utils-go:
-    uses: ./.github/workflows/deploy-utils-go.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-  deploy-notes-rust:
-    uses: ./.github/workflows/deploy-notes-rust.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-  deploy-notes-go:
-    uses: ./.github/workflows/deploy-notes-go.yml
+  deploy-notes:
+    uses: ./.github/workflows/deploy-notes.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}

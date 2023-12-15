@@ -1,14 +1,16 @@
-name: Deploy Users Rust
+name: Deploy Utils
 
 on:
   push:
     branches:
-      - release-users-rust/**
+      - release-urils/**
   workflow_call:
     secrets:
       GCP_CREDENTIALS:
         required: true
       DATABASE_URL:
+        required: true
+      SENDGRID_API_KEY:
         required: true
 
 env:
@@ -16,11 +18,12 @@ env:
   PROJECT_ID: rusve-384620
   REPOSITORY: rusve-repo
   DATABASE: rusve-db
-  SERVICE: users-rust
+  SERVICE: utils
   REGION: europe-north1
   ENV: production
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
-  # DATABASE_URL=postgresql:///?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}&dbname=users
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=utils
+  BUCKET: rusve-bucket
+  SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
 
 permissions:
   contents: read
@@ -28,7 +31,7 @@ permissions:
 
 jobs:
   lint:
-    uses: ./.github/workflows/lint-users-rust.yml
+    uses: ./.github/workflows/lint-utils.yml
   deploy:
     needs:
       - lint
@@ -62,5 +65,7 @@ jobs:
           env_vars: |
             ENV=${{ env.ENV }}
             DATABASE_URL=${{ env.DATABASE_URL }}
+            SENDGRID_API_KEY=${{ env.SENDGRID_API_KEY }}
+            BUCKET=${{ env.BUCKET }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

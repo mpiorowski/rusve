@@ -1,9 +1,9 @@
-name: Deploy Notes Rust
+name: Deploy Users
 
 on:
   push:
     branches:
-      - release-notes-rust/**
+      - release-users/**
   workflow_call:
     secrets:
       GCP_CREDENTIALS:
@@ -16,11 +16,11 @@ env:
   PROJECT_ID: rusve-384620
   REPOSITORY: rusve-repo
   DATABASE: rusve-db
-  SERVICE: notes-rust
+  SERVICE: users
   REGION: europe-north1
   ENV: production
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=notes
-  # DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
+  # DATABASE_URL=postgresql:///?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}&dbname=users
 
 permissions:
   contents: read
@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   lint:
-    uses: ./.github/workflows/lint-notes-rust.yml
+    uses: ./.github/workflows/lint-users.yml
   deploy:
     needs:
       - lint

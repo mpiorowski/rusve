@@ -1,4 +1,4 @@
-name: Lint Utils Rust
+name: Lint Utils
 on:
   workflow_call:
 
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./service-utils-rust
+        working-directory: ./service-utils
     steps:
       - uses: actions/checkout@v3
       - run: RUSTFLAGS="--cfg uuid_unstable" cargo clippy
