@@ -34,7 +34,7 @@ pub async fn get_file_buffer(file_id: &str, file_name: &str) -> Result<Vec<u8>> 
             )
             .await?;
     }
-    return Ok(buffer);
+    Ok(buffer)
 }
 
 pub async fn upload_file(file_id: &str, file_name: &str, file_buffer: Vec<u8>) -> Result<()> {
