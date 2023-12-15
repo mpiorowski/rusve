@@ -82,7 +82,6 @@ impl NotesService for MyService {
         })?;
 
         let id = request.into_inner();
-
         let note = notes_db::get_note_by_id(&conn, &id.id, &user_id)
             .await
             .map_err(|e| {
@@ -105,6 +104,9 @@ impl NotesService for MyService {
         })?;
 
         let mut note = request.into_inner();
+
+        crate::notes_validation::Validation::validate(&note)?;
+
         if note.id.is_empty() {
             note = insert_note(&conn, &user_id, &note).await.map_err(|e| {
                 tracing::error!("Failed to insert note: {:?}", e);

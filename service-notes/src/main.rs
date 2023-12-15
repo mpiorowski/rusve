@@ -2,6 +2,7 @@ mod migrations;
 mod proto;
 mod notes_db;
 mod notes_service;
+mod notes_validation;
 
 use anyhow::{Context, Result};
 use crate::proto::notes_service_server::NotesServiceServer;

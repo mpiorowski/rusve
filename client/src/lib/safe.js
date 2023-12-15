@@ -1,4 +1,5 @@
 import { logger } from "$lib/server/logger";
+import { Status } from "@grpc/grpc-js/build/src/constants";
 
 /**
  * @param {Promise<T> | Function} promiseOrFunc
@@ -68,7 +69,7 @@ export function grpcSafe(res) {
     return (err, data) => {
         if (err) {
             logger.error(err);
-            if (err.code === 3) {
+            if (err.code === Status.INVALID_ARGUMENT) {
                 let fields = [];
                 try {
                     fields = JSON.parse(err.details);
