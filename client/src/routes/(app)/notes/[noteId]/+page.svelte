@@ -11,6 +11,7 @@
 
     /** @type {import("./$types").ActionData} */
     export let form;
+    $: console.log(form);
     $: if (form?.error) {
         toast.error("Error", form.error);
     }
@@ -67,11 +68,12 @@
                 action="?/delete"
                 method="post"
                 use:enhance={() => {
-                    return async ({ result }) => {
+                    return async ({ result, update }) => {
                         if (result.type === "success") {
                             toast.warning("Success", "Note deleted");
                             await goto("/notes");
                         }
+                        await update();
                     };
                 }}
             >

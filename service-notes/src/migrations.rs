@@ -15,7 +15,7 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
             $$ language plpgsql;
 
             create table if not exists notes (
-                id uuid primary key default,
+                id uuid primary key,
                 created timestamptz not null default current_timestamp,
                 updated timestamptz not null default current_timestamp,
                 deleted timestamptz not null default 'infinity',
@@ -23,8 +23,8 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
                 title text not null,
                 content text not null
             );
-            drop trigger if exists set_timestamp on users;
-            create trigger set_timestamp before update on users for each row execute procedure trigger_set_timestamp();
+            drop trigger if exists set_timestamp on notes;
+            create trigger set_timestamp before update on notes for each row execute procedure trigger_set_timestamp();
     "#,
         )
         .await?;

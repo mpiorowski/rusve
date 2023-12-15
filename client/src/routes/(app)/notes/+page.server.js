@@ -1,6 +1,6 @@
 import { getFormValue } from "$lib/helpers";
 import { grpcSafe, safe } from "$lib/safe";
-import { server } from "$lib/server/grpc";
+import { notesService } from "$lib/server/grpc";
 import { createMetadata } from "$lib/server/metadata";
 import { fail } from "@sveltejs/kit";
 
@@ -8,8 +8,8 @@ import { fail } from "@sveltejs/kit";
 export async function load({ locals }) {
     /** @type {import("$lib/proto/proto/Note").Note__Output[]} */
     const notes = [];
-    const metadata = createMetadata(locals.token);
-    const notesStream = server.GetNotesByUserId({}, metadata);
+    const metadata = createMetadata("", locals.user.id);
+    const notesStream = notesService.GetNotesByUserId({}, metadata);
 
     /** @type {Promise<void>} */
     const p = new Promise((res, rej) => {
@@ -40,10 +40,10 @@ export const actions = {
             title: getFormValue(form, "title"),
             content: getFormValue(form, "content"),
         };
-        const metadata = createMetadata(locals.token);
+        const metadata = createMetadata("", locals.user.id);
         /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Note").Note__Output>} */
         const req = await new Promise((r) => {
-            server.CreateNote(data, metadata, grpcSafe(r));
+            notesService.CreateNote(data, metadata, grpcSafe(r));
         });
 
         if (req.error) {

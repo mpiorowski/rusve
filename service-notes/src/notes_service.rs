@@ -26,9 +26,7 @@ impl NotesService for MyService {
             Status::internal("Failed to get connection")
         })?;
 
-        let request = request.into_inner();
-
-        let notesStream = notes_db::get_notes_by_user_id(&conn, &user_id)
+        let notes_stream = notes_db::get_notes_by_user_id(&conn, &user_id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to get notes: {:?}", e);
@@ -37,9 +35,9 @@ impl NotesService for MyService {
 
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
-            futures_util::pin_mut!(notesStream);
+            futures_util::pin_mut!(notes_stream);
             loop {
-                let note = match notesStream.try_next().await {
+                let note = match notes_stream.try_next().await {
                     Ok(Some(note)) => note,
                     Ok(None) => break,
                     Err(e) => {

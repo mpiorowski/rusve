@@ -63,8 +63,8 @@ pub async fn insert_note(conn: &Object, user_id: &str, note: &Note) -> Result<No
     let user_id = Uuid::parse_str(user_id)?;
     let res = conn
         .query_one(
-            "insert into notes (user_id, title, content) values ($1, $2, $3) returning *",
-            &[&user_id, &note.title, &note.content],
+            "insert into notes (id, user_id, title, content) values ($1, $2, $3, $4) returning *",
+            &[&Uuid::now_v7(), &user_id, &note.title, &note.content],
         )
         .await?;
     let note = Note::try_from(res)?;
@@ -85,6 +85,8 @@ pub async fn update_note(conn: &Object, user_id: &str, note: &Note) -> Result<No
 }
 
 pub async fn delete_note_by_id(conn: &Object, id: &str, user_id: &str) -> Result<Note> {
+    let id = Uuid::parse_str(id)?;
+    let user_id = Uuid::parse_str(user_id)?;
     let res = conn
         .query_one(
             "update notes set deleted = now() where id = $1 and user_id = $2 returning *",
