@@ -62,7 +62,7 @@
                     <div class="ml-4 flex items-center md:ml-6">
                         <!-- Profile dropdown -->
                         <div class="relative ml-3 flex">
-                            <Avatar avatar={data.user.avatar} />
+                            <Avatar avatar={data.profile.avatarUrl} />
                         </div>
                     </div>
                 </div>
@@ -152,7 +152,7 @@
                     <div class="flex-shrink-0">
                         <img
                             class="h-10 w-10 rounded-full"
-                            src={data.user.avatar}
+                            src={data.profile.avatarUrl}
                             alt="Avatar"
                         />
                     </div>

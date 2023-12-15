@@ -5,40 +5,28 @@ import { upsendApi } from "$lib/server/api";
 import { usersService } from "$lib/server/grpc";
 import { perf } from "$lib/server/logger";
 import { createMetadata } from "$lib/server/metadata";
-import { error, fail } from "@sveltejs/kit";
+import { fail } from "@sveltejs/kit";
 
 /** @type {import('./$types').PageServerLoad} */
-export async function load({ locals }) {
+export async function load({ parent }) {
     const end = perf("Load profile");
+    const profile = await parent();
+
     /**
      * We return the profile data immediately, and then fetch the resume and stream it to the client as it loads.
      */
-
-    /** @type {import('$lib/safe').Safe<import('$lib/proto/proto/Profile').Profile__Output>} */
-    const profile = await new Promise((r) => {
-        usersService.GetProfileByUserId(
-            {},
-            createMetadata(locals.token, locals.user.id),
-            grpcSafe(r),
-        );
-    });
-    if (profile.error) {
-        throw error(500, profile.msg);
-    }
-
     /** @type {Promise<import("$lib/safe").Safe<import("$lib/types").UpsendFile | undefined>>} */
     let resumePromise = Promise.resolve({ data: undefined, error: false });
-    if (profile.data.resumeId) {
+    if (profile.profile.resumeId) {
         /** @type {Promise<import('$lib/safe').Safe<import('$lib/types').UpsendFile>>} */
         resumePromise = upsendApi({
-            url: `/files/${profile.data.resumeId}`,
+            url: `/files/${profile.profile.resumeId}`,
             method: "GET",
         });
     }
 
     end();
     return {
-        profile: profile.data,
         stream: { resume: resumePromise },
     };
 }
