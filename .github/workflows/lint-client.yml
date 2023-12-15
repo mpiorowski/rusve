@@ -10,7 +10,7 @@ env:
   UTILS_URI: service-utils
   NOTES_URI: service-notes
   STRIPE_API_KEY: STRIPE_KEY
-  SERVICE_ACCOUNT: SERVICE_ACCOUNT
+  UPSEND_KEY: UPSEND_KEY 
 
 jobs:
   lint:

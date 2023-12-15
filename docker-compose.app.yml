@@ -14,7 +14,6 @@ services:
         UTILS_URI: service-utils
         NOTES_URI: service-notes
         STRIPE_API_KEY: STRIPE_KEY
-        SERVICE_ACCOUNT: SERVICE_ACCOUNT
     volumes:
       - ./client/src:/client/src
       - ./client/.svelte-kit:/client/.svelte-kit
