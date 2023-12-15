@@ -23,7 +23,8 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
                 sub text unique not null,
                 role int not null,
                 subscription_id text not null default '',
-                subscription_end timestamptz not null default '-infinity'
+                subscription_end timestamptz not null default '-infinity',
+                unique (email, sub)
             );
             drop trigger if exists set_timestamp on users;
             create trigger set_timestamp before update on users for each row execute procedure trigger_set_timestamp();
@@ -32,7 +33,7 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
                 id uuid primary key,
                 created timestamptz not null default current_timestamp,
                 updated timestamptz not null default current_timestamp,
-                deleted timestamptz not null default '-infinity',
+                deleted timestamptz not null default 'infinity',
                 user_id uuid not null references users(id) on delete cascade,
                 name text not null,
                 about text not null,
@@ -40,7 +41,8 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
                 avatar_url text not null default '',
                 cover_id text not null default '',
                 cover_url text not null default '',
-                resume_id text not null default ''
+                resume_id text not null default '',
+                unique (user_id)
             );
             drop trigger if exists set_timestamp on profiles;
             create trigger set_timestamp before update on profiles for each row execute procedure trigger_set_timestamp();
