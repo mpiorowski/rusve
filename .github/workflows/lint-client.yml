@@ -2,6 +2,16 @@ name: Lint Client
 on:
   workflow_call:
 
+env:
+  ENV: development
+  COOKIE_DOMAIN: .127.0.0.1
+  PUBLIC_SERVER_HTTP: http://127.0.0.1:8090
+  USERS_URI: service-users
+  UTILS_URI: service-utils
+  NOTES_URI: service-notes
+  STRIPE_API_KEY: STRIPE_KEY
+  SERVICE_ACCOUNT: SERVICE_ACCOUNT
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -15,9 +25,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
-      - run: cp .env.example .env
-      - run: npm i -g pnpm
-      - run: pnpm i
-      - run: pnpm run build
-      - run: pnpm run lint
-      - run: pnpm run check
+      - run: npm i
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run check
