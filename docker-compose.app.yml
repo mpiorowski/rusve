@@ -63,7 +63,7 @@ services:
     environment:
       PORT: 443
       ENV: development
-      RUST_LOG: debug
+      RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-notes&user=postgres&password=12345&dbname=notes
 
   service-utils:
@@ -78,7 +78,7 @@ services:
     environment:
       PORT: 443
       ENV: development
-      RUST_LOG: debug
+      RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-utils&user=postgres&password=12345&dbname=users
       BUCKET: bucket
       SENDGRID_API_KEY: sendgid-api-key
