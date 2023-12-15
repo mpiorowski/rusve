@@ -58,12 +58,11 @@ impl NotesService for MyService {
                         {
                             tracing::error!("Failed to send error: {:?}", e);
                         }
-                        break;
+                        return;
                     }
                 };
                 if let Err(e) = tx.send(Ok(note)).await {
                     tracing::error!("Failed to send note: {:?}", e);
-                    break;
                 }
             }
             tracing::info!("GetNotesByUserId: {:?}", start.elapsed());
