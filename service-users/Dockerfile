@@ -3,7 +3,10 @@ FROM rust:1.74 as dev
 
 WORKDIR /app
 
-COPY . .
+COPY src .
+COPY Cargo.toml .
+COPY Cargo.lock .
+COPY public.key .
 
 CMD ["cargo", "run"]
 
@@ -12,7 +15,10 @@ FROM rust:1.74 as build
 
 WORKDIR /app
 
-COPY . .
+COPY src .
+COPY Cargo.toml .
+COPY Cargo.lock .
+COPY public.key .
 RUN cargo build --release
 
 # Production

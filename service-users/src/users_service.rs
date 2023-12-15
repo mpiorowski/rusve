@@ -1,129 +1,88 @@
-use std::str::FromStr;
-
 use crate::proto::users_service_server::UsersService;
-use crate::proto::UserId;
-use crate::proto::{AuthRequest, Empty, PaymentId, User, UserIds};
+use crate::proto::{AuthResponse, Empty, Profile};
+use crate::users_db::select_token_by_id;
 use crate::{users_db, MyService};
 use anyhow::Result;
-use futures_util::TryStreamExt;
-use tokio::sync::mpsc;
-use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
-use uuid::Uuid;
 
 #[tonic::async_trait]
 impl UsersService for MyService {
-    type GetUsersStream = ReceiverStream<Result<User, Status>>;
-
-    async fn auth(&self, request: Request<AuthRequest>) -> Result<Response<User>, Status> {
+    async fn auth(&self, request: Request<Empty>) -> Result<Response<AuthResponse>, Status> {
         let start = std::time::Instant::now();
+        let metadata = request.metadata();
+        let token = rusve_users::auth(metadata)?.token;
 
         let mut conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
             Status::internal("Failed to get connection")
         })?;
-        let request = request.into_inner();
 
-        let user = users_db::auth_user(&mut conn, request).await.map_err(|e| {
-            tracing::error!("Failed to auth user: {:?}", e);
-            Status::unauthenticated("Failed to auth user")
+        let token = select_token_by_id(&conn, &token).await.map_err(|e| {
+            tracing::error!("Failed to auth token: {:?}", e);
+            Status::unauthenticated("Failed to auth token")
         })?;
-        if user.deleted.is_some() {
+
+        // check if token has expired
+        if token.created + time::Duration::days(7) < time::OffsetDateTime::now_utc() {
+            tracing::error!("Token has expired");
+            return Err(Status::unauthenticated("Unauthenticated"));
+        }
+
+        // create new token
+        let token_id = users_db::update_token_uuid(&conn, &token.user_id)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to update token: {:?}", e);
+                Status::internal("Failed to update token")
+            })?;
+
+        // get user
+        let user = users_db::select_user_by_uuid(&mut conn, token.user_id)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to auth user: {:?}", e);
+                Status::unauthenticated("Failed to auth user")
+            })?;
+        if user.deleted != "-infinity" {
             tracing::error!("User is deleted");
             return Err(Status::unauthenticated("Unauthenticated"));
         }
 
         tracing::info!("Auth: {:?}", start.elapsed());
-        Ok(Response::new(user))
+        Ok(Response::new(AuthResponse {
+            user: Some(user.into()),
+            token: token_id.to_string(),
+        }))
     }
 
-    async fn get_users(
+    async fn get_profile_by_user_id(
         &self,
-        request: Request<UserIds>,
-    ) -> Result<Response<Self::GetUsersStream>, Status> {
+        request: Request<crate::proto::Empty>,
+    ) -> Result<Response<crate::proto::Profile>, Status> {
         let start = std::time::Instant::now();
+        let metadata = request.metadata();
+        let user_id = rusve_users::auth(&metadata)?.user_id;
 
         let mut conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
             Status::internal("Failed to get connection")
         })?;
 
-        let user_ids: Vec<Uuid> = request
-            .into_inner()
-            .user_ids
-            .iter()
-            .map(|id| Uuid::from_str(&id))
-            .collect::<Result<Vec<Uuid>, _>>()
-            .map_err(|e| {
-                tracing::error!("Failed to parse user ids: {:?}", e);
-                Status::invalid_argument("Failed to parse user ids")
-            })?;
-
-        let users = users_db::get_users(&mut conn, user_ids)
+        let profile = users_db::select_profile_by_user_id(&mut conn, &user_id)
             .await
             .map_err(|e| {
-                tracing::error!("Failed to get users: {:?}", e);
-                Status::internal("Failed to get users")
+                tracing::error!("Failed to get profile: {:?}", e);
+                Status::internal("Failed to get profile")
             })?;
 
-        let (tx, rx) = mpsc::channel(128);
-        tokio::spawn(async move {
-            futures_util::pin_mut!(users);
-            loop {
-                let user = match users.try_next().await {
-                    Ok(Some(user)) => user,
-                    Ok(None) => break,
-                    Err(e) => {
-                        tracing::error!("Failed to get user: {:?}", e);
-                        if let Err(e) = tx.send(Err(Status::internal("Falied to get user"))).await {
-                            tracing::error!("Failed to send error: {:?}", e);
-                        }
-                        break;
-                    }
-                };
-                let user: User = match user.try_into() {
-                    Ok(user) => user,
-                    Err(e) => {
-                        tracing::error!("Failed to convert user: {:?}", e);
-                        if let Err(e) = tx.send(Err(Status::internal("Failed to convert user"))).await {
-                            tracing::error!("Failed to send error: {:?}", e);
-                        }
-                        break;
-                    }
-                };
-                if let Err(e) = tx.send(Ok(user)).await {
-                    tracing::error!("Failed to send user: {:?}", e);
-                    break;
-                }
-            }
-            tracing::info!("GetUsers: {:?}", start.elapsed());
-        });
-        Ok(Response::new(ReceiverStream::new(rx)))
+        tracing::info!("GetProfileByUserId: {:?}", start.elapsed());
+        Ok(Response::new(profile))
     }
 
-    async fn get_user(&self, request: Request<UserId>) -> Result<Response<User>, Status> {
+    async fn create_profile(&self, request: Request<Profile>) -> Result<Response<Profile>, Status> {
         let start = std::time::Instant::now();
-
-        let mut conn = self.pool.get().await.map_err(|e| {
-            tracing::error!("Failed to get connection: {:?}", e);
-            Status::internal("Failed to get connection")
-        })?;
-
-        let user_id = Uuid::from_str(&request.into_inner().user_id).map_err(|e| {
-            tracing::error!("Failed to parse user id: {:?}", e);
-            Status::invalid_argument("Failed to parse user id")
-        })?;
-        let user = users_db::get_user(&mut conn, &user_id).await.map_err(|e| {
-            tracing::error!("Failed to get user: {:?}", e);
-            Status::internal("Failed to get user")
-        })?;
-
-        tracing::info!("GetUser: {:?}", start.elapsed());
-        Ok(Response::new(user))
-    }
-
-    async fn update_user(&self, request: Request<User>) -> Result<Response<Empty>, Status> {
-        let start = std::time::Instant::now();
+        let metadata = request.metadata();
+        let user_id = rusve_users::auth(&metadata)?.user_id;
 
         let mut conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
@@ -131,63 +90,88 @@ impl UsersService for MyService {
         })?;
 
         let request = request.into_inner();
-        let user_id = Uuid::from_str(&request.id).map_err(|e| {
-            tracing::error!("Failed to parse user id: {:?}", e);
-            Status::invalid_argument("Failed to parse user id")
-        })?;
-        let avatar_id = if let Some(avatar_id) = request.avatar_id {
-            Some(Uuid::from_str(&avatar_id).map_err(|e| {
-                tracing::error!("Failed to parse avatar id: {:?}", e);
-                Status::invalid_argument("Failed to parse avatar id")
-            })?)
+        let profile: Profile;
+        if request.id != "" {
+            profile = users_db::update_profile(&conn, &request)
+                .await
+                .map_err(|e| {
+                    tracing::error!("Failed to get profile: {:?}", e);
+                    Status::internal("Failed to get profile")
+                })?;
         } else {
-            None
-        };
-        users_db::update_user(&mut conn, &user_id, &request.name, &avatar_id)
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to update user: {:?}", e);
-                Status::internal("Failed to update user")
-            })?;
+            profile = users_db::insert_profile(&conn, &request)
+                .await
+                .map_err(|e| {
+                    tracing::error!("Failed to get profile: {:?}", e);
+                    Status::internal("Failed to get profile")
+                })?;
+        }
 
         tracing::info!("UpdateUser: {:?}", start.elapsed());
-        Ok(Response::new(Empty {}))
+        Ok(Response::new(profile))
     }
 
-    async fn update_payment_id(
-        &self,
-        request: Request<PaymentId>,
-    ) -> Result<Response<Empty>, Status> {
-        let start = std::time::Instant::now();
+    // async fn get_users(
+    //     &self,
+    //     request: Request<UserIds>,
+    // ) -> Result<Response<Self::GetUsersStream>, Status> {
+    //     let start = std::time::Instant::now();
 
-        let mut conn = self.pool.get().await.map_err(|e| {
-            tracing::error!("Failed to get connection: {:?}", e);
-            Status::internal("Failed to get connection")
-        })?;
-        let tx = conn.transaction().await.map_err(|e| {
-            tracing::error!("Failed to start transaction: {:?}", e);
-            Status::internal("Failed to start transaction")
-        })?;
+    //     let mut conn = self.pool.get().await.map_err(|e| {
+    //         tracing::error!("Failed to get connection: {:?}", e);
+    //         Status::internal("Failed to get connection")
+    //     })?;
 
-        let request = request.into_inner();
-        let user_id = Uuid::from_str(&request.user_id).map_err(|e| {
-            tracing::error!("Failed to parse user id: {:?}", e);
-            Status::invalid_argument("Failed to parse user id")
-        })?;
+    //     let user_ids: Vec<Uuid> = request
+    //         .into_inner()
+    //         .user_ids
+    //         .iter()
+    //         .map(|id| Uuid::from_str(&id))
+    //         .collect::<Result<Vec<Uuid>, _>>()
+    //         .map_err(|e| {
+    //             tracing::error!("Failed to parse user ids: {:?}", e);
+    //             Status::invalid_argument("Failed to parse user ids")
+    //         })?;
 
-        users_db::update_payment_id(&tx, &user_id, &request.payment_id)
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to update payment id: {:?}", e);
-                Status::internal("Failed to update payment id")
-            })?;
+    //     let users = users_db::get_users(&mut conn, user_ids)
+    //         .await
+    //         .map_err(|e| {
+    //             tracing::error!("Failed to get users: {:?}", e);
+    //             Status::internal("Failed to get users")
+    //         })?;
 
-        tx.commit().await.map_err(|e| {
-            tracing::error!("Failed to commit transaction: {:?}", e);
-            Status::internal("Failed to commit transaction")
-        })?;
-
-        tracing::info!("UpdatePaymentId: {:?}", start.elapsed());
-        Ok(Response::new(Empty {}))
-    }
+    //     let (tx, rx) = mpsc::channel(128);
+    //     tokio::spawn(async move {
+    //         futures_util::pin_mut!(users);
+    //         loop {
+    //             let user = match users.try_next().await {
+    //                 Ok(Some(user)) => user,
+    //                 Ok(None) => break,
+    //                 Err(e) => {
+    //                     tracing::error!("Failed to get user: {:?}", e);
+    //                     if let Err(e) = tx.send(Err(Status::internal("Falied to get user"))).await {
+    //                         tracing::error!("Failed to send error: {:?}", e);
+    //                     }
+    //                     break;
+    //                 }
+    //             };
+    //             let user: User = match user.try_into() {
+    //                 Ok(user) => user,
+    //                 Err(e) => {
+    //                     tracing::error!("Failed to convert user: {:?}", e);
+    //                     if let Err(e) = tx.send(Err(Status::internal("Failed to convert user"))).await {
+    //                         tracing::error!("Failed to send error: {:?}", e);
+    //                     }
+    //                     break;
+    //                 }
+    //             };
+    //             if let Err(e) = tx.send(Ok(user)).await {
+    //                 tracing::error!("Failed to send user: {:?}", e);
+    //                 break;
+    //             }
+    //         }
+    //         tracing::info!("GetUsers: {:?}", start.elapsed());
+    //     });
+    //     Ok(Response::new(ReceiverStream::new(rx)))
+    // }
 }

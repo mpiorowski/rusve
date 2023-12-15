@@ -12,15 +12,12 @@ export async function handle({ event, resolve }) {
         id: "",
         created: "",
         updated: "",
-        deleted: "",
+        deleted: "-infinity",
         email: "",
-        avatar: "",
-        role: 0,
         sub: "",
+        role: 0,
         subscriptionId: "",
-        subscriptionEnd: "",
-        _deleted: "deleted",
-        _subscriptionEnd: "subscriptionEnd",
+        subscriptionEnd: "-infinity",
     };
 
     if (event.url.pathname === "/auth") {
@@ -43,20 +40,20 @@ export async function handle({ event, resolve }) {
     const auth = await new Promise((res) => {
         usersService.Auth({}, metadata, grpcSafe(res));
     });
-    if (auth.error || !auth.data.tokenId || !auth.data.user) {
+    if (auth.error || !auth.data.token || !auth.data.user) {
         logger.error("Error during auth");
         throw redirect(302, "/auth");
     }
 
     event.locals.user = auth.data.user;
-    event.locals.token = auth.data.tokenId;
+    event.locals.token = auth.data.token;
 
     end();
     const response = await resolve(event);
-    // max age is 30 days
+    // max age is 7 days
     response.headers.append(
         "set-cookie",
-        `token=${auth.data.tokenId}; HttpOnly; SameSite=Lax; Secure; Max-Age=2592000; Path=/; Domain=${COOKIE_DOMAIN}`,
+        `token=${auth.data.token}; HttpOnly; SameSite=Lax; Secure; Max-Age=604800; Domain=${COOKIE_DOMAIN}; Path=/`,
     );
     return response;
 }

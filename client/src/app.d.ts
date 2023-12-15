@@ -7,12 +7,12 @@ declare global {
     namespace App {
         // interface Error {}
         interface Locals {
-            user: User__Output;
             token: string;
+            user: User__Output;
         }
         // interface PageData {}
         // interface Platform {}
     }
 }
 
-export { };
+export {};

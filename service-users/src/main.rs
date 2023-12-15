@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
-    sub: String,
+    token: String,
 }
 fn check_auth(req: Request<()>) -> Result<Request<()>, Status> {
     let token = match req.metadata().get("x-authorization") {

@@ -2,11 +2,9 @@
 
 
 export interface AuthRequest {
-  'sub'?: (string);
-  'email'?: (string);
+  'token'?: (string);
 }
 
 export interface AuthRequest__Output {
-  'sub': (string);
-  'email': (string);
+  'token': (string);
 }

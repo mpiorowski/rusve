@@ -110,14 +110,10 @@ pub async fn oauth_callback(
     // Delete the PKCE verifier from the database asynchronously.
     // If this fails, it's not a big deal.
     tokio::spawn(async move {
-        let conn = match state.db_pool.get().await {
-            Ok(conn) => conn,
-            Err(err) => {
-                tracing::error!("Failed to get DB connection: {:?}", err);
-                return;
-            }
-        };
-        if let Err(err) = delete_pkce_by_id(&conn, pkce.id).await {
+        let conn = state.db_pool.get().await.map_err(|err| {
+            tracing::error!("Failed to get DB connection: {:?}", err);
+        });
+        if let Err(err) = delete_pkce_by_id(&conn.unwrap(), pkce.id).await {
             tracing::error!("Failed to delete PKCE verifier: {:?}", err);
         }
     });

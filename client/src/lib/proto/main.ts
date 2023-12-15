@@ -11,19 +11,18 @@ type SubtypeConstructor<Constructor extends new (...args: any) => any, Subtype> 
 
 export interface ProtoGrpcType {
   proto: {
-    AuthRequest: MessageTypeDefinition
+    AuthResponse: MessageTypeDefinition
     Empty: MessageTypeDefinition
     File: MessageTypeDefinition
     FileId: MessageTypeDefinition
     FileType: EnumTypeDefinition
+    Id: MessageTypeDefinition
     Note: MessageTypeDefinition
     NoteId: MessageTypeDefinition
     NotesService: SubtypeConstructor<typeof grpc.Client, _proto_NotesServiceClient> & { service: _proto_NotesServiceDefinition }
-    PaymentId: MessageTypeDefinition
+    Profile: MessageTypeDefinition
     TargetId: MessageTypeDefinition
     User: MessageTypeDefinition
-    UserId: MessageTypeDefinition
-    UserIds: MessageTypeDefinition
     UserRole: EnumTypeDefinition
     UsersService: SubtypeConstructor<typeof grpc.Client, _proto_UsersServiceClient> & { service: _proto_UsersServiceDefinition }
     UtilsService: SubtypeConstructor<typeof grpc.Client, _proto_UtilsServiceClient> & { service: _proto_UtilsServiceDefinition }
