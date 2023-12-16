@@ -1,11 +1,12 @@
-import { getFormValue } from "$lib/helpers";
+import { getFormValue } from "$lib/utils";
 import { grpcSafe, safe } from "$lib/safe";
 import { notesService } from "$lib/server/grpc";
 import { createMetadata } from "$lib/server/metadata";
+import { pagination } from "$lib/ui/pagination";
 import { fail } from "@sveltejs/kit";
 
 /** @type {import('./$types').PageServerLoad} */
-export async function load({ locals }) {
+export async function load({ locals, url }) {
     /** @type {import("$lib/proto/proto/Note").Note__Output[]} */
     const notes = [];
     const metadata = createMetadata("", locals.user.id);
@@ -22,11 +23,13 @@ export async function load({ locals }) {
     if (r.error) {
         return {
             error: r.msg,
-            notes: [],
+            pagination: pagination(notes, 1),
         };
     }
+
+    const page = Number(url.searchParams.get("p")) || 1;
     return {
-        notes: notes,
+        pagination: pagination(notes, page),
     };
 }
 

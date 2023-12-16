@@ -1,10 +1,15 @@
 <script>
-    import { toast } from "$lib/overlay/toast";
+    import { toast } from "$lib/ui/toast";
     import Input from "$lib/form/Input.svelte";
     import Button from "$lib/form/Button.svelte";
     import { enhance } from "$app/forms";
     import { extractError } from "$lib/errors";
     import SaveIcon from "$lib/icons/SaveIcon.svelte";
+    import Pagination from "$lib/ui/Pagination.svelte";
+    import { preloadData, pushState, goto } from "$app/navigation";
+    import { page } from "$app/stores";
+    import Drawer from "$lib/ui/Drawer.svelte";
+    import NotePage from "./[noteId]/+page.svelte";
 
     /** @type {import("./$types").PageData} */
     export let data;
@@ -20,10 +25,42 @@
     let content = "";
     /** @type {boolean} */
     let loading = false;
+
+    /** @param {MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }} e */
+    async function onDetails(e) {
+        // bail if opening a new tab, or we're on too small a screen
+        if (e.metaKey || innerWidth < 640) return;
+
+        // prevent navigation
+        e.preventDefault();
+
+        const { href } = e.currentTarget;
+
+        // run `load` functions (or rather, get the result of the `load` functions
+        // that are already running because of `data-sveltekit-preload-data`)
+        const result = await preloadData(href);
+
+        if (result["type"] === "loaded" && result["status"] === 200) {
+            pushState(href, { noteDrawer: result["data"], open: true });
+        } else {
+            // something bad happened! try navigating
+            goto(href);
+        }
+    }
 </script>
 
+{#if $page.state.open}
+    <Drawer
+        open={$page.state.open}
+        close={() => history.back()}
+        title="Note details"
+    >
+        <NotePage isModal data={$page.state.noteDrawer} {form} />
+    </Drawer>
+{/if}
+
 <form
-    class="m-auto max-w-2xl p-10"
+    class="max-w-2xl"
     action="?/insert"
     method="post"
     use:enhance={() => {
@@ -45,14 +82,14 @@
             <h2
                 class="flex items-center gap-2 text-base font-semibold leading-7 text-gray-900"
             >
-                Notes
+                New Note
             </h2>
             <p class="mt-1 text-sm leading-6 text-gray-600">
-                List of notes you have created.
+                Create a new note.
             </p>
         </div>
 
-        <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-6">
+        <div class="mt-10 grid grid-cols-1 gap-x-6 sm:grid-cols-6">
             <div class="sm:col-span-4">
                 <Input
                     name="title"
@@ -82,6 +119,7 @@
             </div>
         </div>
 
+        <!--
         {#each data.notes as note}
             <div
                 class="mx-auto mt-8 rounded-lg bg-gray-800 p-6 text-white shadow-md"
@@ -93,5 +131,86 @@
                 <Button class="w-20" href="/notes/{note.id}">Edit</Button>
             </div>
         {/each}
+-->
     </div>
 </form>
+
+<div class="relative mt-10 w-full">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-semibold leading-6 text-gray-900">
+                Notes
+            </h1>
+            <p class="mt-2 text-sm text-gray-700">
+                List of notes you have created.
+            </p>
+        </div>
+    </div>
+    <div class="mt-8 flow-root">
+        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div
+                class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8"
+            >
+                <table class="min-w-full divide-y divide-gray-300">
+                    <thead>
+                        <tr>
+                            <th
+                                scope="col"
+                                class="py-3 pl-4 pr-3 text-left text-xs uppercase tracking-wide text-gray-500 sm:pl-0"
+                            >
+                                Title
+                            </th>
+                            <th
+                                scope="col"
+                                class="px-3 py-3 text-left text-xs uppercase tracking-wide text-gray-500"
+                            >
+                                Content
+                            </th>
+                            <th
+                                scope="col"
+                                class="relative py-3 pl-3 pr-4 sm:pr-0"
+                            >
+                                <span class="sr-only">Edit</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                        {#each data.pagination.data as note}
+                            <tr>
+                                <td
+                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
+                                >
+                                    {note.title}
+                                </td>
+                                <td
+                                    class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                                >
+                                    {note.content}
+                                </td>
+                                <td
+                                    class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
+                                >
+                                    <a
+                                        href="/notes/{note.id}"
+                                        class="mr-4 text-indigo-600 hover:text-indigo-900"
+                                        on:click={(e) => onDetails(e)}
+                                    >
+                                        Edit
+                                        <span class="sr-only">
+                                            , {note.title}
+                                        </span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {/each}
+
+                        <!-- More people... -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <Pagination pagination={data.pagination} />
+    </div>
+</div>

@@ -1,5 +1,5 @@
 import { error, fail } from "@sveltejs/kit";
-import { getFormValue } from "$lib/helpers";
+import { getFormValue } from "$lib/utils";
 import { createMetadata } from "$lib/server/metadata";
 import { notesService } from "$lib/server/grpc";
 import { grpcSafe } from "$lib/safe";

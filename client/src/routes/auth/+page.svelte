@@ -3,7 +3,7 @@
     import { PUBLIC_SERVER_HTTP } from "$env/static/public";
     import Button from "$lib/form/Button.svelte";
     import LogoIcon from "$lib/icons/LogoIcon.svelte";
-    import { toast } from "$lib/overlay/toast";
+    import { toast } from "$lib/ui/toast";
 
     const error = $page.url.searchParams.get("error");
     $: if (error) {

@@ -6,7 +6,7 @@
     import FileInput from "$lib/form/FileInput.svelte";
     import Input from "$lib/form/Input.svelte";
     import SaveIcon from "$lib/icons/SaveIcon.svelte";
-    import { toast } from "$lib/overlay/toast";
+    import { toast } from "$lib/ui/toast";
 
     /** @type {import("./$types").PageData} */
     export let data;

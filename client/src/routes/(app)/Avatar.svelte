@@ -1,9 +1,9 @@
 <script>
-    import { checkElement } from "$lib/helpers";
+    import { checkElement } from "$lib/utils";
     import { scale } from "svelte/transition";
 
     /** @type {string} */
-    export let avatar;
+    export let avatarUrl;
 
     /** @type {boolean} */
     let open = false;
@@ -95,10 +95,10 @@
                 <span
                     class="inline-flex h-8 w-8 overflow-hidden rounded-full bg-gray-100 transition hover:bg-gray-200"
                 >
-                    {#if avatar}
+                    {#if avatarUrl}
                         <img
                             class="h-8 w-8 rounded-full"
-                            src={avatar}
+                            src={avatarUrl}
                             alt="Avatar"
                         />
                     {:else}

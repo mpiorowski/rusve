@@ -17,7 +17,7 @@ export async function load({ locals }) {
         throw error(500, profile.msg);
     }
     return {
-        user: locals.user,
         profile: profile.data,
+        email: locals.user.email,
     };
 }

@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import { generateId } from "$lib/helpers";
+import { generateId } from "$lib/utils";
 
 /** @type {import("svelte/store").Writable<import("$lib/types").Toast[]>}*/
 export const toastStore = writable([]);

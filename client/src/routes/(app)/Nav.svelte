@@ -75,7 +75,7 @@
                     <div class="ml-4 flex items-center md:ml-6">
                         <!-- Profile dropdown -->
                         <div class="relative ml-3 flex">
-                            <Avatar avatar={data.profile.avatarUrl} />
+                            <Avatar avatarUrl={data.profile.avatarUrl} />
                         </div>
                     </div>
                 </div>
@@ -173,7 +173,7 @@
                         <div
                             class="text-base font-medium leading-none text-white"
                         >
-                            {data.user.email}
+                            {data.email}
                         </div>
                     </div>
                 </div>
