@@ -2,6 +2,7 @@ mod migrations;
 mod proto;
 mod users_db;
 mod users_service;
+mod stripe_service;
 
 use anyhow::{Context, Result};
 use crate::proto::users_service_server::UsersServiceServer;

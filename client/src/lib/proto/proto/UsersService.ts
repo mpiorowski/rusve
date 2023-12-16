@@ -5,6 +5,7 @@ import type { MethodDefinition } from '@grpc/proto-loader'
 import type { AuthResponse as _proto_AuthResponse, AuthResponse__Output as _proto_AuthResponse__Output } from '../proto/AuthResponse';
 import type { Empty as _proto_Empty, Empty__Output as _proto_Empty__Output } from '../proto/Empty';
 import type { Profile as _proto_Profile, Profile__Output as _proto_Profile__Output } from '../proto/Profile';
+import type { StripeCheckoutResponse as _proto_StripeCheckoutResponse, StripeCheckoutResponse__Output as _proto_StripeCheckoutResponse__Output } from '../proto/StripeCheckoutResponse';
 
 export interface UsersServiceClient extends grpc.Client {
   Auth(argument: _proto_Empty, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_AuthResponse__Output>): grpc.ClientUnaryCall;
@@ -25,6 +26,15 @@ export interface UsersServiceClient extends grpc.Client {
   createProfile(argument: _proto_Profile, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Profile__Output>): grpc.ClientUnaryCall;
   createProfile(argument: _proto_Profile, callback: grpc.requestCallback<_proto_Profile__Output>): grpc.ClientUnaryCall;
   
+  CreateStripeCheckout(argument: _proto_Empty, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_StripeCheckoutResponse__Output>): grpc.ClientUnaryCall;
+  CreateStripeCheckout(argument: _proto_Empty, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_StripeCheckoutResponse__Output>): grpc.ClientUnaryCall;
+  CreateStripeCheckout(argument: _proto_Empty, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_StripeCheckoutResponse__Output>): grpc.ClientUnaryCall;
+  CreateStripeCheckout(argument: _proto_Empty, callback: grpc.requestCallback<_proto_StripeCheckoutResponse__Output>): grpc.ClientUnaryCall;
+  createStripeCheckout(argument: _proto_Empty, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_StripeCheckoutResponse__Output>): grpc.ClientUnaryCall;
+  createStripeCheckout(argument: _proto_Empty, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_StripeCheckoutResponse__Output>): grpc.ClientUnaryCall;
+  createStripeCheckout(argument: _proto_Empty, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_StripeCheckoutResponse__Output>): grpc.ClientUnaryCall;
+  createStripeCheckout(argument: _proto_Empty, callback: grpc.requestCallback<_proto_StripeCheckoutResponse__Output>): grpc.ClientUnaryCall;
+  
   GetProfileByUserId(argument: _proto_Empty, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Profile__Output>): grpc.ClientUnaryCall;
   GetProfileByUserId(argument: _proto_Empty, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Profile__Output>): grpc.ClientUnaryCall;
   GetProfileByUserId(argument: _proto_Empty, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Profile__Output>): grpc.ClientUnaryCall;
@@ -41,6 +51,8 @@ export interface UsersServiceHandlers extends grpc.UntypedServiceImplementation 
   
   CreateProfile: grpc.handleUnaryCall<_proto_Profile__Output, _proto_Profile>;
   
+  CreateStripeCheckout: grpc.handleUnaryCall<_proto_Empty__Output, _proto_StripeCheckoutResponse>;
+  
   GetProfileByUserId: grpc.handleUnaryCall<_proto_Empty__Output, _proto_Profile>;
   
 }
@@ -48,5 +60,6 @@ export interface UsersServiceHandlers extends grpc.UntypedServiceImplementation 
 export interface UsersServiceDefinition extends grpc.ServiceDefinition {
   Auth: MethodDefinition<_proto_Empty, _proto_AuthResponse, _proto_Empty__Output, _proto_AuthResponse__Output>
   CreateProfile: MethodDefinition<_proto_Profile, _proto_Profile, _proto_Profile__Output, _proto_Profile__Output>
+  CreateStripeCheckout: MethodDefinition<_proto_Empty, _proto_StripeCheckoutResponse, _proto_Empty__Output, _proto_StripeCheckoutResponse__Output>
   GetProfileByUserId: MethodDefinition<_proto_Empty, _proto_Profile, _proto_Empty__Output, _proto_Profile__Output>
 }

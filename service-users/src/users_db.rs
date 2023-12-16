@@ -180,3 +180,37 @@ pub async fn update_profile(conn: &Object, user_id: &str, profile: &Profile) -> 
     let profile: Profile = Profile::try_from(profile)?;
     Ok(profile)
 }
+
+pub async fn update_user_subscription_id(
+    conn: &Object,
+    user_id: &str,
+    subscription_id: &str,
+) -> Result<User> {
+    let user_id: Uuid = Uuid::from_str(user_id)?;
+    let user: tokio_postgres::Row = conn
+        .query_one(
+            "update users set subscription_id = $1 where id = $2 returning *",
+            &[&subscription_id, &user_id],
+        )
+        .await?;
+    let user: User = User::try_from(user)?;
+    Ok(user)
+}
+
+pub async fn update_user_subscription_end(
+    conn: &Object,
+    user_id: &str,
+    subscription_end: &str,
+) -> Result<User> {
+    let user_id: Uuid = Uuid::from_str(user_id)?;
+    let subscription_end: time::OffsetDateTime =
+        time::OffsetDateTime::parse(subscription_end, &Iso8601::DEFAULT)?;
+    let user: tokio_postgres::Row = conn
+        .query_one(
+            "update users set subscription_end = $1 where id = $2 returning *",
+            &[&subscription_end, &user_id],
+        )
+        .await?;
+    let user: User = User::try_from(user)?;
+    Ok(user)
+}

@@ -51,6 +51,8 @@ services:
       ENV: development
       RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
+      STRIPE_PRICE_ID: ${STRIPE_PRICE_ID}
 
   service-notes:
     container_name: rusve-service-notes

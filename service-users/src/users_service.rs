@@ -1,6 +1,6 @@
 use crate::proto::users_service_server::UsersService;
 use crate::proto::{AuthResponse, Empty, Profile};
-use crate::users_db::select_token_by_id;
+use crate::users_db::{select_token_by_id, select_user_by_uuid};
 use crate::{users_db, MyService};
 use anyhow::Result;
 use tonic::{Request, Response, Status};
@@ -108,5 +108,40 @@ impl UsersService for MyService {
 
         tracing::info!("UpdateUser: {:?}", start.elapsed());
         Ok(Response::new(profile))
+    }
+
+    async fn create_stripe_checkout(
+        &self,
+        request: Request<crate::proto::Empty>,
+    ) -> Result<Response<crate::proto::StripeCheckoutResponse>, Status> {
+        let start = std::time::Instant::now();
+        let metadata = request.metadata();
+        let user_id = rusve_users::auth(metadata)?.user_id;
+
+        let conn = self.pool.get().await.map_err(|e| {
+            tracing::error!("Failed to get connection: {:?}", e);
+            Status::internal("Failed to get connection")
+        })?;
+
+        let user_uuid = uuid::Uuid::parse_str(&user_id).map_err(|e| {
+            tracing::error!("Failed to parse user uuid: {:?}", e);
+            Status::internal("Failed to parse user uuid")
+        })?;
+        let user = select_user_by_uuid(&conn, user_uuid).await.map_err(|e| {
+            tracing::error!("Failed to auth user: {:?}", e);
+            Status::unauthenticated("Failed to auth user")
+        })?;
+
+        let session_url = crate::stripe_service::create_checkout_session(&conn, user)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to create checkout session: {:?}", e);
+                Status::internal("Failed to create checkout session")
+            })?;
+
+        tracing::info!("CreateStripeCheckoutSession: {:?}", start.elapsed());
+        Ok(Response::new(crate::proto::StripeCheckoutResponse {
+            session_url,
+        }))
     }
 }

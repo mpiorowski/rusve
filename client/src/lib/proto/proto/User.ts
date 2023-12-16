@@ -12,6 +12,8 @@ export interface User {
   'role'?: (_proto_UserRole);
   'subscriptionId'?: (string);
   'subscriptionEnd'?: (string);
+  'subscriptionCheck'?: (string);
+  'subscriptionActive'?: (boolean);
 }
 
 export interface User__Output {
@@ -24,4 +26,6 @@ export interface User__Output {
   'role': (_proto_UserRole__Output);
   'subscriptionId': (string);
   'subscriptionEnd': (string);
+  'subscriptionCheck': (string);
+  'subscriptionActive': (boolean);
 }

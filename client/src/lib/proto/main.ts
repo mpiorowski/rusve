@@ -22,6 +22,7 @@ export interface ProtoGrpcType {
     NotesService: SubtypeConstructor<typeof grpc.Client, _proto_NotesServiceClient> & { service: _proto_NotesServiceDefinition }
     Page: MessageTypeDefinition
     Profile: MessageTypeDefinition
+    StripeCheckoutResponse: MessageTypeDefinition
     TargetId: MessageTypeDefinition
     User: MessageTypeDefinition
     UserRole: EnumTypeDefinition

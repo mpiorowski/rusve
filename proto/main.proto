@@ -29,11 +29,17 @@ message AuthResponse {
     User user = 2;
 }
 
+message StripeCheckoutResponse {
+    string session_url = 1;
+}
+
 service UsersService {
     rpc Auth(Empty) returns (AuthResponse) {}
 
     rpc GetProfileByUserId(Empty) returns (Profile) {}
     rpc CreateProfile(Profile) returns (Profile) {}
+
+    rpc CreateStripeCheckout(Empty) returns (StripeCheckoutResponse) {}
 }
 
 service NotesService {
