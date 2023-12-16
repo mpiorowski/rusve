@@ -1,13 +1,11 @@
 /** Generate pagination schema
- * @template T
- * @param {T[]} data
+ * @param {number} total
  * @param {number} currentPage
  * @param {number} pageSize
  * @returns {number[]}
  */
-function generatePaginationSchema(data, currentPage, pageSize = 10) {
-    const totalItems = data.length;
-    const totalPages = Math.ceil(totalItems / pageSize);
+function generatePaginationSchema(total, currentPage, pageSize) {
+    const totalPages = Math.ceil(total / pageSize);
     const paginationArray = [];
 
     if (totalPages <= 7) {
@@ -47,12 +45,10 @@ function generatePaginationSchema(data, currentPage, pageSize = 10) {
 
 /**
  * Generate pagination data
- * @template T
- * @param {T[]} data
+ * @param {number} total
  * @param {number} currentPage
  * @param {number} pageSize
  * @returns {{
- * data: T[],
  * start: number,
  * end: number,
  * prev: number,
@@ -61,12 +57,7 @@ function generatePaginationSchema(data, currentPage, pageSize = 10) {
  * schema: number[]
  * }}
  */
-export function pagination(data, currentPage, pageSize = 10) {
-    const paginated = data.slice(
-        (currentPage - 1) * pageSize,
-        currentPage * pageSize,
-    );
-    const total = data.length;
+export function pagination(total, currentPage, pageSize) {
     const start = (currentPage - 1) * pageSize + 1;
     const end = currentPage * pageSize > total ? total : currentPage * pageSize;
     const prev = currentPage > 1 ? currentPage - 1 : 1;
@@ -74,10 +65,9 @@ export function pagination(data, currentPage, pageSize = 10) {
         currentPage < Math.ceil(total / pageSize)
             ? currentPage + 1
             : Math.ceil(total / pageSize);
-    const schema = generatePaginationSchema(data, currentPage);
+    const schema = generatePaginationSchema(total, currentPage, pageSize);
 
     return {
-        data: paginated,
         start,
         end,
         prev,

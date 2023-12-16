@@ -6,6 +6,12 @@ use std::str::FromStr;
 use tokio_postgres_rustls::MakeRustlsConnect;
 mod proto;
 
+pub fn slice_iter<'a>(
+    s: &'a [&'a (dyn tokio_postgres::types::ToSql + Sync)],
+) -> impl ExactSizeIterator<Item = &'a dyn tokio_postgres::types::ToSql> + 'a {
+    s.iter().map(|s| *s as _)
+}
+
 pub fn connect_to_db() -> Result<deadpool_postgres::Pool> {
     let database_url = std::env::var("DATABASE_URL")?;
     let tokio_config = tokio_postgres::Config::from_str(&database_url)?;

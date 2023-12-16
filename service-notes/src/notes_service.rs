@@ -1,6 +1,6 @@
 use crate::{
     notes_db::{self, insert_note},
-    proto::{notes_service_server::NotesService, Empty, Id, Note},
+    proto::{notes_service_server::NotesService, Count, Empty, Id, Note, Page},
     MyService,
 };
 use anyhow::Result;
@@ -13,9 +13,33 @@ use tonic::{Request, Response, Status};
 impl NotesService for MyService {
     type GetNotesByUserIdStream = ReceiverStream<Result<Note, Status>>;
 
-    async fn get_notes_by_user_id(
+    async fn count_notes_by_user_id(
         &self,
         request: Request<Empty>,
+    ) -> Result<Response<Count>, Status> {
+        let start = std::time::Instant::now();
+        let metadata = request.metadata();
+        let user_id = rusve_notes::auth(metadata)?.user_id;
+
+        let conn = self.pool.get().await.map_err(|e| {
+            tracing::error!("Failed to get connection: {:?}", e);
+            Status::internal("Failed to get connection")
+        })?;
+
+        let count = notes_db::count_notes_by_user_id(&conn, &user_id)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to count notes: {:?}", e);
+                Status::internal("Failed to count notes")
+            })?;
+
+        tracing::info!("CountNotesByUserId: {:?}", start.elapsed());
+        return Ok(Response::new(Count { count }));
+    }
+
+    async fn get_notes_by_user_id(
+        &self,
+        request: Request<Page>,
     ) -> Result<Response<Self::GetNotesByUserIdStream>, Status> {
         let start = std::time::Instant::now();
         let metadata = request.metadata();
@@ -26,7 +50,8 @@ impl NotesService for MyService {
             Status::internal("Failed to get connection")
         })?;
 
-        let notes_stream = notes_db::get_notes_by_user_id(&conn, &user_id)
+        let page = request.into_inner();
+        let notes_stream = notes_db::get_notes_by_user_id(&conn, &user_id, page.offset, page.limit)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to get notes: {:?}", e);

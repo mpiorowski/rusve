@@ -15,6 +15,15 @@ message Id {
     string id = 1;
 }
 
+message Page {
+    int64 offset = 1;
+    int64 limit = 2;
+}
+
+message Count {
+    int64 count = 1;
+}
+
 message AuthResponse {
     string token = 1;
     User user = 2;
@@ -27,13 +36,9 @@ service UsersService {
     rpc CreateProfile(Profile) returns (Profile) {}
 }
 
-message NoteId {
-    string note_id = 1;
-    string user_id = 2;
-}
-
 service NotesService {
-    rpc GetNotesByUserId(Empty) returns (stream Note) {}
+    rpc CountNotesByUserId(Empty) returns (Count) {}
+    rpc GetNotesByUserId(Page) returns (stream Note) {}
     rpc GetNoteById(Id) returns (Note) {}
     rpc CreateNote(Note) returns (Note) {}
     rpc DeleteNoteById(Id) returns (Empty) {}

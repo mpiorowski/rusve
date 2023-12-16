@@ -1,19 +1,15 @@
 <script>
     import { page } from "$app/stores";
+    import { pagination } from "./pagination";
 
-    /**
-     * @type {{
-     *  start: number,
-     *  end: number,
-     *  prev: number,
-     *  next: number,
-     *  total: number,
-     *  schema: number[]
-     * }}
-     */
-    export let pagination;
-
+    /** @type {number} */
+    export let total;
+    /** @type {number} */
+    export let pageSize;
+    /** @type {number} */
     $: p = Number($page.url.searchParams.get("p")) || 1;
+
+    $: data = pagination(total, p, pageSize);
 </script>
 
 <div
@@ -21,13 +17,13 @@
 >
     <div class="flex flex-1 justify-between sm:hidden">
         <a
-            href={`?p=${pagination.prev}`}
+            href={`?p=${data.prev}`}
             class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
             Previous
         </a>
         <a
-            href={`?p=${pagination.next}`}
+            href={`?p=${data.next}`}
             class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
             Next
@@ -37,11 +33,11 @@
         <div>
             <p class="text-sm text-gray-700">
                 Showing
-                <span class="font-medium">{pagination.start}</span>
+                <span class="font-medium">{data.start}</span>
                 to
-                <span class="font-medium">{pagination.end}</span>
+                <span class="font-medium">{data.end}</span>
                 of
-                <span class="font-medium">{pagination.total}</span>
+                <span class="font-medium">{data.total}</span>
                 results
             </p>
         </div>
@@ -51,7 +47,7 @@
                 aria-label="Pagination"
             >
                 <a
-                    href={`?p=${pagination.prev}`}
+                    href={`?p=${data.prev}`}
                     class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300
                         hover:bg-gray-50 focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-indigo-600"
                 >
@@ -70,7 +66,7 @@
                     </svg>
                 </a>
                 <!-- Current: "z-10 bg-indigo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600", Default: "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0" -->
-                {#each pagination.schema as i}
+                {#each data.schema as i}
                     {#if i === 0}
                         <span
                             class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0"
@@ -92,7 +88,7 @@
                     {/if}
                 {/each}
                 <a
-                    href={`?p=${pagination.next}`}
+                    href={`?p=${data.next}`}
                     class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
                 >
                     <span class="sr-only">Next</span>

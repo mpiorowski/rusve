@@ -175,7 +175,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-white">
-                        {#each data.pagination.data as note}
+                        {#each data.notes as note}
                             <tr>
                                 <td
                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
@@ -211,6 +211,6 @@
         </div>
 
         <!-- Pagination -->
-        <Pagination pagination={data.pagination} />
+        <Pagination total={data.total} pageSize={data.pageSize} />
     </div>
 </div>

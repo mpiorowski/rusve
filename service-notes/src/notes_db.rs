@@ -1,5 +1,6 @@
 use anyhow::Result;
 use deadpool_postgres::Object;
+use rusve_notes::slice_iter;
 use time::format_description::well_known::Iso8601;
 use tokio_postgres::{types::Timestamp, RowStream};
 use uuid::Uuid;
@@ -37,12 +38,31 @@ impl TryFrom<tokio_postgres::Row> for Note {
     }
 }
 
-pub async fn get_notes_by_user_id(conn: &Object, user_id: &str) -> Result<RowStream> {
-    let user_id = Uuid::parse_str(user_id)?;
+pub async fn count_notes_by_user_id(conn: &Object, user_id: &str) -> Result<i64> {
     let stmt = conn
-        .prepare("select * from notes where user_id = $1 and deleted = 'infinity'")
+        .prepare("select count(*) from notes where user_id = $1 and deleted = 'infinity'")
         .await?;
-    let rows = conn.query_raw(&stmt, &[&user_id]).await?;
+    let row = conn.query_one(&stmt, &[&Uuid::parse_str(user_id)?]).await?;
+    let count: i64 = row.try_get(0)?;
+    Ok(count)
+}
+
+pub async fn get_notes_by_user_id(
+    conn: &Object,
+    user_id: &str,
+    offset: i64,
+    limit: i64,
+) -> Result<RowStream> {
+    let stmt = conn
+        .prepare("select * from notes where user_id = $1 and deleted = 'infinity' order by created desc offset $2 limit $3")
+        .await?;
+
+    let rows = conn
+        .query_raw(
+            &stmt,
+            slice_iter(&[&Uuid::parse_str(user_id)?, &offset, &limit]),
+        )
+        .await?;
     Ok(rows)
 }
 
