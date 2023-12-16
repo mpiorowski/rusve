@@ -36,35 +36,50 @@ impl NotesService for MyService {
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
             futures_util::pin_mut!(notes_stream);
-            loop {
-                let note = match notes_stream.try_next().await {
-                    Ok(Some(note)) => note,
-                    Ok(None) => break,
-                    Err(e) => {
-                        tracing::error!("Failed to get note: {:?}", e);
-                        if let Err(e) = tx.send(Err(Status::internal("Failed to get note"))).await {
-                            tracing::error!("Failed to send error: {:?}", e);
+            while let Ok(Some(note)) = notes_stream.try_next().await {
+                let tx = tx.clone();
+                tokio::spawn(async move {
+                    let note: Note = match note.try_into() {
+                        Ok(note) => note,
+                        Err(e) => {
+                            tracing::error!("Failed to get note: {:?}", e);
+                            return;
                         }
-                        break;
+                    };
+                    if let Err(e) = tx.send(Ok(note)).await {
+                        tracing::error!("Failed to send note: {:?}", e);
                     }
-                };
-                let note: Note = match note.try_into() {
-                    Ok(note) => note,
-                    Err(e) => {
-                        tracing::error!("Failed to convert note: {:?}", e);
-                        if let Err(e) = tx
-                            .send(Err(Status::internal("Failed to convert note")))
-                            .await
-                        {
-                            tracing::error!("Failed to send error: {:?}", e);
-                        }
-                        return;
-                    }
-                };
-                if let Err(e) = tx.send(Ok(note)).await {
-                    tracing::error!("Failed to send note: {:?}", e);
-                }
+                });
             }
+            // loop {
+            //     let note = match notes_stream.try_next().await {
+            //         Ok(Some(note)) => note,
+            //         Ok(None) => break,
+            //         Err(e) => {
+            //             tracing::error!("Failed to get note: {:?}", e);
+            //             if let Err(e) = tx.send(Err(Status::internal("Failed to get note"))).await {
+            //                 tracing::error!("Failed to send error: {:?}", e);
+            //             }
+            //             break;
+            //         }
+            //     };
+            //     let note: Note = match note.try_into() {
+            //         Ok(note) => note,
+            //         Err(e) => {
+            //             tracing::error!("Failed to convert note: {:?}", e);
+            //             if let Err(e) = tx
+            //                 .send(Err(Status::internal("Failed to convert note")))
+            //                 .await
+            //             {
+            //                 tracing::error!("Failed to send error: {:?}", e);
+            //             }
+            //             return;
+            //         }
+            //     };
+            //     if let Err(e) = tx.send(Ok(note)).await {
+            //         tracing::error!("Failed to send note: {:?}", e);
+            //     }
+            // }
             tracing::info!("GetNotesByUserId: {:?}", start.elapsed());
         });
         Ok(Response::new(ReceiverStream::new(rx)))
