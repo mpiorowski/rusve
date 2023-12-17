@@ -50,7 +50,7 @@
 </script>
 
 <form
-    class="m-auto max-w-2xl p-10"
+    class="max-w-2xl"
     method="post"
     action="?/createProfile"
     enctype="multipart/form-data"

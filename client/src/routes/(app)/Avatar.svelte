@@ -145,7 +145,7 @@
                         on:mouseover={() => (active = 0)}
                         on:focus={() => (active = 0)}
                         on:click={() => open = false}
-                        href="https://github.com/mpiorowski/sgsg"
+                        href="https://github.com/mpiorowski/rusve"
                         target="_blank"
                         class="block px-4 py-2 text-sm text-gray-700
                     {active === 0 ? 'bg-gray-100 text-gray-900' : ''}"
