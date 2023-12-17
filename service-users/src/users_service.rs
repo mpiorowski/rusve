@@ -48,6 +48,14 @@ impl UsersService for MyService {
             return Err(Status::unauthenticated("Unauthenticated"));
         }
 
+        // update subscription
+        crate::stripe_service::update_subscription(&conn, &user)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to update subscription: {:?}", e);
+                Status::internal("Failed to update subscription")
+            })?;
+
         tracing::info!("Auth: {:?}", start.elapsed());
         Ok(Response::new(AuthResponse {
             user: user.into(),

@@ -46,7 +46,20 @@ impl TryFrom<tokio_postgres::Row> for User {
         let subscription_id: String = value.try_get("subscription_id")?;
         let subscription_end: Timestamp<time::OffsetDateTime> =
             value.try_get("subscription_end")?;
+        let mut subscription_active: bool = false;
         let subscription_end: String = match subscription_end {
+            Timestamp::PosInfinity => "infinity".to_string(),
+            Timestamp::NegInfinity => "-infinity".to_string(),
+            Timestamp::Value(date) => {
+                if date < time::OffsetDateTime::now_utc() + time::Duration::days(2) {
+                    subscription_active = true;
+                }
+                date.format(&Iso8601::DEFAULT)?.to_string()
+            }
+        };
+        let subscription_check: Timestamp<time::OffsetDateTime> =
+            value.try_get("subscription_check")?;
+        let subscription_check: String = match subscription_check {
             Timestamp::PosInfinity => "infinity".to_string(),
             Timestamp::NegInfinity => "-infinity".to_string(),
             Timestamp::Value(date) => date.format(&Iso8601::DEFAULT)?.to_string(),
@@ -62,6 +75,8 @@ impl TryFrom<tokio_postgres::Row> for User {
             role,
             subscription_id,
             subscription_end,
+            subscription_check,
+            subscription_active,
         })
     }
 }
@@ -181,36 +196,3 @@ pub async fn update_profile(conn: &Object, user_id: &str, profile: &Profile) -> 
     Ok(profile)
 }
 
-pub async fn update_user_subscription_id(
-    conn: &Object,
-    user_id: &str,
-    subscription_id: &str,
-) -> Result<User> {
-    let user_id: Uuid = Uuid::from_str(user_id)?;
-    let user: tokio_postgres::Row = conn
-        .query_one(
-            "update users set subscription_id = $1 where id = $2 returning *",
-            &[&subscription_id, &user_id],
-        )
-        .await?;
-    let user: User = User::try_from(user)?;
-    Ok(user)
-}
-
-pub async fn update_user_subscription_end(
-    conn: &Object,
-    user_id: &str,
-    subscription_end: &str,
-) -> Result<User> {
-    let user_id: Uuid = Uuid::from_str(user_id)?;
-    let subscription_end: time::OffsetDateTime =
-        time::OffsetDateTime::parse(subscription_end, &Iso8601::DEFAULT)?;
-    let user: tokio_postgres::Row = conn
-        .query_one(
-            "update users set subscription_end = $1 where id = $2 returning *",
-            &[&subscription_end, &user_id],
-        )
-        .await?;
-    let user: User = User::try_from(user)?;
-    Ok(user)
-}

@@ -24,7 +24,7 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
                 role int not null,
                 subscription_id text not null default '',
                 subscription_end timestamptz not null default '-infinity',
-                subscription_check timestamptz not null default current_timestamp,
+                subscription_check timestamptz not null default '-infinity',
                 unique (email, sub)
             );
             drop trigger if exists set_timestamp on users;

@@ -3,6 +3,7 @@ mod proto;
 mod users_db;
 mod users_service;
 mod stripe_service;
+mod stripe_db;
 
 use anyhow::{Context, Result};
 use crate::proto::users_service_server::UsersServiceServer;

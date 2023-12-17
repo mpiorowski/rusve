@@ -18,7 +18,7 @@ pub async fn create_checkout_session(
     let mut customer_id = user.subscription_id;
     if customer_id.is_empty() {
         customer_id = create_customer(&client, &user.email).await?;
-        crate::users_db::update_user_subscription_id(conn, &user.id, &customer_id.clone()).await?;
+        crate::stripe_db::update_user_subscription_id(conn, &user.id, &customer_id.clone()).await?;
     }
 
     let mut params = stripe::CreateCheckoutSession::new("http://localhost:8080/success");
@@ -50,23 +50,42 @@ pub async fn create_customer(client: &Client, email: &str) -> Result<String> {
     Ok(customer.id.to_string())
 }
 
-pub async fn check_if_subscribed(
+pub async fn update_subscription(
     conn: &deadpool_postgres::Object,
-    user: crate::proto::User,
-) -> Result<bool> {
+    user: &crate::proto::User,
+) -> Result<()> {
     if user.subscription_id.is_empty() {
-        return Ok(false);
+        return Ok(());
     }
-    if !user.subscription_end.is_empty() {
+
+    // Check if subscription is still active versus the current time plus 2 days
+    if user.subscription_end != "-infinity" {
         let subscription_end = time::OffsetDateTime::parse(
             &user.subscription_end,
             &time::format_description::well_known::Iso8601::DEFAULT,
         )?;
-        // Check if subscription is still active versus the current time plus 2 days
-        if subscription_end >= time::OffsetDateTime::now_utc() + time::Duration::days(2) {
-            return Ok(true);
+        if subscription_end >= time::OffsetDateTime::now_utc() {
+            return Ok(());
         }
     }
+
+    // Check if subscription was checked in the last hour
+    if user.subscription_check != "-infinity" {
+        let subscription_check = time::OffsetDateTime::parse(
+            &user.subscription_check,
+            &time::format_description::well_known::Iso8601::DEFAULT,
+        )?;
+        if subscription_check >= time::OffsetDateTime::now_utc() - time::Duration::hours(1) {
+            return Ok(());
+        }
+    }
+
+    let _ = crate::stripe_db::update_user_subscription_check(
+        conn,
+        &user.id,
+        time::OffsetDateTime::now_utc(),
+    )
+    .await?;
 
     let secret_key =
         std::env::var("STRIPE_API_KEY").expect("Missing STRIPE_API_KEY environment variable");
@@ -79,14 +98,14 @@ pub async fn check_if_subscribed(
     let subscriptions = Subscription::list(&client, &params).await?.data;
     for subscription in subscriptions {
         if subscription.status == SubscriptionStatus::Active {
-            crate::users_db::update_user_subscription_end(
+            crate::stripe_db::update_user_subscription_end(
                 conn,
                 &user.id,
                 &subscription.current_period_end.to_string(),
             )
             .await?;
-            return Ok(true);
+            return Ok(());
         }
     }
-    Ok(false)
+    Ok(())
 }

@@ -12,12 +12,14 @@ export async function handle({ event, resolve }) {
         id: "",
         created: "",
         updated: "",
-        deleted: "-infinity",
+        deleted: "infinity",
         email: "",
         sub: "",
         role: 0,
         subscriptionId: "",
         subscriptionEnd: "-infinity",
+        subscriptionCheck: "-infinity",
+        subscriptionActive: false,
     };
 
     if (event.url.pathname === "/auth") {
@@ -44,6 +46,7 @@ export async function handle({ event, resolve }) {
         logger.error("Error during auth");
         throw redirect(302, "/auth?error=1");
     }
+    logger.debug(auth.data.user);
 
     event.locals.user = auth.data.user;
     event.locals.token = auth.data.token;
