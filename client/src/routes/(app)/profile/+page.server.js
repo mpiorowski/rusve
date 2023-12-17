@@ -164,7 +164,7 @@ export const actions = {
                     email_subject: "You've updated your profile",
                     email_html: `
                 <p>Hi ${res.data.name},</p>
-                <p>You've updated your profile. You can view it <a href="https://sgsg.bearbyte.org/profile">here</a>.</p>
+                <p>You've updated your profile. You can view it <a href="https://rusve.bearbyte.org/profile">here</a>.</p>
                 <p>Thanks!</p>
                 `,
                 },

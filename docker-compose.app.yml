@@ -13,7 +13,7 @@ services:
         USERS_URI: service-users
         UTILS_URI: service-utils
         NOTES_URI: service-notes
-        STRIPE_API_KEY: STRIPE_KEY
+        UPSEND_KEY: ${UPSEND_KEY}
     volumes:
       - ./client/src:/client/src
       - ./client/.svelte-kit:/client/.svelte-kit
