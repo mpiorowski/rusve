@@ -8,6 +8,11 @@ use uuid::Uuid;
 
 use crate::proto::{Profile, User};
 
+pub enum StringOrUuid {
+    String(String),
+    Uuid(Uuid),
+}
+
 pub struct Token {
     pub id: Uuid,
     pub created: time::OffsetDateTime,
@@ -145,11 +150,19 @@ pub async fn update_token_uuid(conn: &Object, user_id: &Uuid) -> Result<Uuid> {
     Ok(token_id)
 }
 
-pub async fn select_user_by_uuid(conn: &Object, user_uuid: Uuid) -> Result<User> {
+pub async fn select_user_by_id(
+    conn: &Object,
+    user_id: StringOrUuid,
+) -> Result<User> {
+    // if string, convert to uuid
+    let user_id = match user_id {
+        StringOrUuid::String(user_uuid) => Uuid::from_str(&user_uuid)?,
+        StringOrUuid::Uuid(user_uuid) => user_uuid,
+    };
     let user: tokio_postgres::Row = conn
         .query_one(
             "select * from users where id = $1 and deleted = 'infinity'",
-            &[&user_uuid],
+            &[&user_id],
         )
         .await?;
     let user: User = User::try_from(user)?;
@@ -195,4 +208,3 @@ pub async fn update_profile(conn: &Object, user_id: &str, profile: &Profile) -> 
     let profile: Profile = Profile::try_from(profile)?;
     Ok(profile)
 }
-

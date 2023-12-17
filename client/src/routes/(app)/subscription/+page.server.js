@@ -15,7 +15,7 @@ export const actions = {
     createStripeCheckout: async ({ locals }) => {
         const metadata = createMetadata("", locals.user.id);
 
-        /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/StripeCheckoutResponse").StripeCheckoutResponse>} */
+        /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/StripeUrlResponse").StripeUrlResponse__Output>} */
         const s = await new Promise((r) =>
             usersService.CreateStripeCheckout({}, metadata, grpcSafe(r)),
         );
@@ -24,6 +24,22 @@ export const actions = {
             return fail(500, { error: s.msg });
         }
 
-        throw redirect(303, s.data.sessionUrl ?? "");
+        throw redirect(303, s.data.url ?? "");
+    },
+    createStripePortal: async ({ locals }) => {
+        const metadata = createMetadata("", locals.user.id);
+
+        /** @type {import("$lib/safe").Safe<
+         * import("$lib/proto/proto/StripeUrlResponse").StripeUrlResponse__Output
+         * >} */
+        const s = await new Promise((r) =>
+            usersService.CreateStripePortal({}, metadata, grpcSafe(r)),
+        );
+
+        if (s.error) {
+            return fail(500, { error: s.msg });
+        }
+
+        throw redirect(303, s.data.url ?? "");
     },
 };

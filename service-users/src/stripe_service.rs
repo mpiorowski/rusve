@@ -5,7 +5,9 @@ use stripe::{
     SubscriptionStatus,
 };
 
-pub async fn create_checkout_session(
+use crate::stripe_db::remove_user_subscription_check;
+
+pub async fn create_checkout(
     conn: &deadpool_postgres::Object,
     user: crate::proto::User,
 ) -> Result<String> {
@@ -21,9 +23,13 @@ pub async fn create_checkout_session(
         crate::stripe_db::update_user_subscription_id(conn, &user.id, &customer_id.clone()).await?;
     }
 
-    let mut params = stripe::CreateCheckoutSession::new("http://localhost:8080/success");
+    let client_url = std::env::var("CLIENT_URL").expect("Missing CLIENT_URL environment variable");
+    let success_url = format!("{}?success", client_url);
+    let cancel_url = format!("{}?cancel", client_url);
+
+    let mut params = stripe::CreateCheckoutSession::new(&success_url);
     params.customer = Some(CustomerId::from_str(&customer_id)?);
-    params.cancel_url = Some("http://localhost:8080/cancel");
+    params.cancel_url = Some(&cancel_url);
     params.line_items = Some(vec![stripe::CreateCheckoutSessionLineItems {
         adjustable_quantity: None,
         dynamic_tax_rates: None,
@@ -39,6 +45,8 @@ pub async fn create_checkout_session(
         .url
         .ok_or_else(|| anyhow::anyhow!("Missing session url"))?;
 
+    let _ = remove_user_subscription_check(conn, &user.id).await?;
+
     Ok(session_url)
 }
 
@@ -50,12 +58,12 @@ pub async fn create_customer(client: &Client, email: &str) -> Result<String> {
     Ok(customer.id.to_string())
 }
 
-pub async fn update_subscription(
+pub async fn check_subscription(
     conn: &deadpool_postgres::Object,
     user: &crate::proto::User,
-) -> Result<()> {
+) -> Result<bool> {
     if user.subscription_id.is_empty() {
-        return Ok(());
+        return Ok(false);
     }
 
     // Check if subscription is still active versus the current time plus 2 days
@@ -65,7 +73,7 @@ pub async fn update_subscription(
             &time::format_description::well_known::Iso8601::DEFAULT,
         )?;
         if subscription_end >= time::OffsetDateTime::now_utc() {
-            return Ok(());
+            return Ok(true);
         }
     }
 
@@ -76,16 +84,10 @@ pub async fn update_subscription(
             &time::format_description::well_known::Iso8601::DEFAULT,
         )?;
         if subscription_check >= time::OffsetDateTime::now_utc() - time::Duration::hours(1) {
-            return Ok(());
+            return Ok(false);
         }
     }
-
-    let _ = crate::stripe_db::update_user_subscription_check(
-        conn,
-        &user.id,
-        time::OffsetDateTime::now_utc(),
-    )
-    .await?;
+    let _ = crate::stripe_db::update_user_subscription_check(conn, &user.id).await?;
 
     let secret_key =
         std::env::var("STRIPE_API_KEY").expect("Missing STRIPE_API_KEY environment variable");
@@ -101,11 +103,33 @@ pub async fn update_subscription(
             crate::stripe_db::update_user_subscription_end(
                 conn,
                 &user.id,
-                &subscription.current_period_end.to_string(),
+                subscription.current_period_end,
             )
             .await?;
-            return Ok(());
+            return Ok(true);
         }
     }
-    Ok(())
+    Ok(false)
+}
+
+pub async fn create_portal(
+    conn: &deadpool_postgres::Object,
+    user: crate::proto::User,
+) -> Result<String> {
+    let secret_key =
+        std::env::var("STRIPE_API_KEY").expect("Missing STRIPE_API_KEY environment variable");
+    let client = Client::new(secret_key);
+
+    let mut customer_id = user.subscription_id;
+    if customer_id.is_empty() {
+        customer_id = create_customer(&client, &user.email).await?;
+        crate::stripe_db::update_user_subscription_id(conn, &user.id, &customer_id.clone()).await?;
+    }
+
+    let params = stripe::CreateBillingPortalSession::new(CustomerId::from_str(&customer_id)?);
+    let session_url = stripe::BillingPortalSession::create(&client, params)
+        .await?
+        .url;
+
+    Ok(session_url)
 }

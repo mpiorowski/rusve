@@ -1,6 +1,6 @@
 use crate::proto::users_service_server::UsersService;
 use crate::proto::{AuthResponse, Empty, Profile};
-use crate::users_db::{select_token_by_id, select_user_by_uuid};
+use crate::users_db::{select_token_by_id, select_user_by_id, StringOrUuid};
 use crate::{users_db, MyService};
 use anyhow::Result;
 use tonic::{Request, Response, Status};
@@ -37,7 +37,7 @@ impl UsersService for MyService {
             })?;
 
         // get user
-        let user = users_db::select_user_by_uuid(&conn, token.user_id)
+        let mut user = users_db::select_user_by_id(&conn, StringOrUuid::Uuid(token.user_id))
             .await
             .map_err(|e| {
                 tracing::error!("Failed to auth user: {:?}", e);
@@ -48,13 +48,14 @@ impl UsersService for MyService {
             return Err(Status::unauthenticated("Unauthenticated"));
         }
 
-        // update subscription
-        crate::stripe_service::update_subscription(&conn, &user)
+        // check if user is subscribed
+        let subscribed = crate::stripe_service::check_subscription(&conn, &user)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to update subscription: {:?}", e);
                 Status::internal("Failed to update subscription")
             })?;
+        user.subscription_active = subscribed;
 
         tracing::info!("Auth: {:?}", start.elapsed());
         Ok(Response::new(AuthResponse {
@@ -121,7 +122,7 @@ impl UsersService for MyService {
     async fn create_stripe_checkout(
         &self,
         request: Request<crate::proto::Empty>,
-    ) -> Result<Response<crate::proto::StripeCheckoutResponse>, Status> {
+    ) -> Result<Response<crate::proto::StripeUrlResponse>, Status> {
         let start = std::time::Instant::now();
         let metadata = request.metadata();
         let user_id = rusve_users::auth(metadata)?.user_id;
@@ -130,26 +131,51 @@ impl UsersService for MyService {
             tracing::error!("Failed to get connection: {:?}", e);
             Status::internal("Failed to get connection")
         })?;
+        let user = select_user_by_id(&conn, StringOrUuid::String(user_id))
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to auth user: {:?}", e);
+                Status::unauthenticated("Failed to auth user")
+            })?;
 
-        let user_uuid = uuid::Uuid::parse_str(&user_id).map_err(|e| {
-            tracing::error!("Failed to parse user uuid: {:?}", e);
-            Status::internal("Failed to parse user uuid")
-        })?;
-        let user = select_user_by_uuid(&conn, user_uuid).await.map_err(|e| {
-            tracing::error!("Failed to auth user: {:?}", e);
-            Status::unauthenticated("Failed to auth user")
-        })?;
-
-        let session_url = crate::stripe_service::create_checkout_session(&conn, user)
+        let url = crate::stripe_service::create_checkout(&conn, user)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to create checkout session: {:?}", e);
                 Status::internal("Failed to create checkout session")
             })?;
 
-        tracing::info!("CreateStripeCheckoutSession: {:?}", start.elapsed());
-        Ok(Response::new(crate::proto::StripeCheckoutResponse {
-            session_url,
-        }))
+        tracing::info!("CreateStripeCheckout: {:?}", start.elapsed());
+        Ok(Response::new(crate::proto::StripeUrlResponse { url }))
+    }
+
+    async fn create_stripe_portal(
+        &self,
+        request: Request<crate::proto::Empty>,
+    ) -> Result<Response<crate::proto::StripeUrlResponse>, Status> {
+        let start = std::time::Instant::now();
+        let metadata = request.metadata();
+        let user_id = rusve_users::auth(metadata)?.user_id;
+
+        let conn = self.pool.get().await.map_err(|e| {
+            tracing::error!("Failed to get connection: {:?}", e);
+            Status::internal("Failed to get connection")
+        })?;
+        let user = select_user_by_id(&conn, StringOrUuid::String(user_id))
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to auth user: {:?}", e);
+                Status::unauthenticated("Failed to auth user")
+            })?;
+
+        let url = crate::stripe_service::create_portal(&conn, user)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to create portal session: {:?}", e);
+                Status::internal("Failed to create portal session")
+            })?;
+
+        tracing::info!("CreateStripePortal: {:?}", start.elapsed());
+        Ok(Response::new(crate::proto::StripeUrlResponse { url }))
     }
 }

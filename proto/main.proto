@@ -29,8 +29,8 @@ message AuthResponse {
     User user = 2;
 }
 
-message StripeCheckoutResponse {
-    string session_url = 1;
+message StripeUrlResponse {
+    string url = 1;
 }
 
 service UsersService {
@@ -39,7 +39,8 @@ service UsersService {
     rpc GetProfileByUserId(Empty) returns (Profile) {}
     rpc CreateProfile(Profile) returns (Profile) {}
 
-    rpc CreateStripeCheckout(Empty) returns (StripeCheckoutResponse) {}
+    rpc CreateStripeCheckout(Empty) returns (StripeUrlResponse) {}
+    rpc CreateStripePortal(Empty) returns (StripeUrlResponse) {}
 }
 
 service NotesService {
