@@ -73,16 +73,16 @@
     <div class="space-y-12">
         <div>
             <h2
-                class="flex items-center gap-2 text-base font-semibold leading-7 text-gray-900"
+                class="flex items-center gap-2 text-base font-semibold leading-7 text-gray-50"
             >
                 Profile
             </h2>
-            <p class="mt-1 text-sm leading-6 text-gray-600">
+            <p class="mt-1 text-sm leading-6 text-gray-200">
                 Your public profile is how other people will see you.
             </p>
         </div>
 
-        <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-6">
+        <div class="mt-10 grid grid-cols-1 gap-x-6 sm:grid-cols-6">
             <input type="hidden" name="id" bind:value={data.profile.id} />
             <div class="sm:col-span-4">
                 <Input

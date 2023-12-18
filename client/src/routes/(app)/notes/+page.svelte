@@ -80,11 +80,11 @@
     <div class="space-y-12">
         <div>
             <h2
-                class="flex items-center gap-2 text-base font-semibold leading-7 text-gray-900"
+                class="flex items-center gap-2 text-base font-semibold leading-7 text-gray-50"
             >
                 New Note
             </h2>
-            <p class="mt-1 text-sm leading-6 text-gray-600">
+            <p class="mt-1 text-sm leading-6 text-gray-200">
                 Create a new note.
             </p>
         </div>
@@ -135,82 +135,95 @@
     </div>
 </form>
 
-<div class="relative mt-10 w-full">
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">
-                Notes
-            </h1>
-            <p class="mt-2 text-sm text-gray-700">
-                List of notes you have created.
-            </p>
-        </div>
+<div class="mt-10 sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+        <h1 class="text-base font-semibold leading-6 text-gray-50">Notes</h1>
+        <p class="mt-2 text-sm leading-6 text-gray-200">
+            List of notes you have created.
+        </p>
     </div>
-    <div class="mt-8 flow-root">
-        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div
-                class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8"
-            >
-                <table class="min-w-full divide-y divide-gray-600">
-                    <thead>
+</div>
+<div class="mt-8 flow-root max-w-7xl">
+    <div class="w-full overflow-x-auto">
+        <div class="inline-block min-w-full align-middle">
+            <table class="min-w-full divide-y divide-gray-600">
+                <thead>
+                    <tr>
+                        <th
+                            scope="col"
+                            class="py-3 pl-4 pr-3 text-left text-xs uppercase tracking-wide text-gray-500 sm:pl-0"
+                        >
+                            Title
+                        </th>
+                        <th
+                            scope="col"
+                            class="px-3 py-3 text-left text-xs uppercase tracking-wide text-gray-500"
+                        >
+                            Content
+                        </th>
+                        <th
+                            scope="col"
+                            class="px-3 py-3 text-left text-xs uppercase tracking-wide text-gray-500"
+                        >
+                            Created
+                        </th>
+                        <th
+                            scope="col"
+                            class="px-3 py-3 text-left text-xs uppercase tracking-wide text-gray-500"
+                        >
+                            Updated
+                        </th>
+                        <th scope="col" class="relative py-3 pl-3 pr-4 sm:pr-0">
+                            <span class="sr-only">Edit</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-600 bg-gray-900">
+                    {#each data.notes as note}
                         <tr>
-                            <th
-                                scope="col"
-                                class="py-3 pl-4 pr-3 text-left text-xs uppercase tracking-wide text-gray-500 sm:pl-0"
+                            <td
+                                class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-50 sm:pl-0"
                             >
-                                Title
-                            </th>
-                            <th
-                                scope="col"
-                                class="px-3 py-3 text-left text-xs uppercase tracking-wide text-gray-500"
+                                {note.title}
+                            </td>
+                            <td
+                                class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                Content
-                            </th>
-                            <th
-                                scope="col"
-                                class="relative py-3 pl-3 pr-4 sm:pr-0"
+                                {note.content}
+                            </td>
+                            <td
+                                class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                <span class="sr-only">Edit</span>
-                            </th>
+                                {note.created}
+                            </td>
+                            <td
+                                class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
+                            >
+                                {note.updated}
+                            </td>
+                            <td
+                                class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
+                            >
+                                <a
+                                    href="/notes/{note.id}"
+                                    class="mr-4 text-indigo-600 hover:text-indigo-900"
+                                    on:click={(e) => onDetails(e)}
+                                >
+                                    Edit
+                                    <span class="sr-only">
+                                        , {note.title}
+                                    </span>
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 bg-gray-900">
-                        {#each data.notes as note}
-                            <tr>
-                                <td
-                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-50 sm:pl-0"
-                                >
-                                    {note.title}
-                                </td>
-                                <td
-                                    class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
-                                >
-                                    {note.content}
-                                </td>
-                                <td
-                                    class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
-                                >
-                                    <a
-                                        href="/notes/{note.id}"
-                                        class="mr-4 text-indigo-600 hover:text-indigo-900"
-                                        on:click={(e) => onDetails(e)}
-                                    >
-                                        Edit
-                                        <span class="sr-only">
-                                            , {note.title}
-                                        </span>
-                                    </a>
-                                </td>
-                            </tr>
-                        {/each}
+                    {/each}
 
-                        <!-- More people... -->
-                    </tbody>
-                </table>
-            </div>
+                    <!-- More people... -->
+                </tbody>
+            </table>
         </div>
-
-        <!-- Pagination -->
-        <Pagination total={data.total} pageSize={data.pageSize} />
     </div>
+
+    <!-- Pagination -->
+    <Pagination total={data.total} pageSize={data.pageSize} />
 </div>

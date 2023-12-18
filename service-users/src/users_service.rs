@@ -1,3 +1,4 @@
+use crate::profile_validation::Validation;
 use crate::proto::users_service_server::UsersService;
 use crate::proto::{AuthResponse, Empty, Profile};
 use crate::users_db::{select_token_by_id, select_user_by_id, StringOrUuid};
@@ -99,6 +100,8 @@ impl UsersService for MyService {
         })?;
 
         let mut profile = request.into_inner();
+        Validation::validate(&profile)?;
+
         if profile.id.is_empty() {
             profile = users_db::insert_profile(&conn, &user_id, &profile)
                 .await

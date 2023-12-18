@@ -36,8 +36,8 @@
     <label
         id={label}
         for={name}
-        class="mt-2 flex h-[200px] cursor-pointer justify-center rounded-lg border border-dashed border-gray-900/25
-        focus-within:border-0 focus-within:ring-2 focus-within:ring-indigo-600 hover:bg-gray-200/25
+        class="mt-2 flex h-[200px] cursor-pointer justify-center rounded-lg bg-gray-800 shadow-inset
+        focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 hover:bg-gray-700/25
         {errors.length > 0 ? 'border-0 ring-2 ring-red-600' : ''}"
     >
         <input
@@ -50,7 +50,7 @@
         />
         {#if url}
             <img
-                class="w-full rounded object-cover text-gray-300"
+                class="w-full rounded object-cover text-gray-200"
                 src={url}
                 alt={name}
             />
@@ -72,16 +72,16 @@
                     <p class="mt-4 flex text-sm leading-6 text-gray-900">
                         {file.name}
                     </p>
-                    <p class="text-xs leading-5 text-gray-400">
+                    <p class="text-xs leading-5 text-gray-200">
                         {file.size} bytes
                     </p>
                 {:else}
-                    <div class="mt-4 flex text-sm leading-6 text-gray-600">
+                    <div class="mt-4 flex text-sm leading-6 text-gray-50">
                         <span class="font-semibold">
                             Click to upload an image
                         </span>
                     </div>
-                    <p class="text-xs leading-5 text-gray-500">
+                    <p class="text-xs leading-5 text-gray-200">
                         {description}
                     </p>
                 {/if}

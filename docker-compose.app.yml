@@ -49,7 +49,7 @@ services:
     environment:
       PORT: 443
       ENV: development
-      RUST_LOG: debug
+      RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
       CLIENT_URL: http://127.0.0.1:3000/subscription
       STRIPE_API_KEY: ${STRIPE_API_KEY}

@@ -2,6 +2,7 @@ mod migrations;
 mod proto;
 mod users_db;
 mod users_service;
+mod profile_validation;
 mod stripe_service;
 mod stripe_db;
 

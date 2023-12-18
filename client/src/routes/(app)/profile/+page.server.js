@@ -3,7 +3,7 @@ import { safe } from "$lib/safe";
 import { grpcSafe } from "$lib/safe";
 import { upsendApi } from "$lib/server/api";
 import { usersService } from "$lib/server/grpc";
-import { perf } from "$lib/server/logger";
+import { logger, perf } from "$lib/server/logger";
 import { createMetadata } from "$lib/server/metadata";
 import { fail } from "@sveltejs/kit";
 
@@ -34,6 +34,7 @@ export async function load({ parent }) {
 /** @type {import('./$types').Actions} */
 export const actions = {
     createProfile: async ({ locals, request }) => {
+        const end = perf("Create profile");
         const form = await request.formData();
 
         let resumeId = getFormValue(form, "resumeId");
@@ -76,7 +77,6 @@ export const actions = {
             }
 
             resumeId = file.data.id;
-            console.log(resumeId);
         }
 
         let coverId = getFormValue(form, "coverId");
@@ -154,7 +154,7 @@ export const actions = {
          * Send email with the data to the user
          * We don't check for errors cos the upsend API is not critical
          */
-        await safe(
+        safe(
             upsendApi({
                 url: "/emails",
                 method: "POST",
@@ -169,8 +169,13 @@ export const actions = {
                 `,
                 },
             }),
+        ).catch(() =>
+            logger.error("Failed to send email to user", {
+                email: locals.user.email,
+            }),
         );
 
+        end();
         return {
             profile: res.data,
         };

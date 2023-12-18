@@ -6,7 +6,7 @@
     /** @type {boolean} */
     export let open;
     /** @type {string} */
-    export let title;
+    export let title = "";
     /** @type {"right" | "left"} */
     export let position = "right";
     /** @type {() => void} */
@@ -187,21 +187,29 @@
                             </svg>
                         </button>
                     </div>
-                    <div
-                        class="flex h-full flex-col bg-gray-900 py-6 shadow-xl ring-1 ring-white/10"
-                    >
-                        <div class="px-4 sm:px-6">
-                            <h2
-                                class="text-base font-semibold leading-6 text-gray-50"
-                                id="slide-over-title"
-                            >
-                                {title}
-                            </h2>
+                    {#if title}
+                        <div
+                            class="flex h-full flex-col bg-gray-900 py-6 shadow-xl ring-1 ring-white/10"
+                        >
+                            <div class="px-4 sm:px-6">
+                                <h2
+                                    class="text-base font-semibold leading-6 text-gray-50"
+                                    id="slide-over-title"
+                                >
+                                    {title}
+                                </h2>
+                            </div>
+                            <div class="relative mt-6 flex-1 px-4 sm:px-6">
+                                <slot />
+                            </div>
                         </div>
-                        <div class="relative mt-6 flex-1 px-4 sm:px-6">
+                    {:else}
+                        <div
+                            class="flex h-full flex-col bg-gray-900 shadow-xl ring-1 ring-white/10"
+                        >
                             <slot />
                         </div>
-                    </div>
+                    {/if}
 
                     <!--
                     <div

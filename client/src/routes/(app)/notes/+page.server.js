@@ -16,7 +16,7 @@ export async function load({ locals, url }) {
 
     // Get notes
     const offset = (Number(url.searchParams.get("p")) || 1) - 1;
-    const limit = 5;
+    const limit = 1;
     const notesStream = notesService.GetNotesByUserId(
         {
             offset: offset * limit,

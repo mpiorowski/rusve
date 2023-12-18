@@ -3,9 +3,6 @@ FROM node:20-slim AS dev
 
 WORKDIR /client
 
-COPY package.json /client/package.json
-COPY package-lock.json /client/package-lock.json
-
 ARG ENV
 ARG COOKIE_DOMAIN
 ARG PUBLIC_SERVER_HTTP
@@ -21,8 +18,9 @@ RUN echo "NOTES_URI=${NOTES_URI}" >> .env
 RUN echo "UTILS_URI=${UTILS_URI}" >> .env
 RUN echo "UPSEND_KEY=${UPSEND_KEY}" >> .env
 
+COPY package.json /client/package.json
+COPY package-lock.json /client/package-lock.json
 RUN npm install
-
 COPY . .
 
 CMD npm run dev

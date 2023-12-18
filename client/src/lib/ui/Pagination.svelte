@@ -18,13 +18,15 @@
     <div class="flex flex-1 justify-between sm:hidden">
         <a
             href={`?p=${data.prev}`}
-            class="relative inline-flex items-center rounded-md border border-gray-600 bg-white px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-50"
+            class="relative inline-flex items-center rounded-md border border-gray-700 bg-gray-900 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-700
+            focus:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-indigo-600"
         >
             Previous
         </a>
         <a
             href={`?p=${data.next}`}
-            class="relative ml-3 inline-flex items-center rounded-md border border-gray-600 bg-white px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-50"
+            class="relative ml-3 inline-flex items-center rounded-md border border-gray-700 bg-gray-900 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-700
+            focus:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-indigo-600"
         >
             Next
         </a>
@@ -48,8 +50,8 @@
             >
                 <a
                     href={`?p=${data.prev}`}
-                    class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-50 ring-1 ring-inset ring-gray-600
-                        hover:bg-gray-50 focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-indigo-600"
+                    class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-50 ring-1 ring-inset ring-gray-800
+                        hover:bg-gray-700 focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-indigo-600"
                 >
                     <span class="sr-only">Previous</span>
                     <svg
@@ -69,7 +71,7 @@
                 {#each data.schema as i}
                     {#if i === 0}
                         <span
-                            class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-200 ring-1 ring-inset ring-gray-600 focus:outline-offset-0"
+                            class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-200 ring-1 ring-inset ring-gray-800 focus:outline-offset-0"
                         >
                             ...
                         </span>
@@ -81,7 +83,7 @@
                         focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600
                     {p === i
                                 ? 'bg-indigo-600 text-white  focus-visible:outline-offset-2 '
-                                : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline-offset-0'}"
+                                : 'text-gray-200 ring-1 ring-inset ring-gray-800 hover:bg-gray-700 focus-visible:outline-offset-0'}"
                         >
                             {i}
                         </a>
@@ -89,7 +91,8 @@
                 {/each}
                 <a
                     href={`?p=${data.next}`}
-                    class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-50 ring-1 ring-inset ring-gray-600 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                    class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-50 ring-1 ring-inset ring-gray-800
+                        hover:bg-gray-700 focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-indigo-600"
                 >
                     <span class="sr-only">Next</span>
                     <svg
