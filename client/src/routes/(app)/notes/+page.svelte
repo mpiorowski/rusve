@@ -151,7 +151,7 @@
             <div
                 class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8"
             >
-                <table class="min-w-full divide-y divide-gray-300">
+                <table class="min-w-full divide-y divide-gray-600">
                     <thead>
                         <tr>
                             <th
@@ -174,16 +174,16 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
+                    <tbody class="divide-y divide-gray-200 bg-gray-900">
                         {#each data.notes as note}
                             <tr>
                                 <td
-                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
+                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-50 sm:pl-0"
                                 >
                                     {note.title}
                                 </td>
                                 <td
-                                    class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                                    class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                                 >
                                     {note.content}
                                 </td>

@@ -85,3 +85,34 @@ services:
       DATABASE_URL: postgresql://?host=db-utils&user=postgres&password=12345&dbname=users
       BUCKET: bucket
       SENDGRID_API_KEY: sendgid-api-key
+
+  db-users:
+    container_name: rusve-db-users
+    image: postgres:15.1
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: users
+
+  db-notes:
+    container_name: rusve-db-notes
+    image: postgres:15.1
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: notes
+
+  db-utils:
+    container_name: rusve-db-utils
+    image: postgres:15.1
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: users
+

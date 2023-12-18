@@ -43,7 +43,7 @@
                 {name}
                 {placeholder}
                 {autocomplete}
-                class="block w-full rounded-md border-0 px-3 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6
+                class="inner3 block w-full rounded-md border-0 bg-gray-800 px-3 py-1.5 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6
                 {error ? 'ring-2 ring-red-600' : ''}"
                 aria-invalid={!!error}
                 aria-describedby="{name}-description"
@@ -55,7 +55,7 @@
                 {name}
                 {placeholder}
                 {rows}
-                class="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6
+                class="inner3 block w-full rounded-md border-0 bg-gray-800 px-3 py-1.5 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6
                 {error ? 'ring-2 ring-red-600' : ''}"
                 aria-invalid={!!error}
                 aria-describedby="{name}-description"
@@ -70,3 +70,21 @@
         {error || helper}
     </p>
 </div>
+
+<style>
+    .inner-shadow {
+        box-shadow:
+            inset 0px 0px 3px 3px rgba(0, 0, 0, 0.3),
+            0 -2px 0 hsla(0, 0%, 100%, 0.1);
+    }
+    .inner2 {
+        box-shadow:
+            inset 0 2px 2px 2px hsla(0, 0%, 0%, 0.3),
+            0 1px 0 hsla(0, 0%, 100%, 0.1);
+    }
+    .inner3 {
+        box-shadow:
+            inset 0 2px 2px 0px hsla(0, 0%, 0%, 0.4),
+            inset 0 0px 2px 2px hsla(0, 0%, 0%, 0.3);
+    }
+</style>

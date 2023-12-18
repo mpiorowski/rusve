@@ -13,25 +13,25 @@
 </script>
 
 <div
-    class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6"
+    class="flex items-center justify-between border-t border-gray-600 bg-gray-900 px-4 py-3 sm:px-6"
 >
     <div class="flex flex-1 justify-between sm:hidden">
         <a
             href={`?p=${data.prev}`}
-            class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="relative inline-flex items-center rounded-md border border-gray-600 bg-white px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-50"
         >
             Previous
         </a>
         <a
             href={`?p=${data.next}`}
-            class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="relative ml-3 inline-flex items-center rounded-md border border-gray-600 bg-white px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-50"
         >
             Next
         </a>
     </div>
     <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
-            <p class="text-sm text-gray-700">
+            <p class="text-sm text-gray-200">
                 Showing
                 <span class="font-medium">{data.start}</span>
                 to
@@ -48,7 +48,7 @@
             >
                 <a
                     href={`?p=${data.prev}`}
-                    class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300
+                    class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-50 ring-1 ring-inset ring-gray-600
                         hover:bg-gray-50 focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-indigo-600"
                 >
                     <span class="sr-only">Previous</span>
@@ -69,7 +69,7 @@
                 {#each data.schema as i}
                     {#if i === 0}
                         <span
-                            class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0"
+                            class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-200 ring-1 ring-inset ring-gray-600 focus:outline-offset-0"
                         >
                             ...
                         </span>
@@ -89,7 +89,7 @@
                 {/each}
                 <a
                     href={`?p=${data.next}`}
-                    class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                    class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-50 ring-1 ring-inset ring-gray-600 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
                 >
                     <span class="sr-only">Next</span>
                     <svg

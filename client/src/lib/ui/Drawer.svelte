@@ -1,8 +1,6 @@
 <script>
     import { browser } from "$app/environment";
-    import Button from "$lib/form/Button.svelte";
     import { checkElement, generateId } from "$lib/utils";
-    import XIcon from "$lib/icons/XIcon.svelte";
     import { fade, fly } from "svelte/transition";
 
     /** @type {boolean} */
@@ -160,7 +158,10 @@
                           To: "opacity-0"
                       -->
                     <div
-                        class="absolute right-0 top-0 -mr-8 flex pl-2 pt-4 sm:-ml-10 sm:pr-4"
+                        class="absolute top-0 flex pt-4
+                            {position === 'left'
+                            ? 'right-0 -mr-8 pl-2 sm:-mr-10 sm:pl-4'
+                            : 'left-0 -ml-8 pr-2 sm:-ml-10 sm:pr-4'}"
                         transition:fade
                     >
                         <button
@@ -191,7 +192,7 @@
                     >
                         <div class="px-4 sm:px-6">
                             <h2
-                                class="text-base font-semibold leading-6 text-gray-900"
+                                class="text-base font-semibold leading-6 text-gray-50"
                                 id="slide-over-title"
                             >
                                 {title}
