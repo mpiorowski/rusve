@@ -14,9 +14,11 @@ permissions:
 jobs:
   lint-client:
     uses: ./.github/workflows/lint-client.yml
+  lint-oauth:
+    uses: ./.github/workflows/lint-oauth.yml
   lint-users:
     uses: ./.github/workflows/lint-users.yml
-  lint-utils:
-    uses: ./.github/workflows/lint-utils.yml
   lint-notes:
     uses: ./.github/workflows/lint-notes.yml
+  lint-utils:
+    uses: ./.github/workflows/lint-utils.yml
