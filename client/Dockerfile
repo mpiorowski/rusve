@@ -33,10 +33,11 @@ COPY package.json /client/package.json
 COPY package-lock.json /client/package-lock.json
 
 ARG ENV
-ARG PUBLIC_OAUTH_HTTP 
-ARG SERVER_HTTP
-ARG SERVER_GRPC
 ARG COOKIE_DOMAIN
+ARG PUBLIC_OAUTH_HTTP
+ARG USERS_URI
+ARG NOTES_URI
+ARG UTILS_URI
 ARG UPSEND_KEY
 RUN echo "ENV=${ENV}" >> .env
 RUN echo "COOKIE_DOMAIN=${COOKIE_DOMAIN}" >> .env

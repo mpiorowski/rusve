@@ -5,11 +5,10 @@ on:
 env:
   ENV: development
   COOKIE_DOMAIN: .127.0.0.1
-  PUBLIC_SERVER_HTTP: http://127.0.0.1:8090
+  PUBLIC_OAUTH_HTTP: http://127.0.0.1:8090
   USERS_URI: service-users
   UTILS_URI: service-utils
   NOTES_URI: service-notes
-  STRIPE_API_KEY: STRIPE_KEY
   UPSEND_KEY: UPSEND_KEY 
 
 jobs:
