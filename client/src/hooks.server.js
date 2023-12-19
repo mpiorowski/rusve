@@ -30,6 +30,9 @@ export async function handle({ event, resolve }) {
         });
         return await resolve(event);
     }
+    if (event.url.pathname === "/") {
+        throw redirect(302, "/dashboard");
+    }
 
     const token = event.cookies.get("token");
     if (!token) {

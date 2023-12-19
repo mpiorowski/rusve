@@ -44,9 +44,9 @@
             </svg>
         </button>
         <div class="flex-1 text-sm font-semibold leading-6 text-white">
-            {current?.replace(/^\w/, (c) => c.toUpperCase()) || "Dashboard"}
+            {current?.replace(/^\w/, (c) => c.toUpperCase())}
         </div>
-        <Avatar avatarUrl={""} />
+        <Avatar email={data.email} avatarUrl={""} />
     </div>
 
     <!-- Static sidebar for desktop -->
@@ -66,7 +66,7 @@
             <Avatar email={data.email} avatarUrl={""} />
         </header>
 
-        <div class="p-4 sm:p-6 lg:p-8">
+        <div class="p-6 sm:p-8 lg:p-10">
             <slot />
         </div>
     </main>

@@ -4,6 +4,7 @@
     import { extractError } from "$lib/errors";
     import Button from "$lib/form/Button.svelte";
     import Input from "$lib/form/Input.svelte";
+    import ConfirmModal from "$lib/ui/ConfirmModal.svelte";
     import { toast } from "$lib/ui/toast";
 
     /** @type {import("./$types").PageData} */
@@ -16,7 +17,14 @@
     }
     /** @type {boolean} */
     export let isModal = false;
+
+    /** @type {boolean} */
+    let confirm = false;
 </script>
+
+{#if confirm}
+    <ConfirmModal id={data.note.id} bind:open={confirm} />
+{/if}
 
 <form
     class="max-w-2xl"
@@ -71,22 +79,16 @@
             </div>
             <div class="col-span-full flex justify-end gap-2">
                 <Button class="w-20">Update</Button>
-                <form
-                    action="?/delete"
-                    method="post"
-                    use:enhance={() => {
-                        return async ({ result, update }) => {
-                            if (result.type === "success") {
-                                toast.warning("Success", "Note deleted");
-                                await goto("/notes");
-                            }
-                            await update();
-                        };
+                <Button
+                    on:click={() => {
+                        confirm = true;
                     }}
+                    type="button"
+                    class="w-20"
+                    variant="danger"
                 >
-                    <input type="hidden" name="id" value={data.note.id} />
-                    <Button class="w-20" variant="danger">Delete</Button>
-                </form>
+                    Delete
+                </Button>
             </div>
         </div>
     </div>
