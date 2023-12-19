@@ -5,11 +5,11 @@ import { ENV, USERS_URI, NOTES_URI, UTILS_URI } from "$env/static/private";
 export const packageDefinition = protoLoader.loadSync(
     "./src/lib/proto/main.proto",
     {
-        keepCase: false,
         longs: String,
         defaults: true,
         oneofs: true,
         arrays: true,
+        objects: true,
     },
 );
 
@@ -27,4 +27,3 @@ const cr =
 export const usersService = new proto.proto.UsersService(USERS_URI, cr);
 export const notesService = new proto.proto.NotesService(NOTES_URI, cr);
 export const utilsService = new proto.proto.UtilsService(UTILS_URI, cr);
-

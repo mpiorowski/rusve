@@ -1,9 +1,7 @@
 // Original file: main.proto
 
-import type { Long } from '@grpc/proto-loader';
-
 export interface Count {
-  'count'?: (number | string | Long);
+  'count'?: (number | string);
 }
 
 export interface Count__Output {
