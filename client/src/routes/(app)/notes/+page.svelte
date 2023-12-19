@@ -144,7 +144,7 @@
     </div>
 </div>
 <div class="mt-8 flow-root max-w-7xl">
-    <div class="w-full overflow-x-auto">
+    <div class="overflow-x-auto overflow-y-hidden">
         <div class="inline-block min-w-full align-middle">
             <table class="min-w-full divide-y divide-gray-600">
                 <thead>

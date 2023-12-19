@@ -46,17 +46,17 @@
         <div>
             {#if !isModal}
                 <h2
-                    class="flex items-center gap-2 text-base font-semibold leading-7 text-gray-900"
+                    class="flex items-center gap-2 text-base font-semibold leading-7 text-gray-100"
                 >
                     Note details
                 </h2>
             {/if}
-            <p class="mt-1 text-sm leading-6 text-gray-600">
+            <p class="mt-1 text-sm leading-6 text-gray-200">
                 {data.note.id}
             </p>
         </div>
 
-        <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-6">
+        <div class="mt-10 grid grid-cols-1 gap-x-6 sm:grid-cols-6">
             <input type="hidden" name="id" bind:value={data.note.id} />
             <div class="sm:col-span-4">
                 <input type="hidden" name="id" value={data.note.id} />
@@ -78,7 +78,6 @@
                 />
             </div>
             <div class="col-span-full flex justify-end gap-2">
-                <Button class="w-20">Update</Button>
                 <Button
                     on:click={() => {
                         confirm = true;
@@ -89,6 +88,7 @@
                 >
                     Delete
                 </Button>
+                <Button class="w-20">Update</Button>
             </div>
         </div>
     </div>
