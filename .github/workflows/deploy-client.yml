@@ -25,17 +25,11 @@ env:
   REGION: europe-north1
   ENV: production
   PUBLIC_DOMAIN: https://www.rusve.app
-  PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
-  PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
-  URI_USERS_RUST: users-rust-cdb5ecy4ia-lz.a.run.app
-  URI_USERS_GO: users-go-cdb5ecy4ia-lz.a.run.app
-  URI_UTILS_RUST: utils-rust-cdb5ecy4ia-lz.a.run.app
-  URI_UTILS_GO: utils-go-cdb5ecy4ia-lz.a.run.app
-  URI_NOTES_RUST: notes-rust-cdb5ecy4ia-lz.a.run.app
-  URI_NOTES_GO: notes-go-cdb5ecy4ia-lz.a.run.app
-  URI_DIRECTUS: https://directus-cms.fly.dev
-  SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
-  STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
+  COOKIE_DOMAIN: .rusve.app
+  PUBLIC_OAUTH_HTTP: https://oauth-cdb5ecy4ia-lz.a.run.app
+  USERS_URI: users-rust-cdb5ecy4ia-lz.a.run.app
+  NOTES_URI: notes-rust-cdb5ecy4ia-lz.a.run.app
+  UPSEND_KEY: ${UPSEND_KEY}
 
 permissions:
   contents: write
