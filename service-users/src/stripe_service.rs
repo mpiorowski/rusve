@@ -53,7 +53,7 @@ pub async fn create_checkout(
 pub async fn create_customer(client: &Client, email: &str) -> Result<String> {
     let mut customer: CreateCustomer<'_> = CreateCustomer::new();
     customer.email = Some(email);
-    let customer = Customer::create(&client, customer).await?;
+    let customer = Customer::create(client, customer).await?;
 
     Ok(customer.id.to_string())
 }

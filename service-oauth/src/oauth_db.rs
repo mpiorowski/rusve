@@ -106,7 +106,7 @@ pub async fn create_pkce(client: &Object, csrf_token: &str, pkce_verifier: &str)
             &[&uuid, &csrf_token, &pkce_verifier],
         )
         .await?;
-    Ok(Pkce::try_from(row)?)
+    Pkce::try_from(row)
 }
 
 pub async fn delete_pkce_by_id(client: &Object, id: Uuid) -> Result<()> {
@@ -131,7 +131,7 @@ pub async fn create_token(
             &[&id, &user_id, &access_token, &refresh_token, &expires_in],
         )
         .await?;
-    Ok(Token::try_from(row)?)
+    Token::try_from(row)
 }
 
 pub async fn delete_token_by_user_id(client: &Object, user_id: &str) -> Result<()> {

@@ -68,7 +68,7 @@ pub async fn oauth_login(
         .url();
 
     // Save the CSRF token to the database.
-    match create_pkce(&conn, &csrf_token.secret(), &pkce_verifier.secret()).await {
+    match create_pkce(&conn, csrf_token.secret(), pkce_verifier.secret()).await {
         Ok(_) => {}
         Err(err) => {
             tracing::error!("Failed to save PKCE verifier: {:?}", err);
@@ -76,7 +76,7 @@ pub async fn oauth_login(
         }
     }
 
-    Ok(Redirect::to(&auth_url.to_string()))
+    Ok(Redirect::to(auth_url.as_ref()))
 }
 
 pub async fn oauth_callback(
