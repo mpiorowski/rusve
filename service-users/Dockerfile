@@ -26,7 +26,7 @@ FROM debian:bookworm-slim AS prod
 WORKDIR /app
 
 COPY --from=build /app/target/release /app
-COPY  public.key /app/public.key
+COPY  public.key /public.key
 
 RUN apt-get update && apt-get install -y openssl ca-certificates libssl-dev # libpq-dev 
 
