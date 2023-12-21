@@ -59,7 +59,7 @@ jobs:
           --build-arg USERS_URI=${{ env.USERS_URI }} \
           --build-arg NOTES_URI=${{ env.NOTES_URI }} \
           --build-arg UTILS_URI=${{ env.UTILS_URI }} \
-          --build-arg UPSEND_KEY=${{ env.UPSEND_KEY }} \
+          --build-arg UPSEND_KEY=${{ env.UPSEND_KEY }}
 
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
       - name: Deploy to Cloud Run
