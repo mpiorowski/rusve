@@ -28,6 +28,7 @@ env:
   PUBLIC_OAUTH_HTTP: https://oauth-cdb5ecy4ia-lz.a.run.app
   USERS_URI: users-cdb5ecy4ia-lz.a.run.app
   NOTES_URI: notes-cdb5ecy4ia-lz.a.run.app
+  UTILS_URI: utils
   UPSEND_KEY: ${UPSEND_KEY}
 
 permissions:
