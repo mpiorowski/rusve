@@ -8,14 +8,6 @@ on:
     secrets:
       GCP_CREDENTIALS:
         required: true
-      PUBLIC_API_KEY:
-        required: true
-      PUBLIC_AUTH_DOMAIN:
-        required: true
-      SERVICE_ACCOUNT:
-        required: true
-      STRIPE_API_KEY:
-        required: true
 
 env:
   GAR_LOCATION: europe-north1

@@ -14,10 +14,6 @@ jobs:
     uses: ./.github/workflows/deploy-client.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
-      PUBLIC_AUTH_DOMAIN: ${{ secrets.PUBLIC_AUTH_DOMAIN }}
-      SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
-      STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
   deploy-users:
     uses: ./.github/workflows/deploy-users.yml
     secrets:
