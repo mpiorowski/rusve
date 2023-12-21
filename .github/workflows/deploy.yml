@@ -2,7 +2,7 @@ name: Deploy
 on:
   push:
     branches:
-      - release/**
+      - release
 
 permissions:
   contents: write
