@@ -27,10 +27,8 @@ CMD npm run dev
 
 # Build
 FROM node:20-slim AS build
-WORKDIR /client
 
-COPY package.json /client/package.json
-COPY package-lock.json /client/package-lock.json
+WORKDIR /client
 
 ARG ENV
 ARG COOKIE_DOMAIN
@@ -47,9 +45,9 @@ RUN echo "NOTES_URI=${NOTES_URI}" >> .env
 RUN echo "UTILS_URI=${UTILS_URI}" >> .env
 RUN echo "UPSEND_KEY=${UPSEND_KEY}" >> .env
 
-RUN npm install
-COPY . .
+COPY . /client
 
+RUN npm install
 RUN npm run build
 
 # Production
