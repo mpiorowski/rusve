@@ -41,34 +41,33 @@
     }
 }
 
+html {
+    @apply h-full antialiased;
+}
+
+body {
+    @apply h-full font-poppins;
+}
+
+h1 {
+    @apply text-3xl font-semibold font-poppins;
+}
+
+h2 {
+    @apply text-2xl font-semibold font-poppins;
+}
+
+h3 {
+    @apply text-xl font-semibold font-poppins;
+}
+
 :focus {
     outline: none;
 }
 
-body {
-    @apply text-primary-100 bg-primary-700 font-poppins;
+.no-scroll {
+    overflow: hidden;
 }
-
-h1 {
-    @apply text-3xl font-semibold;
-}
-
-h2 {
-    @apply text-2xl font-semibold;
-}
-
-h3 {
-    @apply text-xl font-semibold;
-}
-
-p {
-    margin: 0;
-}
-
-ol {
-    @apply list-decimal pl-4;
-}
-
-ul {
-    @apply list-disc pl-4;
+.scroll {
+    overflow-y: scroll;
 }

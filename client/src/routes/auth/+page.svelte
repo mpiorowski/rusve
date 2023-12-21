@@ -1,158 +1,102 @@
-<script lang="ts">
-    import LoadingComponent from "$lib/components/LoadingComponent.svelte";
-    import { getFirebaseClient } from "$lib/firebase_client";
-    import Button from "$lib/components/form/Button.svelte";
-    import Input from "$lib/components/form/Input.svelte";
-    import GithubIcon from "$lib/assets/icons/GithubIcon.svelte";
-    import GmailIcon from "$lib/assets/icons/GmailIcon.svelte";
-    import MailIcon from "$lib/assets/icons/MailIcon.svelte";
-    import { toast } from "$lib/components/toast/toast";
-    import {
-        GithubAuthProvider,
-        GoogleAuthProvider,
-        isSignInWithEmailLink,
-        sendSignInLinkToEmail,
-        signInWithEmailLink,
-        signInWithPopup,
-    } from "firebase/auth";
-    import { onMount } from "svelte";
-    import { PUBLIC_DOMAIN } from "$env/static/public";
+<script>
+    import { page } from "$app/stores";
+    import { PUBLIC_OAUTH_HTTP } from "$env/static/public";
+    import Button from "$lib/form/Button.svelte";
+    import LogoIcon from "$lib/icons/LogoIcon.svelte";
+    import { toast } from "$lib/ui/toast";
 
-    let errors: string[] = [];
-    let loading = false;
-
-    let form: HTMLFormElement;
-    const auth = getFirebaseClient();
-    const googleProvider = new GoogleAuthProvider();
-    const githubProvider = new GithubAuthProvider();
-
-    function sendIdToken(idToken: string): void {
-        try {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = "idToken";
-            input.value = idToken;
-            form.appendChild(input);
-            form.submit();
-        } catch (err) {
-            toast.error("Something went wrong");
-            console.error(err);
+    const error = $page.url.searchParams.get("error");
+    $: if (error) {
+        if (error === "invalid_user") {
+            toast.error(
+                "Invalid user",
+                "User already connected to another provider",
+            );
+        } else if (error === "unauthorized") {
+            toast.error("Unauthorized", "You are not authorized to access");
+        } else {
+            toast.error("Error", "Something went wrong");
         }
     }
 
-    async function onSignInWithOAuth(
-        provider: GoogleAuthProvider | GithubAuthProvider,
-    ): Promise<void> {
+    /**
+     * Check if server is running and redirect to login page
+     * @param {string} provider
+     */
+    async function onLogin(provider) {
         try {
-            loading = true;
-            const cred = await signInWithPopup(auth, provider);
-            const idToken = await cred.user.getIdToken();
-            await auth.signOut();
-            sendIdToken(idToken);
+            const response = await fetch(`${PUBLIC_OAUTH_HTTP}`);
+            if (response.status !== 200) {
+                toast.error("Error", "Server is not running");
+                return;
+            }
         } catch (err) {
             console.error(err);
-            toast.error("Something went wrong");
-            loading = false;
-        }
-    }
-
-    let email = "";
-    async function onSignInWithMagicLink(): Promise<void> {
-        try {
-            const url = PUBLIC_DOMAIN + "/auth";
-            await sendSignInLinkToEmail(auth, email, {
-                url: url,
-                handleCodeInApp: true,
-            });
-            window.localStorage.setItem("emailForSignIn", email);
-            toast.success("Check your email for a magic link");
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    async function checkMagicLink(): Promise<void> {
-        if (!isSignInWithEmailLink(auth, window.location.href)) {
+            toast.error("Error", "Server is not running");
             return;
         }
-        try {
-            loading = true;
-            const emailForSignIn =
-                window.localStorage.getItem("emailForSignIn");
-            if (!emailForSignIn) {
-                throw new Error("No email found");
-            }
-            const user = await signInWithEmailLink(
-                auth,
-                emailForSignIn,
-                window.location.href,
-            );
-            const idToken = await user.user.getIdToken();
-            await auth.signOut();
-            sendIdToken(idToken);
-        } catch (err) {
-            loading = false;
-            toast.error("Something went wrong");
-            console.error(err);
-        }
+        window.location.href = `${PUBLIC_OAUTH_HTTP}/oauth-login/${provider}`;
     }
-    onMount(() => {
-        void checkMagicLink();
-    });
 </script>
 
-{#if loading}
-    <div
-        class="absolute top-0 left-0 w-screen h-screen bg-primary-500 z-10 opacity-40 flex justify-center items-center"
-    >
-        <LoadingComponent size={60} />
-    </div>
-{/if}
-
-<form method="post" bind:this={form} />
-<div class="max-w-md m-auto flex flex-col items-center justify-center h-screen">
-    <h2 class="text-primary-200">Welcome back</h2>
-    <p class="text-primary-300 mb-4 mt-2">
-        Sign in so You can say "I use Rust"
-    </p>
-    <div class="flex flex-col w-full gap-2">
-        <Button
-            variant="secondary"
-            on:click={() => onSignInWithOAuth(googleProvider)}
-        >
-            <svelte:fragment slot="icon">
-                <GmailIcon />
-            </svelte:fragment>
-            Google
-        </Button>
-        <Button
-            variant="secondary"
-            on:click={() => onSignInWithOAuth(githubProvider)}
-        >
-            <svelte:fragment slot="icon">
-                <GithubIcon />
-            </svelte:fragment>
-            Github
-        </Button>
-    </div>
-    <div class="w-full flex flex-row gap-4 items-center my-6">
-        <div class="border-b w-full border-primary-300" />
-        <div class="text-primary-300 text-sm whitespace-nowrap">
-            or sign in with email
+<main
+    class="flex min-h-full flex-col justify-center bg-gray-900 px-6 py-12 lg:px-8"
+>
+    <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+        <div class="mx-auto h-10 w-10 text-indigo-600">
+            <LogoIcon />
         </div>
-        <div class="border-b w-full border-primary-300" />
+        <h2
+            class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white"
+        >
+            Sign in to your account
+        </h2>
     </div>
-    <Input
-        type="email"
-        name="email"
-        placeholder="Email"
-        {errors}
-        bind:value={email}
-    />
-    <Button variant="secondary" on:click={onSignInWithMagicLink}>
-        <svelte:fragment slot="icon">
-            <MailIcon />
-        </svelte:fragment>
-        <div>Email</div>
-    </Button>
-</div>
+
+    <div class="mt-6 sm:mx-auto sm:w-full sm:max-w-sm">
+        <div class="mt-6 grid gap-4">
+            <Button type="button" on:click={() => onLogin("google")}>
+                <svg class="h-5 w-5" viewBox="0 0 24 24">
+                    <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="white"
+                    />
+                    <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="white"
+                    />
+                    <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        fill="white"
+                    />
+                    <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="white"
+                    />
+                    <path d="M1 1h22v22H1z" fill="none" />
+                </svg>
+                <span class="ml-2 text-sm font-semibold leading-6">
+                    Continue with Google
+                </span>
+            </Button>
+
+            <Button on:click={() => onLogin("github")}>
+                <svg
+                    class="h-5 w-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                >
+                    <path
+                        fill-rule="evenodd"
+                        d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
+                        clip-rule="evenodd"
+                    />
+                </svg>
+                <span class="ml-2 text-sm font-semibold leading-6">
+                    Continue with GitHub
+                </span>
+            </Button>
+        </div>
+    </div>
+</main>

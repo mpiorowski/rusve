@@ -1,7 +1,2 @@
-**/.DS_Store
-**/node_modules
-build
-.svelte-kit
-package
-**/vite.config.js.timestamp-*
-**/vite.config.ts.timestamp-*
+node_modules
+/.svelte-kit

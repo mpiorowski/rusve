@@ -5,32 +5,50 @@ package proto;
 option go_package = "rusve/proto";
 
 import "users.proto";
-import "utils.proto";
+import "profile.proto";
 import "notes.proto";
+import "utils.proto";
 
 message Empty {}
-message UserId {
-    string user_id = 1;
-}
-message UserIds {
-    repeated string user_ids = 1;
-}
-message PaymentId {
-    string user_id = 1;
-    string payment_id = 2;
+
+message Id {
+    string id = 1;
 }
 
-message AuthRequest {
-    string sub = 1;
-    string email = 2;
+message Page {
+    int64 offset = 1;
+    int64 limit = 2;
+}
+
+message Count {
+    int64 count = 1;
+}
+
+message AuthResponse {
+    string token = 1;
+    User user = 2;
+}
+
+message StripeUrlResponse {
+    string url = 1;
 }
 
 service UsersService {
-    rpc Auth(AuthRequest) returns (User) {}
-    rpc GetUsers(UserIds) returns (stream User) {}
-    rpc GetUser(UserId) returns (User) {}
-    rpc UpdateUser(User) returns (Empty) {}
-    rpc UpdatePaymentId(PaymentId) returns (Empty) {}
+    rpc Auth(Empty) returns (AuthResponse) {}
+
+    rpc GetProfileByUserId(Empty) returns (Profile) {}
+    rpc CreateProfile(Profile) returns (Profile) {}
+
+    rpc CreateStripeCheckout(Empty) returns (StripeUrlResponse) {}
+    rpc CreateStripePortal(Empty) returns (StripeUrlResponse) {}
+}
+
+service NotesService {
+    rpc CountNotesByUserId(Empty) returns (Count) {}
+    rpc GetNotesByUserId(Page) returns (stream Note) {}
+    rpc GetNoteById(Id) returns (Note) {}
+    rpc CreateNote(Note) returns (Note) {}
+    rpc DeleteNoteById(Id) returns (Empty) {}
 }
 
 message TargetId {
@@ -50,13 +68,3 @@ service UtilsService {
     rpc DeleteFile(FileId) returns (File) {}
 }
 
-message NoteId {
-    string note_id = 1;
-    string user_id = 2;
-}
-
-service NotesService {
-    rpc GetNotes(UserId) returns (stream Note) {}
-    rpc CreateNote(Note) returns (Note) {}
-    rpc DeleteNote(NoteId) returns (Empty) {}
-}

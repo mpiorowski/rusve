@@ -1,25 +1,68 @@
 # Development
-FROM node:19-alpine as dev
+FROM node:20-slim AS dev
 
-WORKDIR /app
-COPY package.json /app/package.json
+WORKDIR /client
 
-# pnpm
-RUN npm install -g pnpm
-COPY pnpm-lock.yaml /app/pnpm-lock.yaml
-RUN pnpm install
+ARG ENV
+ARG COOKIE_DOMAIN
+ARG PUBLIC_OAUTH_HTTP
+ARG USERS_URI
+ARG NOTES_URI
+ARG UTILS_URI
+ARG UPSEND_KEY
+RUN echo "ENV=${ENV}" >> .env
+RUN echo "COOKIE_DOMAIN=${COOKIE_DOMAIN}" >> .env
+RUN echo "PUBLIC_OAUTH_HTTP=${PUBLIC_OAUTH_HTTP}" >> .env
+RUN echo "USERS_URI=${USERS_URI}" >> .env
+RUN echo "NOTES_URI=${NOTES_URI}" >> .env
+RUN echo "UTILS_URI=${UTILS_URI}" >> .env
+RUN echo "UPSEND_KEY=${UPSEND_KEY}" >> .env
 
+COPY package.json /client/package.json
+COPY package-lock.json /client/package-lock.json
+RUN npm install
 COPY . .
 
-CMD ["pnpm", "dev"]
+CMD npm run dev
 
-# Production
-FROM node:19-alpine as prod
-WORKDIR /app
-COPY --from=dev /app /app
-COPY .env.prod /app/.env
+# Build
+FROM node:20-slim AS build
+WORKDIR /client
+
+COPY package.json /client/package.json
+COPY package-lock.json /client/package-lock.json
+
+ARG ENV
+ARG COOKIE_DOMAIN
+ARG PUBLIC_OAUTH_HTTP
+ARG USERS_URI
+ARG NOTES_URI
+ARG UTILS_URI
+ARG UPSEND_KEY
+RUN echo "ENV=${ENV}" >> .env
+RUN echo "COOKIE_DOMAIN=${COOKIE_DOMAIN}" >> .env
+RUN echo "PUBLIC_OAUTH_HTTP=${PUBLIC_OAUTH_HTTP}" >> .env
+RUN echo "USERS_URI=${USERS_URI}" >> .env
+RUN echo "NOTES_URI=${NOTES_URI}" >> .env
+RUN echo "UTILS_URI=${UTILS_URI}" >> .env
+RUN echo "UPSEND_KEY=${UPSEND_KEY}" >> .env
+
+RUN npm install
+COPY . .
 
 RUN npm run build
 
-CMD PORT=8080 node build
+# Production
+FROM node:20-slim AS prod
+WORKDIR /client
+
+COPY package.json /client/package.json
+COPY package-lock.json /client/package-lock.json
+RUN npm install --production
+
+COPY --from=build /client/build /client/build
+COPY --from=build /client/src/lib/proto/ /client/src/lib/proto/
+COPY --from=build /client/src/lib/server/private.key /client/src/lib/server/private.key
+
+CMD PORT=3000 node build
 

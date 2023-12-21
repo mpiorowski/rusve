@@ -1,145 +1,73 @@
-<script lang="ts">
-    import "$lib/components/form/TipTap.css";
-    import Toast from "$lib/components/toast/Toast.svelte";
-    import { toastStore } from "$lib/components/toast/toast";
-    import LogoIcon from "$lib/assets/icons/LogoIcon.svelte";
-    import Dropdown from "$lib/components/Dropdown.svelte";
-    import AvatarIcon from "$lib/assets/icons/AvatarIcon.svelte";
-    import type { LayoutData } from "./$types";
+<script>
     import { page } from "$app/stores";
-    import Button from "$lib/components/form/Button.svelte";
-    import { goto } from "$app/navigation";
+    import Drawer from "$lib/ui/Drawer.svelte";
+    import Avatar from "./Avatar.svelte";
+    import Breadcrumbs from "./Breadcrumbs.svelte";
+    import Nav from "./Nav.svelte";
 
-    export let data: LayoutData;
-
-    async function onLogout(): Promise<void> {
-        await goto("/auth");
-    }
-
-    function onRust(): void {
-        window.location.href = "?lang=rust";
-    }
-
-    function onGo(): void {
-        window.location.href = "?lang=go";
-    }
-
-    $: isGo = $page.url.searchParams.get("lang") === "go";
+    /** @type {import("./$types").LayoutData} */
+    export let data;
+    let open = false;
+    $: current = $page.url.pathname.split("/")[1];
 </script>
 
-<svelte:head>
-    <title>Rusve</title>
-    <meta
-        name="description"
-        content="Open source Rust with SvelteKit application, using gRPC and microservices."
-    />
-</svelte:head>
+{#if open}
+    <Drawer {open} close={() => (open = false)} position="left">
+        <Nav close={() => (open = false)} />
+    </Drawer>
+{/if}
 
-<div class="absolute right-10 top-10 flex flex-col gap-2">
-    {#each $toastStore as toast}
-        <Toast {toast} />
-    {/each}
-</div>
-<main>
-    <nav class="h-[60px] border-b border-gray-600">
-        <div
-            class="mx-auto flex h-full w-full max-w-7xl items-center justify-between px-6 text-xl"
+<div class="h-full overflow-auto bg-gray-900 text-gray-50">
+    <!-- Static sidebar for mobile -->
+    <div
+        class="sticky top-0 z-40 flex items-center gap-x-6 border-b border-white/5 bg-gray-900 px-4 py-4 shadow-sm sm:px-6 lg:hidden"
+    >
+        <button
+            type="button"
+            class="-m-2.5 p-2.5 text-gray-400 lg:hidden"
+            on:click={() => (open = true)}
         >
-            <div class="flex w-full items-center justify-between">
-                <div class="flex flex-row items-center justify-center gap-2">
-                    <a
-                        href="/?lang={isGo ? 'go' : 'rust'}"
-                        class="flex flex-row items-center gap-2 font-bold transition hover:cursor-pointer hover:text-secondary-500 md:mr-4 md:text-2xl"
-                    >
-                        <div class="w-12">
-                            <LogoIcon />
-                        </div>
-                        Rusve
-                    </a>
-                    <div class={isGo ? "" : "rounded ring-2 ring-teal-300"}>
-                        <Button on:click={onRust}>Rust</Button>
-                    </div>
-                    <div class={isGo ? "rounded ring-2 ring-teal-300" : ""}>
-                        <Button on:click={onGo}>Go</Button>
-                    </div>
-                </div>
-
-                {#if !data.email}
-                    <a
-                        href="/auth?lang={isGo ? 'go' : 'rust'}"
-                        class="transition hover:text-secondary-500"
-                    >
-                        Login
-                    </a>
-                {/if}
-                {#if data.email}
-                    <a
-                        href="/profile?lang={isGo ? 'go' : 'rust'}"
-                        class="transition hover:text-secondary-500"
-                    >
-                        Profile
-                    </a>
-                    <a
-                        href="/notes?lang={isGo ? 'go' : 'rust'}"
-                        class="transition hover:text-secondary-500"
-                    >
-                        Notes
-                    </a>
-                    <div class="flex flex-row items-center gap-4">
-                        <Dropdown>
-                            <svelte:fragment slot="button">
-                                <div
-                                    class="w-6 transition hover:cursor-pointer hover:text-secondary-500"
-                                >
-                                    <AvatarIcon />
-                                </div>
-                            </svelte:fragment>
-                            <svelte:fragment slot="dropdown">
-                                <div
-                                    class="flex min-w-[120px] flex-col rounded bg-primary-600"
-                                >
-                                    <p class="px-3 py-3 font-semibold">
-                                        {data.email}
-                                    </p>
-                                    <div
-                                        class="w-full border-b border-gray-500"
-                                    />
-                                    <a
-                                        href="/profile?lang={isGo
-                                            ? 'go'
-                                            : 'rust'}"
-                                        class="px-3 py-3 transition hover:text-secondary-500"
-                                    >
-                                        Profile
-                                    </a>
-                                    <a
-                                        href="/billing?lang={isGo
-                                            ? 'go'
-                                            : 'rust'}"
-                                        class="px-3 py-3 transition hover:text-secondary-500"
-                                    >
-                                        Billing
-                                    </a>
-                                    <div
-                                        class="w-full border-b border-gray-500"
-                                    />
-                                    <button
-                                        on:click={onLogout}
-                                        class="w-full px-3 py-3 text-left transition hover:text-secondary-500"
-                                    >
-                                        Sign out
-                                    </button>
-                                </div>
-                            </svelte:fragment>
-                        </Dropdown>
-                    </div>
-                {/if}
-            </div>
+            <span class="sr-only">Open sidebar</span>
+            <svg
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                aria-hidden="true"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                />
+            </svg>
+        </button>
+        <div class="flex-1 text-sm font-semibold leading-6 text-white">
+            {current?.replace(/^\w/, (c) => c.toUpperCase())}
         </div>
-    </nav>
-    <section class="h-[calc(100dvh-60px)] overflow-auto">
-        <div class="mx-auto max-w-4xl px-6 py-8">
+        <Avatar email={data.email} avatarUrl={""} />
+    </div>
+
+    <!-- Static sidebar for desktop -->
+    <div
+        class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col"
+    >
+        <!-- Sidebar component, swap this element with another sidebar if you like -->
+        <Nav />
+    </div>
+
+    <!-- Your content -->
+    <main class="lg:pl-72">
+        <header
+            class="hidden items-center justify-between border-b border-white/5 px-4 py-2 sm:px-6 sm:py-4 lg:flex lg:px-8"
+        >
+            <Breadcrumbs />
+            <Avatar email={data.email} avatarUrl={""} />
+        </header>
+
+        <div class="p-6 sm:p-8 lg:p-10">
             <slot />
         </div>
-    </section>
-</main>
+    </main>
+</div>

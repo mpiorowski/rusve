@@ -2,25 +2,26 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "rusve/proto";
+option go_package = "sgsg/proto";
 
 enum UserRole {
-    UNSET = 0;
-    ROLE_USER = 1;
-    ROLE_ADMIN = 2;
+    ROLE_UNSET = 0;
+    USER = 1;
+    ADMIN = 2;
 }
 
 message User {
     string id = 1;
     string created = 2;
     string updated = 3;
-    optional string deleted = 4;
+    string deleted = 4;
 
     string email = 5;
-    UserRole role = 6;
-    string sub = 7;
+    string sub = 6;
+    UserRole role = 7;
 
-    string name = 8;
-    optional string avatar_id = 9;
-    optional string payment_id = 10;
+    string subscription_id = 8;
+    string subscription_end = 9;
+    string subscription_check = 10;
+    bool subscription_active = 11;
 }

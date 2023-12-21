@@ -2,119 +2,117 @@ version: "3"
 services:
   client:
     container_name: rusve-client
-    working_dir: /app
+    working_dir: /client
     build:
       context: ./client
       target: dev
+      args:
+        ENV: development
+        COOKIE_DOMAIN: .127.0.0.1
+        PUBLIC_OAUTH_HTTP: http://127.0.0.1:8090
+        USERS_URI: service-users
+        UTILS_URI: service-utils
+        NOTES_URI: service-notes
+        UPSEND_KEY: ${UPSEND_KEY}
     volumes:
-      - ./client:/app
+      - ./client/src:/client/src
+      - ./client/.svelte-kit:/client/.svelte-kit
     ports:
       - 3000:3000
 
-  service-users-rust:
-    container_name: rusve-service-users-rust
+  service-oauth:
+    container_name: rusve-service-oauth
     working_dir: /app
     build:
-      context: ./service-users-rust
+      context: ./service-oauth
       target: dev
     volumes:
-      - ./service-users-rust/src:/app/src
-      - ./files:/app/files
+      - ./service-oauth:/app
     environment:
       PORT: 443
       ENV: development
       RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
-    command: sh -c "cargo run --bin main"
-
-  service-users-go:
-    container_name: rusve-service-users-go
-    working_dir: /app
-    build:
-      context: ./service-users-go
-      target: dev
-    volumes:
-      - ./service-users-go/src:/app/src
-      - ./files:/app/files
-    environment:
-      ENV: development
-      PORT: 443
-      DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
-    command: sh -c "go run /app/src/."
-
-  service-notes-rust:
-    container_name: rusve-service-notes-rust
-    working_dir: /app
-    build:
-      context: ./service-notes-rust
-      target: dev
-    volumes:
-      - ./service-notes-rust/src:/app/src
-    environment:
-      ENV: development
-      PORT: 443
-      DATABASE_URL: postgresql://?host=db-notes&user=postgres&password=12345&dbname=notes
-    command: sh -c "cargo run --bin main"
-
-  service-notes-go:
-    container_name: rusve-service-notes-go
-    working_dir: /app
-    build:
-      context: ./service-notes-go
-      target: dev
-    volumes:
-      - ./service-notes-go:/app
-    environment:
-      ENV: development
-      PORT: 443
-      DATABASE_URL: postgresql://?host=db-notes&user=postgres&password=12345&dbname=notes
-    command: sh -c "go run /app/src/."
-
-  service-utils-rust:
-    container_name: rusve-service-utils-rust
-    working_dir: /app
-    build:
-      context: ./service-utils-rust
-      target: dev
-    volumes:
-      - ./service-utils-rust/src:/app/src
-      - ./files:/app/files
-    environment:
-      PORT: 443
-      ENV: development
-      DATABASE_URL: postgresql://?host=db-utils&user=postgres&password=12345&dbname=users
-      BUCKET: bucket
-      SENDGRID_API_KEY: sendgid-api-key
-    command: sh -c "cargo run --bin main"
-
-  service-utils-go:
-    container_name: rusve-service-utils-go
-    working_dir: /app
-    build:
-      context: ./service-utils-go
-      target: dev
-    volumes:
-      - ./service-utils-go/src:/app/src
-      - ./files:/app/files
-    environment:
-      PORT: 443
-      ENV: development
-      DATABASE_URL: postgresql://?host=db-utils&user=postgres&password=12345&dbname=users
-      BUCKET: bucket
-      SENDGRID_API_KEY: sendgid-api-key
-    command: sh -c "go run /app/src/."
-
-  directus:
-    container_name: rusve-directus
-    build:
-      context: ./directus
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
     ports:
-      - 8055:8055
+      - 8090:443
+
+  service-users:
+    container_name: rusve-service-users
+    working_dir: /app
+    build:
+      context: ./service-users
+      target: dev
+    volumes:
+      - ./service-users/src:/app/src
     environment:
-      KEY: 255d861b-5ea1-5996-9aa3-922530ec40b1
-      SECRET: 6116487b-cda1-52c2-b5b5-c8022c45e263
-      DB_CLIENT: sqlite3
-      DB_FILENAME: ./database/data.db
-      CACHE_ENABLED: false
-      ADMIN_EMAIL: admin@example.com
-      ADMIN_PASSWORD: d1r3ctu5
+      PORT: 443
+      ENV: development
+      RUST_LOG: info
+      DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
+      CLIENT_URL: http://127.0.0.1:3000/subscription
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
+      STRIPE_PRICE_ID: ${STRIPE_PRICE_ID}
+
+  service-notes:
+    container_name: rusve-service-notes
+    working_dir: /app
+    build:
+      context: ./service-notes
+      target: dev
+    volumes:
+      - ./service-notes/src:/app/src
+    environment:
+      PORT: 443
+      ENV: development
+      RUST_LOG: info
+      DATABASE_URL: postgresql://?host=db-notes&user=postgres&password=12345&dbname=notes
+
+  service-utils:
+    container_name: rusve-service-utils
+    working_dir: /app
+    build:
+      context: ./service-utils
+      target: dev
+    volumes:
+      - ./service-utils/src:/app/src
+      - ./files:/app/files
+    environment:
+      PORT: 443
+      ENV: development
+      RUST_LOG: info
+      DATABASE_URL: postgresql://?host=db-utils&user=postgres&password=12345&dbname=users
+      BUCKET: bucket
+      SENDGRID_API_KEY: sendgid-api-key
+
+  db-users:
+    container_name: rusve-db-users
+    image: postgres:15.1
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: users
+
+  db-notes:
+    container_name: rusve-db-notes
+    image: postgres:15.1
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: notes
+
+  db-utils:
+    container_name: rusve-db-utils
+    image: postgres:15.1
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: users
+

@@ -1,4 +1,4 @@
-// Original file: ../proto/users.proto
+// Original file: users.proto
 
 import type { UserRole as _proto_UserRole, UserRole__Output as _proto_UserRole__Output } from '../proto/UserRole';
 
@@ -8,28 +8,24 @@ export interface User {
   'updated'?: (string);
   'deleted'?: (string);
   'email'?: (string);
-  'role'?: (_proto_UserRole);
   'sub'?: (string);
-  'name'?: (string);
-  'avatarId'?: (string);
-  'paymentId'?: (string);
-  '_deleted'?: "deleted";
-  '_avatarId'?: "avatarId";
-  '_paymentId'?: "paymentId";
+  'role'?: (_proto_UserRole);
+  'subscriptionId'?: (string);
+  'subscriptionEnd'?: (string);
+  'subscriptionCheck'?: (string);
+  'subscriptionActive'?: (boolean);
 }
 
 export interface User__Output {
   'id': (string);
   'created': (string);
   'updated': (string);
-  'deleted'?: (string);
+  'deleted': (string);
   'email': (string);
-  'role': (_proto_UserRole__Output);
   'sub': (string);
-  'name': (string);
-  'avatarId'?: (string);
-  'paymentId'?: (string);
-  '_deleted': "deleted";
-  '_avatarId': "avatarId";
-  '_paymentId': "paymentId";
+  'role': (_proto_UserRole__Output);
+  'subscriptionId': (string);
+  'subscriptionEnd': (string);
+  'subscriptionCheck': (string);
+  'subscriptionActive': (boolean);
 }

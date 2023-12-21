@@ -1,0 +1,8 @@
+[package]
+name = "rusve-proto"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# General
+tonic-build = "0.9.2"
