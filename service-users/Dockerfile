@@ -18,6 +18,7 @@ WORKDIR /app
 COPY src /app/src
 COPY Cargo.toml /app/Cargo.toml
 COPY Cargo.lock /app/Cargo.lock
+COPY public.key /app/public.key
 RUN cargo build --release
 
 # Production
