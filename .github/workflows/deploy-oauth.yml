@@ -10,6 +10,10 @@ on:
         required: true
       DATABASE_URL:
         required: true
+      GOOGLE_CLIENT_ID:
+        required: true
+      GOOGLE_CLIENT_SECRET:
+        required: true
 
 env:
   GAR_LOCATION: europe-north1
@@ -62,5 +66,7 @@ jobs:
           env_vars: |
             ENV=${{ env.ENV }}
             DATABASE_URL=${{ env.DATABASE_URL }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

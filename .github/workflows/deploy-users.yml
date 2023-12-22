@@ -10,6 +10,10 @@ on:
         required: true
       DATABASE_URL:
         required: true
+      STRIPE_API_KEY:
+        required: true
+      STRIPE_PRICE_ID:
+        required: true
 
 env:
   GAR_LOCATION: europe-north1
@@ -62,5 +66,7 @@ jobs:
           env_vars: |
             ENV=${{ env.ENV }}
             DATABASE_URL=${{ env.DATABASE_URL }}
+            STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}
+            STRIPE_PRICE_ID=${{ secrets.STRIPE_PRICE_ID }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
