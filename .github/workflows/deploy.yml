@@ -14,24 +14,24 @@ jobs:
     uses: ./.github/workflows/deploy-client.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-        # deploy-users:
-        #   uses: ./.github/workflows/deploy-users.yml
-        #   secrets:
-        #     GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-        #     DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-        # deploy-oauth:
-        #   uses: ./.github/workflows/deploy-oauth.yml
-        #   secrets:
-        #     GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-        #     DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-        # deploy-utils:
-        #   uses: ./.github/workflows/deploy-utils.yml
-        #   secrets:
-        #     GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-        #     DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-        #     SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-        # deploy-notes:
-        #   uses: ./.github/workflows/deploy-notes.yml
-        #   secrets:
-        #     GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-        #     DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
+  deploy-users:
+    uses: ./.github/workflows/deploy-users.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
+  deploy-oauth:
+    uses: ./.github/workflows/deploy-oauth.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
+  deploy-utils:
+    uses: ./.github/workflows/deploy-utils.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+  deploy-notes:
+    uses: ./.github/workflows/deploy-notes.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
