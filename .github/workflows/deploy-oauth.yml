@@ -24,6 +24,8 @@ env:
   SERVICE: oauth
   ENV: production
   RUST_LOG: info
+  SERVER_URL: https://oauth-cdb5ecy4ia-lz.a.run.app
+  CLIENT_URL: https://client-cdb5ecy4ia-lz.a.run.app
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
   # DATABASE_URL=postgresql:///?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}&dbname=users
 
@@ -67,6 +69,8 @@ jobs:
           env_vars: |
             ENV=${{ env.ENV }}
             RUST_LOG=${{ env.RUST_LOG }}
+            CLIENT_URL=${{ env.CLIENT_URL }}
+            SERVER_URL=${{ env.SERVER_URL }}
             DATABASE_URL=${{ env.DATABASE_URL }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}

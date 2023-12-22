@@ -10,30 +10,30 @@ use axum::Json;
 use axum::{routing::get, Router};
 use http::header::{AUTHORIZATION, CONTENT_TYPE};
 use http::Method;
-use rusve_oauth::Envs;
+use rusve_oauth::Env;
 use std::sync::Arc;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
 
 struct AppState {
+    env: Env,
     db_pool: deadpool_postgres::Pool,
-    envs: Envs,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initalize environment variables
-    let envs: Envs = rusve_oauth::init_envs()?;
+    let env: Env = rusve_oauth::init_envs()?;
 
     // Connect to database
     let db_pool = rusve_oauth::connect_to_db().context("Failed to connect to database")?;
 
     // Create shared state
-    let shared_state = Arc::new(AppState { db_pool, envs });
+    let shared_state = Arc::new(AppState { db_pool, env });
     tracing::info!("Connected to database");
 
     // Initialize tracing
-    let filter = &shared_state.envs.rust_log;
+    let filter = &shared_state.env.rust_log;
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
     // Run migrations
@@ -48,17 +48,14 @@ async fn main() -> Result<()> {
         .allow_headers([AUTHORIZATION, CONTENT_TYPE])
         .allow_origin(Any);
 
-    let google_client_id = shared_state.envs.google_client_id.clone();
-    let google_client_secret = shared_state.envs.google_client_secret.clone();
     let app = Router::new()
         .route("/", get(root))
         .route("/oauth-login/google", get(oauth_service::oauth_login))
         .route("/oauth-callback/google", get(oauth_service::oauth_callback))
-        .with_state(shared_state)
+        .with_state(shared_state.clone())
         .layer(ServiceBuilder::new().layer(cors))
         .layer(Extension(oauth_service::build_oauth_client(
-            google_client_id,
-            google_client_secret,
+            shared_state.env.clone(),
         )));
 
     let port = std::env::var("PORT").context("PORT not set")?;

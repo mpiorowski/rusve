@@ -26,9 +26,9 @@ struct GoogleUser {
     picture: String,
 }
 
-pub fn build_oauth_client(client_id: String, client_secret: String) -> BasicClient {
+pub fn build_oauth_client(env: rusve_oauth::Env) -> BasicClient {
     // In prod, http://localhost:8000 would get replaced by whatever your production URL is
-    let redirect_url = "http://127.0.0.1:8090/oauth-callback/google".to_string();
+    let redirect_url = format!("{}/oauth-callback/google", env.server_url);
 
     // If you're not using Google OAuth, you can use whatever the relevant auth/token URL is for your given OAuth service
     let auth_url = AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string())
@@ -37,8 +37,8 @@ pub fn build_oauth_client(client_id: String, client_secret: String) -> BasicClie
         .expect("Invalid token endpoint URL");
 
     BasicClient::new(
-        ClientId::new(client_id),
-        Some(ClientSecret::new(client_secret)),
+        ClientId::new(env.google_client_id),
+        Some(ClientSecret::new(env.google_client_secret)),
         auth_url,
         Some(token_url),
     )
@@ -84,6 +84,7 @@ pub async fn oauth_callback(
     Query(query): Query<HashMap<String, String>>,
     Extension(client): Extension<BasicClient>,
 ) -> Result<Response, StatusCode> {
+    let client_url = state.env.client_url.clone();
     let conn = state.db_pool.get().await.map_err(|err| {
         tracing::error!("Failed to get DB connection: {:?}", err);
         StatusCode::INTERNAL_SERVER_ERROR
@@ -230,7 +231,7 @@ pub async fn oauth_callback(
                 3600 * 24 * 7
             ),
         )
-        .header(header::LOCATION, "http://127.0.0.1:3000")
+        .header(header::LOCATION, client_url)
         .body("".into())
         .unwrap())
 }

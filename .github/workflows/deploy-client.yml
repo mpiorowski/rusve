@@ -55,7 +55,7 @@ jobs:
           docker build -f ./client/Dockerfile -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./client \
           --build-arg ENV=${{ env.ENV }} \
           --build-arg COOKIE_DOMAIN=${{ env.COOKIE_DOMAIN }} \
-          --build-arg PUBLIC_OAUTH_HTTP=http${{ env.PUBLIC_OAUTH_HTTP }} \
+          --build-arg PUBLIC_OAUTH_HTTP=${{ env.PUBLIC_OAUTH_HTTP }} \
           --build-arg USERS_URI=${{ env.USERS_URI }} \
           --build-arg NOTES_URI=${{ env.NOTES_URI }} \
           --build-arg UTILS_URI=${{ env.UTILS_URI }} \
