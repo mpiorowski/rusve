@@ -23,6 +23,7 @@ env:
   REGION: europe-north1
   SERVICE: oauth
   ENV: production
+  RUST_LOG: info
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
   # DATABASE_URL=postgresql:///?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}&dbname=users
 
@@ -65,6 +66,7 @@ jobs:
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
           env_vars: |
             ENV=${{ env.ENV }}
+            RUST_LOG=${{ env.RUST_LOG }}
             DATABASE_URL=${{ env.DATABASE_URL }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
