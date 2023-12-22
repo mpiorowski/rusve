@@ -62,5 +62,5 @@ COPY --from=build /client/build /client/build
 COPY --from=build /client/src/lib/proto/ /client/src/lib/proto/
 COPY --from=build /client/src/lib/server/private.key /client/src/lib/server/private.key
 
-CMD PORT=3000 node build
+CMD PORT=8080 node build
 
