@@ -25,3 +25,25 @@ pub fn connect_to_db() -> Result<deadpool_postgres::Pool> {
     let pool = Pool::builder(mgr).build()?;
     Ok(pool)
 }
+
+pub struct Envs {
+    pub rust_log: String,
+    pub database_url: String,
+    pub google_client_id: String,
+    pub google_client_secret: String,
+}
+
+pub fn init_envs() -> Result<Envs> {
+    let rust_log = std::env::var("RUST_LOG").context("RUST_LOG not set")?;
+    let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
+    let google_client_id = std::env::var("GOOGLE_CLIENT_ID").context("GOOGLE_CLIENT_ID not set")?;
+    let google_client_secret =
+        std::env::var("GOOGLE_CLIENT_SECRET").context("GOOGLE_CLIENT_SECRET not set")?;
+
+    Ok(Envs {
+        rust_log,
+        database_url,
+        google_client_id,
+        google_client_secret,
+    })
+}

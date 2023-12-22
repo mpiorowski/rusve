@@ -10,14 +10,18 @@ on:
         required: true
       DATABASE_URL:
         required: true
+      GOOGLE_CLIENT_ID:
+        required: true
+      GOOGLE_CLIENT_SECRET:
+        required: true
 
 env:
   GAR_LOCATION: europe-north1
   PROJECT_ID: rusve-384620
   REPOSITORY: rusve-repo
   DATABASE: rusve-db
-  SERVICE: oauth
   REGION: europe-north1
+  SERVICE: oauth
   ENV: production
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
   # DATABASE_URL=postgresql:///?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}&dbname=users
@@ -62,5 +66,7 @@ jobs:
           env_vars: |
             ENV=${{ env.ENV }}
             DATABASE_URL=${{ env.DATABASE_URL }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

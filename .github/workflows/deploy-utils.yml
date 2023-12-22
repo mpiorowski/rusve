@@ -18,8 +18,8 @@ env:
   PROJECT_ID: rusve-384620
   REPOSITORY: rusve-repo
   DATABASE: rusve-db
-  SERVICE: utils
   REGION: europe-north1
+  SERVICE: utils
   ENV: production
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=utils
   BUCKET: rusve-bucket

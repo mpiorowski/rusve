@@ -10,24 +10,31 @@ use axum::Json;
 use axum::{routing::get, Router};
 use http::header::{AUTHORIZATION, CONTENT_TYPE};
 use http::Method;
+use rusve_oauth::Envs;
 use std::sync::Arc;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
 
 struct AppState {
     db_pool: deadpool_postgres::Pool,
+    envs: Envs,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Initialize tracing
-    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_owned());
-    tracing_subscriber::fmt().with_env_filter(filter).init();
+    // Initalize environment variables
+    let envs: Envs = rusve_oauth::init_envs()?;
 
     // Connect to database
     let db_pool = rusve_oauth::connect_to_db().context("Failed to connect to database")?;
-    let shared_state = Arc::new(AppState { db_pool });
+
+    // Create shared state
+    let shared_state = Arc::new(AppState { db_pool, envs });
     tracing::info!("Connected to database");
+
+    // Initialize tracing
+    let filter = &shared_state.envs.rust_log;
+    tracing_subscriber::fmt().with_env_filter(filter).init();
 
     // Run migrations
     migrations::run_migrations(&shared_state.db_pool)
@@ -41,6 +48,8 @@ async fn main() -> Result<()> {
         .allow_headers([AUTHORIZATION, CONTENT_TYPE])
         .allow_origin(Any);
 
+    let google_client_id = shared_state.envs.google_client_id.clone();
+    let google_client_secret = shared_state.envs.google_client_secret.clone();
     let app = Router::new()
         .route("/", get(root))
         .route("/oauth-login/google", get(oauth_service::oauth_login))
@@ -48,8 +57,8 @@ async fn main() -> Result<()> {
         .with_state(shared_state)
         .layer(ServiceBuilder::new().layer(cors))
         .layer(Extension(oauth_service::build_oauth_client(
-            std::env::var("GOOGLE_CLIENT_ID").context("GOOGLE_CLIENT_ID not set")?,
-            std::env::var("GOOGLE_CLIENT_SECRET").context("GOOGLE_CLIENT_SECRET not set")?,
+            google_client_id,
+            google_client_secret,
         )));
 
     let port = std::env::var("PORT").context("PORT not set")?;
