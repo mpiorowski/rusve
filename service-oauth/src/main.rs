@@ -20,6 +20,8 @@ struct AppState {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // Check for environment variables
+
     // Initialize tracing
     let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_owned());
     tracing_subscriber::fmt().with_env_filter(filter).init();

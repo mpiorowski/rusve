@@ -25,3 +25,8 @@ pub fn connect_to_db() -> Result<deadpool_postgres::Pool> {
     let pool = Pool::builder(mgr).build()?;
     Ok(pool)
 }
+
+type Env = std::sync::Arc<std::collections::HashMap<String, String>>;
+struct EnvStore {
+    env: Env,
+}
