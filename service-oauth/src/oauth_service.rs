@@ -222,7 +222,7 @@ pub async fn oauth_callback(
     tracing::info!("User authenticated: {:?}", user);
 
     Ok(Response::builder()
-        .status(StatusCode::PERMANENT_REDIRECT)
+        .status(StatusCode::TEMPORARY_REDIRECT)
         .header(
             header::SET_COOKIE,
             format!(
