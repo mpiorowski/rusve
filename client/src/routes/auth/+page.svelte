@@ -1,6 +1,6 @@
 <script>
     import { page } from "$app/stores";
-    import { PUBLIC_OAUTH_HTTP } from "$env/static/public";
+    import { PUBLIC_OAUTH_URL } from "$env/static/public";
     import Button from "$lib/form/Button.svelte";
     import LogoIcon from "$lib/icons/LogoIcon.svelte";
     import { toast } from "$lib/ui/toast";
@@ -25,7 +25,7 @@
      */
     async function onLogin(provider) {
         try {
-            const response = await fetch(`${PUBLIC_OAUTH_HTTP}`);
+            const response = await fetch(`${PUBLIC_OAUTH_URL}`);
             if (response.status !== 200) {
                 toast.error("Error", "Server is not running");
                 return;
@@ -35,7 +35,7 @@
             toast.error("Error", "Server is not running");
             return;
         }
-        window.location.href = `${PUBLIC_OAUTH_HTTP}/oauth-login/${provider}`;
+        window.location.href = `${PUBLIC_OAUTH_URL}/oauth-login/${provider}`;
     }
 </script>
 

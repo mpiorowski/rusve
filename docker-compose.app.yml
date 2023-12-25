@@ -9,7 +9,7 @@ services:
       args:
         ENV: development
         COOKIE_DOMAIN: .127.0.0.1
-        PUBLIC_OAUTH_HTTP: http://127.0.0.1:8090
+        PUBLIC_OAUTH_URL: http://127.0.0.1:8090
         USERS_URI: service-users
         UTILS_URI: service-utils
         NOTES_URI: service-notes
@@ -33,6 +33,8 @@ services:
       ENV: development
       RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
+      SERVER_URL: http://127.0.0.1:8090
+      CLIENT_URL: http://127.0.0.1:3000
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
     ports:
