@@ -35,6 +35,7 @@ pub fn build_oauth_client(env: rusve_oauth::Env) -> BasicClient {
         .expect("Invalid authorization endpoint URL");
     let token_url = TokenUrl::new("https://www.googleapis.com/oauth2/v3/token".to_string())
         .expect("Invalid token endpoint URL");
+    let redirect_url = RedirectUrl::new(redirect_url).expect("Invalid redirect URL");
 
     BasicClient::new(
         ClientId::new(env.google_client_id),
@@ -42,7 +43,7 @@ pub fn build_oauth_client(env: rusve_oauth::Env) -> BasicClient {
         auth_url,
         Some(token_url),
     )
-    .set_redirect_uri(RedirectUrl::new(redirect_url).unwrap())
+    .set_redirect_uri(redirect_url)
 }
 
 pub async fn oauth_login(
@@ -222,16 +223,18 @@ pub async fn oauth_callback(
 
     Ok(Response::builder()
         .status(StatusCode::PERMANENT_REDIRECT)
-        .header(
-            header::SET_COOKIE,
-            format!(
-                "token={}; HttpOnly; Max-Age={}; Path=/; SameSite=Lax",
-                token.id,
-                // 7 days
-                3600 * 24 * 7
-            ),
-        )
-        .header(header::LOCATION, client_url)
+        // .header(
+            // header::AUTHORIZATION,
+            // format!("Bearer {}", token.id),
+            // format!(
+            //     "token={}; HttpOnly; Max-Age={}; Path=/; SameSite=Lax; Domain={}; Secure",
+            //     token.id,
+            //     // 7 days
+            //     3600 * 24 * 7,
+            //     client_domain
+            // ),
+        // )
+        .header(header::LOCATION, format!("{}/?token={}", client_url, token.id))
         .body("".into())
         .unwrap())
 }

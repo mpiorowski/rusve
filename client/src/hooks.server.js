@@ -30,11 +30,20 @@ export async function handle({ event, resolve }) {
         });
         return await resolve(event);
     }
+    const queryToken = event.url.searchParams.get("token");
+    if (queryToken) {
+        event.cookies.set("token", queryToken, {
+            domain: COOKIE_DOMAIN,
+            path: "/",
+            maxAge: 10,
+        });
+        throw redirect(302, "/dashboard");
+    }
     if (event.url.pathname === "/") {
         throw redirect(302, "/dashboard");
     }
 
-    const token = event.cookies.get("token");
+    const token = event.cookies.get("token") ?? "";
     if (!token) {
         logger.info("No token");
         throw redirect(302, "/auth");
@@ -59,7 +68,7 @@ export async function handle({ event, resolve }) {
     // max age is 7 days
     response.headers.append(
         "set-cookie",
-        `token=${auth.data.token}; HttpOnly; SameSite=Lax; Secure; Max-Age=604800; Domain=${COOKIE_DOMAIN}; Path=/`,
+        `token=${auth.data.token}; HttpOnly; SameSite=Strict; Secure; Max-Age=604800; Domain=${COOKIE_DOMAIN}; Path=/`,
     );
     return response;
 }
