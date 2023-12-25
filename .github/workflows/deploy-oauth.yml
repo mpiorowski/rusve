@@ -26,6 +26,7 @@ env:
   RUST_LOG: info
   SERVER_URL: https://oauth-cdb5ecy4ia-lz.a.run.app
   CLIENT_URL: https://client-cdb5ecy4ia-lz.a.run.app
+  CLIENT_DOMAIN: client-cdb5ecy4ia-lz.a.run.app
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
   # DATABASE_URL=postgresql:///?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}&dbname=users
 
@@ -70,6 +71,7 @@ jobs:
             ENV=${{ env.ENV }}
             RUST_LOG=${{ env.RUST_LOG }}
             CLIENT_URL=${{ env.CLIENT_URL }}
+            CLIENT_DOMAIN=${{ env.CLIENT_DOMAIN }}
             SERVER_URL=${{ env.SERVER_URL }}
             DATABASE_URL=${{ env.DATABASE_URL }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}

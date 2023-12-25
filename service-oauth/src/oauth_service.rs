@@ -85,6 +85,7 @@ pub async fn oauth_callback(
     Extension(client): Extension<BasicClient>,
 ) -> Result<Response, StatusCode> {
     let client_url = state.env.client_url.clone();
+    let client_domain = state.env.client_domain.clone();
     let conn = state.db_pool.get().await.map_err(|err| {
         tracing::error!("Failed to get DB connection: {:?}", err);
         StatusCode::INTERNAL_SERVER_ERROR
@@ -225,10 +226,11 @@ pub async fn oauth_callback(
         .header(
             header::SET_COOKIE,
             format!(
-                "token={}; HttpOnly; Max-Age={}; Path=/; SameSite=Lax",
+                "token={}; HttpOnly; Max-Age={}; Path=/; SameSite=Lax; Domain={}",
                 token.id,
                 // 7 days
-                3600 * 24 * 7
+                3600 * 24 * 7,
+                client_domain
             ),
         )
         .header(header::LOCATION, client_url)
