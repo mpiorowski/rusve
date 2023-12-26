@@ -25,7 +25,7 @@ env:
   ENV: production
   RUST_LOG: info
   SERVER_URL: https://oauth-cdb5ecy4ia-lz.a.run.app
-  CLIENT_URL: https://client-cdb5ecy4ia-lz.a.run.app
+  CLIENT_URL: https://www.rusve.app
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
   # DATABASE_URL=postgresql:///?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}&dbname=users
 
