@@ -27,7 +27,7 @@ services:
       context: ./service-oauth
       target: dev
     volumes:
-      - ./service-oauth:/app
+      - ./service-oauth/src:/app/src
     environment:
       PORT: 443
       ENV: development
@@ -37,6 +37,8 @@ services:
       CLIENT_URL: http://127.0.0.1:3000
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
     ports:
       - 8090:443
 

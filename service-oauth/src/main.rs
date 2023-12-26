@@ -1,11 +1,11 @@
 mod migrations;
 mod oauth_db;
+mod oauth_http;
 mod oauth_service;
 
 use anyhow::Context;
 use anyhow::Result;
 use axum::http::StatusCode;
-use axum::Extension;
 use axum::Json;
 use axum::{routing::get, Router};
 use http::header::{AUTHORIZATION, CONTENT_TYPE};
@@ -50,13 +50,13 @@ async fn main() -> Result<()> {
 
     let app = Router::new()
         .route("/", get(root))
-        .route("/oauth-login/google", get(oauth_service::oauth_login))
-        .route("/oauth-callback/google", get(oauth_service::oauth_callback))
+        .route("/oauth-login/:provider", get(oauth_http::oauth_login))
+        .route("/oauth-callback/:provider", get(oauth_http::oauth_callback))
         .with_state(shared_state.clone())
-        .layer(ServiceBuilder::new().layer(cors))
-        .layer(Extension(oauth_service::build_oauth_client(
-            shared_state.env.clone(),
-        )));
+        .layer(ServiceBuilder::new().layer(cors));
+    // .layer(Extension(oauth_service::build_oauth_client(
+    //     shared_state.env.clone(),
+    // )));
 
     let port = std::env::var("PORT").context("PORT not set")?;
     let addr = format!("0.0.0.0:{}", port);
