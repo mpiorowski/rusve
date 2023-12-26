@@ -29,6 +29,7 @@ pub struct OAuthConfig {
     auth_url: String,
     token_url: String,
     redirect_url: String,
+    pub scopes: Vec<String>,
     user_info_url: String,
 }
 
@@ -42,7 +43,7 @@ struct GoogleUser {
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct GithubUser {
-    id: String,
+    id: i64,
     email: String,
     avatar_url: String,
 }
@@ -58,6 +59,7 @@ impl OAuth for OAuthConfig {
                 token_url: "https://www.googleapis.com/oauth2/v3/token".to_string(),
                 redirect_url: format!("{}/oauth-callback/google", env.server_url),
                 user_info_url: "https://www.googleapis.com/oauth2/v3/userinfo".to_string(),
+                scopes: vec!["email".to_string(), "openid".to_string()],
             }),
             "github" => Ok(Self {
                 provider: OAuthProvider::Github,
@@ -67,6 +69,7 @@ impl OAuth for OAuthConfig {
                 token_url: "https://github.com/login/oauth/access_token".to_string(),
                 redirect_url: format!("{}/oauth-callback/github", env.server_url),
                 user_info_url: "https://api.github.com/user".to_string(),
+                scopes: vec!["user:email".to_string()],
             }),
             _ => Err(anyhow::anyhow!(format!(
                 "Invalid OAuth provider: {}",
@@ -105,7 +108,6 @@ impl OAuth for OAuthConfig {
                         StatusCode::INTERNAL_SERVER_ERROR
                     })?;
 
-                println!("user_profile: {:?}", user_profile);
                 let user_profile = user_profile.json::<GoogleUser>().await.map_err(|err| {
                     tracing::error!("Failed to parse user profile: {:?}", err);
                     StatusCode::INTERNAL_SERVER_ERROR
@@ -125,19 +127,19 @@ impl OAuth for OAuthConfig {
                     .get(&self.user_info_url)
                     .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
                     .header(reqwest::header::ACCEPT, "application/vnd.github.v3+json")
+                    .header(reqwest::header::USER_AGENT, "Rusve")
                     .send()
                     .await
                     .map_err(|err| {
                         tracing::error!("Failed to get user profile: {:?}", err);
                         StatusCode::INTERNAL_SERVER_ERROR
                     })?;
-                println!("user_profile: {:?}", user_profile);
                 let user_profile = user_profile.json::<GithubUser>().await.map_err(|err| {
                     tracing::error!("Failed to parse user profile: {:?}", err);
                     StatusCode::INTERNAL_SERVER_ERROR
                 })?;
                 Ok(OAuthUser {
-                    sub: user_profile.id,
+                    sub: user_profile.id.to_string(),
                     email: user_profile.email,
                     avatar: user_profile.avatar_url,
                 })

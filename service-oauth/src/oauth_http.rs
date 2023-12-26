@@ -36,14 +36,13 @@ pub async fn oauth_login(
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
     // Generate the full authorization URL.
-    let (auth_url, csrf_token) = client
+    let mut client = client
         .authorize_url(CsrfToken::new_random)
-        // Set the desired scopes.
-        .add_scope(Scope::new("openid".to_string()))
-        .add_scope(Scope::new("email".to_string()))
-        // Set the PKCE code challenge.
-        .set_pkce_challenge(pkce_challenge)
-        .url();
+        .set_pkce_challenge(pkce_challenge);
+    for scope in oauth_config.scopes {
+        client = client.add_scope(Scope::new(scope));
+    }
+    let (auth_url, csrf_token) = client.add_extra_param("access_type", "offline").url();
 
     // Save the CSRF token to the database.
     match create_pkce(&conn, csrf_token.secret(), pkce_verifier.secret()).await {
@@ -124,32 +123,6 @@ pub async fn oauth_callback(
     let user_profile = oauth_config
         .get_user_info(token.access_token().secret())
         .await?;
-
-    // Get the user's profile.
-    // let user_profile = reqwest::Client::new()
-    //     .get("https://www.googleapis.com/oauth2/v3/userinfo")
-    //     .header(
-    //         reqwest::header::AUTHORIZATION,
-    //         format!("Bearer {}", auth_token.access_token().secret()),
-    //     )
-    //     .send()
-    //     .await;
-
-    // let user_profile = match user_profile {
-    //     Ok(response) => response,
-    //     Err(err) => {
-    //         tracing::error!("Failed to get user profile: {:?}", err);
-    //         return Err(StatusCode::INTERNAL_SERVER_ERROR);
-    //     }
-    // };
-
-    // let user_profile = match user_profile.json::<GoogleUser>().await {
-    //     Ok(profile) => profile,
-    //     Err(err) => {
-    //         tracing::error!("Failed to parse user profile: {:?}", err);
-    //         return Err(StatusCode::INTERNAL_SERVER_ERROR);
-    //     }
-    // };
 
     // let mut client = match UsersServiceClient::connect("http://service-users:443").await {
     //     Ok(client) => client,

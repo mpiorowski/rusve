@@ -18,8 +18,7 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
             user_id uuid not null,
             access_token text not null,
             refresh_token text not null,
-            expires_in int not null,
-            unique (user_id)
+            expires_in int not null
         );
     "#,
         )
