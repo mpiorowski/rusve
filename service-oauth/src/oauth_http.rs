@@ -1,8 +1,4 @@
 use crate::{
-    oauth_db::{
-        auth_user, create_pkce, create_token, delete_pkce_by_id, delete_token_by_user_id,
-        select_pkce_by_csrf,
-    },
     oauth_service::{OAuth, OAuthConfig},
     AppState,
 };
@@ -13,12 +9,11 @@ use axum::{
 };
 use http::{header, StatusCode};
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope, TokenResponse};
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{collections::HashMap, sync::Arc};
 
 pub async fn oauth_login(
     Path(provider): Path<String>,
     State(state): State<Arc<AppState>>,
-    // Extension(client): Extension<BasicClient>,
 ) -> Result<Redirect, StatusCode> {
     let conn = state.db_pool.get().await.map_err(|err| {
         tracing::error!("Failed to get DB connection: {:?}", err);
@@ -45,7 +40,7 @@ pub async fn oauth_login(
     let (auth_url, csrf_token) = client.add_extra_param("access_type", "offline").url();
 
     // Save the CSRF token to the database.
-    match create_pkce(&conn, csrf_token.secret(), pkce_verifier.secret()).await {
+    match crate::oauth_db::create_pkce(&conn, csrf_token.secret(), pkce_verifier.secret()).await {
         Ok(_) => {}
         Err(err) => {
             tracing::error!("Failed to save PKCE verifier: {:?}", err);
@@ -75,7 +70,7 @@ pub async fn oauth_callback(
         None => return Err(StatusCode::BAD_REQUEST),
     };
 
-    let pkce = match select_pkce_by_csrf(&conn, csrf).await {
+    let pkce = match crate::oauth_db::select_pkce_by_csrf(&conn, csrf).await {
         Ok(Some(pkce)) => pkce,
         Ok(None) => return Err(StatusCode::BAD_REQUEST),
         Err(err) => {
@@ -83,18 +78,6 @@ pub async fn oauth_callback(
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
-
-    // Delete the PKCE verifier from the database asynchronously.
-    // If this fails, it's not a big deal.
-    let db = state.db_pool.clone();
-    tokio::spawn(async move {
-        let conn = db.get().await.map_err(|err| {
-            tracing::error!("Failed to get DB connection: {:?}", err);
-        });
-        if let Err(err) = delete_pkce_by_id(&conn.unwrap(), pkce.id).await {
-            tracing::error!("Failed to delete PKCE verifier: {:?}", err);
-        }
-    });
 
     // check if the `created` field is older than 10 minutes
     let diff = time::OffsetDateTime::now_utc() - pkce.created;
@@ -144,7 +127,8 @@ pub async fn oauth_callback(
     // };
 
     // Create a new user if one doesn't exist, otherwise update the existing user.
-    let user = match auth_user(&conn, &user_profile.sub, &user_profile.email).await {
+    let user = match crate::oauth_db::auth_user(&conn, &user_profile.sub, &user_profile.email).await
+    {
         Ok(user) => user,
         Err(err) => {
             tracing::error!("Failed to authenticate user: {:?}", err);
@@ -152,19 +136,15 @@ pub async fn oauth_callback(
         }
     };
 
-    // Delete the user's existing token.
-    if let Err(err) = delete_token_by_user_id(&conn, &user.id).await {
-        tracing::error!("Failed to delete token: {:?}", err);
-        return Err(StatusCode::INTERNAL_SERVER_ERROR);
-    }
     // Create a new token.
-    let expires_in = token.expires_in().unwrap_or(Duration::from_secs(3600));
-    let token = match create_token(
+    let token = match crate::oauth_db::create_token(
         &conn,
         &user.id,
         token.access_token().secret(),
-        "",
-        expires_in.as_secs_f32() as i32,
+        match token.refresh_token() {
+            Some(token) => token.secret(),
+            None => "",
+        },
     )
     .await
     {
@@ -176,6 +156,16 @@ pub async fn oauth_callback(
     };
 
     tracing::info!("User authenticated: {:?}", user);
+
+    // Delete old PKCE verifiers and tokens asynchronously. If this fails, it's not a big deal.
+    tokio::spawn(async move {
+        if let Err(err) = crate::oauth_db::delete_old_pkces(&conn).await {
+            tracing::error!("Failed to delete old PKCE verifiers: {:?}", err);
+        }
+        if let Err(err) = crate::oauth_db::delete_old_tokens(&conn).await {
+            tracing::error!("Failed to delete old tokens: {:?}", err);
+        }
+    });
 
     Ok(Response::builder()
         .status(StatusCode::PERMANENT_REDIRECT)
