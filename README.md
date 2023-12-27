@@ -1,5 +1,7 @@
 # Welcome to Rusve!
 
+**BIG UPDATE IS COMMING, README NEED SOME UPDATES, pls wait :)**
+
 ### What is Rusve? 
 
 It is a attempt to find the best way to build **fast** and **scalable** web applications, while not beeing afraid of new technologies.
