@@ -140,20 +140,17 @@ pub async fn select_token_by_id(conn: &Object, token_id: &str) -> Result<Token> 
     Ok(token)
 }
 
-pub async fn update_token_uuid(conn: &Object, user_id: &Uuid) -> Result<Uuid> {
-    let token_id: Uuid = Uuid::now_v7();
+pub async fn update_token_id(conn: &Object, old_id: &Uuid) -> Result<Uuid> {
+    let new_id: Uuid = Uuid::now_v7();
     conn.execute(
-        "update tokens set id = $1 where user_id = $2",
-        &[&token_id, &user_id],
+        "update tokens set id = $1 where id = $2",
+        &[&new_id, &old_id],
     )
     .await?;
-    Ok(token_id)
+    Ok(new_id)
 }
 
-pub async fn select_user_by_id(
-    conn: &Object,
-    user_id: StringOrUuid,
-) -> Result<User> {
+pub async fn select_user_by_id(conn: &Object, user_id: StringOrUuid) -> Result<User> {
     // if string, convert to uuid
     let user_id = match user_id {
         StringOrUuid::String(user_uuid) => Uuid::from_str(&user_uuid)?,

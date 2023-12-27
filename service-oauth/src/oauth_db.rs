@@ -33,7 +33,6 @@ pub struct Token {
     pub created: OffsetDateTime,
     pub access_token: String,
     pub refresh_token: String,
-    pub expires_in: i32,
 }
 
 impl TryFrom<tokio_postgres::Row> for Token {
@@ -44,14 +43,12 @@ impl TryFrom<tokio_postgres::Row> for Token {
         let created: OffsetDateTime = value.try_get("created")?;
         let access_token: String = value.try_get("access_token")?;
         let refresh_token: String = value.try_get("refresh_token")?;
-        let expires_in: i32 = value.try_get("expires_in")?;
 
         Ok(Token {
             id,
             created,
             access_token,
             refresh_token,
-            expires_in,
         })
     }
 }
