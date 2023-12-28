@@ -17,7 +17,7 @@ env:
   REGION: europe-north1
   ENV: production
   COOKIE_DOMAIN: .rusve.app
-  PUBLIC_AUTH_URL: https://oauth-cdb5ecy4ia-lz.a.run.app
+  PUBLIC_AUTH_URL: https://auth-cdb5ecy4ia-lz.a.run.app
   USERS_URI: users-cdb5ecy4ia-lz.a.run.app
   NOTES_URI: notes-cdb5ecy4ia-lz.a.run.app
   UTILS_URI: utils
