@@ -14,6 +14,10 @@ on:
         required: true
       GOOGLE_CLIENT_SECRET:
         required: true
+      GITHUB_CLIENT_SECRET:
+        required: true
+      GITHUB_CLIENT_ID:
+        required: true
 
 env:
   GAR_LOCATION: europe-north1

@@ -11,7 +11,6 @@ uuid = { version = "1.3.2", features = ["v4", "default", "v7"] }
 serde = { version = "1.0.126", features = ["derive"] }
 serde_json = "1.0.96"
 jsonwebtoken = "8.3.0"
-# openssl = { version = "0.10", features = ["vendored"] }
 
 # Trace
 tracing = "0.1.37"
