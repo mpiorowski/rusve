@@ -2,7 +2,7 @@
 
 https://www.rusve.app
 
-**BIG UPDATE IS COMMING, README NEED SOME UPDATES, pls wait :)**
+**BIG UPDATE DROPPED, README NEED SOME UPDATES, pls wait :)**
 
 ## What is Rusve? 
 
