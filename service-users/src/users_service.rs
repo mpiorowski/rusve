@@ -30,7 +30,7 @@ impl UsersService for MyService {
         }
 
         // create new token
-        let token_id = users_db::update_token_uuid(&conn, &token.user_id)
+        let token_id = users_db::update_token_id(&conn, &token.id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to update token: {:?}", e);

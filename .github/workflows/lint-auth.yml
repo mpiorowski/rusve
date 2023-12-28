@@ -1,4 +1,4 @@
-name: Lint Oauth
+name: Lint Auth
 on:
   workflow_call:
 
@@ -10,7 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./service-oauth
+        working-directory: ./service-auth
     steps:
       - uses: actions/checkout@v3
+      - run: rustup toolchain install nightly
+      - run: rustup default nightly
+      - run: rustup component add clippy-preview
       - run: cargo clippy --all-targets --all-features

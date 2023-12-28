@@ -48,6 +48,7 @@ impl TryFrom<tokio_postgres::Row> for User {
         let email: String = value.try_get("email")?;
         let sub: String = value.try_get("sub")?;
         let role: i32 = value.try_get("role")?;
+        let avatar: String = value.try_get("avatar")?;
         let subscription_id: String = value.try_get("subscription_id")?;
         let subscription_end: Timestamp<time::OffsetDateTime> =
             value.try_get("subscription_end")?;
@@ -78,6 +79,7 @@ impl TryFrom<tokio_postgres::Row> for User {
             email,
             sub,
             role,
+            avatar,
             subscription_id,
             subscription_end,
             subscription_check,
@@ -140,21 +142,17 @@ pub async fn select_token_by_id(conn: &Object, token_id: &str) -> Result<Token> 
     Ok(token)
 }
 
-pub async fn update_token_uuid(conn: &Object, user_id: &Uuid) -> Result<Uuid> {
-    let token_id: Uuid = Uuid::now_v7();
+pub async fn update_token_id(conn: &Object, old_id: &Uuid) -> Result<Uuid> {
+    let new_id: Uuid = Uuid::now_v7();
     conn.execute(
-        "update tokens set id = $1 where user_id = $2",
-        &[&token_id, &user_id],
+        "update tokens set id = $1, created = now() where id = $2",
+        &[&new_id, &old_id],
     )
     .await?;
-    Ok(token_id)
+    Ok(new_id)
 }
 
-pub async fn select_user_by_id(
-    conn: &Object,
-    user_id: StringOrUuid,
-) -> Result<User> {
-    // if string, convert to uuid
+pub async fn select_user_by_id(conn: &Object, user_id: StringOrUuid) -> Result<User> {
     let user_id = match user_id {
         StringOrUuid::String(user_uuid) => Uuid::from_str(&user_uuid)?,
         StringOrUuid::Uuid(user_uuid) => user_uuid,

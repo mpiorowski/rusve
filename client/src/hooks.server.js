@@ -16,6 +16,7 @@ export async function handle({ event, resolve }) {
         email: "",
         sub: "",
         role: 0,
+        avatar: "",
         subscriptionId: "",
         subscriptionEnd: "-infinity",
         subscriptionCheck: "-infinity",

@@ -1,5 +1,5 @@
 # Development
-FROM rust:1.74 as dev
+FROM rustlang/rust:nightly as dev
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY Cargo.lock /app/Cargo.lock
 CMD ["cargo", "run"]
 
 # Build
-FROM rust:1.74 as build
+FROM rustlang/rust:nightly as build
 
 WORKDIR /app
 
@@ -28,5 +28,5 @@ COPY --from=build /app/target/release /app
 
 RUN apt-get update && apt-get install -y openssl ca-certificates libssl-dev # libpq-dev 
 
-CMD ["/app/rusve-oauth"]
+CMD ["/app/rusve-auth"]
 

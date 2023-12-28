@@ -34,6 +34,8 @@ pub struct Env {
     pub client_url: String,
     pub google_client_id: String,
     pub google_client_secret: String,
+    pub github_client_id: String,
+    pub github_client_secret: String,
 }
 
 pub fn init_envs() -> Result<Env> {
@@ -44,6 +46,9 @@ pub fn init_envs() -> Result<Env> {
     let google_client_id = std::env::var("GOOGLE_CLIENT_ID").context("GOOGLE_CLIENT_ID not set")?;
     let google_client_secret =
         std::env::var("GOOGLE_CLIENT_SECRET").context("GOOGLE_CLIENT_SECRET not set")?;
+    let github_client_id = std::env::var("GITHUB_CLIENT_ID").context("GITHUB_CLIENT_ID not set")?;
+    let github_client_secret =
+        std::env::var("GITHUB_CLIENT_SECRET").context("GITHUB_CLIENT_SECRET not set")?;
 
     Ok(Env {
         rust_log,
@@ -52,5 +57,7 @@ pub fn init_envs() -> Result<Env> {
         client_url,
         google_client_id,
         google_client_secret,
+        github_client_id,
+        github_client_secret,
     })
 }

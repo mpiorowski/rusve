@@ -1,9 +1,9 @@
-name: Deploy Oauth
+name: Deploy Auth
 
 on:
   push:
     branches:
-      - release-oauth/**
+      - release-auth/**
   workflow_call:
     secrets:
       GCP_CREDENTIALS:
@@ -21,7 +21,7 @@ env:
   REPOSITORY: rusve-repo
   DATABASE: rusve-db
   REGION: europe-north1
-  SERVICE: oauth
+  SERVICE: auth
   ENV: production
   RUST_LOG: info
   SERVER_URL: https://oauth-cdb5ecy4ia-lz.a.run.app
@@ -35,7 +35,7 @@ permissions:
 
 jobs:
   lint:
-    uses: ./.github/workflows/lint-oauth.yml
+    uses: ./.github/workflows/lint-auth.yml
   deploy:
     needs:
       - lint

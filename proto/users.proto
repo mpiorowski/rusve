@@ -19,9 +19,10 @@ message User {
     string email = 5;
     string sub = 6;
     UserRole role = 7;
+    string avatar = 8;
 
-    string subscription_id = 8;
-    string subscription_end = 9;
-    string subscription_check = 10;
-    bool subscription_active = 11;
+    string subscription_id = 9;
+    string subscription_end = 10;
+    string subscription_check = 11;
+    bool subscription_active = 12;
 }

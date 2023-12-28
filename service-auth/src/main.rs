@@ -1,16 +1,16 @@
+mod auth_db;
+mod auth_oauth;
+mod auth_service;
 mod migrations;
-mod oauth_db;
-mod oauth_service;
 
 use anyhow::Context;
 use anyhow::Result;
 use axum::http::StatusCode;
-use axum::Extension;
 use axum::Json;
 use axum::{routing::get, Router};
 use http::header::{AUTHORIZATION, CONTENT_TYPE};
 use http::Method;
-use rusve_oauth::Env;
+use rusve_auth::Env;
 use std::sync::Arc;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
@@ -23,10 +23,10 @@ struct AppState {
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initalize environment variables
-    let env: Env = rusve_oauth::init_envs()?;
+    let env: Env = rusve_auth::init_envs()?;
 
     // Connect to database
-    let db_pool = rusve_oauth::connect_to_db().context("Failed to connect to database")?;
+    let db_pool = rusve_auth::connect_to_db().context("Failed to connect to database")?;
 
     // Create shared state
     let shared_state = Arc::new(AppState { db_pool, env });
@@ -50,13 +50,13 @@ async fn main() -> Result<()> {
 
     let app = Router::new()
         .route("/", get(root))
-        .route("/oauth-login/google", get(oauth_service::oauth_login))
-        .route("/oauth-callback/google", get(oauth_service::oauth_callback))
+        .route("/oauth-login/:provider", get(auth_service::oauth_login))
+        .route(
+            "/oauth-callback/:provider",
+            get(auth_service::oauth_callback),
+        )
         .with_state(shared_state.clone())
-        .layer(ServiceBuilder::new().layer(cors))
-        .layer(Extension(oauth_service::build_oauth_client(
-            shared_state.env.clone(),
-        )));
+        .layer(ServiceBuilder::new().layer(cors));
 
     let port = std::env::var("PORT").context("PORT not set")?;
     let addr = format!("0.0.0.0:{}", port);
