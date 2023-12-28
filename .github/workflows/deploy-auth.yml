@@ -74,5 +74,7 @@ jobs:
             DATABASE_URL=${{ env.DATABASE_URL }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}
+            GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
