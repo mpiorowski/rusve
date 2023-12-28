@@ -1,6 +1,6 @@
 use anyhow::Result;
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
-use rusve_oauth::Env;
+use rusve_auth::Env;
 
 pub enum OAuthProvider {
     Google,

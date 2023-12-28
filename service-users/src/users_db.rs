@@ -143,40 +143,11 @@ pub async fn select_token_by_id(conn: &Object, token_id: &str) -> Result<Token> 
 pub async fn update_token_id(conn: &Object, old_id: &Uuid) -> Result<Uuid> {
     let new_id: Uuid = Uuid::now_v7();
     conn.execute(
-        "update tokens set id = $1 and created = now() where id = $2",
+        "update tokens set id = $1, created = now() where id = $2",
         &[&new_id, &old_id],
     )
     .await?;
     Ok(new_id)
-}
-
-pub async fn auth_user(conn: &Object, sub: &str, email: &str) -> Result<User> {
-    let row = conn
-        .query_opt(
-            "select * from users where sub = $1 or email = $2",
-            &[&sub, &email],
-        )
-        .await?;
-    let user = match row {
-        Some(_) => {
-            conn.query_one(
-                "update users set updated = now() where email = $1 and sub = $2 returning *",
-                &[&email, &sub],
-            )
-            .await
-        }
-        None => {
-            let id = Uuid::now_v7();
-            let role: i32 = 1;
-            conn.query_one(
-                "insert into users (id, email, sub, role) values ($1, $2, $3, $4) returning *",
-                &[&id, &email, &sub, &role],
-            )
-            .await
-        }
-    }?;
-    let user = User::try_from(user)?;
-    Ok(user)
 }
 
 pub async fn select_user_by_id(conn: &Object, user_id: StringOrUuid) -> Result<User> {

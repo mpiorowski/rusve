@@ -10,7 +10,7 @@ use axum::Json;
 use axum::{routing::get, Router};
 use http::header::{AUTHORIZATION, CONTENT_TYPE};
 use http::Method;
-use rusve_oauth::Env;
+use rusve_auth::Env;
 use std::sync::Arc;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
@@ -23,10 +23,10 @@ struct AppState {
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initalize environment variables
-    let env: Env = rusve_oauth::init_envs()?;
+    let env: Env = rusve_auth::init_envs()?;
 
     // Connect to database
-    let db_pool = rusve_oauth::connect_to_db().context("Failed to connect to database")?;
+    let db_pool = rusve_auth::connect_to_db().context("Failed to connect to database")?;
 
     // Create shared state
     let shared_state = Arc::new(AppState { db_pool, env });

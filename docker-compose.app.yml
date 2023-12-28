@@ -9,7 +9,7 @@ services:
       args:
         ENV: development
         COOKIE_DOMAIN: .127.0.0.1
-        PUBLIC_OAUTH_URL: http://127.0.0.1:8090
+        PUBLIC_AUTH_URL: http://127.0.0.1:8090
         USERS_URI: service-users
         UTILS_URI: service-utils
         NOTES_URI: service-notes
@@ -20,14 +20,14 @@ services:
     ports:
       - 3000:3000
 
-  service-oauth:
-    container_name: rusve-service-oauth
+  service-auth:
+    container_name: rusve-service-auth
     working_dir: /app
     build:
-      context: ./service-oauth
+      context: ./service-auth
       target: dev
     volumes:
-      - ./service-oauth/src:/app/src
+      - ./service-auth/src:/app/src
     environment:
       PORT: 443
       ENV: development
