@@ -21,11 +21,13 @@
         }
     }
 
+    let loading = false;
     /**
      * Check if server is running and redirect to login page
      * @param {string} provider
      */
     async function onLogin(provider) {
+        loading = true;
         try {
             const response = await fetch(`${PUBLIC_AUTH_URL}`);
             if (response.status !== 200) {
@@ -57,7 +59,7 @@
 
     <div class="mt-6 sm:mx-auto sm:w-full sm:max-w-sm">
         <div class="mt-6 grid gap-4">
-            <Button type="button" on:click={() => onLogin("google")}>
+            <Button type="button" on:click={() => onLogin("google")} {loading}>
                 <svg class="h-5 w-5" viewBox="0 0 24 24">
                     <path
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -82,7 +84,7 @@
                 </span>
             </Button>
 
-            <Button on:click={() => onLogin("github")}>
+            <Button on:click={() => onLogin("github")} {loading}>
                 <svg
                     class="h-5 w-5"
                     fill="currentColor"

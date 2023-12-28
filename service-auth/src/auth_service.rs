@@ -1,5 +1,5 @@
 use crate::{
-    oauth_service::{OAuth, OAuthConfig},
+    auth_oauth::{OAuth, OAuthConfig},
     AppState,
 };
 use anyhow::Result;
@@ -39,7 +39,7 @@ pub async fn oauth_login(
     let (auth_url, csrf_token) = client.add_extra_param("access_type", "offline").url();
 
     // Save the CSRF token to the database.
-    match crate::oauth_db::create_pkce(&conn, csrf_token.secret(), pkce_verifier.secret()).await {
+    match crate::auth_db::create_pkce(&conn, csrf_token.secret(), pkce_verifier.secret()).await {
         Ok(_) => {}
         Err(err) => {
             tracing::error!("Failed to save PKCE verifier: {:?}", err);
@@ -72,7 +72,7 @@ pub async fn oauth_callback(
         Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
     })?;
 
-    let pkce = match crate::oauth_db::select_pkce_by_csrf(&conn, csrf).await {
+    let pkce = match crate::auth_db::select_pkce_by_csrf(&conn, csrf).await {
         Ok(Some(pkce)) => pkce,
         Ok(None) => {
             return Err(Redirect::to(&format!(
@@ -144,7 +144,7 @@ pub async fn oauth_callback(
     // };
 
     // Create a new user if one doesn't exist, otherwise update the existing user.
-    let user = match crate::oauth_db::auth_user(
+    let user = match crate::auth_db::auth_user(
         &conn,
         &user_profile.sub,
         &user_profile.email,
@@ -163,7 +163,7 @@ pub async fn oauth_callback(
     };
 
     // Create a new token.
-    let token = match crate::oauth_db::create_token(
+    let token = match crate::auth_db::create_token(
         &conn,
         &user.id,
         token.access_token().secret(),
@@ -188,10 +188,10 @@ pub async fn oauth_callback(
 
     // Delete old PKCE verifiers and tokens asynchronously. If this fails, it's not a big deal.
     tokio::spawn(async move {
-        if let Err(err) = crate::oauth_db::delete_old_pkces(&conn).await {
+        if let Err(err) = crate::auth_db::delete_old_pkces(&conn).await {
             tracing::error!("Failed to delete old PKCE verifiers: {:?}", err);
         }
-        if let Err(err) = crate::oauth_db::delete_old_tokens(&conn).await {
+        if let Err(err) = crate::auth_db::delete_old_tokens(&conn).await {
             tracing::error!("Failed to delete old tokens: {:?}", err);
         }
     });

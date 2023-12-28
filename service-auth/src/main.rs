@@ -1,7 +1,7 @@
+mod auth_db;
+mod auth_oauth;
+mod auth_service;
 mod migrations;
-mod oauth_db;
-mod oauth_http;
-mod oauth_service;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -50,8 +50,11 @@ async fn main() -> Result<()> {
 
     let app = Router::new()
         .route("/", get(root))
-        .route("/oauth-login/:provider", get(oauth_http::oauth_login))
-        .route("/oauth-callback/:provider", get(oauth_http::oauth_callback))
+        .route("/oauth-login/:provider", get(auth_service::oauth_login))
+        .route(
+            "/oauth-callback/:provider",
+            get(auth_service::oauth_callback),
+        )
         .with_state(shared_state.clone())
         .layer(ServiceBuilder::new().layer(cors));
 
