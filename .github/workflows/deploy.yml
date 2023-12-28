@@ -21,8 +21,8 @@ jobs:
       DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
       STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
       STRIPE_PRICE_ID: ${{ secrets.STRIPE_PRICE_ID }}
-  deploy-oauth:
-    uses: ./.github/workflows/deploy-oauth.yml
+  deploy-auth:
+    uses: ./.github/workflows/deploy-auth.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}

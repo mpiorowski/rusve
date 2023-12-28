@@ -17,7 +17,7 @@ env:
   REGION: europe-north1
   ENV: production
   COOKIE_DOMAIN: .rusve.app
-  PUBLIC_OAUTH_URL: https://oauth-cdb5ecy4ia-lz.a.run.app
+  PUBLIC_AUTH_URL: https://oauth-cdb5ecy4ia-lz.a.run.app
   USERS_URI: users-cdb5ecy4ia-lz.a.run.app
   NOTES_URI: notes-cdb5ecy4ia-lz.a.run.app
   UTILS_URI: utils
@@ -55,7 +55,7 @@ jobs:
           docker build -f ./client/Dockerfile -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./client \
           --build-arg ENV=${{ env.ENV }} \
           --build-arg COOKIE_DOMAIN=${{ env.COOKIE_DOMAIN }} \
-          --build-arg PUBLIC_OAUTH_URL=${{ env.PUBLIC_OAUTH_URL }} \
+          --build-arg PUBLIC_AUTH_URL=${{ env.PUBLIC_AUTH_URL }} \
           --build-arg USERS_URI=${{ env.USERS_URI }} \
           --build-arg NOTES_URI=${{ env.NOTES_URI }} \
           --build-arg UTILS_URI=${{ env.UTILS_URI }} \
