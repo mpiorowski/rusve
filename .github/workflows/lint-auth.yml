@@ -13,10 +13,5 @@ jobs:
         working-directory: ./service-auth
     steps:
       - uses: actions/checkout@v3
-      - name: Install latest nightly
-        uses: actions-rs/toolchain@v1
-        with:
-            toolchain: nightly
-            override: true
-            components: rustfmt, clippy
+      - run: rustup toolchain add nightly
       - run: cargo clippy --all-targets --all-features
