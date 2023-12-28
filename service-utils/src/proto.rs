@@ -17,12 +17,14 @@ pub struct User {
     #[prost(enumeration = "UserRole", tag = "7")]
     pub role: i32,
     #[prost(string, tag = "8")]
-    pub subscription_id: ::prost::alloc::string::String,
+    pub avatar: ::prost::alloc::string::String,
     #[prost(string, tag = "9")]
-    pub subscription_end: ::prost::alloc::string::String,
+    pub subscription_id: ::prost::alloc::string::String,
     #[prost(string, tag = "10")]
+    pub subscription_end: ::prost::alloc::string::String,
+    #[prost(string, tag = "11")]
     pub subscription_check: ::prost::alloc::string::String,
-    #[prost(bool, tag = "11")]
+    #[prost(bool, tag = "12")]
     pub subscription_active: bool,
 }
 #[derive(serde::Serialize, serde::Deserialize)]

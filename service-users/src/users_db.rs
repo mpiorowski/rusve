@@ -48,6 +48,7 @@ impl TryFrom<tokio_postgres::Row> for User {
         let email: String = value.try_get("email")?;
         let sub: String = value.try_get("sub")?;
         let role: i32 = value.try_get("role")?;
+        let avatar: String = value.try_get("avatar")?;
         let subscription_id: String = value.try_get("subscription_id")?;
         let subscription_end: Timestamp<time::OffsetDateTime> =
             value.try_get("subscription_end")?;
@@ -78,6 +79,7 @@ impl TryFrom<tokio_postgres::Row> for User {
             email,
             sub,
             role,
+            avatar,
             subscription_id,
             subscription_end,
             subscription_check,

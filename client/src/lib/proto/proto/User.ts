@@ -10,6 +10,7 @@ export interface User {
   'email'?: (string);
   'sub'?: (string);
   'role'?: (_proto_UserRole);
+  'avatar'?: (string);
   'subscriptionId'?: (string);
   'subscriptionEnd'?: (string);
   'subscriptionCheck'?: (string);
@@ -24,6 +25,7 @@ export interface User__Output {
   'email': (string);
   'sub': (string);
   'role': (_proto_UserRole__Output);
+  'avatar': (string);
   'subscriptionId': (string);
   'subscriptionEnd': (string);
   'subscriptionCheck': (string);

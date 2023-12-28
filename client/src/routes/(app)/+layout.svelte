@@ -46,7 +46,7 @@
         <div class="flex-1 text-sm font-semibold leading-6 text-white">
             {current?.replace(/^\w/, (c) => c.toUpperCase())}
         </div>
-        <Avatar email={data.email} avatarUrl={""} />
+        <Avatar email={data.email} avatarUrl={data.avatar} />
     </div>
 
     <!-- Static sidebar for desktop -->
@@ -63,7 +63,7 @@
             class="hidden items-center justify-between border-b border-white/5 px-4 py-2 sm:px-6 sm:py-4 lg:flex lg:px-8"
         >
             <Breadcrumbs />
-            <Avatar email={data.email} avatarUrl={""} />
+            <Avatar email={data.email} avatarUrl={data.avatar} />
         </header>
 
         <div class="p-6 sm:p-8 lg:p-10">

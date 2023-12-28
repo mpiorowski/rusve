@@ -19,5 +19,6 @@ export async function load({ locals }) {
     return {
         profile: profile.data,
         email: locals.user.email,
+        avatar: locals.user.avatar,
     };
 }
