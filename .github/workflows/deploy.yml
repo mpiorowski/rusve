@@ -10,17 +10,17 @@ permissions:
   checks: write
 
 jobs:
-  deploy-client:
-    uses: ./.github/workflows/deploy-client.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-  deploy-users:
-    uses: ./.github/workflows/deploy-users.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-      STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
-      STRIPE_PRICE_ID: ${{ secrets.STRIPE_PRICE_ID }}
+  # deploy-client:
+  #   uses: ./.github/workflows/deploy-client.yml
+  #   secrets:
+  #     GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+  # deploy-users:
+  #   uses: ./.github/workflows/deploy-users.yml
+  #   secrets:
+  #     GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+  #     DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
+  #     STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
+  #     STRIPE_PRICE_ID: ${{ secrets.STRIPE_PRICE_ID }}
   deploy-auth:
     uses: ./.github/workflows/deploy-auth.yml
     secrets:
@@ -28,11 +28,11 @@ jobs:
       DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-  deploy-notes:
-    uses: ./.github/workflows/deploy-notes.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
+        # deploy-notes:
+        #   uses: ./.github/workflows/deploy-notes.yml
+        #   secrets:
+        #     GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+        #     DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
         # deploy-utils:
         #   uses: ./.github/workflows/deploy-utils.yml
         #   secrets:
