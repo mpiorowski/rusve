@@ -54,9 +54,6 @@ async fn main() -> Result<()> {
         .route("/oauth-callback/:provider", get(oauth_http::oauth_callback))
         .with_state(shared_state.clone())
         .layer(ServiceBuilder::new().layer(cors));
-    // .layer(Extension(oauth_service::build_oauth_client(
-    //     shared_state.env.clone(),
-    // )));
 
     let port = std::env::var("PORT").context("PORT not set")?;
     let addr = format!("0.0.0.0:{}", port);

@@ -12,8 +12,10 @@
                 "Invalid user",
                 "User already connected to another provider",
             );
-        } else if (error === "unauthorized") {
+        } else if (error === "1") {
             toast.error("Unauthorized", "You are not authorized to access");
+        } else if (error === "2") {
+            toast.error("Unauthorized", "Cannot create user");
         } else {
             toast.error("Error", "Something went wrong");
         }

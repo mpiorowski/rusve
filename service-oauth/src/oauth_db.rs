@@ -139,7 +139,7 @@ pub async fn delete_old_tokens(client: &Object) -> Result<()> {
     Ok(())
 }
 
-pub async fn auth_user(conn: &Object, sub: &str, email: &str) -> Result<User> {
+pub async fn auth_user(conn: &Object, sub: &str, email: &str, avatar: &str) -> Result<User> {
     let row = conn
         .query_opt(
             "select * from users where sub = $1 or email = $2",
@@ -158,8 +158,8 @@ pub async fn auth_user(conn: &Object, sub: &str, email: &str) -> Result<User> {
             let id = Uuid::now_v7();
             let role: i32 = 1;
             conn.query_one(
-                "insert into users (id, email, sub, role) values ($1, $2, $3, $4) returning *",
-                &[&id, &email, &sub, &role],
+                "insert into users (id, email, sub, role, avatar) values ($1, $2, $3, $4, $5) returning *",
+                &[&id, &email, &sub, &role, &avatar],
             )
             .await
         }

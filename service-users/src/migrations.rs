@@ -22,7 +22,7 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
                 email text unique not null,
                 sub text unique not null,
                 role int not null,
-                avatar_url text not null default '',
+                avatar text not null default '',
                 subscription_id text not null default '',
                 subscription_end timestamptz not null default '-infinity',
                 subscription_check timestamptz not null default '-infinity',

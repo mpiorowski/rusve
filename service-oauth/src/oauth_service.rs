@@ -1,5 +1,4 @@
 use anyhow::Result;
-use http::StatusCode;
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 use rusve_oauth::Env;
 
@@ -19,7 +18,7 @@ pub trait OAuth {
     where
         Self: Sized;
     fn build_oauth_client(&self) -> BasicClient;
-    async fn get_user_info(&self, token: &str) -> Result<OAuthUser, StatusCode>;
+    async fn get_user_info(&self, token: &str) -> Result<OAuthUser>;
 }
 
 pub struct OAuthConfig {
@@ -93,7 +92,7 @@ impl OAuth for OAuthConfig {
         .set_redirect_uri(redirect_url)
     }
 
-    async fn get_user_info(&self, token: &str) -> Result<OAuthUser, StatusCode> {
+    async fn get_user_info(&self, token: &str) -> Result<OAuthUser> {
         println!("get_user_info: {:?}", token);
 
         match self.provider {
@@ -102,19 +101,11 @@ impl OAuth for OAuthConfig {
                     .get(&self.user_info_url)
                     .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
                     .send()
-                    .await
-                    .map_err(|err| {
-                        tracing::error!("Failed to get user profile: {:?}", err);
-                        StatusCode::INTERNAL_SERVER_ERROR
-                    })?;
+                    .await?;
 
-                let user_profile = user_profile.json::<GoogleUser>().await.map_err(|err| {
-                    tracing::error!("Failed to parse user profile: {:?}", err);
-                    StatusCode::INTERNAL_SERVER_ERROR
-                })?;
+                let user_profile = user_profile.json::<GoogleUser>().await?;
                 if !user_profile.email_verified {
-                    tracing::error!("User email is not verified");
-                    return Err(StatusCode::UNAUTHORIZED);
+                    return Err(anyhow::anyhow!("User email is not verified"));
                 }
                 Ok(OAuthUser {
                     sub: user_profile.sub,
@@ -129,15 +120,8 @@ impl OAuth for OAuthConfig {
                     .header(reqwest::header::ACCEPT, "application/vnd.github.v3+json")
                     .header(reqwest::header::USER_AGENT, "Rusve")
                     .send()
-                    .await
-                    .map_err(|err| {
-                        tracing::error!("Failed to get user profile: {:?}", err);
-                        StatusCode::INTERNAL_SERVER_ERROR
-                    })?;
-                let user_profile = user_profile.json::<GithubUser>().await.map_err(|err| {
-                    tracing::error!("Failed to parse user profile: {:?}", err);
-                    StatusCode::INTERNAL_SERVER_ERROR
-                })?;
+                    .await?;
+                let user_profile = user_profile.json::<GithubUser>().await?;
                 Ok(OAuthUser {
                     sub: user_profile.id.to_string(),
                     email: user_profile.email,

@@ -5,25 +5,24 @@ use crate::{
 use anyhow::Result;
 use axum::{
     extract::{Path, Query, State},
-    response::{Redirect, Response},
+    response::Redirect,
 };
-use http::{header, StatusCode};
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope, TokenResponse};
 use std::{collections::HashMap, sync::Arc};
 
 pub async fn oauth_login(
     Path(provider): Path<String>,
     State(state): State<Arc<AppState>>,
-) -> Result<Redirect, StatusCode> {
+) -> Result<Redirect, Redirect> {
     let conn = state.db_pool.get().await.map_err(|err| {
         tracing::error!("Failed to get DB connection: {:?}", err);
-        StatusCode::INTERNAL_SERVER_ERROR
+        Redirect::to(&format!("{}/auth?error=1", state.env.client_url))
     })?;
 
     let oauth_config =
         OAuthConfig::get_config_by_provider(&provider, state.env.clone()).map_err(|err| {
             tracing::error!("Failed to get OAuth provider: {:?}", err);
-            StatusCode::INTERNAL_SERVER_ERROR
+            Redirect::to(&format!("{}/auth?error=1", state.env.client_url))
         })?;
     let client = oauth_config.build_oauth_client();
 
@@ -44,7 +43,10 @@ pub async fn oauth_login(
         Ok(_) => {}
         Err(err) => {
             tracing::error!("Failed to save PKCE verifier: {:?}", err);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            return Err(Redirect::to(&format!(
+                "{}/auth?error=1",
+                state.env.client_url
+            )));
         }
     }
 
@@ -55,41 +57,52 @@ pub async fn oauth_callback(
     Path(provider): Path<String>,
     State(state): State<Arc<AppState>>,
     Query(query): Query<HashMap<String, String>>,
-) -> Result<Response, StatusCode> {
+) -> Result<Redirect, Redirect> {
     let conn = state.db_pool.get().await.map_err(|err| {
         tracing::error!("Failed to get DB connection: {:?}", err);
-        StatusCode::INTERNAL_SERVER_ERROR
+        Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
     })?;
 
-    let code = match query.get("code") {
-        Some(code) => code,
-        None => return Err(StatusCode::BAD_REQUEST),
-    };
-    let csrf = match query.get("state") {
-        Some(state) => state,
-        None => return Err(StatusCode::BAD_REQUEST),
-    };
+    let code = query.get("code").ok_or_else(|| {
+        tracing::error!("Missing code");
+        Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
+    })?;
+    let csrf = query.get("state").ok_or_else(|| {
+        tracing::error!("Missing CSRF token");
+        Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
+    })?;
 
     let pkce = match crate::oauth_db::select_pkce_by_csrf(&conn, csrf).await {
         Ok(Some(pkce)) => pkce,
-        Ok(None) => return Err(StatusCode::BAD_REQUEST),
+        Ok(None) => {
+            return Err(Redirect::to(&format!(
+                "{}/auth?error=2",
+                state.env.client_url
+            )))
+        }
         Err(err) => {
             tracing::error!("Failed to select PKCE verifier: {:?}", err);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            return Err(Redirect::to(&format!(
+                "{}/auth?error=2",
+                state.env.client_url
+            )));
         }
     };
 
     // check if the `created` field is older than 10 minutes
     let diff = time::OffsetDateTime::now_utc() - pkce.created;
     if diff.whole_minutes() > 10 {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err(Redirect::to(&format!(
+            "{}/auth?error=2",
+            state.env.client_url
+        )));
     }
 
     // Exchange the code with a token.
     let oauth_config =
         OAuthConfig::get_config_by_provider(&provider, state.env.clone()).map_err(|err| {
             tracing::error!("Failed to get OAuth provider: {:?}", err);
-            StatusCode::INTERNAL_SERVER_ERROR
+            Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
         })?;
     let client = oauth_config.build_oauth_client();
     let token = client
@@ -100,12 +113,16 @@ pub async fn oauth_callback(
         .await
         .map_err(|err| {
             tracing::error!("Failed to exchange code with token: {:?}", err);
-            StatusCode::INTERNAL_SERVER_ERROR
+            Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
         })?;
 
     let user_profile = oauth_config
         .get_user_info(token.access_token().secret())
-        .await?;
+        .await
+        .map_err(|err| {
+            tracing::error!("Failed to get user profile: {:?}", err);
+            Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
+        })?;
 
     // let mut client = match UsersServiceClient::connect("http://service-users:443").await {
     //     Ok(client) => client,
@@ -127,12 +144,21 @@ pub async fn oauth_callback(
     // };
 
     // Create a new user if one doesn't exist, otherwise update the existing user.
-    let user = match crate::oauth_db::auth_user(&conn, &user_profile.sub, &user_profile.email).await
+    let user = match crate::oauth_db::auth_user(
+        &conn,
+        &user_profile.sub,
+        &user_profile.email,
+        &user_profile.avatar,
+    )
+    .await
     {
         Ok(user) => user,
         Err(err) => {
             tracing::error!("Failed to authenticate user: {:?}", err);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            return Err(Redirect::to(&format!(
+                "{}/auth?error=invalid_user",
+                state.env.client_url
+            )));
         }
     };
 
@@ -151,7 +177,10 @@ pub async fn oauth_callback(
         Ok(token) => token,
         Err(err) => {
             tracing::error!("Failed to create token: {:?}", err);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            return Err(Redirect::to(&format!(
+                "{}/auth?error=2",
+                state.env.client_url
+            )));
         }
     };
 
@@ -167,23 +196,8 @@ pub async fn oauth_callback(
         }
     });
 
-    Ok(Response::builder()
-        .status(StatusCode::PERMANENT_REDIRECT)
-        // .header(
-        // header::AUTHORIZATION,
-        // format!("Bearer {}", token.id),
-        // format!(
-        //     "token={}; HttpOnly; Max-Age={}; Path=/; SameSite=Lax; Domain={}; Secure",
-        //     token.id,
-        //     // 7 days
-        //     3600 * 24 * 7,
-        //     client_domain
-        // ),
-        // )
-        .header(
-            header::LOCATION,
-            format!("{}/?token={}", state.env.client_url, token.id),
-        )
-        .body("".into())
-        .unwrap())
+    Ok(Redirect::to(&format!(
+        "{}/?token={}",
+        state.env.client_url, token.id
+    )))
 }
