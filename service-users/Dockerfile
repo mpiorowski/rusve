@@ -1,5 +1,5 @@
 # Development
-FROM rust:1.74 as dev
+FROM rust:bookworm as dev
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY public.key /app/public.key
 CMD ["cargo", "run"]
 
 # Build
-FROM rust:1.74 as build
+FROM rust:bookworm as build
 
 WORKDIR /app
 

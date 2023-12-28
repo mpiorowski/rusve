@@ -20,7 +20,7 @@ COPY Cargo.lock /app/Cargo.lock
 RUN cargo build --release
 
 # Production
-FROM debian:bookworm AS prod
+FROM debian:bookworm-slim AS prod
 
 WORKDIR /app
 
