@@ -10,7 +10,7 @@ COPY Cargo.lock /app/Cargo.lock
 CMD ["cargo", "run"]
 
 # Build
-FROM rustlang/rust:nightly-bookworm-slim as build
+FROM rustlang/rust:nightly-bookworm as build
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ COPY Cargo.lock /app/Cargo.lock
 RUN cargo build --release
 
 # Production
-FROM debian:bookworm-slim AS prod
+FROM debian:bookworm AS prod
 
 WORKDIR /app
 
