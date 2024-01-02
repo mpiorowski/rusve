@@ -39,6 +39,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - 8090:443
 
@@ -58,6 +59,7 @@ services:
       CLIENT_URL: http://127.0.0.1:3000/subscription
       STRIPE_API_KEY: ${STRIPE_API_KEY}
       STRIPE_PRICE_ID: ${STRIPE_PRICE_ID}
+      JWT_SECRET: ${JWT_SECRET}
 
   service-notes:
     container_name: rusve-service-notes

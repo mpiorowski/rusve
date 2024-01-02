@@ -9,12 +9,12 @@ use crate::stripe_db::remove_user_subscription_check;
 
 pub async fn create_checkout(
     conn: &deadpool_postgres::Object,
+    env: &rusve_users::Env,
     user: crate::proto::User,
 ) -> Result<String> {
-    let secret_key =
-        std::env::var("STRIPE_API_KEY").expect("Missing STRIPE_API_KEY environment variable");
-    let price_id =
-        std::env::var("STRIPE_PRICE_ID").expect("Missing STRIPE_PRICE_ID environment variable");
+    let secret_key = env.stripe_api_key.clone();
+    let price_id = env.stripe_price_id.clone();
+    let client_url = env.client_url.clone();
     let client = Client::new(secret_key);
 
     let mut customer_id = user.subscription_id;
@@ -23,7 +23,6 @@ pub async fn create_checkout(
         crate::stripe_db::update_user_subscription_id(conn, &user.id, &customer_id.clone()).await?;
     }
 
-    let client_url = std::env::var("CLIENT_URL").expect("Missing CLIENT_URL environment variable");
     let success_url = format!("{}?success", client_url);
     let cancel_url = format!("{}?cancel", client_url);
 
@@ -60,6 +59,7 @@ pub async fn create_customer(client: &Client, email: &str) -> Result<String> {
 
 pub async fn check_subscription(
     conn: &deadpool_postgres::Object,
+    env: &rusve_users::Env,
     user: &crate::proto::User,
 ) -> Result<bool> {
     if user.subscription_id.is_empty() {
@@ -89,8 +89,7 @@ pub async fn check_subscription(
     }
     let _ = crate::stripe_db::update_user_subscription_check(conn, &user.id).await?;
 
-    let secret_key =
-        std::env::var("STRIPE_API_KEY").expect("Missing STRIPE_API_KEY environment variable");
+    let secret_key = env.stripe_api_key.clone();
     let client = Client::new(secret_key);
 
     let customer_id: CustomerId = CustomerId::from_str(&user.subscription_id)?;
@@ -114,10 +113,10 @@ pub async fn check_subscription(
 
 pub async fn create_portal(
     conn: &deadpool_postgres::Object,
+    env: &rusve_users::Env,
     user: crate::proto::User,
 ) -> Result<String> {
-    let secret_key =
-        std::env::var("STRIPE_API_KEY").expect("Missing STRIPE_API_KEY environment variable");
+    let secret_key = env.stripe_api_key.clone();
     let client = Client::new(secret_key);
 
     let mut customer_id = user.subscription_id;

@@ -13,7 +13,8 @@ jobs:
         working-directory: ./service-auth
     steps:
       - uses: actions/checkout@v3
-      - run: rustup toolchain install nightly
-      - run: rustup default nightly
-      - run: rustup component add clippy-preview
+        # - run: rustup toolchain install nightly
+        # - run: rustup default nightly
+        # - run: rustup component add clippy-preview
+      - run: rustup update
       - run: cargo clippy --all-targets --all-features

@@ -1,26 +1,34 @@
 mod migrations;
-mod proto;
-mod users_db;
-mod users_service;
+mod profile_db;
 mod profile_validation;
-mod stripe_service;
+mod proto;
 mod stripe_db;
+mod stripe_service;
+mod token_db;
+mod user_db;
+mod user_service;
 
-use anyhow::{Context, Result};
 use crate::proto::users_service_server::UsersServiceServer;
+use anyhow::{Context, Result};
+use rusve_users::Env;
 
 pub struct MyService {
     pool: deadpool_postgres::Pool,
+    env: Env,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // Initalize environment variables
+    let env: Env = rusve_users::init_envs()?;
+
     // Initialize tracing
-    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_owned());
-    tracing_subscriber::fmt().with_env_filter(filter).init();
+    tracing_subscriber::fmt()
+        .with_env_filter(env.rust_log.as_str())
+        .init();
 
     // Connect to database
-    let pool = rusve_users::connect_to_db().context("Failed to connect to database")?;
+    let pool = rusve_users::connect_to_db(&env).context("Failed to connect to database")?;
     tracing::info!("Connected to database");
 
     // Run migrations
@@ -30,10 +38,9 @@ async fn main() -> Result<()> {
     tracing::info!("Migrations complete");
 
     // Run gRPC server
-    let port = std::env::var("PORT").context("PORT not set")?;
-    let addr = format!("[::]:{}", port).parse()?;
-    tracing::info!("gRPC server started on port: {:?}", port);
-    let server = MyService { pool };
+    let addr = format!("[::]:{}", env.port).parse()?;
+    tracing::info!("gRPC server started on port: {:?}", env.port);
+    let server = MyService { pool, env };
     let svc = UsersServiceServer::new(server);
     tonic::transport::Server::builder()
         .add_service(svc)

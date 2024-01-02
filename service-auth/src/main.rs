@@ -2,6 +2,7 @@ mod auth_db;
 mod auth_oauth;
 mod auth_service;
 mod migrations;
+mod proto;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -26,10 +27,13 @@ async fn main() -> Result<()> {
     let env: Env = rusve_auth::init_envs()?;
 
     // Connect to database
-    let db_pool = rusve_auth::connect_to_db().context("Failed to connect to database")?;
+    let db_pool = rusve_auth::connect_to_db(&env).context("Failed to connect to database")?;
 
     // Create shared state
-    let shared_state = Arc::new(AppState { db_pool, env });
+    let shared_state = Arc::new(AppState {
+        db_pool,
+        env: env.clone(),
+    });
     tracing::info!("Connected to database");
 
     // Initialize tracing
@@ -58,8 +62,7 @@ async fn main() -> Result<()> {
         .with_state(shared_state.clone())
         .layer(ServiceBuilder::new().layer(cors));
 
-    let port = std::env::var("PORT").context("PORT not set")?;
-    let addr = format!("0.0.0.0:{}", port);
+    let addr = format!("0.0.0.0:{}", env.port);
     tracing::info!("Api server started on {}", addr);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app)
