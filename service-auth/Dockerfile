@@ -1,5 +1,5 @@
 # Development
-FROM rustlang/rust:nightly-bookworm as dev
+FROM rust:bookworm as dev
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY Cargo.lock /app/Cargo.lock
 CMD ["cargo", "run"]
 
 # Build
-FROM rustlang/rust:nightly-bookworm as build
+FROM rust:bookworm as build
 
 WORKDIR /app
 
