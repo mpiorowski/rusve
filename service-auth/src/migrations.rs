@@ -5,7 +5,7 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
     client
         .batch_execute(
             r#"
-        create table if not exists pkce (
+        create table if not exists verifiers (
             id uuid primary key,
             created timestamptz not null default now(),
             csrf_token text not null,

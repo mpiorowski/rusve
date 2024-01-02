@@ -3,14 +3,14 @@ use deadpool_postgres::{GenericClient, Object};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-pub struct Pkce {
+pub struct Verifier {
     pub id: Uuid,
     pub created: OffsetDateTime,
     pub csrf_token: String,
     pub pkce_verifier: String,
 }
 
-impl TryFrom<tokio_postgres::Row> for Pkce {
+impl TryFrom<tokio_postgres::Row> for Verifier {
     type Error = anyhow::Error;
 
     fn try_from(value: tokio_postgres::Row) -> std::result::Result<Self, Self::Error> {
@@ -19,7 +19,7 @@ impl TryFrom<tokio_postgres::Row> for Pkce {
         let csrf_token: String = value.try_get("csrf_token")?;
         let pkce_verifier: String = value.try_get("pkce_verifier")?;
 
-        Ok(Pkce {
+        Ok(Verifier {
             id,
             created,
             csrf_token,
@@ -79,25 +79,25 @@ impl TryFrom<tokio_postgres::Row> for User {
     }
 }
 
-pub async fn select_pkce_by_csrf(client: &Object, csrf_token: &str) -> Result<Option<Pkce>> {
+pub async fn select_verifiers_by_csrf(client: &Object, csrf_token: &str) -> Result<Option<Verifier>> {
     let row = client
-        .query_opt("select * from pkce where csrf_token = $1", &[&csrf_token])
+        .query_opt("select * from verifiers where csrf_token = $1", &[&csrf_token])
         .await?;
     match row {
-        Some(row) => Ok(Some(Pkce::try_from(row)?)),
+        Some(row) => Ok(Some(Verifier::try_from(row)?)),
         None => Ok(None),
     }
 }
 
-pub async fn create_pkce(client: &Object, csrf_token: &str, pkce_verifier: &str) -> Result<Pkce> {
+pub async fn create_verifiers(client: &Object, csrf_token: &str, pkce_verifier: &str) -> Result<Verifier> {
     let uuid = Uuid::now_v7();
     let row = client
         .query_one(
-            "insert into pkce (id, csrf_token, pkce_verifier) values ($1, $2, $3) returning *",
+            "insert into verifiers (id, csrf_token, pkce_verifier) values ($1, $2, $3) returning *",
             &[&uuid, &csrf_token, &pkce_verifier],
         )
         .await?;
-    Pkce::try_from(row)
+    Verifier::try_from(row)
 }
 
 // 10 minutes

@@ -38,8 +38,9 @@ pub async fn oauth_login(
     }
     let (auth_url, csrf_token) = client.add_extra_param("access_type", "offline").url();
 
-    // Save the CSRF token to the database.
-    match crate::auth_db::create_pkce(&conn, csrf_token.secret(), pkce_verifier.secret()).await {
+    // Save the CSRF token and PKCE verifier so we can verify them later.
+    match crate::auth_db::create_verifiers(&conn, csrf_token.secret(), pkce_verifier.secret()).await
+    {
         Ok(_) => {}
         Err(err) => {
             tracing::error!("Failed to save PKCE verifier: {:?}", err);
@@ -72,7 +73,7 @@ pub async fn oauth_callback(
         Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
     })?;
 
-    let pkce = match crate::auth_db::select_pkce_by_csrf(&conn, csrf).await {
+    let pkce = match crate::auth_db::select_verifiers_by_csrf(&conn, csrf).await {
         Ok(Some(pkce)) => pkce,
         Ok(None) => {
             return Err(Redirect::to(&format!(
@@ -124,24 +125,24 @@ pub async fn oauth_callback(
             Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
         })?;
 
-    // let mut client = match UsersServiceClient::connect("http://service-users:443").await {
-    //     Ok(client) => client,
-    //     Err(err) => {
-    //         tracing::error!("Failed to connect to users service: {:?}", err);
-    //         return Err(StatusCode::INTERNAL_SERVER_ERROR);
-    //     }
-    // };
-    // let request = tonic::Request::new(crate::proto::AuthRequest {
-    //     email: user_profile.email,
-    //     sub: user_profile.sub,
-    // });
-    // let user = match client.auth(request).await {
-    //     Ok(user) => user.into_inner(),
-    //     Err(err) => {
-    //         tracing::error!("Failed to authenticate user: {:?}", err);
-    //         return Err(StatusCode::INTERNAL_SERVER_ERROR);
-    //     }
-    // };
+    let mut client = match UsersServiceClient::connect("http://service-users:443").await {
+        Ok(client) => client,
+        Err(err) => {
+            tracing::error!("Failed to connect to users service: {:?}", err);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    };
+    let request = tonic::Request::new(crate::proto::AuthRequest {
+        email: user_profile.email,
+        sub: user_profile.sub,
+    });
+    let user = match client.auth(request).await {
+        Ok(user) => user.into_inner(),
+        Err(err) => {
+            tracing::error!("Failed to authenticate user: {:?}", err);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    };
 
     // Create a new user if one doesn't exist, otherwise update the existing user.
     let user = match crate::auth_db::auth_user(
@@ -185,7 +186,6 @@ pub async fn oauth_callback(
     };
 
     tracing::info!("User authenticated: {:?}", user);
-
     // Delete old PKCE verifiers and tokens asynchronously. If this fails, it's not a big deal.
     tokio::spawn(async move {
         if let Err(err) = crate::auth_db::delete_old_pkces(&conn).await {
