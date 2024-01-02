@@ -1,5 +1,6 @@
 use crate::{
     auth_oauth::{OAuth, OAuthConfig},
+    proto::users_service_client::UsersServiceClient,
     AppState,
 };
 use anyhow::Result;
@@ -39,17 +40,13 @@ pub async fn oauth_login(
     let (auth_url, csrf_token) = client.add_extra_param("access_type", "offline").url();
 
     // Save the CSRF token and PKCE verifier so we can verify them later.
-    match crate::auth_db::create_verifiers(&conn, csrf_token.secret(), pkce_verifier.secret()).await
-    {
-        Ok(_) => {}
-        Err(err) => {
-            tracing::error!("Failed to save PKCE verifier: {:?}", err);
-            return Err(Redirect::to(&format!(
-                "{}/auth?error=1",
-                state.env.client_url
-            )));
-        }
-    }
+    // Here we are using the PostgreSQL database, but you can use whatever you want, e.g. Redis.
+    crate::auth_db::create_verifiers(&conn, csrf_token.secret(), pkce_verifier.secret())
+        .await
+        .map_err(|err| {
+            tracing::error!("Failed to save verifier: {:?}", err);
+            Redirect::to(&format!("{}/auth?error=1", state.env.client_url))
+        })?;
 
     Ok(Redirect::to(auth_url.as_ref()))
 }
@@ -73,8 +70,8 @@ pub async fn oauth_callback(
         Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
     })?;
 
-    let pkce = match crate::auth_db::select_verifiers_by_csrf(&conn, csrf).await {
-        Ok(Some(pkce)) => pkce,
+    let verifiers = match crate::auth_db::select_verifiers_by_csrf(&conn, csrf).await {
+        Ok(Some(verifiers)) => verifiers,
         Ok(None) => {
             return Err(Redirect::to(&format!(
                 "{}/auth?error=2",
@@ -82,7 +79,7 @@ pub async fn oauth_callback(
             )))
         }
         Err(err) => {
-            tracing::error!("Failed to select PKCE verifier: {:?}", err);
+            tracing::error!("Failed to select verifiers: {:?}", err);
             return Err(Redirect::to(&format!(
                 "{}/auth?error=2",
                 state.env.client_url
@@ -91,7 +88,7 @@ pub async fn oauth_callback(
     };
 
     // check if the `created` field is older than 10 minutes
-    let diff = time::OffsetDateTime::now_utc() - pkce.created;
+    let diff = time::OffsetDateTime::now_utc() - verifiers.created;
     if diff.whole_minutes() > 10 {
         return Err(Redirect::to(&format!(
             "{}/auth?error=2",
@@ -109,7 +106,7 @@ pub async fn oauth_callback(
     let token = client
         .exchange_code(oauth2::AuthorizationCode::new(code.to_string()))
         // Set the PKCE code verifier.
-        .set_pkce_verifier(oauth2::PkceCodeVerifier::new(pkce.pkce_verifier))
+        .set_pkce_verifier(oauth2::PkceCodeVerifier::new(verifiers.pkce_verifier))
         .request_async(oauth2::reqwest::async_http_client)
         .await
         .map_err(|err| {
@@ -117,6 +114,7 @@ pub async fn oauth_callback(
             Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
         })?;
 
+    // Get the user's profile.
     let user_profile = oauth_config
         .get_user_info(token.access_token().secret())
         .await
@@ -125,77 +123,43 @@ pub async fn oauth_callback(
             Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
         })?;
 
-    let mut client = match UsersServiceClient::connect("http://service-users:443").await {
-        Ok(client) => client,
-        Err(err) => {
+    // Generate a JWT token.
+    let jwt_token = oauth_config
+        .generate_jwt(user_profile)
+        .await
+        .map_err(|err| {
+            tracing::error!("Failed to generate JWT token: {:?}", err);
+            Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
+        })?;
+
+    /*
+     * This is where you implement you own logic to create or update a user in your database.
+     * Here we are connecting to the users service via gRPC server-server and creating a new user.
+     * The users service will return a token id that we can use to authenticate the user.
+     */
+    let mut client = UsersServiceClient::connect("http://service-users:443")
+        .await
+        .map_err(|err| {
             tracing::error!("Failed to connect to users service: {:?}", err);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
-        }
-    };
-    let request = tonic::Request::new(crate::proto::AuthRequest {
-        email: user_profile.email,
-        sub: user_profile.sub,
-    });
-    let user = match client.auth(request).await {
-        Ok(user) => user.into_inner(),
-        Err(err) => {
-            tracing::error!("Failed to authenticate user: {:?}", err);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
-        }
-    };
+            Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
+        })?;
+    let mut request = tonic::Request::new(crate::proto::Empty {});
+    let metadata = request.metadata_mut();
+    metadata.insert("x-authorization", jwt_token);
+    let token = client.create_user(request).await.map_err(|err| {
+        tracing::error!("Failed to authenticate user: {:?}", err);
+        Redirect::to(&format!("{}/auth?error=invalid_user", state.env.client_url))
+    })?;
+    let token = token.into_inner();
 
-    // Create a new user if one doesn't exist, otherwise update the existing user.
-    let user = match crate::auth_db::auth_user(
-        &conn,
-        &user_profile.sub,
-        &user_profile.email,
-        &user_profile.avatar,
-    )
-    .await
-    {
-        Ok(user) => user,
-        Err(err) => {
-            tracing::error!("Failed to authenticate user: {:?}", err);
-            return Err(Redirect::to(&format!(
-                "{}/auth?error=invalid_user",
-                state.env.client_url
-            )));
-        }
-    };
-
-    // Create a new token.
-    let token = match crate::auth_db::create_token(
-        &conn,
-        &user.id,
-        token.access_token().secret(),
-        match token.refresh_token() {
-            Some(token) => token.secret(),
-            None => "",
-        },
-    )
-    .await
-    {
-        Ok(token) => token,
-        Err(err) => {
-            tracing::error!("Failed to create token: {:?}", err);
-            return Err(Redirect::to(&format!(
-                "{}/auth?error=2",
-                state.env.client_url
-            )));
-        }
-    };
-
-    tracing::info!("User authenticated: {:?}", user);
-    // Delete old PKCE verifiers and tokens asynchronously. If this fails, it's not a big deal.
+    // Delete old verifiers asynchronously. If this fails, it's not a big deal.
     tokio::spawn(async move {
-        if let Err(err) = crate::auth_db::delete_old_pkces(&conn).await {
-            tracing::error!("Failed to delete old PKCE verifiers: {:?}", err);
-        }
-        if let Err(err) = crate::auth_db::delete_old_tokens(&conn).await {
-            tracing::error!("Failed to delete old tokens: {:?}", err);
+        if let Err(err) = crate::auth_db::delete_old_verifiers(&conn).await {
+            tracing::error!("Failed to delete old verifiers: {:?}", err);
         }
     });
 
+    tracing::info!("User authenticated");
     Ok(Redirect::to(&format!(
         "{}/?token={}",
         state.env.client_url, token.id

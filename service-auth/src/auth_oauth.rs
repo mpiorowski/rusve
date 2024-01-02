@@ -1,16 +1,20 @@
 use anyhow::Result;
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 use rusve_auth::Env;
+use serde::{Deserialize, Serialize};
+use tonic::metadata::{Ascii, MetadataValue};
 
 pub enum OAuthProvider {
     Google,
     Github,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct OAuthUser {
     pub sub: String,
     pub email: String,
     pub avatar: String,
+    pub exp: i64,
 }
 
 pub trait OAuth {
@@ -19,6 +23,7 @@ pub trait OAuth {
         Self: Sized;
     fn build_oauth_client(&self) -> BasicClient;
     async fn get_user_info(&self, token: &str) -> Result<OAuthUser>;
+    async fn generate_jwt(&self, user: OAuthUser) -> Result<MetadataValue<Ascii>>;
 }
 
 pub struct OAuthConfig {
@@ -30,6 +35,7 @@ pub struct OAuthConfig {
     redirect_url: String,
     pub scopes: Vec<String>,
     user_info_url: String,
+    jwt_secret: String,
 }
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
@@ -59,6 +65,7 @@ impl OAuth for OAuthConfig {
                 redirect_url: format!("{}/oauth-callback/google", env.server_url),
                 user_info_url: "https://www.googleapis.com/oauth2/v3/userinfo".to_string(),
                 scopes: vec!["email".to_string(), "openid".to_string()],
+                jwt_secret: env.jwt_secret,
             }),
             "github" => Ok(Self {
                 provider: OAuthProvider::Github,
@@ -69,6 +76,7 @@ impl OAuth for OAuthConfig {
                 redirect_url: format!("{}/oauth-callback/github", env.server_url),
                 user_info_url: "https://api.github.com/user".to_string(),
                 scopes: vec!["user:email".to_string()],
+                jwt_secret: env.jwt_secret,
             }),
             _ => Err(anyhow::anyhow!(format!(
                 "Invalid OAuth provider: {}",
@@ -93,8 +101,6 @@ impl OAuth for OAuthConfig {
     }
 
     async fn get_user_info(&self, token: &str) -> Result<OAuthUser> {
-        println!("get_user_info: {:?}", token);
-
         match self.provider {
             OAuthProvider::Google => {
                 let user_profile = reqwest::Client::new()
@@ -111,6 +117,8 @@ impl OAuth for OAuthConfig {
                     sub: user_profile.sub,
                     email: user_profile.email,
                     avatar: user_profile.picture,
+                    // 5 min
+                    exp: time::OffsetDateTime::now_utc().unix_timestamp() + 60 * 5,
                 })
             }
             OAuthProvider::Github => {
@@ -126,8 +134,21 @@ impl OAuth for OAuthConfig {
                     sub: user_profile.id.to_string(),
                     email: user_profile.email,
                     avatar: user_profile.avatar_url,
+                    // 5 min
+                    exp: time::OffsetDateTime::now_utc().unix_timestamp() + 60 * 5,
                 })
             }
         }
+    }
+
+    async fn generate_jwt(&self, user: OAuthUser) -> Result<MetadataValue<Ascii>> {
+        let token = jsonwebtoken::encode(
+            &jsonwebtoken::Header::default(),
+            &user,
+            &jsonwebtoken::EncodingKey::from_secret(self.jwt_secret.as_bytes()),
+        )?;
+        let token = format!("bearer {}", token);
+        let token: MetadataValue<Ascii> = token.parse()?;
+        Ok(token)
     }
 }

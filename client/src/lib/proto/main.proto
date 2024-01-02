@@ -34,7 +34,7 @@ message StripeUrlResponse {
 }
 
 service UsersService {
-    rpc Connect(Empty) returns (Empty) {}
+    rpc CreateUser(Empty) returns (Id) {}
     rpc Auth(Empty) returns (AuthResponse) {}
 
     rpc GetProfileByUserId(Empty) returns (Profile) {}

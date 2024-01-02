@@ -304,10 +304,10 @@ pub mod users_service_client {
             self.inner = self.inner.max_encoding_message_size(limit);
             self
         }
-        pub async fn connect(
+        pub async fn create_user(
             &mut self,
             request: impl tonic::IntoRequest<super::Empty>,
-        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status> {
+        ) -> std::result::Result<tonic::Response<super::Id>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -319,11 +319,11 @@ pub mod users_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UsersService/Connect",
+                "/proto.UsersService/CreateUser",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("proto.UsersService", "Connect"));
+                .insert(GrpcMethod::new("proto.UsersService", "CreateUser"));
             self.inner.unary(req, path, codec).await
         }
         pub async fn auth(
@@ -826,10 +826,10 @@ pub mod users_service_server {
     /// Generated trait containing gRPC methods that should be implemented for use with UsersServiceServer.
     #[async_trait]
     pub trait UsersService: Send + Sync + 'static {
-        async fn connect(
+        async fn create_user(
             &self,
             request: tonic::Request<super::Empty>,
-        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status>;
+        ) -> std::result::Result<tonic::Response<super::Id>, tonic::Status>;
         async fn auth(
             &self,
             request: tonic::Request<super::Empty>,
@@ -936,12 +936,12 @@ pub mod users_service_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/proto.UsersService/Connect" => {
+                "/proto.UsersService/CreateUser" => {
                     #[allow(non_camel_case_types)]
-                    struct ConnectSvc<T: UsersService>(pub Arc<T>);
+                    struct CreateUserSvc<T: UsersService>(pub Arc<T>);
                     impl<T: UsersService> tonic::server::UnaryService<super::Empty>
-                    for ConnectSvc<T> {
-                        type Response = super::Empty;
+                    for CreateUserSvc<T> {
+                        type Response = super::Id;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
@@ -951,7 +951,7 @@ pub mod users_service_server {
                             request: tonic::Request<super::Empty>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
-                            let fut = async move { (*inner).connect(request).await };
+                            let fut = async move { (*inner).create_user(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -962,7 +962,7 @@ pub mod users_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = ConnectSvc(inner);
+                        let method = CreateUserSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

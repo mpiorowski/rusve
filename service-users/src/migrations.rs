@@ -14,6 +14,12 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
             end;
             $$ language plpgsql;
 
+            create table if not exists tokens (
+                id uuid primary key,
+                created timestamptz not null default now(),
+                user_id uuid not null
+            );
+
             create table if not exists users (
                 id uuid primary key,
                 created timestamptz not null default current_timestamp,
