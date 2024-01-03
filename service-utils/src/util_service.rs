@@ -1,6 +1,6 @@
 use crate::proto::utils_service_server::UtilsService;
-use crate::proto::{File, Id, Empty};
-use crate::{files_utils, MyService};
+use crate::proto::{Email, Empty, File, Id};
+use crate::MyService;
 use anyhow::Result;
 use futures_util::TryStreamExt;
 use tokio::sync::mpsc;
@@ -10,6 +10,21 @@ use tonic::{Request, Response, Status};
 #[tonic::async_trait]
 impl UtilsService for MyService {
     type GetFilesStream = ReceiverStream<Result<File, Status>>;
+
+    async fn send_email(&self, request: Request<Email>) -> Result<Response<Empty>, Status> {
+        let start = std::time::Instant::now();
+
+        let request = request.into_inner();
+        crate::email_utils::send_email(&self.env, request)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to send email: {:?}", e);
+                Status::internal("Failed to send email")
+            })?;
+
+        tracing::info!("SendEmail: {:?}", start.elapsed());
+        Ok(Response::new(Empty {}))
+    }
 
     async fn get_files(
         &self,
@@ -23,7 +38,7 @@ impl UtilsService for MyService {
         })?;
 
         let request = request.into_inner();
-        let files = crate::files_db::get_files_by_target_id(&conn, &request.id)
+        let files = crate::file_db::get_files_by_target_id(&conn, &request.id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to get files by target id: {:?}", e);
@@ -77,14 +92,14 @@ impl UtilsService for MyService {
 
         let request = request.into_inner();
 
-        let mut file = crate::files_db::get_file_by_id(&conn, &request.id)
+        let mut file = crate::file_db::get_file_by_id(&conn, &request.id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to get file by id: {:?}", e);
                 Status::internal("Failed to get file by id")
             })?;
 
-        let file_buffer = files_utils::get_file_buffer(&self.env, &file.id, &file.file_name)
+        let file_buffer = crate::file_utils::get_file_buffer(&self.env, &file.id, &file.file_name)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to get file buffer: {:?}", e);
@@ -112,14 +127,12 @@ impl UtilsService for MyService {
         let file = request.into_inner();
         let file_buffer = file.file_buffer.to_owned();
 
-        let file = crate::files_db::insert_file(&tx, &file)
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to create file: {:?}", e);
-                Status::internal("Failed to create file")
-            })?;
+        let file = crate::file_db::insert_file(&tx, &file).await.map_err(|e| {
+            tracing::error!("Failed to create file: {:?}", e);
+            Status::internal("Failed to create file")
+        })?;
 
-        files_utils::upload_file(&self.env, &file.id, &file.file_name, file_buffer)
+        crate::file_utils::upload_file(&self.env, &file.id, &file.file_name, file_buffer)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to upload file: {:?}", e);
@@ -148,14 +161,14 @@ impl UtilsService for MyService {
 
         let request = request.into_inner();
 
-        let file: File = crate::files_db::delete_file(&tx, &request.id)
+        let file: File = crate::file_db::delete_file(&tx, &request.id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to delete file: {:?}", e);
                 Status::internal("Failed to delete file")
             })?;
 
-        files_utils::delete_file(&self.env, &file.id, &file.file_name)
+        crate::file_utils::delete_file(&self.env, &file.id, &file.file_name)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to delete file: {:?}", e);

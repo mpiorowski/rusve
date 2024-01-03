@@ -1,7 +1,7 @@
 mod migrations;
-mod notes_db;
-mod notes_service;
-mod notes_validation;
+mod note_db;
+mod note_service;
+mod note_validation;
 mod proto;
 
 use crate::proto::notes_service_server::NotesServiceServer;

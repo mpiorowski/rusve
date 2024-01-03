@@ -1,11 +1,16 @@
 use anyhow::Result;
 use deadpool_postgres::Object;
-use rusve_notes::slice_iter;
 use time::format_description::well_known::Iso8601;
 use tokio_postgres::{types::Timestamp, RowStream};
 use uuid::Uuid;
 
 use crate::proto::Note;
+
+fn slice_iter<'a>(
+    s: &'a [&'a (dyn tokio_postgres::types::ToSql + Sync)],
+) -> impl ExactSizeIterator<Item = &'a dyn tokio_postgres::types::ToSql> + 'a {
+    s.iter().map(|s| *s as _)
+}
 
 impl TryFrom<tokio_postgres::Row> for Note {
     type Error = anyhow::Error;

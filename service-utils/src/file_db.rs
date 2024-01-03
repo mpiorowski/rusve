@@ -4,7 +4,7 @@ use time::format_description::well_known::Iso8601;
 use tokio_postgres::{types::Timestamp, RowStream};
 use uuid::Uuid;
 
-use crate::proto::{File, FileType};
+use crate::proto::File;
 
 impl TryFrom<tokio_postgres::Row> for File {
     type Error = anyhow::Error;

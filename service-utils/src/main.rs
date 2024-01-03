@@ -1,7 +1,8 @@
-mod email_service;
-mod files_db;
-mod files_service;
-mod files_utils;
+mod util_service;
+mod file_utils;
+mod file_db;
+mod email_utils;
+mod email_db;
 mod migrations;
 mod proto;
 

@@ -21,12 +21,6 @@ pub fn init_envs() -> Result<Env> {
     })
 }
 
-pub fn slice_iter<'a>(
-    s: &'a [&'a (dyn tokio_postgres::types::ToSql + Sync)],
-) -> impl ExactSizeIterator<Item = &'a dyn tokio_postgres::types::ToSql> + 'a {
-    s.iter().map(|s| *s as _)
-}
-
 pub fn connect_to_db(env: &Env) -> Result<deadpool_postgres::Pool> {
     let tokio_config = tokio_postgres::Config::from_str(&env.database_url)?;
     let mgr_config = ManagerConfig {

@@ -53,9 +53,14 @@ service NotesService {
 }
 
 service UtilsService {
-    rpc GetFiles(Id) returns (stream File) {}
-    rpc GetFile(Id) returns (File) {}
+    rpc CountEmailsByUserId(Empty) returns (Count) {}
+    rpc GetEmailsByUserId(Page) returns (stream Email) {}
+    rpc SendEmail(Email) returns (Empty) {}
+
+    rpc CountFilesByUserId(Empty) returns (Count) {}
+    rpc GetFilesByUserId(Page) returns (stream File) {}
+    rpc GetFileById(Id) returns (File) {}
     rpc UploadFile(File) returns (File) {}
-    rpc DeleteFile(Id) returns (Empty) {}
+    rpc DeleteFileById(Id) returns (Empty) {}
 }
 
