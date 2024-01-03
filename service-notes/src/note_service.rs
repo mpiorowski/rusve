@@ -1,5 +1,4 @@
 use crate::{
-    notes_db::{self, insert_note},
     proto::{notes_service_server::NotesService, Count, Empty, Id, Note, Page},
     MyService,
 };
@@ -26,7 +25,7 @@ impl NotesService for MyService {
             Status::internal("Failed to get connection")
         })?;
 
-        let count = notes_db::count_notes_by_user_id(&conn, &user_id)
+        let count = crate::note_db::count_notes_by_user_id(&conn, &user_id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to count notes: {:?}", e);
@@ -51,12 +50,13 @@ impl NotesService for MyService {
         })?;
 
         let page = request.into_inner();
-        let notes_stream = notes_db::get_notes_by_user_id(&conn, &user_id, page.offset, page.limit)
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to get notes: {:?}", e);
-                Status::internal("Failed to get notes")
-            })?;
+        let notes_stream =
+            crate::note_db::get_notes_by_user_id(&conn, &user_id, page.offset, page.limit)
+                .await
+                .map_err(|e| {
+                    tracing::error!("Failed to get notes: {:?}", e);
+                    Status::internal("Failed to get notes")
+                })?;
 
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
@@ -121,7 +121,7 @@ impl NotesService for MyService {
         })?;
 
         let id = request.into_inner();
-        let note = notes_db::get_note_by_id(&conn, &id.id, &user_id)
+        let note = crate::note_db::get_note_by_id(&conn, &id.id, &user_id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to get note: {:?}", e);
@@ -144,15 +144,17 @@ impl NotesService for MyService {
 
         let mut note = request.into_inner();
 
-        crate::notes_validation::Validation::validate(&note)?;
+        crate::note_validation::Validation::validate(&note)?;
 
         if note.id.is_empty() {
-            note = insert_note(&conn, &user_id, &note).await.map_err(|e| {
-                tracing::error!("Failed to insert note: {:?}", e);
-                Status::internal("Failed to insert note")
-            })?;
+            note = crate::note_db::insert_note(&conn, &user_id, &note)
+                .await
+                .map_err(|e| {
+                    tracing::error!("Failed to insert note: {:?}", e);
+                    Status::internal("Failed to insert note")
+                })?;
         } else {
-            note = notes_db::update_note(&conn, &user_id, &note)
+            note = crate::note_db::update_note(&conn, &user_id, &note)
                 .await
                 .map_err(|e| {
                     tracing::error!("Failed to update note: {:?}", e);
@@ -175,7 +177,7 @@ impl NotesService for MyService {
         })?;
 
         let id = request.into_inner();
-        notes_db::delete_note_by_id(&conn, &id.id, &user_id)
+        crate::note_db::delete_note_by_id(&conn, &id.id, &user_id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to delete note: {:?}", e);
