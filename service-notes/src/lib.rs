@@ -6,15 +6,29 @@ use std::str::FromStr;
 use tokio_postgres_rustls::MakeRustlsConnect;
 mod proto;
 
+#[derive(Clone)]
+pub struct Env {
+    pub port: String,
+    pub rust_log: String,
+    pub database_url: String,
+}
+
+pub fn init_envs() -> Result<Env> {
+    Ok(Env {
+        port: std::env::var("PORT")?,
+        rust_log: std::env::var("RUST_LOG")?,
+        database_url: std::env::var("DATABASE_URL")?,
+    })
+}
+
 pub fn slice_iter<'a>(
     s: &'a [&'a (dyn tokio_postgres::types::ToSql + Sync)],
 ) -> impl ExactSizeIterator<Item = &'a dyn tokio_postgres::types::ToSql> + 'a {
     s.iter().map(|s| *s as _)
 }
 
-pub fn connect_to_db() -> Result<deadpool_postgres::Pool> {
-    let database_url = std::env::var("DATABASE_URL")?;
-    let tokio_config = tokio_postgres::Config::from_str(&database_url)?;
+pub fn connect_to_db(env: &Env) -> Result<deadpool_postgres::Pool> {
+    let tokio_config = tokio_postgres::Config::from_str(&env.database_url)?;
     let mgr_config = ManagerConfig {
         recycling_method: RecyclingMethod::Fast,
     };

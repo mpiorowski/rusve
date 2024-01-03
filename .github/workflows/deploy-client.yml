@@ -3,7 +3,7 @@ name: Deploy Client
 on:
   push:
     branches:
-      - release-client/**
+      - release-client
   workflow_call:
     secrets:
       GCP_CREDENTIALS:

@@ -6,20 +6,20 @@ option go_package = "rusve/proto";
 
 enum FileType {
     FILE_UNSET = 0;
-    DOCUMENT = 1;
-    AVATAR = 2;
+    FILE_DOCUMENT = 1;
+    FILE_AVATAR = 2;
 }
 
 message File {
     string id = 1;
     string created = 2;
     string updated = 3;
-    optional string deleted = 4;
+    string deleted = 4;
 
     string target_id = 5;
-    string name = 6;
-    FileType type = 7;
+    string file_name = 6;
+    FileType file_type = 7;
 
-    bytes buffer = 8;
-    string url = 9;
+    bytes file_buffer = 8;
+    string file_url = 9;
 }

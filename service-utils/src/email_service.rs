@@ -7,7 +7,6 @@ use google_cloud_pubsub::{
 };
 use sendgrid::{Destination, Mail, SGClient};
 use serde::Deserialize;
-use tokio_util::sync::CancellationToken;
 
 #[derive(Deserialize, Debug)]
 struct EmailMessage {

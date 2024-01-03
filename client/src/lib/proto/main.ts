@@ -15,7 +15,6 @@ export interface ProtoGrpcType {
     Count: MessageTypeDefinition
     Empty: MessageTypeDefinition
     File: MessageTypeDefinition
-    FileId: MessageTypeDefinition
     FileType: EnumTypeDefinition
     Id: MessageTypeDefinition
     Note: MessageTypeDefinition
@@ -23,7 +22,6 @@ export interface ProtoGrpcType {
     Page: MessageTypeDefinition
     Profile: MessageTypeDefinition
     StripeUrlResponse: MessageTypeDefinition
-    TargetId: MessageTypeDefinition
     User: MessageTypeDefinition
     UserRole: EnumTypeDefinition
     UsersService: SubtypeConstructor<typeof grpc.Client, _proto_UsersServiceClient> & { service: _proto_UsersServiceDefinition }

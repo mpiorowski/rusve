@@ -52,20 +52,10 @@ service NotesService {
     rpc DeleteNoteById(Id) returns (Empty) {}
 }
 
-message TargetId {
-    string target_id = 1;
-    FileType type = 2;
-}
-
-message FileId {
-    string file_id = 1;
-    string target_id = 2;
-}
-
 service UtilsService {
-    rpc GetFiles(TargetId) returns (stream File) {}
-    rpc GetFile(FileId) returns (File) {}
-    rpc CreateFile(File) returns (File) {}
-    rpc DeleteFile(FileId) returns (File) {}
+    rpc GetFiles(Id) returns (stream File) {}
+    rpc GetFile(Id) returns (File) {}
+    rpc UploadFile(File) returns (File) {}
+    rpc DeleteFile(Id) returns (Empty) {}
 }
 

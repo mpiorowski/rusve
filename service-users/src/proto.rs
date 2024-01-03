@@ -115,26 +115,26 @@ pub struct File {
     pub created: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub updated: ::prost::alloc::string::String,
-    #[prost(string, optional, tag = "4")]
-    pub deleted: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, tag = "4")]
+    pub deleted: ::prost::alloc::string::String,
     #[prost(string, tag = "5")]
     pub target_id: ::prost::alloc::string::String,
     #[prost(string, tag = "6")]
-    pub name: ::prost::alloc::string::String,
+    pub file_name: ::prost::alloc::string::String,
     #[prost(enumeration = "FileType", tag = "7")]
-    pub r#type: i32,
+    pub file_type: i32,
     #[prost(bytes = "vec", tag = "8")]
-    pub buffer: ::prost::alloc::vec::Vec<u8>,
+    pub file_buffer: ::prost::alloc::vec::Vec<u8>,
     #[prost(string, tag = "9")]
-    pub url: ::prost::alloc::string::String,
+    pub file_url: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum FileType {
     FileUnset = 0,
-    Document = 1,
-    Avatar = 2,
+    FileDocument = 1,
+    FileAvatar = 2,
 }
 impl FileType {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -144,16 +144,16 @@ impl FileType {
     pub fn as_str_name(&self) -> &'static str {
         match self {
             FileType::FileUnset => "FILE_UNSET",
-            FileType::Document => "DOCUMENT",
-            FileType::Avatar => "AVATAR",
+            FileType::FileDocument => "FILE_DOCUMENT",
+            FileType::FileAvatar => "FILE_AVATAR",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
             "FILE_UNSET" => Some(Self::FileUnset),
-            "DOCUMENT" => Some(Self::Document),
-            "AVATAR" => Some(Self::Avatar),
+            "FILE_DOCUMENT" => Some(Self::FileDocument),
+            "FILE_AVATAR" => Some(Self::FileAvatar),
             _ => None,
         }
     }
@@ -200,24 +200,6 @@ pub struct AuthResponse {
 pub struct StripeUrlResponse {
     #[prost(string, tag = "1")]
     pub url: ::prost::alloc::string::String,
-}
-#[derive(serde::Serialize, serde::Deserialize)]
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct TargetId {
-    #[prost(string, tag = "1")]
-    pub target_id: ::prost::alloc::string::String,
-    #[prost(enumeration = "FileType", tag = "2")]
-    pub r#type: i32,
-}
-#[derive(serde::Serialize, serde::Deserialize)]
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FileId {
-    #[prost(string, tag = "1")]
-    pub file_id: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub target_id: ::prost::alloc::string::String,
 }
 /// Generated client implementations.
 pub mod users_service_client {
@@ -728,7 +710,7 @@ pub mod utils_service_client {
         }
         pub async fn get_files(
             &mut self,
-            request: impl tonic::IntoRequest<super::TargetId>,
+            request: impl tonic::IntoRequest<super::Id>,
         ) -> std::result::Result<
             tonic::Response<tonic::codec::Streaming<super::File>>,
             tonic::Status,
@@ -753,7 +735,7 @@ pub mod utils_service_client {
         }
         pub async fn get_file(
             &mut self,
-            request: impl tonic::IntoRequest<super::FileId>,
+            request: impl tonic::IntoRequest<super::Id>,
         ) -> std::result::Result<tonic::Response<super::File>, tonic::Status> {
             self.inner
                 .ready()
@@ -773,7 +755,7 @@ pub mod utils_service_client {
                 .insert(GrpcMethod::new("proto.UtilsService", "GetFile"));
             self.inner.unary(req, path, codec).await
         }
-        pub async fn create_file(
+        pub async fn upload_file(
             &mut self,
             request: impl tonic::IntoRequest<super::File>,
         ) -> std::result::Result<tonic::Response<super::File>, tonic::Status> {
@@ -788,17 +770,17 @@ pub mod utils_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UtilsService/CreateFile",
+                "/proto.UtilsService/UploadFile",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("proto.UtilsService", "CreateFile"));
+                .insert(GrpcMethod::new("proto.UtilsService", "UploadFile"));
             self.inner.unary(req, path, codec).await
         }
         pub async fn delete_file(
             &mut self,
-            request: impl tonic::IntoRequest<super::FileId>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status> {
+            request: impl tonic::IntoRequest<super::Id>,
+        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -1630,20 +1612,20 @@ pub mod utils_service_server {
             + 'static;
         async fn get_files(
             &self,
-            request: tonic::Request<super::TargetId>,
+            request: tonic::Request<super::Id>,
         ) -> std::result::Result<tonic::Response<Self::GetFilesStream>, tonic::Status>;
         async fn get_file(
             &self,
-            request: tonic::Request<super::FileId>,
+            request: tonic::Request<super::Id>,
         ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
-        async fn create_file(
+        async fn upload_file(
             &self,
             request: tonic::Request<super::File>,
         ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
         async fn delete_file(
             &self,
-            request: tonic::Request<super::FileId>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
+            request: tonic::Request<super::Id>,
+        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct UtilsServiceServer<T: UtilsService> {
@@ -1729,7 +1711,7 @@ pub mod utils_service_server {
                     struct GetFilesSvc<T: UtilsService>(pub Arc<T>);
                     impl<
                         T: UtilsService,
-                    > tonic::server::ServerStreamingService<super::TargetId>
+                    > tonic::server::ServerStreamingService<super::Id>
                     for GetFilesSvc<T> {
                         type Response = super::File;
                         type ResponseStream = T::GetFilesStream;
@@ -1739,7 +1721,7 @@ pub mod utils_service_server {
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::TargetId>,
+                            request: tonic::Request<super::Id>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).get_files(request).await };
@@ -1772,7 +1754,7 @@ pub mod utils_service_server {
                 "/proto.UtilsService/GetFile" => {
                     #[allow(non_camel_case_types)]
                     struct GetFileSvc<T: UtilsService>(pub Arc<T>);
-                    impl<T: UtilsService> tonic::server::UnaryService<super::FileId>
+                    impl<T: UtilsService> tonic::server::UnaryService<super::Id>
                     for GetFileSvc<T> {
                         type Response = super::File;
                         type Future = BoxFuture<
@@ -1781,7 +1763,7 @@ pub mod utils_service_server {
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::FileId>,
+                            request: tonic::Request<super::Id>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).get_file(request).await };
@@ -1811,11 +1793,11 @@ pub mod utils_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/proto.UtilsService/CreateFile" => {
+                "/proto.UtilsService/UploadFile" => {
                     #[allow(non_camel_case_types)]
-                    struct CreateFileSvc<T: UtilsService>(pub Arc<T>);
+                    struct UploadFileSvc<T: UtilsService>(pub Arc<T>);
                     impl<T: UtilsService> tonic::server::UnaryService<super::File>
-                    for CreateFileSvc<T> {
+                    for UploadFileSvc<T> {
                         type Response = super::File;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
@@ -1826,7 +1808,7 @@ pub mod utils_service_server {
                             request: tonic::Request<super::File>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
-                            let fut = async move { (*inner).create_file(request).await };
+                            let fut = async move { (*inner).upload_file(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -1837,7 +1819,7 @@ pub mod utils_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = CreateFileSvc(inner);
+                        let method = UploadFileSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
@@ -1856,16 +1838,16 @@ pub mod utils_service_server {
                 "/proto.UtilsService/DeleteFile" => {
                     #[allow(non_camel_case_types)]
                     struct DeleteFileSvc<T: UtilsService>(pub Arc<T>);
-                    impl<T: UtilsService> tonic::server::UnaryService<super::FileId>
+                    impl<T: UtilsService> tonic::server::UnaryService<super::Id>
                     for DeleteFileSvc<T> {
-                        type Response = super::File;
+                        type Response = super::Empty;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::FileId>,
+                            request: tonic::Request<super::Id>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).delete_file(request).await };

@@ -8,22 +8,20 @@ export interface File {
   'updated'?: (string);
   'deleted'?: (string);
   'targetId'?: (string);
-  'name'?: (string);
-  'type'?: (_proto_FileType);
-  'buffer'?: (Buffer | Uint8Array | string);
-  'url'?: (string);
-  '_deleted'?: "deleted";
+  'fileName'?: (string);
+  'fileType'?: (_proto_FileType);
+  'fileBuffer'?: (Buffer | Uint8Array | string);
+  'fileUrl'?: (string);
 }
 
 export interface File__Output {
   'id': (string);
   'created': (string);
   'updated': (string);
-  'deleted'?: (string);
+  'deleted': (string);
   'targetId': (string);
-  'name': (string);
-  'type': (_proto_FileType__Output);
-  'buffer': (Buffer);
-  'url': (string);
-  '_deleted': "deleted";
+  'fileName': (string);
+  'fileType': (_proto_FileType__Output);
+  'fileBuffer': (Buffer);
+  'fileUrl': (string);
 }

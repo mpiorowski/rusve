@@ -15,7 +15,7 @@ pub async fn oauth_login(
     Path(provider): Path<String>,
     State(state): State<Arc<AppState>>,
 ) -> Result<Redirect, Redirect> {
-    let conn = state.db_pool.get().await.map_err(|err| {
+    let conn = state.pool.get().await.map_err(|err| {
         tracing::error!("Failed to get DB connection: {:?}", err);
         Redirect::to(&format!("{}/auth?error=1", state.env.client_url))
     })?;
@@ -56,7 +56,7 @@ pub async fn oauth_callback(
     State(state): State<Arc<AppState>>,
     Query(query): Query<HashMap<String, String>>,
 ) -> Result<Redirect, Redirect> {
-    let conn = state.db_pool.get().await.map_err(|err| {
+    let conn = state.pool.get().await.map_err(|err| {
         tracing::error!("Failed to get DB connection: {:?}", err);
         Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
     })?;

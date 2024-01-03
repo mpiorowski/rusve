@@ -10,22 +10,20 @@ mod user_service;
 
 use crate::proto::users_service_server::UsersServiceServer;
 use anyhow::{Context, Result};
-use rusve_users::Env;
 
 pub struct MyService {
+    env: rusve_users::Env,
     pool: deadpool_postgres::Pool,
-    env: Env,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initalize environment variables
-    let env: Env = rusve_users::init_envs()?;
+    let env: rusve_users::Env = rusve_users::init_envs()?;
 
     // Initialize tracing
-    tracing_subscriber::fmt()
-        .with_env_filter(env.rust_log.as_str())
-        .init();
+    let filter = &env.rust_log;
+    tracing_subscriber::fmt().with_env_filter(filter).init();
 
     // Connect to database
     let pool = rusve_users::connect_to_db(&env).context("Failed to connect to database")?;
@@ -40,12 +38,12 @@ async fn main() -> Result<()> {
     // Run gRPC server
     let addr = format!("[::]:{}", env.port).parse()?;
     tracing::info!("gRPC server started on port: {:?}", env.port);
-    let server = MyService { pool, env };
+    let server = MyService { env, pool };
     let svc = UsersServiceServer::new(server);
     tonic::transport::Server::builder()
         .add_service(svc)
         .serve(addr)
-        .await?;
-
+        .await
+        .context("Failed to run gRPC server")?;
     Ok(())
 }

@@ -20,8 +20,8 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
                 updated timestamptz not null default current_timestamp,
                 deleted timestamptz not null default 'infinity',
                 target_id uuid not null,
-                name text not null,
-                type text not null
+                file_name text not null,
+                file_type int not null
             );
             drop trigger if exists set_timestamp on files;
             create trigger set_timestamp before update on files for each row execute procedure trigger_set_timestamp();

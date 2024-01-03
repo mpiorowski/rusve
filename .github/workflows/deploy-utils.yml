@@ -3,7 +3,7 @@ name: Deploy Utils
 on:
   push:
     branches:
-      - release-urils/**
+      - release-utils
   workflow_call:
     secrets:
       GCP_CREDENTIALS:

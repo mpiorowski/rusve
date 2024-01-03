@@ -1,13 +1,11 @@
-use crate::files_db::{get_file_by_id, get_files_by_target_id};
 use crate::proto::utils_service_server::UtilsService;
-use crate::proto::{File, FileId, TargetId};
+use crate::proto::{File, Id, Empty};
 use crate::{files_utils, MyService};
 use anyhow::Result;
-use futures_util::stream::TryStreamExt;
+use futures_util::TryStreamExt;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
-use uuid::Uuid;
 
 #[tonic::async_trait]
 impl UtilsService for MyService {
@@ -15,7 +13,7 @@ impl UtilsService for MyService {
 
     async fn get_files(
         &self,
-        request: Request<TargetId>,
+        request: Request<Id>,
     ) -> Result<Response<Self::GetFilesStream>, Status> {
         let start = std::time::Instant::now();
 
@@ -25,11 +23,7 @@ impl UtilsService for MyService {
         })?;
 
         let request = request.into_inner();
-        let target_id = Uuid::parse_str(&request.target_id).map_err(|e| {
-            tracing::error!("Invalid target id: {:?}", e);
-            Status::invalid_argument("Invalid target id")
-        })?;
-        let files = get_files_by_target_id(&conn, &target_id)
+        let files = crate::files_db::get_files_by_target_id(&conn, &request.id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to get files by target id: {:?}", e);
@@ -55,7 +49,10 @@ impl UtilsService for MyService {
                     Ok(file) => file,
                     Err(e) => {
                         tracing::error!("Failed to convert file: {:?}", e);
-                        if let Err(e) = tx.send(Err(Status::internal("Failed to convert file"))).await {
+                        if let Err(e) = tx
+                            .send(Err(Status::internal("Failed to convert file")))
+                            .await
+                        {
                             tracing::error!("Failed to send error: {:?}", e);
                         }
                         break;
@@ -70,7 +67,7 @@ impl UtilsService for MyService {
         });
         Ok(Response::new(ReceiverStream::new(rx)))
     }
-    async fn get_file(&self, request: Request<FileId>) -> Result<Response<File>, Status> {
+    async fn get_file(&self, request: Request<Id>) -> Result<Response<File>, Status> {
         let start = std::time::Instant::now();
 
         let conn = self.pool.get().await.map_err(|e| {
@@ -80,34 +77,26 @@ impl UtilsService for MyService {
 
         let request = request.into_inner();
 
-        let file_id = Uuid::parse_str(&request.file_id).map_err(|e| {
-            tracing::error!("Invalid file id: {:?}", e);
-            Status::invalid_argument("Invalid file id")
-        })?;
-        let target_id = Uuid::parse_str(&request.target_id).map_err(|e| {
-            tracing::error!("Invalid target id: {:?}", e);
-            Status::invalid_argument("Invalid target id")
-        })?;
-        let mut file = get_file_by_id(&conn, &file_id, &target_id)
+        let mut file = crate::files_db::get_file_by_id(&conn, &request.id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to get file by id: {:?}", e);
                 Status::internal("Failed to get file by id")
             })?;
 
-        let file_buffer = files_utils::get_file_buffer(&file.id, &file.name)
+        let file_buffer = files_utils::get_file_buffer(&self.env, &file.id, &file.file_name)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to get file buffer: {:?}", e);
                 Status::internal("Failed to get file buffer")
             })?;
 
-        file.buffer = file_buffer;
+        file.file_buffer = file_buffer;
 
         tracing::info!("GetFile: {:?}", start.elapsed());
         Ok(Response::new(file))
     }
-    async fn create_file(&self, request: Request<File>) -> Result<Response<File>, Status> {
+    async fn upload_file(&self, request: Request<File>) -> Result<Response<File>, Status> {
         let start = std::time::Instant::now();
 
         let mut conn = self.pool.get().await.map_err(|e| {
@@ -121,16 +110,16 @@ impl UtilsService for MyService {
 
         // get file from request
         let file = request.into_inner();
-        let file_buffer = file.buffer.to_owned();
+        let file_buffer = file.file_buffer.to_owned();
 
-        let file = crate::files_db::create_file(&tx, &file)
+        let file = crate::files_db::insert_file(&tx, &file)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to create file: {:?}", e);
                 Status::internal("Failed to create file")
             })?;
 
-        files_utils::upload_file(&file.id, &file.name, file_buffer)
+        files_utils::upload_file(&self.env, &file.id, &file.file_name, file_buffer)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to upload file: {:?}", e);
@@ -145,7 +134,7 @@ impl UtilsService for MyService {
         tracing::info!("CreateFile: {:?}", start.elapsed());
         Ok(Response::new(file))
     }
-    async fn delete_file(&self, request: Request<FileId>) -> Result<Response<File>, Status> {
+    async fn delete_file(&self, request: Request<Id>) -> Result<Response<Empty>, Status> {
         let start = std::time::Instant::now();
 
         let mut conn = self.pool.get().await.map_err(|e| {
@@ -159,22 +148,14 @@ impl UtilsService for MyService {
 
         let request = request.into_inner();
 
-        let file_id = Uuid::parse_str(&request.file_id).map_err(|e| {
-            tracing::error!("Invalid file id: {:?}", e);
-            Status::invalid_argument("Invalid file id")
-        })?;
-        let target_id = Uuid::parse_str(&request.target_id).map_err(|e| {
-            tracing::error!("Invalid target id: {:?}", e);
-            Status::invalid_argument("Invalid target id")
-        })?;
-        let file: File = crate::files_db::delete_file(&tx, &file_id, &target_id)
+        let file: File = crate::files_db::delete_file(&tx, &request.id)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to delete file: {:?}", e);
                 Status::internal("Failed to delete file")
             })?;
 
-        files_utils::delete_file(&file.id, &file.name)
+        files_utils::delete_file(&self.env, &file.id, &file.file_name)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to delete file: {:?}", e);
@@ -187,6 +168,6 @@ impl UtilsService for MyService {
         })?;
 
         tracing::info!("DeleteFile: {:?}", start.elapsed());
-        Ok(Response::new(file))
+        Ok(Response::new(Empty {}))
     }
 }

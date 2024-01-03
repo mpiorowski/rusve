@@ -3,7 +3,7 @@ name: Deploy Auth
 on:
   push:
     branches:
-      - release-auth/**
+      - release-auth
   workflow_call:
     secrets:
       GCP_CREDENTIALS:

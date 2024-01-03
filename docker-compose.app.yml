@@ -30,7 +30,6 @@ services:
       - ./service-auth/src:/app/src
     environment:
       PORT: 443
-      ENV: development
       RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
       SERVER_URL: http://127.0.0.1:8090
@@ -53,7 +52,6 @@ services:
       - ./service-users/src:/app/src
     environment:
       PORT: 443
-      ENV: development
       RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
       CLIENT_URL: http://127.0.0.1:3000/subscription
@@ -71,7 +69,6 @@ services:
       - ./service-notes/src:/app/src
     environment:
       PORT: 443
-      ENV: development
       RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-notes&user=postgres&password=12345&dbname=notes
 
@@ -86,8 +83,11 @@ services:
       - ./files:/app/files
     environment:
       PORT: 443
-      ENV: development
       RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-utils&user=postgres&password=12345&dbname=users
-      BUCKET: bucket
+      TARGET: development
       SENDGRID_API_KEY: sendgid-api-key
+      S3_ACCESS_KEY: S3_ACCESS_KEY
+      S3_SECRET_KEY: S3_SECRET_KEY
+      S3_ENDPOINT: S3_ENDPOINT
+      S3_BUCKET_NAME: S3_BUCKET_NAME
