@@ -3,19 +3,25 @@ import { grpcSafe, safe } from "$lib/safe";
 import { notesService } from "$lib/server/grpc";
 import { createMetadata } from "$lib/server/metadata";
 import { fail } from "@sveltejs/kit";
+import { perf } from "$lib/server/logger";
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals, url }) {
+    const end = perf("load_notes");
     const metadata = createMetadata(locals.user.id);
 
-    // Count notes
-    /** @type {Promise<import("$lib/safe").Safe<import("$lib/proto/proto/Count").Count__Output>>} */
+    /**
+     * Count notes
+     * @type {Promise<import("$lib/safe").Safe<import("$lib/proto/proto/Count").Count__Output>>}
+     */
     const s1 = new Promise((r) => {
         notesService.CountNotesByUserId({}, metadata, grpcSafe(r));
     });
 
-    // Get notes
-    const offset = (Number(url.searchParams.get("p")) || 1) - 1;
+    /**
+     * Get notes
+     */
+    const offset = Number(url.searchParams.get("p") ?? 1) - 1;
     const limit = 1;
     const notesStream = notesService.GetNotesByUserId(
         {
@@ -54,6 +60,7 @@ export async function load({ locals, url }) {
         };
     }
 
+    end();
     return {
         notes: d2.data.sort(
             (a, b) =>
@@ -67,6 +74,7 @@ export async function load({ locals, url }) {
 /** @type {import('./$types').Actions} */
 export const actions = {
     insert: async ({ locals, request }) => {
+        const end = perf("insert_note");
         const form = await request.formData();
 
         /** @type {import("$lib/proto/proto/Note").Note} */
@@ -87,6 +95,7 @@ export const actions = {
             return fail(500, { error: req.msg });
         }
 
+        end();
         return { note: req.data };
     },
 };

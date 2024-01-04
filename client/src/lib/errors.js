@@ -22,6 +22,7 @@ export function extractError(fields, field) {
 }
 
 const errorMessages = {
+    req: "Field required. Length: 3-1000 characters.",
     required: "This field is required",
     min: "A minimum of 3 characters is required",
     max: "A maximum of 1000 characters is allowed",

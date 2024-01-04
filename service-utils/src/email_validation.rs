@@ -8,33 +8,45 @@ pub trait Validation {
     fn validate(&self) -> Result<(), tonic::Status>;
 }
 
-impl Validation for crate::proto::Note {
+impl Validation for crate::proto::Email {
     fn validate(&self) -> Result<(), tonic::Status> {
         let mut validators = Vec::new();
-        if self.title.is_empty() {
+        if self.email_to.is_empty() || self.email_to.len() < 3 || self.email_to.len() > 1000 {
             validators.push(Validator {
-                field: "title",
-                tag: "required",
+                field: "email_to",
+                tag: "req",
             });
         }
-        if self.title.len() > 1000 {
+        // check if email_to is valid email
+        if !self.email_to.contains("@") {
             validators.push(Validator {
-                field: "title",
-                tag: "max",
+                field: "email_to",
+                tag: "email",
             });
         }
-        if self.content.is_empty() {
+        if self.email_from.is_empty() || self.email_from.len() < 3 || self.email_from.len() > 1000 {
             validators.push(Validator {
-                field: "content",
-                tag: "required",
+                field: "email_from",
+                tag: "req",
             });
         }
-        if self.content.len() > 1000 {
+        if self.email_subject.is_empty()
+            || self.email_subject.len() < 3
+            || self.email_subject.len() > 1000
+        {
             validators.push(Validator {
-                field: "content",
-                tag: "max",
+                field: "email_subject",
+                tag: "req",
             });
         }
+
+        if self.email_body.is_empty() || self.email_body.len() < 3 || self.email_body.len() > 1000 {
+            validators.push(Validator {
+                field: "email_body",
+                tag: "req",
+            });
+        }
+
         if validators.is_empty() {
             Ok(())
         } else {

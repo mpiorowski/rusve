@@ -7,6 +7,7 @@
 
     /** @type {import("./$types").LayoutData} */
     export let data;
+
     let open = false;
     $: current = $page.url.pathname.split("/")[1];
 </script>

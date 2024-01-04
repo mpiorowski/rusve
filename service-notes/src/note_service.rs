@@ -137,14 +137,13 @@ impl NotesService for MyService {
         let metadata = request.metadata();
         let user_id = rusve_notes::auth(metadata)?.id;
 
+        let mut note = request.into_inner();
+        crate::note_validation::Validation::validate(&note)?;
+
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
             Status::internal("Failed to get connection")
         })?;
-
-        let mut note = request.into_inner();
-
-        crate::note_validation::Validation::validate(&note)?;
 
         if note.id.is_empty() {
             note = crate::note_db::insert_note(&conn, &user_id, &note)

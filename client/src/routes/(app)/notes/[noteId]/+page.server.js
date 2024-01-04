@@ -3,9 +3,11 @@ import { getFormValue } from "$lib/utils";
 import { createMetadata } from "$lib/server/metadata";
 import { notesService } from "$lib/server/grpc";
 import { grpcSafe } from "$lib/safe";
+import { perf } from "$lib/server/logger";
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals, params }) {
+    const end = perf("load_note");
     const id = params.noteId;
     if (!id) {
         throw error(409, "Missing note id");
@@ -21,6 +23,7 @@ export async function load({ locals, params }) {
         throw error(404, req.msg);
     }
 
+    end();
     return {
         note: req.data,
     };
@@ -29,6 +32,7 @@ export async function load({ locals, params }) {
 /** @type {import('./$types').Actions} */
 export const actions = {
     update: async ({ locals, request }) => {
+        const end = perf("update_note");
         const form = await request.formData();
 
         /** @type {import("$lib/proto/proto/Note").Note} */
@@ -51,9 +55,11 @@ export const actions = {
             return fail(500, { error: req.msg });
         }
 
+        end();
         return { note: req.data };
     },
     delete: async ({ locals, request }) => {
+        const end = perf("delete_note");
         const form = await request.formData();
         /** @type {import("$lib/proto/proto/Id").Id} */
         const data = {
@@ -69,6 +75,7 @@ export const actions = {
             return fail(400, { error: req.msg });
         }
 
+        end();
         return {
             success: true,
         };

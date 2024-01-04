@@ -50,6 +50,7 @@ fn slice_iter<'a>(
 }
 
 pub async fn count_emails_by_target_id(conn: &Object, target_id: &str) -> Result<i64> {
+    let target_id = Uuid::parse_str(target_id)?;
     let stmt = conn
         .prepare("select count(*) from emails where target_id = $1 and deleted = 'infinity'")
         .await?;
@@ -88,7 +89,7 @@ pub async fn insert_email(
     let target_id = Uuid::parse_str(&target_id)?;
     let email = conn
         .query_one(
-            "insert into emails (id, target_id, email_to, email_from, email_from_name, email_subject, email_body) values ($1, $2, $3, $4, $5, &6) returning *",
+            "insert into emails (id, target_id, email_to, email_from, email_from_name, email_subject, email_body) values ($1, $2, $3, $4, $5, $6, $7) returning *",
             &[&id, &target_id, &email.email_to, &email.email_from, &email.email_from_name, &email.email_subject, &email.email_body],
         )
         .await?;

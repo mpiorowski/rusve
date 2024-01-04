@@ -3,6 +3,7 @@ mod file_service;
 mod file_utils;
 mod file_db;
 mod email_service;
+mod email_validation;
 mod email_db;
 mod migrations;
 mod proto;

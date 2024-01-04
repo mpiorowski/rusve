@@ -86,6 +86,8 @@ pub async fn send_email(
     let target_id = rusve_utils::auth(metadata)?.id;
 
     let email = request.into_inner();
+    crate::email_validation::Validation::validate(&email)?;
+
     let mut conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
         Status::internal("Failed to get connection")
@@ -108,8 +110,8 @@ pub async fn send_email(
             address: email.email_to.as_str(),
             name: email.email_to.as_str(),
         })
-        .add_from("email@rusve.app")
-        .add_from_name("Rusve - rust")
+        .add_from(email.email_from.as_str())
+        .add_from_name(email.email_from_name.as_str())
         .add_subject(email.email_subject.as_str())
         .add_html(email.email_body.as_str());
 

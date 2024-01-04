@@ -5,12 +5,21 @@ import { upsendApi } from "$lib/server/api";
 import { usersService } from "$lib/server/grpc";
 import { logger, perf } from "$lib/server/logger";
 import { createMetadata } from "$lib/server/metadata";
-import { fail } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 
 /** @type {import('./$types').PageServerLoad} */
-export async function load({ parent }) {
-    const end = perf("Load profile");
-    const profile = await parent();
+export async function load({ locals }) {
+    const end = perf("load_profile");
+    const profile = await new Promise((r) => {
+        usersService.GetProfileByUserId(
+            {},
+            createMetadata(locals.user.id),
+            grpcSafe(r),
+        );
+    });
+    if (profile.error) {
+        throw error(500, profile.msg);
+    }
 
     /**
      * We return the profile data immediately, and then fetch the resume and stream it to the client as it loads.
@@ -34,7 +43,7 @@ export async function load({ parent }) {
 /** @type {import('./$types').Actions} */
 export const actions = {
     createProfile: async ({ locals, request }) => {
-        const end = perf("Create profile");
+        const end = perf("create_profile");
         const form = await request.formData();
 
         let resumeId = getFormValue(form, "resumeId");
