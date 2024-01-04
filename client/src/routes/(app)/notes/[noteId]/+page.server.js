@@ -11,7 +11,7 @@ export async function load({ locals, params }) {
         throw error(409, "Missing note id");
     }
 
-    const metadata = createMetadata("", locals.user.id);
+    const metadata = createMetadata(locals.user.id);
     /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Note").Note__Output>} */
     const req = await new Promise((r) => {
         notesService.GetNoteById({ id }, metadata, grpcSafe(r));
@@ -38,7 +38,7 @@ export const actions = {
             content: getFormValue(form, "content"),
         };
 
-        const metadata = createMetadata("", locals.user.id);
+        const metadata = createMetadata(locals.user.id);
         /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Note").Note__Output>} */
         const req = await new Promise((r) => {
             notesService.CreateNote(data, metadata, grpcSafe(r));
@@ -59,7 +59,7 @@ export const actions = {
         const data = {
             id: getFormValue(form, "id"),
         };
-        const metadata = createMetadata("", locals.user.id);
+        const metadata = createMetadata(locals.user.id);
         /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Empty").Empty>} */
         const req = await new Promise((r) => {
             notesService.DeleteNoteById(data, metadata, grpcSafe(r));

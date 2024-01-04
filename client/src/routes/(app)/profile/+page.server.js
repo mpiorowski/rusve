@@ -138,7 +138,7 @@ export const actions = {
         const res = await new Promise((r) => {
             usersService.CreateProfile(
                 data,
-                createMetadata("", locals.user.id),
+                createMetadata(locals.user.id),
                 grpcSafe(r),
             );
         });

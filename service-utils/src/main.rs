@@ -1,7 +1,8 @@
-mod util_service;
+mod grpc;
+mod file_service;
 mod file_utils;
 mod file_db;
-mod email_utils;
+mod email_service;
 mod email_db;
 mod migrations;
 mod proto;
@@ -10,21 +11,21 @@ use crate::proto::utils_service_server::UtilsServiceServer;
 use anyhow::{Context, Result};
 
 pub struct MyService {
-    env: rusve_users::Env,
+    env: rusve_utils::Env,
     pool: deadpool_postgres::Pool,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initalize environment variables
-    let env: rusve_users::Env = rusve_users::init_envs()?;
+    let env: rusve_utils::Env = rusve_utils::init_envs()?;
 
     // Initialize tracing
     let filter = &env.rust_log;
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
     // Connect to database
-    let pool = rusve_users::connect_to_db(&env).context("Failed to connect to database")?;
+    let pool = rusve_utils::connect_to_db(&env).context("Failed to connect to database")?;
     tracing::info!("Connected to database");
 
     // Run migrations

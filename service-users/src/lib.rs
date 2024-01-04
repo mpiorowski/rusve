@@ -76,8 +76,7 @@ pub fn extract_token(metadata: &tonic::metadata::MetadataMap) -> Result<&str, to
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Claims {
-    pub token: String,
-    pub user_id: String,
+    pub id: String,
 }
 pub fn decode_token(metadata: &tonic::metadata::MetadataMap) -> Result<Claims, tonic::Status> {
     let token = extract_token(metadata)?;

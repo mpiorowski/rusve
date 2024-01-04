@@ -40,32 +40,61 @@ impl TryFrom<tokio_postgres::Row> for File {
     }
 }
 
-pub async fn get_files_by_target_id(conn: &Object, target_id: &str) -> Result<RowStream> {
-    let target_id = Uuid::parse_str(target_id)?;
-    let stmt = conn
-        .prepare(
-            "select * from files where target_id = $1 and deleted is null order by created desc",
-        )
-        .await?;
-    let files = conn.query_raw(&stmt, &[&target_id]).await?;
-
-    Ok(files)
+fn slice_iter<'a>(
+    s: &'a [&'a (dyn tokio_postgres::types::ToSql + Sync)],
+) -> impl ExactSizeIterator<Item = &'a dyn tokio_postgres::types::ToSql> + 'a {
+    s.iter().map(|s| *s as _)
 }
 
-pub async fn get_file_by_id(conn: &Object, file_id: &str) -> Result<File> {
-    let file_id = Uuid::parse_str(file_id)?;
+pub async fn count_files_by_target_id(conn: &Object, target_id: &str) -> Result<i64> {
+    let target_id = Uuid::parse_str(target_id)?;
+    let count: i64 = conn
+        .query_one(
+            "select count(*) from files where target_id = $1 and deleted = 'infinity'",
+            &[&target_id],
+        )
+        .await?
+        .try_get(0)?;
+
+    Ok(count)
+}
+
+pub async fn get_files_by_target_id(
+    conn: &Object,
+    target_id: &str,
+    offset: i64,
+    limit: i64,
+) -> Result<RowStream> {
+    let stmt = conn
+        .prepare(
+            "select * from files where target_id = $1 and deleted = 'infinity' order by created desc offset $2 limit $3",
+        )
+        .await?;
+
+    let rows = conn
+        .query_raw(
+            &stmt,
+            slice_iter(&[&Uuid::parse_str(target_id)?, &offset, &limit]),
+        )
+        .await?;
+    Ok(rows)
+}
+
+pub async fn get_file_by_id(conn: &Object, id: &str, target_id: &str) -> Result<File> {
+    let id = Uuid::parse_str(id)?;
+    let target_id = Uuid::parse_str(target_id)?;
     let file = conn
         .query_one(
-            "select * from files where id = $1 and deleted is null",
-            &[&file_id],
+            "select * from files where id = $1 and target_id = $2 and deleted = 'infinity'",
+            &[&id, &target_id],
         )
         .await?;
 
     file.try_into()
 }
 
-pub async fn insert_file(conn: &Transaction<'_>, file: &File) -> Result<File> {
-    let target_id = Uuid::parse_str(&file.target_id)?;
+pub async fn insert_file(conn: &Transaction<'_>, file: &File, target_id: &str) -> Result<File> {
+    let target_id = Uuid::parse_str(target_id)?;
     let file = conn
         .query_one(
             "insert into files (target_id, file_name, file_type) values ($1, $2, $3) returning *",
@@ -76,12 +105,13 @@ pub async fn insert_file(conn: &Transaction<'_>, file: &File) -> Result<File> {
     file.try_into()
 }
 
-pub async fn delete_file(conn: &Transaction<'_>, file_id: &str) -> Result<File> {
-    let file_id = Uuid::parse_str(file_id)?;
+pub async fn delete_file(conn: &Transaction<'_>, id: &str, target_id: &str) -> Result<File> {
+    let id = Uuid::parse_str(id)?;
+    let target_id = Uuid::parse_str(target_id)?;
     let file = conn
         .query_one(
-            "update files set deleted = now() where id = $1 returning *",
-            &[&file_id],
+            "update files set deleted = now() where id = $1 and target_id = $2 returning *",
+            &[&id, &target_id],
         )
         .await?;
 

@@ -72,6 +72,32 @@
                     <li>
                         <a
                             on:click={close}
+                            href="/emails"
+                            class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6
+                                    {current === 'emails'
+                                ? 'bg-gray-800 text-white'
+                                : 'text-gray-400 hover:bg-gray-800 hover:text-white'}"
+                        >
+                            <FileTextIcon />
+                            Emails
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            on:click={close}
+                            href="/files"
+                            class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6
+                                    {current === 'files'
+                                ? 'bg-gray-800 text-white'
+                                : 'text-gray-400 hover:bg-gray-800 hover:text-white'}"
+                        >
+                            <FileTextIcon />
+                            Files
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            on:click={close}
                             href="/subscription"
                             class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6
                                     {current === 'subscription'

@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use rusve_users::{connect_to_bucket, Env};
+use rusve_utils::{connect_to_bucket, Env};
 use tokio::io::AsyncWriteExt;
 
 pub async fn get_file_buffer(env: &Env, file_id: &str, file_name: &str) -> Result<Vec<u8>> {

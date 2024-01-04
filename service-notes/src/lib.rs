@@ -43,8 +43,7 @@ pub fn connect_to_db(env: &Env) -> Result<deadpool_postgres::Pool> {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Claims {
-    pub token: String,
-    pub user_id: String,
+    pub id: String,
 }
 pub fn auth(metadata: &tonic::metadata::MetadataMap) -> Result<Claims, tonic::Status> {
     let token = match metadata.get("x-authorization") {

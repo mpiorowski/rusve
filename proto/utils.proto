@@ -30,9 +30,10 @@ message Email {
     string updated = 3;
     string deleted = 4;
 
-    string email_to = 5;
-    string email_from = 6;
-    string email_from_name = 7;
-    string email_subject = 8;
-    string email_body = 9;
+    string target_id = 5;
+    string email_to = 6;
+    string email_from = 7;
+    string email_from_name = 8;
+    string email_subject = 9;
+    string email_body = 10;
 }

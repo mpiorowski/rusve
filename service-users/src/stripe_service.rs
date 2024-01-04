@@ -4,58 +4,9 @@ use stripe::{
     Client, CreateCustomer, Customer, CustomerId, ListSubscriptions, Subscription,
     SubscriptionStatus,
 };
+use tonic::{Request, Response, Status};
 
 use crate::stripe_db::remove_user_subscription_check;
-
-pub async fn create_checkout(
-    conn: &deadpool_postgres::Object,
-    env: &rusve_users::Env,
-    user: crate::proto::User,
-) -> Result<String> {
-    let secret_key = env.stripe_api_key.clone();
-    let price_id = env.stripe_price_id.clone();
-    let client_url = env.client_url.clone();
-    let client = Client::new(secret_key);
-
-    let mut customer_id = user.subscription_id;
-    if customer_id.is_empty() {
-        customer_id = create_customer(&client, &user.email).await?;
-        crate::stripe_db::update_user_subscription_id(conn, &user.id, &customer_id.clone()).await?;
-    }
-
-    let success_url = format!("{}?success", client_url);
-    let cancel_url = format!("{}?cancel", client_url);
-
-    let mut params = stripe::CreateCheckoutSession::new(&success_url);
-    params.customer = Some(CustomerId::from_str(&customer_id)?);
-    params.cancel_url = Some(&cancel_url);
-    params.line_items = Some(vec![stripe::CreateCheckoutSessionLineItems {
-        adjustable_quantity: None,
-        dynamic_tax_rates: None,
-        price: Some(price_id),
-        price_data: None,
-        quantity: Some(1),
-        tax_rates: None,
-    }]);
-    params.mode = Some(stripe::CheckoutSessionMode::Subscription);
-
-    let session_url = stripe::CheckoutSession::create(&client, params)
-        .await?
-        .url
-        .ok_or_else(|| anyhow::anyhow!("Missing session url"))?;
-
-    let _ = remove_user_subscription_check(conn, &user.id).await?;
-
-    Ok(session_url)
-}
-
-pub async fn create_customer(client: &Client, email: &str) -> Result<String> {
-    let mut customer: CreateCustomer<'_> = CreateCustomer::new();
-    customer.email = Some(email);
-    let customer = Customer::create(client, customer).await?;
-
-    Ok(customer.id.to_string())
-}
 
 pub async fn check_subscription(
     conn: &deadpool_postgres::Object,
@@ -111,7 +62,121 @@ pub async fn check_subscription(
     Ok(false)
 }
 
-pub async fn create_portal(
+pub async fn create_stripe_checkout(
+    env: &rusve_users::Env,
+    pool: &deadpool_postgres::Pool,
+    request: Request<crate::proto::Empty>,
+) -> Result<Response<crate::proto::StripeUrlResponse>, Status> {
+    let start = std::time::Instant::now();
+    let metadata = request.metadata();
+    let user_id = rusve_users::decode_token(metadata)?.id;
+
+    let conn = pool.get().await.map_err(|e| {
+        tracing::error!("Failed to get connection: {:?}", e);
+        Status::internal("Failed to get connection")
+    })?;
+    let user =
+        crate::user_db::select_user_by_id(&conn, crate::user_db::StringOrUuid::String(user_id))
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to auth user: {:?}", e);
+                Status::unauthenticated("Failed to auth user")
+            })?;
+
+    let url = crate::stripe_service::create_checkout(env, conn, user)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to create checkout session: {:?}", e);
+            Status::internal("Failed to create checkout session")
+        })?;
+
+    tracing::info!("CreateStripeCheckout: {:?}", start.elapsed());
+    Ok(Response::new(crate::proto::StripeUrlResponse { url }))
+}
+
+pub async fn create_stripe_portal(
+    env: &rusve_users::Env,
+    pool: &deadpool_postgres::Pool,
+    request: Request<crate::proto::Empty>,
+) -> Result<Response<crate::proto::StripeUrlResponse>, Status> {
+    let start = std::time::Instant::now();
+    let metadata = request.metadata();
+    let user_id = rusve_users::decode_token(metadata)?.id;
+
+    let conn = pool.get().await.map_err(|e| {
+        tracing::error!("Failed to get connection: {:?}", e);
+        Status::internal("Failed to get connection")
+    })?;
+    let user = crate::user_db::select_user_by_id(&conn, crate::user_db::StringOrUuid::String(user_id))
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to auth user: {:?}", e);
+            Status::unauthenticated("Failed to auth user")
+        })?;
+
+    let url = crate::stripe_service::create_portal(&conn, env, user)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to create portal session: {:?}", e);
+            Status::internal("Failed to create portal session")
+        })?;
+
+    tracing::info!("CreateStripePortal: {:?}", start.elapsed());
+    Ok(Response::new(crate::proto::StripeUrlResponse { url }))
+}
+
+async fn create_checkout(
+    env: &rusve_users::Env,
+    conn: deadpool_postgres::Object,
+    user: crate::proto::User,
+) -> Result<String> {
+    let secret_key = env.stripe_api_key.clone();
+    let price_id = env.stripe_price_id.clone();
+    let client_url = env.client_url.clone();
+    let client = Client::new(secret_key);
+
+    let mut customer_id = user.subscription_id;
+    if customer_id.is_empty() {
+        customer_id = create_customer(&client, &user.email).await?;
+        crate::stripe_db::update_user_subscription_id(&conn, &user.id, &customer_id.clone())
+            .await?;
+    }
+
+    let success_url = format!("{}?success", client_url);
+    let cancel_url = format!("{}?cancel", client_url);
+
+    let mut params = stripe::CreateCheckoutSession::new(&success_url);
+    params.customer = Some(CustomerId::from_str(&customer_id)?);
+    params.cancel_url = Some(&cancel_url);
+    params.line_items = Some(vec![stripe::CreateCheckoutSessionLineItems {
+        adjustable_quantity: None,
+        dynamic_tax_rates: None,
+        price: Some(price_id),
+        price_data: None,
+        quantity: Some(1),
+        tax_rates: None,
+    }]);
+    params.mode = Some(stripe::CheckoutSessionMode::Subscription);
+
+    let session_url = stripe::CheckoutSession::create(&client, params)
+        .await?
+        .url
+        .ok_or_else(|| anyhow::anyhow!("Missing session url"))?;
+
+    let _ = remove_user_subscription_check(&conn, &user.id).await?;
+
+    Ok(session_url)
+}
+
+async fn create_customer(client: &Client, email: &str) -> Result<String> {
+    let mut customer: CreateCustomer<'_> = CreateCustomer::new();
+    customer.email = Some(email);
+    let customer = Customer::create(client, customer).await?;
+
+    Ok(customer.id.to_string())
+}
+
+async fn create_portal(
     conn: &deadpool_postgres::Object,
     env: &rusve_users::Env,
     user: crate::proto::User,

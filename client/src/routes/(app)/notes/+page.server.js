@@ -6,7 +6,7 @@ import { fail } from "@sveltejs/kit";
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals, url }) {
-    const metadata = createMetadata("", locals.user.id);
+    const metadata = createMetadata(locals.user.id);
 
     // Count notes
     /** @type {Promise<import("$lib/safe").Safe<import("$lib/proto/proto/Count").Count__Output>>} */
@@ -74,7 +74,7 @@ export const actions = {
             title: getFormValue(form, "title"),
             content: getFormValue(form, "content"),
         };
-        const metadata = createMetadata("", locals.user.id);
+        const metadata = createMetadata(locals.user.id);
         /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Note").Note__Output>} */
         const req = await new Promise((r) => {
             notesService.CreateNote(data, metadata, grpcSafe(r));

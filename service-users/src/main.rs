@@ -1,12 +1,14 @@
-mod migrations;
-mod profile_db;
-mod profile_validation;
 mod proto;
-mod stripe_db;
+mod migrations;
+mod grpc;
+mod profile_service;
+mod profile_validation;
+mod profile_db;
 mod stripe_service;
+mod stripe_db;
 mod token_db;
-mod user_db;
 mod user_service;
+mod user_db;
 
 use crate::proto::users_service_server::UsersServiceServer;
 use anyhow::{Context, Result};

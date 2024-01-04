@@ -31,6 +31,7 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
                 created timestamptz not null default current_timestamp,
                 updated timestamptz not null default current_timestamp,
                 deleted timestamptz not null default 'infinity',
+                target_id uuid not null,
                 email_to text not null,
                 email_from text not null,
                 email_from_name text not null,

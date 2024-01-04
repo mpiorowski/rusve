@@ -1,6 +1,6 @@
 use crate::proto::Email;
 use anyhow::Result;
-use deadpool_postgres::{Object, Transaction};
+use deadpool_postgres::Object;
 use time::format_description::well_known::Iso8601;
 use tokio_postgres::{types::Timestamp, RowStream};
 use uuid::Uuid;
@@ -21,6 +21,7 @@ impl TryFrom<tokio_postgres::Row> for Email {
             Timestamp::Value(date) => date.format(&Iso8601::DEFAULT)?.to_string(),
         };
 
+        let target_id: Uuid = value.try_get("target_id")?;
         let email_to: String = value.try_get("email_to")?;
         let email_from: String = value.try_get("email_from")?;
         let email_from_name: String = value.try_get("email_from_name")?;
@@ -32,6 +33,7 @@ impl TryFrom<tokio_postgres::Row> for Email {
             created,
             updated,
             deleted,
+            target_id: target_id.to_string(),
             email_to,
             email_from,
             email_from_name,
@@ -47,42 +49,47 @@ fn slice_iter<'a>(
     s.iter().map(|s| *s as _)
 }
 
-pub async fn count_emails_by_user_id(conn: &Object, user_id: &str) -> Result<i64> {
+pub async fn count_emails_by_target_id(conn: &Object, target_id: &str) -> Result<i64> {
     let stmt = conn
-        .prepare("select count(*) from emails where user_id = $1 and deleted = 'infinity'")
+        .prepare("select count(*) from emails where target_id = $1 and deleted = 'infinity'")
         .await?;
-    let count = conn.query_one(&stmt, &[&user_id]).await?;
+    let count = conn.query_one(&stmt, &[&target_id]).await?;
 
     Ok(count.get(0))
 }
 
-pub async fn get_emails_by_user_id(
+pub async fn get_emails_by_target_id(
     conn: &Object,
-    user_id: &str,
+    target_id: &str,
     offset: i64,
     limit: i64,
 ) -> Result<RowStream> {
     let stmt = conn
         .prepare(
-            "select * from emails where user_id = $1 and deleted = 'infinity' order by created desc offset $2 limit $3",
+            "select * from emails where target_id = $1 and deleted = 'infinity' order by created desc offset $2 limit $3",
         )
         .await?;
 
     let rows = conn
         .query_raw(
             &stmt,
-            slice_iter(&[&Uuid::parse_str(user_id)?, &offset, &limit]),
+            slice_iter(&[&Uuid::parse_str(target_id)?, &offset, &limit]),
         )
         .await?;
     Ok(rows)
 }
 
-pub async fn insert_email(conn: &Transaction<'_>, email: &Email) -> Result<Email> {
+pub async fn insert_email(
+    conn: &deadpool_postgres::Transaction<'_>,
+    target_id: &str,
+    email: &Email,
+) -> Result<Email> {
     let id = Uuid::now_v7();
+    let target_id = Uuid::parse_str(&target_id)?;
     let email = conn
         .query_one(
-            "insert into emails (id, email_to, email_from, email_from_name, email_subject, email_body) values ($1, $2, $3, $4, $5, &6) returning *",
-            &[&id, &email.email_to, &email.email_from, &email.email_from_name, &email.email_subject, &email.email_body],
+            "insert into emails (id, target_id, email_to, email_from, email_from_name, email_subject, email_body) values ($1, $2, $3, $4, $5, &6) returning *",
+            &[&id, &target_id, &email.email_to, &email.email_from, &email.email_from_name, &email.email_subject, &email.email_body],
         )
         .await?;
 

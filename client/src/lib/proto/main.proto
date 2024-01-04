@@ -53,12 +53,12 @@ service NotesService {
 }
 
 service UtilsService {
-    rpc CountEmailsByUserId(Empty) returns (Count) {}
-    rpc GetEmailsByUserId(Page) returns (stream Email) {}
-    rpc SendEmail(Email) returns (Empty) {}
+    rpc CountEmailsByTargetId(Empty) returns (Count) {}
+    rpc GetEmailsByTargetId(Page) returns (stream Email) {}
+    rpc SendEmail(Email) returns (Email) {}
 
-    rpc CountFilesByUserId(Empty) returns (Count) {}
-    rpc GetFilesByUserId(Page) returns (stream File) {}
+    rpc CountFilesByTargetId(Empty) returns (Count) {}
+    rpc GetFilesByTargetId(Page) returns (stream File) {}
     rpc GetFileById(Id) returns (File) {}
     rpc UploadFile(File) returns (File) {}
     rpc DeleteFileById(Id) returns (Empty) {}

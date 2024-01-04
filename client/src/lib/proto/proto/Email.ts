@@ -6,6 +6,7 @@ export interface Email {
   'created'?: (string);
   'updated'?: (string);
   'deleted'?: (string);
+  'targetId'?: (string);
   'emailTo'?: (string);
   'emailFrom'?: (string);
   'emailFromName'?: (string);
@@ -18,6 +19,7 @@ export interface Email__Output {
   'created': (string);
   'updated': (string);
   'deleted': (string);
+  'targetId': (string);
   'emailTo': (string);
   'emailFrom': (string);
   'emailFromName': (string);

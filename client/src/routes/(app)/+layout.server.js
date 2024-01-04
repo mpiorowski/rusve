@@ -9,7 +9,7 @@ export async function load({ locals }) {
     const profile = await new Promise((r) => {
         usersService.GetProfileByUserId(
             {},
-            createMetadata(locals.token, locals.user.id),
+            createMetadata(locals.user.id),
             grpcSafe(r),
         );
     });
