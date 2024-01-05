@@ -65,14 +65,10 @@ export interface UtilsServiceClient extends grpc.Client {
   sendEmail(argument: _proto_Email, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Email__Output>): grpc.ClientUnaryCall;
   sendEmail(argument: _proto_Email, callback: grpc.requestCallback<_proto_Email__Output>): grpc.ClientUnaryCall;
   
-  UploadFile(argument: _proto_File, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  UploadFile(argument: _proto_File, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  UploadFile(argument: _proto_File, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  UploadFile(argument: _proto_File, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  uploadFile(argument: _proto_File, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  uploadFile(argument: _proto_File, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  uploadFile(argument: _proto_File, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  uploadFile(argument: _proto_File, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  UploadFile(metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientDuplexStream<_proto_File, _proto_File__Output>;
+  UploadFile(options?: grpc.CallOptions): grpc.ClientDuplexStream<_proto_File, _proto_File__Output>;
+  uploadFile(metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientDuplexStream<_proto_File, _proto_File__Output>;
+  uploadFile(options?: grpc.CallOptions): grpc.ClientDuplexStream<_proto_File, _proto_File__Output>;
   
 }
 
@@ -91,7 +87,7 @@ export interface UtilsServiceHandlers extends grpc.UntypedServiceImplementation 
   
   SendEmail: grpc.handleUnaryCall<_proto_Email__Output, _proto_Email>;
   
-  UploadFile: grpc.handleUnaryCall<_proto_File__Output, _proto_File>;
+  UploadFile: grpc.handleBidiStreamingCall<_proto_File__Output, _proto_File>;
   
 }
 

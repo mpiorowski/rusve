@@ -9,9 +9,9 @@ export interface File {
   'deleted'?: (string);
   'targetId'?: (string);
   'fileName'?: (string);
+  'fileSize'?: (string);
   'fileType'?: (_proto_FileType);
   'fileBuffer'?: (Buffer | Uint8Array | string);
-  'fileUrl'?: (string);
 }
 
 export interface File__Output {
@@ -21,7 +21,7 @@ export interface File__Output {
   'deleted': (string);
   'targetId': (string);
   'fileName': (string);
+  'fileSize': (string);
   'fileType': (_proto_FileType__Output);
   'fileBuffer': (Buffer);
-  'fileUrl': (string);
 }

@@ -26,16 +26,17 @@ export async function load({ locals }) {
      */
     /** @type {Promise<import("$lib/safe").Safe<import("$lib/types").UpsendFile | undefined>>} */
     let resumePromise = Promise.resolve({ data: undefined, error: false });
-    if (profile.profile.resumeId) {
+    if (profile.resumeId) {
         /** @type {Promise<import('$lib/safe').Safe<import('$lib/types').UpsendFile>>} */
         resumePromise = upsendApi({
-            url: `/files/${profile.profile.resumeId}`,
+            url: `/files/${profile.resumeId}`,
             method: "GET",
         });
     }
 
     end();
     return {
+        profile: profile.data,
         stream: { resume: resumePromise },
     };
 }

@@ -82,7 +82,7 @@
             <h2
                 class="flex items-center gap-2 text-base font-semibold leading-7 text-gray-50"
             >
-                New Note
+                New note
             </h2>
             <p class="mt-1 text-sm leading-6 text-gray-200">
                 Create a new note.

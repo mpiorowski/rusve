@@ -18,10 +18,10 @@ message File {
 
     string target_id = 5;
     string file_name = 6;
-    FileType file_type = 7;
+    string file_size = 7;
+    FileType file_type = 8;
 
-    bytes file_buffer = 8;
-    string file_url = 9;
+    bytes file_buffer = 9;
 }
 
 message Email {

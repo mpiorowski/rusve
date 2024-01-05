@@ -60,7 +60,7 @@ service UtilsService {
     rpc CountFilesByTargetId(Empty) returns (Count) {}
     rpc GetFilesByTargetId(Page) returns (stream File) {}
     rpc GetFileById(Id) returns (File) {}
-    rpc UploadFile(File) returns (File) {}
+    rpc UploadFile(stream File) returns (stream File) {}
     rpc DeleteFileById(Id) returns (Empty) {}
 }
 

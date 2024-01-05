@@ -2,7 +2,7 @@
     import { enhance } from "$app/forms";
     import { extractError } from "$lib/errors";
     import Button from "$lib/form/Button.svelte";
-    import Input from "$lib/form/Input.svelte";
+    import FileInput from "$lib/form/FileInput.svelte";
     import Pagination from "$lib/ui/Pagination.svelte";
     import { toast } from "$lib/ui/toast";
 
@@ -17,19 +17,14 @@
 
     let loading = false;
 
-    const newEmail = {
-        emailTo: "",
-        emailFrom: "email@rusve.app",
-        emailFromName: "",
-        emailSubject: "",
-        emailBody: "",
-    };
+    /** @type {File} */
+    const newFile = new File([], "");
 </script>
 
 <form
     class="max-w-2xl"
     method="post"
-    action="?/sendEmail"
+    action="?/uploadFile"
     enctype="multipart/form-data"
     use:enhance={() => {
         const timeout = setTimeout(() => {
@@ -37,7 +32,7 @@
         }, 100);
         return async ({ result, update }) => {
             if (result.type === "success") {
-                toast.success("Success", "Your message has been sent.");
+                toast.success("Success", "Your file has been uploaded.");
             }
             clearTimeout(timeout);
             loading = false;
@@ -52,53 +47,17 @@
             <h2
                 class="flex items-center gap-2 text-base font-semibold leading-7 text-gray-50"
             >
-                New Email
+                New file
             </h2>
-            <p class="mt-1 text-sm leading-6 text-gray-200">Send an email.</p>
+            <p class="mt-1 text-sm leading-6 text-gray-200">Upload a new file.</p>
         </div>
-        <div class="grid grid-cols-2 gap-x-6">
-            <div class="col-span-2">
-                <Input
-                    name="emailTo"
-                    label="To"
-                    autocomplete="email"
-                    bind:value={newEmail.emailTo}
-                    error={extractError(form?.fields, "email_to")}
-                />
-            </div>
-            <Input
-                name="emailFrom"
-                label="From"
-                bind:value={newEmail.emailFrom}
-                error={extractError(form?.fields, "email_from")}
-            />
-            <Input
-                name="emailFromName"
-                label="From name"
-                bind:value={newEmail.emailFromName}
-                error={extractError(form?.fields, "email_from_name")}
-            />
-            <div class="col-span-2">
-                <Input
-                    name="emailSubject"
-                    label="Subject"
-                    autocomplete="email"
-                    bind:value={newEmail.emailSubject}
-                    error={extractError(form?.fields, "email_subject")}
-                />
-            </div>
-            <div class="col-span-2">
-                <Input
-                    name="emailBody"
-                    label="Body"
-                    autocomplete="email"
-                    rows={5}
-                    bind:value={newEmail.emailBody}
-                    error={extractError(form?.fields, "email_body")}
-                />
-            </div>
-            <Button {loading}>Send</Button>
-        </div>
+        <FileInput
+            name="file"
+            label="File"
+            accept="image/*"
+            bind:file={newFile}
+         />
+        <Button {loading}>Send</Button>
     </div>
 </form>
 
@@ -161,47 +120,35 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-600 bg-gray-900">
-                    {#each data.emails as email}
+                    {#each data.files as file}
                         <tr>
                             <td
                                 class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-50 sm:pl-0"
                             >
-                                {email.emailTo}
+                                {file.fileName}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                {email.emailFrom}
+                                {file.fileSize}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                {email.emailFromName}
+                                {file.fileType}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                {email.emailSubject}
+                                {file.created}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                {email.emailBody}
-                            </td>
-                            <td
-                                class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
-                            >
-                                {email.created}
-                            </td>
-                            <td
-                                class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
-                            >
-                                {email.updated}
+                                {file.updated}
                             </td>
                         </tr>
                     {/each}
-
-                    <!-- More people... -->
                 </tbody>
             </table>
         </div>

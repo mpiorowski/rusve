@@ -121,12 +121,12 @@ pub struct File {
     pub target_id: ::prost::alloc::string::String,
     #[prost(string, tag = "6")]
     pub file_name: ::prost::alloc::string::String,
-    #[prost(enumeration = "FileType", tag = "7")]
+    #[prost(string, tag = "7")]
+    pub file_size: ::prost::alloc::string::String,
+    #[prost(enumeration = "FileType", tag = "8")]
     pub file_type: i32,
-    #[prost(bytes = "vec", tag = "8")]
+    #[prost(bytes = "vec", tag = "9")]
     pub file_buffer: ::prost::alloc::vec::Vec<u8>,
-    #[prost(string, tag = "9")]
-    pub file_url: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -873,8 +873,11 @@ pub mod utils_service_client {
         }
         pub async fn upload_file(
             &mut self,
-            request: impl tonic::IntoRequest<super::File>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status> {
+            request: impl tonic::IntoStreamingRequest<Message = super::File>,
+        ) -> std::result::Result<
+            tonic::Response<tonic::codec::Streaming<super::File>>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -888,10 +891,10 @@ pub mod utils_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/proto.UtilsService/UploadFile",
             );
-            let mut req = request.into_request();
+            let mut req = request.into_streaming_request();
             req.extensions_mut()
                 .insert(GrpcMethod::new("proto.UtilsService", "UploadFile"));
-            self.inner.unary(req, path, codec).await
+            self.inner.streaming(req, path, codec).await
         }
         pub async fn delete_file_by_id(
             &mut self,
@@ -1762,10 +1765,16 @@ pub mod utils_service_server {
             &self,
             request: tonic::Request<super::Id>,
         ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
+        /// Server streaming response type for the UploadFile method.
+        type UploadFileStream: futures_core::Stream<
+                Item = std::result::Result<super::File, tonic::Status>,
+            >
+            + Send
+            + 'static;
         async fn upload_file(
             &self,
-            request: tonic::Request<super::File>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
+            request: tonic::Request<tonic::Streaming<super::File>>,
+        ) -> std::result::Result<tonic::Response<Self::UploadFileStream>, tonic::Status>;
         async fn delete_file_by_id(
             &self,
             request: tonic::Request<super::Id>,
@@ -2121,16 +2130,17 @@ pub mod utils_service_server {
                 "/proto.UtilsService/UploadFile" => {
                     #[allow(non_camel_case_types)]
                     struct UploadFileSvc<T: UtilsService>(pub Arc<T>);
-                    impl<T: UtilsService> tonic::server::UnaryService<super::File>
+                    impl<T: UtilsService> tonic::server::StreamingService<super::File>
                     for UploadFileSvc<T> {
                         type Response = super::File;
+                        type ResponseStream = T::UploadFileStream;
                         type Future = BoxFuture<
-                            tonic::Response<Self::Response>,
+                            tonic::Response<Self::ResponseStream>,
                             tonic::Status,
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::File>,
+                            request: tonic::Request<tonic::Streaming<super::File>>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).upload_file(request).await };
@@ -2155,7 +2165,7 @@ pub mod utils_service_server {
                                 max_decoding_message_size,
                                 max_encoding_message_size,
                             );
-                        let res = grpc.unary(method, req).await;
+                        let res = grpc.streaming(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)
