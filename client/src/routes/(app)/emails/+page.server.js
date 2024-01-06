@@ -70,11 +70,11 @@ export const actions = {
 
         /** @type {import('$lib/proto/proto/Email').Email} */
         const data = {
-            emailTo: getFormValue(form, "emailTo"),
-            emailFrom: getFormValue(form, "emailFrom"),
-            emailFromName: getFormValue(form, "emailFromName"),
-            emailSubject: getFormValue(form, "emailSubject"),
-            emailBody: getFormValue(form, "emailBody"),
+            email_to: getFormValue(form, "email_to"),
+            email_from: getFormValue(form, "email_from"),
+            email_from_name: getFormValue(form, "email_from_name"),
+            email_subject: getFormValue(form, "email_subject"),
+            email_body: getFormValue(form, "email_body"),
         };
 
         /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Email").Email__Output>} */

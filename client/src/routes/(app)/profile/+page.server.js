@@ -47,7 +47,7 @@ export const actions = {
         const end = perf("create_profile");
         const form = await request.formData();
 
-        let resumeId = getFormValue(form, "resumeId");
+        let resume_id = getFormValue(form, "resume_id");
         const resume = form.get("resume");
         if (!(resume instanceof File)) {
             return fail(400, { error: "Resume must be a PDF" });
@@ -63,9 +63,9 @@ export const actions = {
             /**
              * Delete old resume
              */
-            if (resumeId) {
+            if (resume_id) {
                 const resDel = await upsendApi({
-                    url: `/files/${resumeId}`,
+                    url: `/files/${resume_id}`,
                     method: "DELETE",
                 });
                 if (resDel.error) {
@@ -86,11 +86,11 @@ export const actions = {
                 return fail(400, { error: file.msg });
             }
 
-            resumeId = file.data.id;
+            resume_id = file.data.id;
         }
 
-        let coverId = getFormValue(form, "coverId");
-        let coverUrl = getFormValue(form, "coverUrl");
+        let cover_id = getFormValue(form, "cover_id");
+        let cover_url = getFormValue(form, "cover_url");
         const cover = form.get("cover");
         if (!(cover instanceof File)) {
             return fail(400, { error: "Cover must be an image" });
@@ -107,9 +107,9 @@ export const actions = {
             /**
              * Delete old cover
              */
-            if (coverId) {
+            if (cover_id) {
                 const resDel = await upsendApi({
-                    url: `/images/${coverId}`,
+                    url: `/images/${cover_id}`,
                     method: "DELETE",
                 });
                 if (resDel.error) {
@@ -130,8 +130,8 @@ export const actions = {
                 return fail(400, { error: file.msg });
             }
 
-            coverId = file.data.id;
-            coverUrl = file.data.url;
+            cover_id = file.data.id;
+            cover_url = file.data.url;
         }
 
         /** @type {import('$lib/proto/proto/Profile').Profile} */
@@ -139,9 +139,9 @@ export const actions = {
             id: getFormValue(form, "id"),
             name: getFormValue(form, "name"),
             about: getFormValue(form, "about"),
-            resumeId: resumeId,
-            coverId: coverId,
-            coverUrl: coverUrl,
+            resume_id: resume_id,
+            cover_id: cover_id,
+            cover_url: cover_url,
         };
 
         /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Profile").Profile__Output>} */

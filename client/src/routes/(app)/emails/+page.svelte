@@ -60,7 +60,7 @@
         <div class="grid grid-cols-2 gap-x-6">
             <div class="col-span-2">
                 <Input
-                    name="emailTo"
+                    name="email_to"
                     label="To"
                     autocomplete="email"
                     bind:value={newEmail.emailTo}
@@ -68,20 +68,20 @@
                 />
             </div>
             <Input
-                name="emailFrom"
+                name="email_from"
                 label="From"
                 bind:value={newEmail.emailFrom}
                 error={extractError(form?.fields, "email_from")}
             />
             <Input
-                name="emailFromName"
+                name="email_from_name"
                 label="From name"
                 bind:value={newEmail.emailFromName}
                 error={extractError(form?.fields, "email_from_name")}
             />
             <div class="col-span-2">
                 <Input
-                    name="emailSubject"
+                    name="email_subject"
                     label="Subject"
                     autocomplete="email"
                     bind:value={newEmail.emailSubject}
@@ -90,7 +90,7 @@
             </div>
             <div class="col-span-2">
                 <Input
-                    name="emailBody"
+                    name="email_body"
                     label="Body"
                     autocomplete="email"
                     rows={5}
@@ -172,27 +172,27 @@
                             <td
                                 class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-50 sm:pl-0"
                             >
-                                {email.emailTo}
+                                {email.email_to}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                {email.emailFrom}
+                                {email.email_from}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                {email.emailFromName}
+                                {email.email_from_name}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                {email.emailSubject}
+                                {email.email_subject}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                {email.emailBody}
+                                {email.email_body}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
