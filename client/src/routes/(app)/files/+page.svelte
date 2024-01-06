@@ -1,9 +1,9 @@
 <script>
     import { enhance } from "$app/forms";
-    import { extractError } from "$lib/errors";
     import Button from "$lib/form/Button.svelte";
     import FileInput from "$lib/form/FileInput.svelte";
     import Pagination from "$lib/ui/Pagination.svelte";
+    import UploadIcon from "$lib/icons/UploadIcon.svelte";
     import { toast } from "$lib/ui/toast";
 
     /** @type {import("./$types").PageData} */
@@ -18,7 +18,7 @@
     let loading = false;
 
     /** @type {File} */
-    const newFile = new File([], "");
+    let newFile = new File([], "");
 </script>
 
 <form
@@ -49,23 +49,30 @@
             >
                 New file
             </h2>
-            <p class="mt-1 text-sm leading-6 text-gray-200">Upload a new file.</p>
+            <p class="mt-1 text-sm leading-6 text-gray-200">
+                Upload a new file.
+            </p>
         </div>
         <FileInput
             name="file"
             label="File"
             accept="image/*"
             bind:file={newFile}
-         />
-        <Button {loading}>Send</Button>
+        />
+        <div class="flex justify-end">
+            <Button {loading}>
+                <UploadIcon />
+                Upload
+            </Button>
+        </div>
     </div>
 </form>
 
 <div class="mt-10 sm:flex sm:items-center">
     <div class="sm:flex-auto">
-        <h1 class="text-base font-semibold leading-6 text-gray-50">Emails</h1>
+        <h1 class="text-base font-semibold leading-6 text-gray-50">Files</h1>
         <p class="mt-2 text-sm leading-6 text-gray-200">
-            List of emails You have sent.
+            List of files uploaded to the server.
         </p>
     </div>
 </div>
@@ -79,31 +86,19 @@
                             scope="col"
                             class="py-3 pl-4 pr-3 text-left text-xs uppercase tracking-wide text-gray-500 sm:pl-0"
                         >
-                            To
+                            Name
                         </th>
                         <th
                             scope="col"
                             class="px-3 py-3 text-left text-xs uppercase tracking-wide text-gray-500"
                         >
-                            From
+                            Size
                         </th>
                         <th
                             scope="col"
                             class="px-3 py-3 text-left text-xs uppercase tracking-wide text-gray-500"
                         >
-                            From name
-                        </th>
-                        <th
-                            scope="col"
-                            class="px-3 py-3 text-left text-xs uppercase tracking-wide text-gray-500"
-                        >
-                            Subject
-                        </th>
-                        <th
-                            scope="col"
-                            class="px-3 py-3 text-left text-xs uppercase tracking-wide text-gray-500"
-                        >
-                            Body
+                            Type
                         </th>
                         <th
                             scope="col"

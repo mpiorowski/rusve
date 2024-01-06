@@ -105,7 +105,7 @@ pub async fn auth(
         })?;
     user.subscription_active = subscribed;
 
-    tracing::info!("Auth: {:?}", start.elapsed());
+    tracing::info!("auth: {:?}", start.elapsed());
     Ok(Response::new(crate::proto::AuthResponse {
         user: user.into(),
         token: token_id.to_string(),

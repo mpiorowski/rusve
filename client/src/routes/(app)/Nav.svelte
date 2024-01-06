@@ -1,9 +1,11 @@
 <script>
     import { page } from "$app/stores";
     import CreditCardIcon from "$lib/icons/CreditCardIcon.svelte";
+    import FileIcon from "$lib/icons/FileIcon.svelte";
     import FileTextIcon from "$lib/icons/FileTextIcon.svelte";
     import HomeIcon from "$lib/icons/HomeIcon.svelte";
     import LogoIcon from "$lib/icons/LogoIcon.svelte";
+    import MailIcon from "$lib/icons/MailIcon.svelte";
     import SettingsIcon from "$lib/icons/SettingsIcon.svelte";
     import UserIcon from "$lib/icons/UserIcon.svelte";
 
@@ -78,7 +80,7 @@
                                 ? 'bg-gray-800 text-white'
                                 : 'text-gray-400 hover:bg-gray-800 hover:text-white'}"
                         >
-                            <FileTextIcon />
+                            <MailIcon />
                             Emails
                         </a>
                     </li>
@@ -91,7 +93,7 @@
                                 ? 'bg-gray-800 text-white'
                                 : 'text-gray-400 hover:bg-gray-800 hover:text-white'}"
                         >
-                            <FileTextIcon />
+                            <FileIcon />
                             Files
                         </a>
                     </li>

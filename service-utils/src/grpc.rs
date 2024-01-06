@@ -9,6 +9,7 @@ use tonic::{Request, Response, Status};
 impl UtilsService for MyService {
     type GetEmailsByTargetIdStream = ReceiverStream<Result<Email, Status>>;
     type GetFilesByTargetIdStream = ReceiverStream<Result<File, Status>>;
+    type UploadFileStream = ReceiverStream<Result<File, Status>>;
 
     async fn count_emails_by_target_id(
         &self,
@@ -46,7 +47,10 @@ impl UtilsService for MyService {
         crate::file_service::get_file_by_id(&self.env, &self.pool, request).await
     }
 
-    async fn upload_file(&self, request: Request<File>) -> Result<Response<File>, Status> {
+    async fn upload_file(
+        &self,
+        request: Request<tonic::Streaming<File>>,
+    ) -> Result<Response<Self::UploadFileStream>, Status> {
         crate::file_service::upload_file(&self.env, &self.pool, request).await
     }
 

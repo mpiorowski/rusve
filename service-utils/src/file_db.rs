@@ -95,11 +95,12 @@ pub async fn get_file_by_id(conn: &Object, id: &str, target_id: &str) -> Result<
 }
 
 pub async fn insert_file(conn: &Transaction<'_>, file: &File, target_id: &str) -> Result<File> {
+    let id = Uuid::now_v7();
     let target_id = Uuid::parse_str(target_id)?;
     let file = conn
         .query_one(
-            "insert into files (target_id, file_name, file_size, file_type) values ($1, $2, $3, $4) returning *",
-            &[&target_id, &file.file_name, &file.file_size, &file.file_type],
+            "insert into files (id, target_id, file_name, file_size, file_type) values ($1, $2, $3, $4, $5) returning *",
+            &[&id, &target_id, &file.file_name, &file.file_size, &file.file_type],
         )
         .await?;
 

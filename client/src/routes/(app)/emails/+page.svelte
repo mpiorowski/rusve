@@ -3,6 +3,7 @@
     import { extractError } from "$lib/errors";
     import Button from "$lib/form/Button.svelte";
     import Input from "$lib/form/Input.svelte";
+    import SendIcon from "$lib/icons/SendIcon.svelte";
     import Pagination from "$lib/ui/Pagination.svelte";
     import { toast } from "$lib/ui/toast";
 
@@ -97,7 +98,12 @@
                     error={extractError(form?.fields, "email_body")}
                 />
             </div>
-            <Button {loading}>Send</Button>
+            <div class="col-span-full flex justify-end">
+                <Button {loading}>
+                    <SendIcon />
+                    Send
+                </Button>
+            </div>
         </div>
     </div>
 </form>

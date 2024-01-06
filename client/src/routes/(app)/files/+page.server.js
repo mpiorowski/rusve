@@ -53,10 +53,16 @@ export async function load({ locals, url }) {
     return {
         // We need to sort the files by created date because thes stream does not guarantee order
         error: "",
-        files: d2.data.sort(
-            (a, b) =>
-                new Date(b.created).getTime() - new Date(a.created).getTime(),
-        ),
+        files: d2.data
+            .sort(
+                (a, b) =>
+                    new Date(b.created).getTime() -
+                    new Date(a.created).getTime(),
+            )
+            .map((f) => ({
+                ...f,
+                fileBuffer: Array.from(f.fileBuffer),
+            })),
         total: Number(d1.data.count),
         pageSize: limit,
     };
@@ -92,6 +98,7 @@ export const actions = {
             /** @type {import('$lib/proto/proto/File').File} */
             const message = {
                 fileName: file.name,
+                fileSize: String(file.size),
                 fileType: FileType.FILE_DOCUMENT,
                 fileBuffer: chunk,
             };
@@ -103,12 +110,24 @@ export const actions = {
         }
         stream.end();
 
+        /** @type {import("$lib/proto/proto/File").File} */
+        let newFile;
+        /** @type {Promise<void>} */
+        const p = new Promise((res, rej) => {
+            stream.on("error", (err) => rej(err));
+            stream.on("data", (data) => (newFile = data));
+            stream.on("end", () => res());
+        });
+        const s = await safe(p);
+        if (s.error) {
+            return fail(500, { error: s.msg });
+        }
+
         end();
         return {
             file: {
-                name: file.name,
-                type: file.type,
-                size: file.size,
+                ...newFile,
+                fileBuffer: [],
             },
         };
     },

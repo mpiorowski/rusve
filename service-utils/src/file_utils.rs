@@ -27,17 +27,16 @@ pub async fn upload_file(
     let target = env.target.clone();
     let file_path = format!("{}/{}", &file_id, &file_name);
 
-    if target == "development" {
-        // save file to disk
-        tokio::fs::create_dir_all(format!("/app/files/{}", &file_id)).await?;
-        let file_path = format!("/app/files/{}", &file_path);
-        let mut new_file = tokio::fs::File::create(file_path).await?;
-        new_file.write_all(&file_buffer).await?;
-    } else if target == "production" {
-        // save to bucket
-        let bucket = connect_to_bucket(&env).await?;
-        bucket.put_object(file_path, &file_buffer).await?;
-    }
+    // if target == "development" {
+    //     // save file to disk
+    //     tokio::fs::create_dir_all(format!("/app/files/{}", &file_id)).await?;
+    //     let file_path = format!("/app/files/{}", &file_path);
+    //     let mut new_file = tokio::fs::File::create(file_path).await?;
+    //     new_file.write_all(&file_buffer).await?;
+    // } else if target == "production" {
+    // save to bucket
+    let bucket = connect_to_bucket(&env).await?;
+    bucket.put_object(file_path, &file_buffer).await?;
     Ok(())
 }
 

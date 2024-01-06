@@ -1,5 +1,5 @@
-use crate::proto::{Empty, File, Id, Page, Count};
-use tokio_stream::wrappers::ReceiverStream;
+use crate::proto::{Count, Empty, File, Id, Page};
+use tokio_stream::{wrappers::ReceiverStream, StreamExt};
 use tonic::{Request, Response, Status};
 
 pub async fn count_files_by_target_id(
@@ -124,8 +124,8 @@ pub async fn get_file_by_id(
 pub async fn upload_file(
     env: &rusve_utils::Env,
     pool: &deadpool_postgres::Pool,
-    request: Request<File>,
-) -> Result<Response<File>, Status> {
+    request: Request<tonic::Streaming<File>>,
+) -> Result<Response<ReceiverStream<Result<File, Status>>>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
     let target_id = rusve_utils::auth(metadata)?.id;
@@ -139,9 +139,20 @@ pub async fn upload_file(
         Status::internal("Failed to start transaction")
     })?;
 
-    // get file from request
-    let file = request.into_inner();
-    let file_buffer = file.file_buffer.to_owned();
+    // get file from stream
+    let mut stream = request.into_inner();
+    let mut buffer = vec![];
+    let mut file: File = Default::default();
+    while let Some(file_stream) = stream.try_next().await.map_err(|e| {
+        tracing::error!("Failed to get file stream: {:?}", e);
+        Status::internal("Failed to get file stream")
+    })? {
+        buffer.extend(&file_stream.file_buffer);
+        if file.file_name.is_empty() {
+            file = file_stream;
+        }
+    }
+
     let file = crate::file_db::insert_file(&tr, &file, &target_id)
         .await
         .map_err(|e| {
@@ -149,7 +160,7 @@ pub async fn upload_file(
             Status::internal("Failed to create file")
         })?;
 
-    crate::file_utils::upload_file(&env, &file.id, &file.file_name, file_buffer)
+    crate::file_utils::upload_file(&env, &file.id, &file.file_name, buffer)
         .await
         .map_err(|e| {
             tracing::error!("Failed to upload file: {:?}", e);
@@ -161,8 +172,12 @@ pub async fn upload_file(
         Status::internal("Failed to commit transaction")
     })?;
 
-    tracing::info!("create_file: {:?}", start.elapsed());
-    Ok(Response::new(file))
+    tracing::info!("upload_file: {:?}", start.elapsed());
+    let (tx, rx) = tokio::sync::mpsc::channel(1);
+    tx.send(Ok(file))
+        .await
+        .map_err(|e| Status::internal(format!("Failed to send file: {:?}", e)))?;
+    Ok(Response::new(ReceiverStream::new(rx)))
 }
 
 pub async fn delete_file_by_id(
