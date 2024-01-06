@@ -10,7 +10,7 @@ export interface ProtoGrpcType {
   proto: {
     Email: MessageTypeDefinition
     File: MessageTypeDefinition
-    FileType: EnumTypeDefinition
+    FileTarget: EnumTypeDefinition
   }
 }
 

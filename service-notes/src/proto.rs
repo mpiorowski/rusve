@@ -123,9 +123,11 @@ pub struct File {
     pub file_name: ::prost::alloc::string::String,
     #[prost(string, tag = "7")]
     pub file_size: ::prost::alloc::string::String,
-    #[prost(enumeration = "FileType", tag = "8")]
-    pub file_type: i32,
-    #[prost(bytes = "vec", tag = "9")]
+    #[prost(string, tag = "8")]
+    pub file_type: ::prost::alloc::string::String,
+    #[prost(enumeration = "FileTarget", tag = "9")]
+    pub file_target: i32,
+    #[prost(bytes = "vec", tag = "10")]
     pub file_buffer: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -156,21 +158,21 @@ pub struct Email {
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
-pub enum FileType {
+pub enum FileTarget {
     FileUnset = 0,
     FileDocument = 1,
     FileAvatar = 2,
 }
-impl FileType {
+impl FileTarget {
     /// String value of the enum field names used in the ProtoBuf definition.
     ///
     /// The values are not transformed in any way and thus are considered stable
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
-            FileType::FileUnset => "FILE_UNSET",
-            FileType::FileDocument => "FILE_DOCUMENT",
-            FileType::FileAvatar => "FILE_AVATAR",
+            FileTarget::FileUnset => "FILE_UNSET",
+            FileTarget::FileDocument => "FILE_DOCUMENT",
+            FileTarget::FileAvatar => "FILE_AVATAR",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.

@@ -11,10 +11,10 @@ export interface User {
   'sub'?: (string);
   'role'?: (_proto_UserRole);
   'avatar'?: (string);
-  'subscriptionId'?: (string);
-  'subscriptionEnd'?: (string);
-  'subscriptionCheck'?: (string);
-  'subscriptionActive'?: (boolean);
+  'subscription_id'?: (string);
+  'subscription_end'?: (string);
+  'subscription_check'?: (string);
+  'subscription_active'?: (boolean);
 }
 
 export interface User__Output {
@@ -26,8 +26,8 @@ export interface User__Output {
   'sub': (string);
   'role': (_proto_UserRole__Output);
   'avatar': (string);
-  'subscriptionId': (string);
-  'subscriptionEnd': (string);
-  'subscriptionCheck': (string);
-  'subscriptionActive': (boolean);
+  'subscription_id': (string);
+  'subscription_end': (string);
+  'subscription_check': (string);
+  'subscription_active': (boolean);
 }

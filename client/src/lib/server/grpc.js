@@ -5,6 +5,7 @@ import { ENV, USERS_URI, NOTES_URI, UTILS_URI } from "$env/static/private";
 export const packageDefinition = protoLoader.loadSync(
     "./src/lib/proto/main.proto",
     {
+        keepCase: true,
         longs: String,
         defaults: true,
         oneofs: true,

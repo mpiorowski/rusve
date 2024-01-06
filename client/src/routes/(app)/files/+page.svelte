@@ -19,6 +19,28 @@
 
     /** @type {File} */
     let newFile = new File([], "");
+
+    /**
+     * Download a base64 encoded file
+     * @param {import("$lib/proto/proto/File").File__Output} file
+     * @returns {Promise<void>}
+     */
+    async function onDownload(file) {
+        try {
+            const blob = new Blob([new Uint8Array(file.file_buffer)], {
+                type: file.file_type,
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = file.file_name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            console.error(e);
+        }
+    }
 </script>
 
 <form
@@ -61,7 +83,9 @@
         />
         <div class="flex justify-end">
             <Button {loading}>
-                <UploadIcon />
+                {#if !loading}
+                    <UploadIcon />
+                {/if}
                 Upload
             </Button>
         </div>
@@ -112,6 +136,9 @@
                         >
                             Updated
                         </th>
+                        <th scope="col" class="relative py-3 pl-3 pr-4 sm:pr-0">
+                            <span class="sr-only">Edit</span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-600 bg-gray-900">
@@ -120,17 +147,17 @@
                             <td
                                 class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-50 sm:pl-0"
                             >
-                                {file.fileName}
+                                {file.file_name}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                {file.fileSize}
+                                {file.file_size}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
-                                {file.fileType}
+                                {file.file_type}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
@@ -141,6 +168,19 @@
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
                             >
                                 {file.updated}
+                            </td>
+                            <td
+                                class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
+                            >
+                                <button
+                                    class="mr-4 text-indigo-600 hover:text-indigo-900"
+                                    on:click={() => onDownload(file)}
+                                >
+                                    Download
+                                    <span class="sr-only">
+                                        , {file.file_name}
+                                    </span>
+                                </button>
                             </td>
                         </tr>
                     {/each}

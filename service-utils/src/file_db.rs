@@ -25,7 +25,8 @@ impl TryFrom<tokio_postgres::Row> for File {
         let target_id: Uuid = value.try_get("target_id")?;
         let file_name: String = value.try_get("file_name")?;
         let file_size: String = value.try_get("file_size")?;
-        let file_type: i32 = value.try_get("file_type")?;
+        let file_type: String = value.try_get("file_type")?;
+        let file_target: i32 = value.try_get("file_target")?;
 
         Ok(File {
             id: id.to_string(),
@@ -36,6 +37,7 @@ impl TryFrom<tokio_postgres::Row> for File {
             file_name,
             file_size,
             file_type,
+            file_target,
             file_buffer: Vec::new(),
         })
     }
@@ -99,15 +101,15 @@ pub async fn insert_file(conn: &Transaction<'_>, file: &File, target_id: &str) -
     let target_id = Uuid::parse_str(target_id)?;
     let file = conn
         .query_one(
-            "insert into files (id, target_id, file_name, file_size, file_type) values ($1, $2, $3, $4, $5) returning *",
-            &[&id, &target_id, &file.file_name, &file.file_size, &file.file_type],
+            "insert into files (id, target_id, file_name, file_size, file_type, file_target) values ($1, $2, $3, $4, $5, $6) returning *",
+            &[&id, &target_id, &file.file_name, &file.file_size, &file.file_type, &file.file_target],
         )
         .await?;
 
     file.try_into()
 }
 
-pub async fn delete_file(conn: &Transaction<'_>, id: &str, target_id: &str) -> Result<File> {
+pub async fn delete_file_by_id(conn: &Transaction<'_>, id: &str, target_id: &str) -> Result<File> {
     let id = Uuid::parse_str(id)?;
     let target_id = Uuid::parse_str(target_id)?;
     let file = conn

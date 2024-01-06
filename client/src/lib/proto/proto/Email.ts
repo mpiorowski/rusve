@@ -6,12 +6,12 @@ export interface Email {
   'created'?: (string);
   'updated'?: (string);
   'deleted'?: (string);
-  'targetId'?: (string);
-  'emailTo'?: (string);
-  'emailFrom'?: (string);
-  'emailFromName'?: (string);
-  'emailSubject'?: (string);
-  'emailBody'?: (string);
+  'target_id'?: (string);
+  'email_to'?: (string);
+  'email_from'?: (string);
+  'email_from_name'?: (string);
+  'email_subject'?: (string);
+  'email_body'?: (string);
 }
 
 export interface Email__Output {
@@ -19,10 +19,10 @@ export interface Email__Output {
   'created': (string);
   'updated': (string);
   'deleted': (string);
-  'targetId': (string);
-  'emailTo': (string);
-  'emailFrom': (string);
-  'emailFromName': (string);
-  'emailSubject': (string);
-  'emailBody': (string);
+  'target_id': (string);
+  'email_to': (string);
+  'email_from': (string);
+  'email_from_name': (string);
+  'email_subject': (string);
+  'email_body': (string);
 }

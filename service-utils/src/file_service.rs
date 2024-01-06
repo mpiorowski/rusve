@@ -199,7 +199,7 @@ pub async fn delete_file_by_id(
     })?;
 
     let request = request.into_inner();
-    let file = crate::file_db::delete_file(&tr, &request.id, &target_id)
+    let file = crate::file_db::delete_file_by_id(&tr, &request.id, &target_id)
         .await
         .map_err(|e| {
             tracing::error!("Failed to delete file: {:?}", e);

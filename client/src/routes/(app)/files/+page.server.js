@@ -4,7 +4,7 @@ import { perf } from "$lib/server/logger";
 import { createMetadata } from "$lib/server/metadata";
 import { fail } from "@sveltejs/kit";
 import { safe } from "$lib/safe";
-import { FileType } from "$lib/proto/proto/FileType";
+import { FileTarget } from "$lib/proto/proto/FileTarget";
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals, url }) {
@@ -61,7 +61,7 @@ export async function load({ locals, url }) {
             )
             .map((f) => ({
                 ...f,
-                fileBuffer: Array.from(f.fileBuffer),
+                file_buffer: Array.from(f.file_buffer),
             })),
         total: Number(d1.data.count),
         pageSize: limit,
@@ -97,10 +97,11 @@ export const actions = {
             const chunk = buffer.subarray(offset, offset + chunkSize);
             /** @type {import('$lib/proto/proto/File').File} */
             const message = {
-                fileName: file.name,
-                fileSize: String(file.size),
-                fileType: FileType.FILE_DOCUMENT,
-                fileBuffer: chunk,
+                file_name: file.name,
+                file_size: String(file.size),
+                file_type: file.type,
+                file_target: FileTarget.FILE_DOCUMENT,
+                file_buffer: chunk,
             };
             const res = safe(() => stream.write(message));
             if (res.error) {
@@ -112,11 +113,11 @@ export const actions = {
 
         /** @type {import("$lib/proto/proto/File").File} */
         let newFile;
-        /** @type {Promise<void>} */
+        /** @type {Promise<import("$lib/proto/proto/File").File>} */
         const p = new Promise((res, rej) => {
             stream.on("error", (err) => rej(err));
             stream.on("data", (data) => (newFile = data));
-            stream.on("end", () => res());
+            stream.on("end", () => res(newFile));
         });
         const s = await safe(p);
         if (s.error) {
@@ -126,8 +127,8 @@ export const actions = {
         end();
         return {
             file: {
-                ...newFile,
-                fileBuffer: [],
+                ...s.data,
+                file_buffer: [],
             },
         };
     },
