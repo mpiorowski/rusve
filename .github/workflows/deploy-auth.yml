@@ -18,6 +18,8 @@ on:
         required: true
       GITHUB_CLIENT_ID:
         required: true
+      JWT_SECRET:
+        required: true
 
 env:
   GAR_LOCATION: europe-north1
@@ -30,6 +32,7 @@ env:
   SERVER_URL: https://auth-cdb5ecy4ia-lz.a.run.app
   CLIENT_URL: https://www.rusve.app
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
   # DATABASE_URL=postgresql:///?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}&dbname=users
 
 permissions:
@@ -78,5 +81,6 @@ jobs:
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}
             GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}
+            JWT_SECRET=${{ env.JWT_SECRET }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
