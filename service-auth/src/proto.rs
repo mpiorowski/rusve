@@ -160,8 +160,8 @@ pub struct Email {
 #[repr(i32)]
 pub enum FileTarget {
     FileUnset = 0,
-    FileDocument = 1,
-    FileAvatar = 2,
+    Document = 1,
+    Avatar = 2,
 }
 impl FileTarget {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -171,16 +171,16 @@ impl FileTarget {
     pub fn as_str_name(&self) -> &'static str {
         match self {
             FileTarget::FileUnset => "FILE_UNSET",
-            FileTarget::FileDocument => "FILE_DOCUMENT",
-            FileTarget::FileAvatar => "FILE_AVATAR",
+            FileTarget::Document => "DOCUMENT",
+            FileTarget::Avatar => "AVATAR",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
             "FILE_UNSET" => Some(Self::FileUnset),
-            "FILE_DOCUMENT" => Some(Self::FileDocument),
-            "FILE_AVATAR" => Some(Self::FileAvatar),
+            "DOCUMENT" => Some(Self::Document),
+            "AVATAR" => Some(Self::Avatar),
             _ => None,
         }
     }

@@ -84,7 +84,6 @@
         <FileInput
             name="file"
             label="File"
-            accept="image/*"
             bind:file={newFile}
         />
         <div class="flex justify-end">

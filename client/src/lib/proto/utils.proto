@@ -6,8 +6,8 @@ option go_package = "rusve/proto";
 
 enum FileTarget {
     FILE_UNSET = 0;
-    FILE_DOCUMENT = 1;
-    FILE_AVATAR = 2;
+    DOCUMENT = 1;
+    AVATAR = 2;
 }
 
 message File {
