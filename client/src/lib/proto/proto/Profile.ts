@@ -6,14 +6,14 @@ export interface Profile {
   'created'?: (string);
   'updated'?: (string);
   'deleted'?: (string);
-  'userId'?: (string);
+  'user_id'?: (string);
   'name'?: (string);
   'about'?: (string);
-  'avatarId'?: (string);
-  'avatarUrl'?: (string);
-  'coverId'?: (string);
-  'coverUrl'?: (string);
-  'resumeId'?: (string);
+  'avatar_id'?: (string);
+  'avatar_url'?: (string);
+  'cover_id'?: (string);
+  'cover_url'?: (string);
+  'resume_id'?: (string);
 }
 
 export interface Profile__Output {
@@ -21,12 +21,12 @@ export interface Profile__Output {
   'created': (string);
   'updated': (string);
   'deleted': (string);
-  'userId': (string);
+  'user_id': (string);
   'name': (string);
   'about': (string);
-  'avatarId': (string);
-  'avatarUrl': (string);
-  'coverId': (string);
-  'coverUrl': (string);
-  'resumeId': (string);
+  'avatar_id': (string);
+  'avatar_url': (string);
+  'cover_id': (string);
+  'cover_url': (string);
+  'resume_id': (string);
 }

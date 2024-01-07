@@ -1,9 +1,11 @@
 <script>
     import { page } from "$app/stores";
     import CreditCardIcon from "$lib/icons/CreditCardIcon.svelte";
+    import FileIcon from "$lib/icons/FileIcon.svelte";
     import FileTextIcon from "$lib/icons/FileTextIcon.svelte";
     import HomeIcon from "$lib/icons/HomeIcon.svelte";
     import LogoIcon from "$lib/icons/LogoIcon.svelte";
+    import MailIcon from "$lib/icons/MailIcon.svelte";
     import SettingsIcon from "$lib/icons/SettingsIcon.svelte";
     import UserIcon from "$lib/icons/UserIcon.svelte";
 
@@ -67,6 +69,32 @@
                         >
                             <FileTextIcon />
                             Notes
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            on:click={close}
+                            href="/emails"
+                            class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6
+                                    {current === 'emails'
+                                ? 'bg-gray-800 text-white'
+                                : 'text-gray-400 hover:bg-gray-800 hover:text-white'}"
+                        >
+                            <MailIcon />
+                            Emails
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            on:click={close}
+                            href="/files"
+                            class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6
+                                    {current === 'files'
+                                ? 'bg-gray-800 text-white'
+                                : 'text-gray-400 hover:bg-gray-800 hover:text-white'}"
+                        >
+                            <FileIcon />
+                            Files
                         </a>
                     </li>
                     <li>

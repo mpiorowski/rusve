@@ -2,59 +2,98 @@
 
 import type * as grpc from '@grpc/grpc-js'
 import type { MethodDefinition } from '@grpc/proto-loader'
+import type { Count as _proto_Count, Count__Output as _proto_Count__Output } from '../proto/Count';
+import type { Email as _proto_Email, Email__Output as _proto_Email__Output } from '../proto/Email';
+import type { Empty as _proto_Empty, Empty__Output as _proto_Empty__Output } from '../proto/Empty';
 import type { File as _proto_File, File__Output as _proto_File__Output } from '../proto/File';
-import type { FileId as _proto_FileId, FileId__Output as _proto_FileId__Output } from '../proto/FileId';
-import type { TargetId as _proto_TargetId, TargetId__Output as _proto_TargetId__Output } from '../proto/TargetId';
+import type { Id as _proto_Id, Id__Output as _proto_Id__Output } from '../proto/Id';
+import type { Page as _proto_Page, Page__Output as _proto_Page__Output } from '../proto/Page';
 
 export interface UtilsServiceClient extends grpc.Client {
-  CreateFile(argument: _proto_File, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  CreateFile(argument: _proto_File, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  CreateFile(argument: _proto_File, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  CreateFile(argument: _proto_File, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  createFile(argument: _proto_File, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  createFile(argument: _proto_File, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  createFile(argument: _proto_File, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  createFile(argument: _proto_File, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  CountEmailsByTargetId(argument: _proto_Empty, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  CountEmailsByTargetId(argument: _proto_Empty, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  CountEmailsByTargetId(argument: _proto_Empty, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  CountEmailsByTargetId(argument: _proto_Empty, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  countEmailsByTargetId(argument: _proto_Empty, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  countEmailsByTargetId(argument: _proto_Empty, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  countEmailsByTargetId(argument: _proto_Empty, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  countEmailsByTargetId(argument: _proto_Empty, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
   
-  DeleteFile(argument: _proto_FileId, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  DeleteFile(argument: _proto_FileId, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  DeleteFile(argument: _proto_FileId, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  DeleteFile(argument: _proto_FileId, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  deleteFile(argument: _proto_FileId, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  deleteFile(argument: _proto_FileId, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  deleteFile(argument: _proto_FileId, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  deleteFile(argument: _proto_FileId, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  CountFilesByTargetId(argument: _proto_Empty, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  CountFilesByTargetId(argument: _proto_Empty, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  CountFilesByTargetId(argument: _proto_Empty, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  CountFilesByTargetId(argument: _proto_Empty, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  countFilesByTargetId(argument: _proto_Empty, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  countFilesByTargetId(argument: _proto_Empty, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  countFilesByTargetId(argument: _proto_Empty, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
+  countFilesByTargetId(argument: _proto_Empty, callback: grpc.requestCallback<_proto_Count__Output>): grpc.ClientUnaryCall;
   
-  GetFile(argument: _proto_FileId, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  GetFile(argument: _proto_FileId, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  GetFile(argument: _proto_FileId, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  GetFile(argument: _proto_FileId, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  getFile(argument: _proto_FileId, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  getFile(argument: _proto_FileId, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  getFile(argument: _proto_FileId, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  getFile(argument: _proto_FileId, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  DeleteFileById(argument: _proto_Id, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  DeleteFileById(argument: _proto_Id, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  DeleteFileById(argument: _proto_Id, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  DeleteFileById(argument: _proto_Id, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  deleteFileById(argument: _proto_Id, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  deleteFileById(argument: _proto_Id, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  deleteFileById(argument: _proto_Id, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
+  deleteFileById(argument: _proto_Id, callback: grpc.requestCallback<_proto_Empty__Output>): grpc.ClientUnaryCall;
   
-  GetFiles(argument: _proto_TargetId, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
-  GetFiles(argument: _proto_TargetId, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
-  getFiles(argument: _proto_TargetId, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
-  getFiles(argument: _proto_TargetId, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  GetEmailsByTargetId(argument: _proto_Page, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Email__Output>;
+  GetEmailsByTargetId(argument: _proto_Page, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Email__Output>;
+  getEmailsByTargetId(argument: _proto_Page, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Email__Output>;
+  getEmailsByTargetId(argument: _proto_Page, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Email__Output>;
+  
+  GetFileById(argument: _proto_Id, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  GetFileById(argument: _proto_Id, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  getFileById(argument: _proto_Id, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  getFileById(argument: _proto_Id, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  
+  GetFilesByTargetId(argument: _proto_Page, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  GetFilesByTargetId(argument: _proto_Page, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  getFilesByTargetId(argument: _proto_Page, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  getFilesByTargetId(argument: _proto_Page, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  
+  SendEmail(argument: _proto_Email, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Email__Output>): grpc.ClientUnaryCall;
+  SendEmail(argument: _proto_Email, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Email__Output>): grpc.ClientUnaryCall;
+  SendEmail(argument: _proto_Email, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Email__Output>): grpc.ClientUnaryCall;
+  SendEmail(argument: _proto_Email, callback: grpc.requestCallback<_proto_Email__Output>): grpc.ClientUnaryCall;
+  sendEmail(argument: _proto_Email, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Email__Output>): grpc.ClientUnaryCall;
+  sendEmail(argument: _proto_Email, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_Email__Output>): grpc.ClientUnaryCall;
+  sendEmail(argument: _proto_Email, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_Email__Output>): grpc.ClientUnaryCall;
+  sendEmail(argument: _proto_Email, callback: grpc.requestCallback<_proto_Email__Output>): grpc.ClientUnaryCall;
+  
+  UploadFile(metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientDuplexStream<_proto_File, _proto_File__Output>;
+  UploadFile(options?: grpc.CallOptions): grpc.ClientDuplexStream<_proto_File, _proto_File__Output>;
+  uploadFile(metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientDuplexStream<_proto_File, _proto_File__Output>;
+  uploadFile(options?: grpc.CallOptions): grpc.ClientDuplexStream<_proto_File, _proto_File__Output>;
   
 }
 
 export interface UtilsServiceHandlers extends grpc.UntypedServiceImplementation {
-  CreateFile: grpc.handleUnaryCall<_proto_File__Output, _proto_File>;
+  CountEmailsByTargetId: grpc.handleUnaryCall<_proto_Empty__Output, _proto_Count>;
   
-  DeleteFile: grpc.handleUnaryCall<_proto_FileId__Output, _proto_File>;
+  CountFilesByTargetId: grpc.handleUnaryCall<_proto_Empty__Output, _proto_Count>;
   
-  GetFile: grpc.handleUnaryCall<_proto_FileId__Output, _proto_File>;
+  DeleteFileById: grpc.handleUnaryCall<_proto_Id__Output, _proto_Empty>;
   
-  GetFiles: grpc.handleServerStreamingCall<_proto_TargetId__Output, _proto_File>;
+  GetEmailsByTargetId: grpc.handleServerStreamingCall<_proto_Page__Output, _proto_Email>;
+  
+  GetFileById: grpc.handleServerStreamingCall<_proto_Id__Output, _proto_File>;
+  
+  GetFilesByTargetId: grpc.handleServerStreamingCall<_proto_Page__Output, _proto_File>;
+  
+  SendEmail: grpc.handleUnaryCall<_proto_Email__Output, _proto_Email>;
+  
+  UploadFile: grpc.handleBidiStreamingCall<_proto_File__Output, _proto_File>;
   
 }
 
 export interface UtilsServiceDefinition extends grpc.ServiceDefinition {
-  CreateFile: MethodDefinition<_proto_File, _proto_File, _proto_File__Output, _proto_File__Output>
-  DeleteFile: MethodDefinition<_proto_FileId, _proto_File, _proto_FileId__Output, _proto_File__Output>
-  GetFile: MethodDefinition<_proto_FileId, _proto_File, _proto_FileId__Output, _proto_File__Output>
-  GetFiles: MethodDefinition<_proto_TargetId, _proto_File, _proto_TargetId__Output, _proto_File__Output>
+  CountEmailsByTargetId: MethodDefinition<_proto_Empty, _proto_Count, _proto_Empty__Output, _proto_Count__Output>
+  CountFilesByTargetId: MethodDefinition<_proto_Empty, _proto_Count, _proto_Empty__Output, _proto_Count__Output>
+  DeleteFileById: MethodDefinition<_proto_Id, _proto_Empty, _proto_Id__Output, _proto_Empty__Output>
+  GetEmailsByTargetId: MethodDefinition<_proto_Page, _proto_Email, _proto_Page__Output, _proto_Email__Output>
+  GetFileById: MethodDefinition<_proto_Id, _proto_File, _proto_Id__Output, _proto_File__Output>
+  GetFilesByTargetId: MethodDefinition<_proto_Page, _proto_File, _proto_Page__Output, _proto_File__Output>
+  SendEmail: MethodDefinition<_proto_Email, _proto_Email, _proto_Email__Output, _proto_Email__Output>
+  UploadFile: MethodDefinition<_proto_File, _proto_File, _proto_File__Output, _proto_File__Output>
 }

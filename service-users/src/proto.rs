@@ -115,37 +115,64 @@ pub struct File {
     pub created: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub updated: ::prost::alloc::string::String,
-    #[prost(string, optional, tag = "4")]
-    pub deleted: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, tag = "4")]
+    pub deleted: ::prost::alloc::string::String,
     #[prost(string, tag = "5")]
     pub target_id: ::prost::alloc::string::String,
     #[prost(string, tag = "6")]
-    pub name: ::prost::alloc::string::String,
-    #[prost(enumeration = "FileType", tag = "7")]
-    pub r#type: i32,
-    #[prost(bytes = "vec", tag = "8")]
-    pub buffer: ::prost::alloc::vec::Vec<u8>,
+    pub file_name: ::prost::alloc::string::String,
+    #[prost(string, tag = "7")]
+    pub file_size: ::prost::alloc::string::String,
+    #[prost(string, tag = "8")]
+    pub file_type: ::prost::alloc::string::String,
+    #[prost(enumeration = "FileTarget", tag = "9")]
+    pub file_target: i32,
+    #[prost(bytes = "vec", tag = "10")]
+    pub file_buffer: ::prost::alloc::vec::Vec<u8>,
+}
+#[derive(serde::Serialize, serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Email {
+    #[prost(string, tag = "1")]
+    pub id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub created: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub updated: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub deleted: ::prost::alloc::string::String,
+    #[prost(string, tag = "5")]
+    pub target_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "6")]
+    pub email_to: ::prost::alloc::string::String,
+    #[prost(string, tag = "7")]
+    pub email_from: ::prost::alloc::string::String,
+    #[prost(string, tag = "8")]
+    pub email_from_name: ::prost::alloc::string::String,
     #[prost(string, tag = "9")]
-    pub url: ::prost::alloc::string::String,
+    pub email_subject: ::prost::alloc::string::String,
+    #[prost(string, tag = "10")]
+    pub email_body: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
-pub enum FileType {
+pub enum FileTarget {
     FileUnset = 0,
     Document = 1,
     Avatar = 2,
 }
-impl FileType {
+impl FileTarget {
     /// String value of the enum field names used in the ProtoBuf definition.
     ///
     /// The values are not transformed in any way and thus are considered stable
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
-            FileType::FileUnset => "FILE_UNSET",
-            FileType::Document => "DOCUMENT",
-            FileType::Avatar => "AVATAR",
+            FileTarget::FileUnset => "FILE_UNSET",
+            FileTarget::Document => "DOCUMENT",
+            FileTarget::Avatar => "AVATAR",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -200,24 +227,6 @@ pub struct AuthResponse {
 pub struct StripeUrlResponse {
     #[prost(string, tag = "1")]
     pub url: ::prost::alloc::string::String,
-}
-#[derive(serde::Serialize, serde::Deserialize)]
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct TargetId {
-    #[prost(string, tag = "1")]
-    pub target_id: ::prost::alloc::string::String,
-    #[prost(enumeration = "FileType", tag = "2")]
-    pub r#type: i32,
-}
-#[derive(serde::Serialize, serde::Deserialize)]
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FileId {
-    #[prost(string, tag = "1")]
-    pub file_id: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub target_id: ::prost::alloc::string::String,
 }
 /// Generated client implementations.
 pub mod users_service_client {
@@ -726,9 +735,101 @@ pub mod utils_service_client {
             self.inner = self.inner.max_encoding_message_size(limit);
             self
         }
-        pub async fn get_files(
+        pub async fn count_emails_by_target_id(
             &mut self,
-            request: impl tonic::IntoRequest<super::TargetId>,
+            request: impl tonic::IntoRequest<super::Empty>,
+        ) -> std::result::Result<tonic::Response<super::Count>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/proto.UtilsService/CountEmailsByTargetId",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("proto.UtilsService", "CountEmailsByTargetId"));
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn get_emails_by_target_id(
+            &mut self,
+            request: impl tonic::IntoRequest<super::Page>,
+        ) -> std::result::Result<
+            tonic::Response<tonic::codec::Streaming<super::Email>>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/proto.UtilsService/GetEmailsByTargetId",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("proto.UtilsService", "GetEmailsByTargetId"));
+            self.inner.server_streaming(req, path, codec).await
+        }
+        pub async fn send_email(
+            &mut self,
+            request: impl tonic::IntoRequest<super::Email>,
+        ) -> std::result::Result<tonic::Response<super::Email>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/proto.UtilsService/SendEmail",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("proto.UtilsService", "SendEmail"));
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn count_files_by_target_id(
+            &mut self,
+            request: impl tonic::IntoRequest<super::Empty>,
+        ) -> std::result::Result<tonic::Response<super::Count>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/proto.UtilsService/CountFilesByTargetId",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("proto.UtilsService", "CountFilesByTargetId"));
+            self.inner.unary(req, path, codec).await
+        }
+        /// Returns stream of files metadata without content
+        pub async fn get_files_by_target_id(
+            &mut self,
+            request: impl tonic::IntoRequest<super::Page>,
         ) -> std::result::Result<
             tonic::Response<tonic::codec::Streaming<super::File>>,
             tonic::Status,
@@ -744,17 +845,21 @@ pub mod utils_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UtilsService/GetFiles",
+                "/proto.UtilsService/GetFilesByTargetId",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("proto.UtilsService", "GetFiles"));
+                .insert(GrpcMethod::new("proto.UtilsService", "GetFilesByTargetId"));
             self.inner.server_streaming(req, path, codec).await
         }
-        pub async fn get_file(
+        /// Returns single file with content as stream
+        pub async fn get_file_by_id(
             &mut self,
-            request: impl tonic::IntoRequest<super::FileId>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status> {
+            request: impl tonic::IntoRequest<super::Id>,
+        ) -> std::result::Result<
+            tonic::Response<tonic::codec::Streaming<super::File>>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -766,17 +871,21 @@ pub mod utils_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UtilsService/GetFile",
+                "/proto.UtilsService/GetFileById",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("proto.UtilsService", "GetFile"));
-            self.inner.unary(req, path, codec).await
+                .insert(GrpcMethod::new("proto.UtilsService", "GetFileById"));
+            self.inner.server_streaming(req, path, codec).await
         }
-        pub async fn create_file(
+        /// Send single file with content as stream
+        pub async fn upload_file(
             &mut self,
-            request: impl tonic::IntoRequest<super::File>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status> {
+            request: impl tonic::IntoStreamingRequest<Message = super::File>,
+        ) -> std::result::Result<
+            tonic::Response<tonic::codec::Streaming<super::File>>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -788,17 +897,17 @@ pub mod utils_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UtilsService/CreateFile",
+                "/proto.UtilsService/UploadFile",
             );
-            let mut req = request.into_request();
+            let mut req = request.into_streaming_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("proto.UtilsService", "CreateFile"));
-            self.inner.unary(req, path, codec).await
+                .insert(GrpcMethod::new("proto.UtilsService", "UploadFile"));
+            self.inner.streaming(req, path, codec).await
         }
-        pub async fn delete_file(
+        pub async fn delete_file_by_id(
             &mut self,
-            request: impl tonic::IntoRequest<super::FileId>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status> {
+            request: impl tonic::IntoRequest<super::Id>,
+        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -810,11 +919,11 @@ pub mod utils_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/proto.UtilsService/DeleteFile",
+                "/proto.UtilsService/DeleteFileById",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("proto.UtilsService", "DeleteFile"));
+                .insert(GrpcMethod::new("proto.UtilsService", "DeleteFileById"));
             self.inner.unary(req, path, codec).await
         }
     }
@@ -1622,28 +1731,74 @@ pub mod utils_service_server {
     /// Generated trait containing gRPC methods that should be implemented for use with UtilsServiceServer.
     #[async_trait]
     pub trait UtilsService: Send + Sync + 'static {
-        /// Server streaming response type for the GetFiles method.
-        type GetFilesStream: futures_core::Stream<
+        async fn count_emails_by_target_id(
+            &self,
+            request: tonic::Request<super::Empty>,
+        ) -> std::result::Result<tonic::Response<super::Count>, tonic::Status>;
+        /// Server streaming response type for the GetEmailsByTargetId method.
+        type GetEmailsByTargetIdStream: futures_core::Stream<
+                Item = std::result::Result<super::Email, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        async fn get_emails_by_target_id(
+            &self,
+            request: tonic::Request<super::Page>,
+        ) -> std::result::Result<
+            tonic::Response<Self::GetEmailsByTargetIdStream>,
+            tonic::Status,
+        >;
+        async fn send_email(
+            &self,
+            request: tonic::Request<super::Email>,
+        ) -> std::result::Result<tonic::Response<super::Email>, tonic::Status>;
+        async fn count_files_by_target_id(
+            &self,
+            request: tonic::Request<super::Empty>,
+        ) -> std::result::Result<tonic::Response<super::Count>, tonic::Status>;
+        /// Server streaming response type for the GetFilesByTargetId method.
+        type GetFilesByTargetIdStream: futures_core::Stream<
                 Item = std::result::Result<super::File, tonic::Status>,
             >
             + Send
             + 'static;
-        async fn get_files(
+        /// Returns stream of files metadata without content
+        async fn get_files_by_target_id(
             &self,
-            request: tonic::Request<super::TargetId>,
-        ) -> std::result::Result<tonic::Response<Self::GetFilesStream>, tonic::Status>;
-        async fn get_file(
+            request: tonic::Request<super::Page>,
+        ) -> std::result::Result<
+            tonic::Response<Self::GetFilesByTargetIdStream>,
+            tonic::Status,
+        >;
+        /// Server streaming response type for the GetFileById method.
+        type GetFileByIdStream: futures_core::Stream<
+                Item = std::result::Result<super::File, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        /// Returns single file with content as stream
+        async fn get_file_by_id(
             &self,
-            request: tonic::Request<super::FileId>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
-        async fn create_file(
+            request: tonic::Request<super::Id>,
+        ) -> std::result::Result<
+            tonic::Response<Self::GetFileByIdStream>,
+            tonic::Status,
+        >;
+        /// Server streaming response type for the UploadFile method.
+        type UploadFileStream: futures_core::Stream<
+                Item = std::result::Result<super::File, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        /// Send single file with content as stream
+        async fn upload_file(
             &self,
-            request: tonic::Request<super::File>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
-        async fn delete_file(
+            request: tonic::Request<tonic::Streaming<super::File>>,
+        ) -> std::result::Result<tonic::Response<Self::UploadFileStream>, tonic::Status>;
+        async fn delete_file_by_id(
             &self,
-            request: tonic::Request<super::FileId>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
+            request: tonic::Request<super::Id>,
+        ) -> std::result::Result<tonic::Response<super::Empty>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct UtilsServiceServer<T: UtilsService> {
@@ -1724,25 +1879,24 @@ pub mod utils_service_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/proto.UtilsService/GetFiles" => {
+                "/proto.UtilsService/CountEmailsByTargetId" => {
                     #[allow(non_camel_case_types)]
-                    struct GetFilesSvc<T: UtilsService>(pub Arc<T>);
-                    impl<
-                        T: UtilsService,
-                    > tonic::server::ServerStreamingService<super::TargetId>
-                    for GetFilesSvc<T> {
-                        type Response = super::File;
-                        type ResponseStream = T::GetFilesStream;
+                    struct CountEmailsByTargetIdSvc<T: UtilsService>(pub Arc<T>);
+                    impl<T: UtilsService> tonic::server::UnaryService<super::Empty>
+                    for CountEmailsByTargetIdSvc<T> {
+                        type Response = super::Count;
                         type Future = BoxFuture<
-                            tonic::Response<Self::ResponseStream>,
+                            tonic::Response<Self::Response>,
                             tonic::Status,
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::TargetId>,
+                            request: tonic::Request<super::Empty>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
-                            let fut = async move { (*inner).get_files(request).await };
+                            let fut = async move {
+                                (*inner).count_emails_by_target_id(request).await
+                            };
                             Box::pin(fut)
                         }
                     }
@@ -1753,7 +1907,54 @@ pub mod utils_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = GetFilesSvc(inner);
+                        let method = CountEmailsByTargetIdSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/proto.UtilsService/GetEmailsByTargetId" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetEmailsByTargetIdSvc<T: UtilsService>(pub Arc<T>);
+                    impl<
+                        T: UtilsService,
+                    > tonic::server::ServerStreamingService<super::Page>
+                    for GetEmailsByTargetIdSvc<T> {
+                        type Response = super::Email;
+                        type ResponseStream = T::GetEmailsByTargetIdStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::Page>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                (*inner).get_emails_by_target_id(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetEmailsByTargetIdSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
@@ -1769,22 +1970,22 @@ pub mod utils_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/proto.UtilsService/GetFile" => {
+                "/proto.UtilsService/SendEmail" => {
                     #[allow(non_camel_case_types)]
-                    struct GetFileSvc<T: UtilsService>(pub Arc<T>);
-                    impl<T: UtilsService> tonic::server::UnaryService<super::FileId>
-                    for GetFileSvc<T> {
-                        type Response = super::File;
+                    struct SendEmailSvc<T: UtilsService>(pub Arc<T>);
+                    impl<T: UtilsService> tonic::server::UnaryService<super::Email>
+                    for SendEmailSvc<T> {
+                        type Response = super::Email;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::FileId>,
+                            request: tonic::Request<super::Email>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
-                            let fut = async move { (*inner).get_file(request).await };
+                            let fut = async move { (*inner).send_email(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -1795,7 +1996,7 @@ pub mod utils_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = GetFileSvc(inner);
+                        let method = SendEmailSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
@@ -1811,22 +2012,24 @@ pub mod utils_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/proto.UtilsService/CreateFile" => {
+                "/proto.UtilsService/CountFilesByTargetId" => {
                     #[allow(non_camel_case_types)]
-                    struct CreateFileSvc<T: UtilsService>(pub Arc<T>);
-                    impl<T: UtilsService> tonic::server::UnaryService<super::File>
-                    for CreateFileSvc<T> {
-                        type Response = super::File;
+                    struct CountFilesByTargetIdSvc<T: UtilsService>(pub Arc<T>);
+                    impl<T: UtilsService> tonic::server::UnaryService<super::Empty>
+                    for CountFilesByTargetIdSvc<T> {
+                        type Response = super::Count;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::File>,
+                            request: tonic::Request<super::Empty>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
-                            let fut = async move { (*inner).create_file(request).await };
+                            let fut = async move {
+                                (*inner).count_files_by_target_id(request).await
+                            };
                             Box::pin(fut)
                         }
                     }
@@ -1837,7 +2040,7 @@ pub mod utils_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = CreateFileSvc(inner);
+                        let method = CountFilesByTargetIdSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
@@ -1853,22 +2056,27 @@ pub mod utils_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/proto.UtilsService/DeleteFile" => {
+                "/proto.UtilsService/GetFilesByTargetId" => {
                     #[allow(non_camel_case_types)]
-                    struct DeleteFileSvc<T: UtilsService>(pub Arc<T>);
-                    impl<T: UtilsService> tonic::server::UnaryService<super::FileId>
-                    for DeleteFileSvc<T> {
+                    struct GetFilesByTargetIdSvc<T: UtilsService>(pub Arc<T>);
+                    impl<
+                        T: UtilsService,
+                    > tonic::server::ServerStreamingService<super::Page>
+                    for GetFilesByTargetIdSvc<T> {
                         type Response = super::File;
+                        type ResponseStream = T::GetFilesByTargetIdStream;
                         type Future = BoxFuture<
-                            tonic::Response<Self::Response>,
+                            tonic::Response<Self::ResponseStream>,
                             tonic::Status,
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::FileId>,
+                            request: tonic::Request<super::Page>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
-                            let fut = async move { (*inner).delete_file(request).await };
+                            let fut = async move {
+                                (*inner).get_files_by_target_id(request).await
+                            };
                             Box::pin(fut)
                         }
                     }
@@ -1879,7 +2087,141 @@ pub mod utils_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = DeleteFileSvc(inner);
+                        let method = GetFilesByTargetIdSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.server_streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/proto.UtilsService/GetFileById" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetFileByIdSvc<T: UtilsService>(pub Arc<T>);
+                    impl<
+                        T: UtilsService,
+                    > tonic::server::ServerStreamingService<super::Id>
+                    for GetFileByIdSvc<T> {
+                        type Response = super::File;
+                        type ResponseStream = T::GetFileByIdStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::Id>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                (*inner).get_file_by_id(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetFileByIdSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.server_streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/proto.UtilsService/UploadFile" => {
+                    #[allow(non_camel_case_types)]
+                    struct UploadFileSvc<T: UtilsService>(pub Arc<T>);
+                    impl<T: UtilsService> tonic::server::StreamingService<super::File>
+                    for UploadFileSvc<T> {
+                        type Response = super::File;
+                        type ResponseStream = T::UploadFileStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<tonic::Streaming<super::File>>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move { (*inner).upload_file(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = UploadFileSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/proto.UtilsService/DeleteFileById" => {
+                    #[allow(non_camel_case_types)]
+                    struct DeleteFileByIdSvc<T: UtilsService>(pub Arc<T>);
+                    impl<T: UtilsService> tonic::server::UnaryService<super::Id>
+                    for DeleteFileByIdSvc<T> {
+                        type Response = super::Empty;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::Id>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                (*inner).delete_file_by_id(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = DeleteFileByIdSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

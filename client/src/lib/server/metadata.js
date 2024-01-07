@@ -9,16 +9,14 @@ const key = fs.readFileSync("./src/lib/server/private.key");
 
 /**
  * Create a Metadata object with the correct authorization headers
- * @param {string} token - The token id to use for the authorization
- * @param {string} userId - The user id to use for the authorization
+ * @param {string} id - The token id or user id
  * @returns {Metadata} - Metadata object with the correct authorization headers
  */
-export function createMetadata(token, userId) {
+export function createMetadata(id) {
     const metadata = new Metadata();
 
     const tokenPayload = {
-        token: token,
-        user_id: userId,
+        id: id,
     };
 
     // Generate and sign the token

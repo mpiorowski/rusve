@@ -29,16 +29,16 @@ rustls = "0.21.5"
 rustls-native-certs = "0.6.3"
 deadpool-postgres = "0.10.5"
 
+# gRPC
+prost = "0.11.9"
+tonic = "0.9.2"
+
 # Http
 axum = "0.7.2"
 tower = "0.4.13"
 tower-http = { version = "0.5.0", features = ["cors"] }
 http = "1.0.0"
 reqwest = { version = "0.11.22", features = ["default", "json"] }
-
-# gRPC
-prost = "0.11.9"
-tonic = "0.9.2"
 
 # OAuth
 oauth2 = "4.4.2"

@@ -5,28 +5,38 @@ import { upsendApi } from "$lib/server/api";
 import { usersService } from "$lib/server/grpc";
 import { logger, perf } from "$lib/server/logger";
 import { createMetadata } from "$lib/server/metadata";
-import { fail } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 
 /** @type {import('./$types').PageServerLoad} */
-export async function load({ parent }) {
-    const end = perf("Load profile");
-    const profile = await parent();
+export async function load({ locals }) {
+    const end = perf("load_profile");
+    const profile = await new Promise((r) => {
+        usersService.GetProfileByUserId(
+            {},
+            createMetadata(locals.user.id),
+            grpcSafe(r),
+        );
+    });
+    if (profile.error) {
+        throw error(500, profile.msg);
+    }
 
     /**
      * We return the profile data immediately, and then fetch the resume and stream it to the client as it loads.
      */
     /** @type {Promise<import("$lib/safe").Safe<import("$lib/types").UpsendFile | undefined>>} */
     let resumePromise = Promise.resolve({ data: undefined, error: false });
-    if (profile.profile.resumeId) {
+    if (profile.resumeId) {
         /** @type {Promise<import('$lib/safe').Safe<import('$lib/types').UpsendFile>>} */
         resumePromise = upsendApi({
-            url: `/files/${profile.profile.resumeId}`,
+            url: `/files/${profile.resumeId}`,
             method: "GET",
         });
     }
 
     end();
     return {
+        profile: profile.data,
         stream: { resume: resumePromise },
     };
 }
@@ -34,10 +44,10 @@ export async function load({ parent }) {
 /** @type {import('./$types').Actions} */
 export const actions = {
     createProfile: async ({ locals, request }) => {
-        const end = perf("Create profile");
+        const end = perf("create_profile");
         const form = await request.formData();
 
-        let resumeId = getFormValue(form, "resumeId");
+        let resume_id = getFormValue(form, "resume_id");
         const resume = form.get("resume");
         if (!(resume instanceof File)) {
             return fail(400, { error: "Resume must be a PDF" });
@@ -53,9 +63,9 @@ export const actions = {
             /**
              * Delete old resume
              */
-            if (resumeId) {
+            if (resume_id) {
                 const resDel = await upsendApi({
-                    url: `/files/${resumeId}`,
+                    url: `/files/${resume_id}`,
                     method: "DELETE",
                 });
                 if (resDel.error) {
@@ -76,11 +86,11 @@ export const actions = {
                 return fail(400, { error: file.msg });
             }
 
-            resumeId = file.data.id;
+            resume_id = file.data.id;
         }
 
-        let coverId = getFormValue(form, "coverId");
-        let coverUrl = getFormValue(form, "coverUrl");
+        let cover_id = getFormValue(form, "cover_id");
+        let cover_url = getFormValue(form, "cover_url");
         const cover = form.get("cover");
         if (!(cover instanceof File)) {
             return fail(400, { error: "Cover must be an image" });
@@ -97,9 +107,9 @@ export const actions = {
             /**
              * Delete old cover
              */
-            if (coverId) {
+            if (cover_id) {
                 const resDel = await upsendApi({
-                    url: `/images/${coverId}`,
+                    url: `/images/${cover_id}`,
                     method: "DELETE",
                 });
                 if (resDel.error) {
@@ -120,8 +130,8 @@ export const actions = {
                 return fail(400, { error: file.msg });
             }
 
-            coverId = file.data.id;
-            coverUrl = file.data.url;
+            cover_id = file.data.id;
+            cover_url = file.data.url;
         }
 
         /** @type {import('$lib/proto/proto/Profile').Profile} */
@@ -129,16 +139,16 @@ export const actions = {
             id: getFormValue(form, "id"),
             name: getFormValue(form, "name"),
             about: getFormValue(form, "about"),
-            resumeId: resumeId,
-            coverId: coverId,
-            coverUrl: coverUrl,
+            resume_id: resume_id,
+            cover_id: cover_id,
+            cover_url: cover_url,
         };
 
         /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Profile").Profile__Output>} */
         const res = await new Promise((r) => {
             usersService.CreateProfile(
                 data,
-                createMetadata("", locals.user.id),
+                createMetadata(locals.user.id),
                 grpcSafe(r),
             );
         });

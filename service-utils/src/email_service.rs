@@ -1,105 +1,130 @@
 use anyhow::Result;
-use futures_util::StreamExt;
-use google_cloud_default::WithAuthExt;
-use google_cloud_pubsub::{
-    client::{Client, ClientConfig},
-    subscriber::ReceivedMessage,
-};
 use sendgrid::{Destination, Mail, SGClient};
-use serde::Deserialize;
-use tokio_util::sync::CancellationToken;
+use tokio_stream::wrappers::ReceiverStream;
+use tonic::{Request, Response, Status};
 
-#[derive(Deserialize, Debug)]
-struct EmailMessage {
-    email: String,
-    subject: String,
-    message: String,
+use crate::proto::{Count, Email, Empty, Page};
+
+pub async fn count_emails_by_target_id(
+    pool: &deadpool_postgres::Pool,
+    request: Request<Empty>,
+) -> Result<Response<Count>, Status> {
+    let start = std::time::Instant::now();
+    let metadata = request.metadata();
+    let target_id = rusve_utils::auth(metadata)?.id;
+
+    let conn = pool.get().await.map_err(|e| {
+        tracing::error!("Failed to get connection: {:?}", e);
+        Status::internal("Failed to get connection")
+    })?;
+
+    let count = crate::email_db::count_emails_by_target_id(&conn, &target_id)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to count emails: {:?}", e);
+            Status::internal("Failed to count emails")
+        })?;
+
+    tracing::info!("count_emails_by_target_id: {:?}", start.elapsed());
+    Ok(Response::new(Count { count }))
 }
 
-async fn send_email(message: &ReceivedMessage) -> Result<()> {
-    let email_message: EmailMessage = serde_json::from_slice(&message.message.data)?;
-    let sendgrid_api_key = std::env::var("SENDGRID_API_KEY").unwrap();
-    let sg = SGClient::new(sendgrid_api_key);
+pub async fn get_emails_by_target_id(
+    pool: &deadpool_postgres::Pool,
+    request: Request<Page>,
+) -> Result<Response<ReceiverStream<Result<crate::proto::Email, Status>>>, Status> {
+    let start = std::time::Instant::now();
+    let metadata = request.metadata();
+    let target_id = rusve_utils::auth(metadata)?.id;
+
+    let conn = pool.get().await.map_err(|e| {
+        tracing::error!("Failed to get connection: {:?}", e);
+        Status::internal("Failed to get connection")
+    })?;
+
+    let page = request.into_inner();
+    let emails_stream =
+        crate::email_db::get_emails_by_target_id(&conn, &target_id, page.offset, page.limit)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to get emails: {:?}", e);
+                Status::internal("Failed to get emails")
+            })?;
+
+    let (tx, rx) = tokio::sync::mpsc::channel(128);
+    tokio::spawn(async move {
+        futures_util::pin_mut!(emails_stream);
+        while let Ok(Some(note)) = tokio_stream::StreamExt::try_next(&mut emails_stream).await {
+            let tx = tx.clone();
+            tokio::spawn(async move {
+                let email: Email = match note.try_into() {
+                    Ok(note) => note,
+                    Err(e) => {
+                        tracing::error!("Failed to get note: {:?}", e);
+                        return;
+                    }
+                };
+                if let Err(e) = tx.send(Ok(email)).await {
+                    tracing::error!("Failed to send email: {:?}", e);
+                }
+            });
+        }
+        tracing::info!("get_emails_by_target_id: {:?}", start.elapsed());
+    });
+    Ok(Response::new(tokio_stream::wrappers::ReceiverStream::new(
+        rx,
+    )))
+}
+
+pub async fn send_email(
+    env: &rusve_utils::Env,
+    pool: &deadpool_postgres::Pool,
+    request: Request<Email>,
+) -> Result<Response<Email>, Status> {
+    let start = std::time::Instant::now();
+    let metadata = request.metadata();
+    let target_id = rusve_utils::auth(metadata)?.id;
+
+    let email = request.into_inner();
+    crate::email_validation::Validation::validate(&email)?;
+
+    let mut conn = pool.get().await.map_err(|e| {
+        tracing::error!("Failed to get connection: {:?}", e);
+        Status::internal("Failed to get connection")
+    })?;
+    let tr = conn.transaction().await.map_err(|e| {
+        tracing::error!("Failed to start transaction: {:?}", e);
+        Status::internal("Failed to start transaction")
+    })?;
+
+    let email = crate::email_db::insert_email(&tr, &target_id, &email)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to insert email: {:?}", e);
+            Status::internal("Failed to insert email")
+        })?;
+
+    let sg = SGClient::new(env.sendgrid_api_key.as_str());
     let mail_info = Mail::new()
         .add_to(Destination {
-            address: email_message.email.as_str(),
-            name: email_message.email.as_str(),
+            address: email.email_to.as_str(),
+            name: email.email_to.as_str(),
         })
-        .add_from("email@rusve.app")
-        .add_from_name("Rusve - rust")
-        .add_subject(email_message.subject.as_str())
-        .add_html(email_message.message.as_str());
+        .add_from(email.email_from.as_str())
+        .add_from_name(email.email_from_name.as_str())
+        .add_subject(email.email_subject.as_str())
+        .add_html(email.email_body.as_str());
 
-    sg.send(mail_info).await?;
-    Ok(())
-}
+    sg.send(mail_info).await.map_err(|e| {
+        tracing::error!("Failed to send email: {:?}", e);
+        Status::internal("Failed to send email")
+    })?;
 
-pub async fn subscribe_to_emails() -> Result<()> {
-    let env = std::env::var("ENV").unwrap();
-    if env == "development" {
-        return Ok(());
-    }
-    // Create pubsub client.
-    let config = ClientConfig::default().with_auth().await?;
-    let client = Client::new(config).await?;
-    let subscription = client.subscription("email-sub");
+    tr.commit().await.map_err(|e| {
+        tracing::error!("Failed to commit transaction: {:?}", e);
+        Status::internal("Failed to commit transaction")
+    })?;
 
-    // Check if subscription exists.
-    if !subscription.exists(None).await? {
-        return Err(anyhow::anyhow!("Subscription does not exist"));
-    }
-
-    // Token for cancel.
-    let cancel = CancellationToken::new();
-
-    tokio::spawn(async move {
-        let mut stream = match subscription.subscribe(None).await {
-            Ok(stream) => stream,
-            Err(e) => {
-                tracing::error!("Error subscribing to pubsub: {:?}", e);
-                cancel.cancel();
-                return;
-            }
-        };
-        while let Some(message) = stream.next().await {
-            let _ = match send_email(&message).await {
-                Err(e) => {
-                    tracing::error!("Error sending email: {:?}", e);
-                    cancel.cancel();
-                    message.nack().await
-                }
-                Ok(_) => {
-                    tracing::info!("Email sent successfully");
-                    message.ack().await
-                }
-            };
-        }
-    });
-
-    // Receive blocks until the ctx is cancelled or an error occurs.
-    // Or simply use the `subscription.subscribe` method.
-    // subscription
-    //     .receive(
-    //         |message, cancel| async move {
-    //             let _ = match send_email(&message).await {
-    //                 Err(e) => {
-    //                     println!("Error sending email: {:?}", e);
-    //                     cancel.cancel();
-    //                     message.nack().await
-    //                 }
-    //                 Ok(_) => {
-    //                     println!("Email sent successfully");
-    //                     message.ack().await
-    //                 }
-    //             };
-    //         },
-    //         cancel.clone(),
-    //         None,
-    //     )
-    //     .await?;
-
-    // Delete subscription if needed.
-    // subscription.delete(None).await?;
-
-    Ok(())
+    tracing::info!("send_email: {:?}", start.elapsed());
+    Ok(Response::new(email))
 }

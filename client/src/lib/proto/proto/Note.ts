@@ -6,7 +6,7 @@ export interface Note {
   'created'?: (string);
   'updated'?: (string);
   'deleted'?: (string);
-  'userId'?: (string);
+  'user_id'?: (string);
   'title'?: (string);
   'content'?: (string);
 }
@@ -16,7 +16,7 @@ export interface Note__Output {
   'created': (string);
   'updated': (string);
   'deleted': (string);
-  'userId': (string);
+  'user_id': (string);
   'title': (string);
   'content': (string);
 }

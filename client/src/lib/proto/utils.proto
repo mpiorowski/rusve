@@ -4,7 +4,7 @@ package proto;
 
 option go_package = "rusve/proto";
 
-enum FileType {
+enum FileTarget {
     FILE_UNSET = 0;
     DOCUMENT = 1;
     AVATAR = 2;
@@ -14,12 +14,27 @@ message File {
     string id = 1;
     string created = 2;
     string updated = 3;
-    optional string deleted = 4;
+    string deleted = 4;
 
     string target_id = 5;
-    string name = 6;
-    FileType type = 7;
+    string file_name = 6;
+    string file_size = 7;
+    string file_type = 8;
+    FileTarget file_target = 9;
 
-    bytes buffer = 8;
-    string url = 9;
+    bytes file_buffer = 10;
+}
+
+message Email {
+    string id = 1;
+    string created = 2;
+    string updated = 3;
+    string deleted = 4;
+
+    string target_id = 5;
+    string email_to = 6;
+    string email_from = 7;
+    string email_from_name = 8;
+    string email_subject = 9;
+    string email_body = 10;
 }

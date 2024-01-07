@@ -18,22 +18,14 @@ pub struct Env {
 }
 
 pub fn init_envs() -> Result<Env> {
-    let port = std::env::var("PORT").context("PORT not set")?;
-    let rust_log = std::env::var("RUST_LOG").context("RUST_LOG not set")?;
-    let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
-    let client_url = std::env::var("CLIENT_URL").context("CLIENT_URL not set")?;
-    let stripe_api_key = std::env::var("STRIPE_API_KEY").context("STRIPE_API_KEY not set")?;
-    let stripe_price_id = std::env::var("STRIPE_PRICE_ID").context("STRIPE_PRICE_ID not set")?;
-    let jwt_secret = std::env::var("JWT_SECRET").context("JWT_SECRET not set")?;
-
     Ok(Env {
-        port,
-        rust_log,
-        database_url,
-        client_url,
-        stripe_api_key,
-        stripe_price_id,
-        jwt_secret,
+        port: std::env::var("PORT")?,
+        rust_log: std::env::var("RUST_LOG")?,
+        database_url: std::env::var("DATABASE_URL")?,
+        client_url: std::env::var("CLIENT_URL")?,
+        stripe_api_key: std::env::var("STRIPE_API_KEY")?,
+        stripe_price_id: std::env::var("STRIPE_PRICE_ID")?,
+        jwt_secret: std::env::var("JWT_SECRET")?,
     })
 }
 
@@ -84,8 +76,7 @@ pub fn extract_token(metadata: &tonic::metadata::MetadataMap) -> Result<&str, to
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Claims {
-    pub token: String,
-    pub user_id: String,
+    pub id: String,
 }
 pub fn decode_token(metadata: &tonic::metadata::MetadataMap) -> Result<Claims, tonic::Status> {
     let token = extract_token(metadata)?;

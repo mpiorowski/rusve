@@ -6,15 +6,23 @@ use std::str::FromStr;
 use tokio_postgres_rustls::MakeRustlsConnect;
 mod proto;
 
-pub fn slice_iter<'a>(
-    s: &'a [&'a (dyn tokio_postgres::types::ToSql + Sync)],
-) -> impl ExactSizeIterator<Item = &'a dyn tokio_postgres::types::ToSql> + 'a {
-    s.iter().map(|s| *s as _)
+#[derive(Clone)]
+pub struct Env {
+    pub port: String,
+    pub rust_log: String,
+    pub database_url: String,
 }
 
-pub fn connect_to_db() -> Result<deadpool_postgres::Pool> {
-    let database_url = std::env::var("DATABASE_URL")?;
-    let tokio_config = tokio_postgres::Config::from_str(&database_url)?;
+pub fn init_envs() -> Result<Env> {
+    Ok(Env {
+        port: std::env::var("PORT")?,
+        rust_log: std::env::var("RUST_LOG")?,
+        database_url: std::env::var("DATABASE_URL")?,
+    })
+}
+
+pub fn connect_to_db(env: &Env) -> Result<deadpool_postgres::Pool> {
+    let tokio_config = tokio_postgres::Config::from_str(&env.database_url)?;
     let mgr_config = ManagerConfig {
         recycling_method: RecyclingMethod::Fast,
     };
@@ -35,8 +43,7 @@ pub fn connect_to_db() -> Result<deadpool_postgres::Pool> {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Claims {
-    pub token: String,
-    pub user_id: String,
+    pub id: String,
 }
 pub fn auth(metadata: &tonic::metadata::MetadataMap) -> Result<Claims, tonic::Status> {
     let token = match metadata.get("x-authorization") {

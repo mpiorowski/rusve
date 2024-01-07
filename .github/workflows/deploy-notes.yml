@@ -3,7 +3,7 @@ name: Deploy Notes
 on:
   push:
     branches:
-      - release-notes/**
+      - release-notes
   workflow_call:
     secrets:
       GCP_CREDENTIALS:

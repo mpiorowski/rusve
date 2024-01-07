@@ -13,17 +13,16 @@ export interface ProtoGrpcType {
   proto: {
     AuthResponse: MessageTypeDefinition
     Count: MessageTypeDefinition
+    Email: MessageTypeDefinition
     Empty: MessageTypeDefinition
     File: MessageTypeDefinition
-    FileId: MessageTypeDefinition
-    FileType: EnumTypeDefinition
+    FileTarget: EnumTypeDefinition
     Id: MessageTypeDefinition
     Note: MessageTypeDefinition
     NotesService: SubtypeConstructor<typeof grpc.Client, _proto_NotesServiceClient> & { service: _proto_NotesServiceDefinition }
     Page: MessageTypeDefinition
     Profile: MessageTypeDefinition
     StripeUrlResponse: MessageTypeDefinition
-    TargetId: MessageTypeDefinition
     User: MessageTypeDefinition
     UserRole: EnumTypeDefinition
     UsersService: SubtypeConstructor<typeof grpc.Client, _proto_UsersServiceClient> & { service: _proto_UsersServiceDefinition }

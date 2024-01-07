@@ -11,40 +11,39 @@ use axum::Json;
 use axum::{routing::get, Router};
 use http::header::{AUTHORIZATION, CONTENT_TYPE};
 use http::Method;
-use rusve_auth::Env;
 use std::sync::Arc;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
 
 struct AppState {
-    env: Env,
-    db_pool: deadpool_postgres::Pool,
+    env: rusve_auth::Env,
+    pool: deadpool_postgres::Pool,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initalize environment variables
-    let env: Env = rusve_auth::init_envs()?;
-
-    // Connect to database
-    let db_pool = rusve_auth::connect_to_db(&env).context("Failed to connect to database")?;
-
-    // Create shared state
-    let shared_state = Arc::new(AppState {
-        db_pool,
-        env: env.clone(),
-    });
-    tracing::info!("Connected to database");
+    let env: rusve_auth::Env = rusve_auth::init_envs()?;
 
     // Initialize tracing
-    let filter = &shared_state.env.rust_log;
+    let filter = &env.rust_log;
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
+    // Connect to database
+    let pool = rusve_auth::connect_to_db(&env).context("Failed to connect to database")?;
+    tracing::info!("Connected to database");
+
     // Run migrations
-    migrations::run_migrations(&shared_state.db_pool)
+    migrations::run_migrations(&pool)
         .await
         .context("Failed to run migrations")?;
     tracing::info!("Migrations complete");
+
+    // Create shared state
+    let shared_state = Arc::new(AppState {
+        pool,
+        env: env.clone(),
+    });
 
     // TODO - Add origin for production
     let cors = CorsLayer::new()
@@ -62,12 +61,13 @@ async fn main() -> Result<()> {
         .with_state(shared_state.clone())
         .layer(ServiceBuilder::new().layer(cors));
 
-    let addr = format!("0.0.0.0:{}", env.port);
-    tracing::info!("Api server started on {}", addr);
+    // Run HTTP server
+    let addr = format!("[::]:{}", env.port);
+    tracing::info!("HTTP server started on port: {:?}", env.port);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app)
         .await
-        .context("Failed to start server")?;
+        .context("Failed to run HTTP server")?;
     Ok(())
 }
 

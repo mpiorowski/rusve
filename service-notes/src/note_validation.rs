@@ -1,7 +1,3 @@
-use tonic::Status;
-
-use crate::proto::Note;
-
 #[derive(serde::Serialize)]
 pub struct Validator<'a> {
     pub field: &'a str,
@@ -9,11 +5,11 @@ pub struct Validator<'a> {
 }
 
 pub trait Validation {
-    fn validate(&self) -> Result<(), Status>;
+    fn validate(&self) -> Result<(), tonic::Status>;
 }
 
-impl Validation for Note {
-    fn validate(&self) -> Result<(), Status> {
+impl Validation for crate::proto::Note {
+    fn validate(&self) -> Result<(), tonic::Status> {
         let mut validators = Vec::new();
         if self.title.is_empty() {
             validators.push(Validator {
@@ -44,10 +40,10 @@ impl Validation for Note {
         } else {
             let json = serde_json::to_string(&validators);
             match json {
-                Ok(json) => Err(Status::invalid_argument(json)),
+                Ok(json) => Err(tonic::Status::invalid_argument(json)),
                 Err(e) => {
                     tracing::error!("Failed to serialize validators: {:?}", e);
-                    Err(Status::internal("Failed to serialize validators"))
+                    Err(tonic::Status::internal("Failed to serialize validators"))
                 }
             }
         }

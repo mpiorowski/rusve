@@ -82,7 +82,7 @@
             <h2
                 class="flex items-center gap-2 text-base font-semibold leading-7 text-gray-50"
             >
-                New Note
+                New note
             </h2>
             <p class="mt-1 text-sm leading-6 text-gray-200">
                 Create a new note.
@@ -118,20 +118,6 @@
                 </Button>
             </div>
         </div>
-
-        <!--
-        {#each data.notes as note}
-            <div
-                class="mx-auto mt-8 rounded-lg bg-gray-800 p-6 text-white shadow-md"
-            >
-                <h2 class="mb-2 text-xl font-semibold">{note.title}</h2>
-                <p class="mb-4 text-gray-50">
-                    {note.content}
-                </p>
-                <Button class="w-20" href="/notes/{note.id}">Edit</Button>
-            </div>
-        {/each}
--->
     </div>
 </form>
 

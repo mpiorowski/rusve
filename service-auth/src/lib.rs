@@ -20,30 +20,17 @@ pub struct Env {
 }
 
 pub fn init_envs() -> Result<Env> {
-    let port = std::env::var("PORT").context("PORT not set")?;
-    let rust_log = std::env::var("RUST_LOG").context("RUST_LOG not set")?;
-    let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL not set")?;
-    let server_url = std::env::var("SERVER_URL").context("SERVER_URL not set")?;
-    let client_url = std::env::var("CLIENT_URL").context("CLIENT_URL not set")?;
-    let google_client_id = std::env::var("GOOGLE_CLIENT_ID").context("GOOGLE_CLIENT_ID not set")?;
-    let google_client_secret =
-        std::env::var("GOOGLE_CLIENT_SECRET").context("GOOGLE_CLIENT_SECRET not set")?;
-    let github_client_id = std::env::var("GITHUB_CLIENT_ID").context("GITHUB_CLIENT_ID not set")?;
-    let github_client_secret =
-        std::env::var("GITHUB_CLIENT_SECRET").context("GITHUB_CLIENT_SECRET not set")?;
-    let jwt_secret = std::env::var("JWT_SECRET").context("JWT_SECRET not set")?;
-
     Ok(Env {
-        port,
-        rust_log,
-        database_url,
-        server_url,
-        client_url,
-        google_client_id,
-        google_client_secret,
-        github_client_id,
-        github_client_secret,
-        jwt_secret,
+        port: std::env::var("PORT")?,
+        rust_log: std::env::var("RUST_LOG")?,
+        database_url: std::env::var("DATABASE_URL")?,
+        server_url: std::env::var("SERVER_URL")?,
+        client_url: std::env::var("CLIENT_URL")?,
+        google_client_id: std::env::var("GOOGLE_CLIENT_ID")?,
+        google_client_secret: std::env::var("GOOGLE_CLIENT_SECRET")?,
+        github_client_id: std::env::var("GITHUB_CLIENT_ID")?,
+        github_client_secret: std::env::var("GITHUB_CLIENT_SECRET")?,
+        jwt_secret: std::env::var("JWT_SECRET")?,
     })
 }
 

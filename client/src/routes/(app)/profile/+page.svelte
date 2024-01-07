@@ -109,8 +109,8 @@
             <div class="col-span-full">
                 <input
                     type="hidden"
-                    name="resumeId"
-                    bind:value={data.profile.resumeId}
+                    name="resume_id"
+                    bind:value={data.profile.resume_id}
                 />
                 <FileInput
                     name="resume"
@@ -118,7 +118,7 @@
                     bind:file={resume}
                     helper="PDF up to 5MB"
                 />
-                {#if data.profile.resumeId}
+                {#if data.profile.resume_id}
                     {#await data.stream.resume}
                         <div class="mt-2">
                             <span class="text-sm text-gray-600">
@@ -156,21 +156,21 @@
             <div class="col-span-full mt-6">
                 <input
                     type="hidden"
-                    name="coverId"
-                    bind:value={data.profile.coverId}
+                    name="cover_id"
+                    bind:value={data.profile.cover_id}
                 />
                 <input
                     type="hidden"
-                    name="coverUrl"
-                    bind:value={data.profile.coverUrl}
+                    name="cover_url"
+                    bind:value={data.profile.cover_url}
                 />
                 <Dropzone
                     name="cover"
                     label="Cover photo"
                     bind:file={cover}
                     description="SVG, PNG, JPG, GIF up to 5MB"
-                    url={data.profile.coverUrl
-                        ? data.profile.coverUrl + "h=400"
+                    url={data.profile.cover_url
+                        ? data.profile.cover_url + "h=400"
                         : ""}
                     accept="image/*"
                 />
