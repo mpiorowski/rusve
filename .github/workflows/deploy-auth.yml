@@ -29,7 +29,8 @@ env:
   REGION: europe-north1
   SERVICE: auth
   RUST_LOG: info
-  SERVER_URL: https://auth-cdb5ecy4ia-lz.a.run.app
+  AUTH_URL: https://auth-cdb5ecy4ia-lz.a.run.app
+  USERS_URI: users-cdb5ecy4ia-lz.a.run.app
   CLIENT_URL: https://www.rusve.app
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -75,7 +76,8 @@ jobs:
           env_vars: |
             RUST_LOG=${{ env.RUST_LOG }}
             CLIENT_URL=${{ env.CLIENT_URL }}
-            SERVER_URL=${{ env.SERVER_URL }}
+            AUTH_URL=${{ env.AUTH_URL }}
+            USERS_URI=${{ env.USERS_URI }}
             DATABASE_URL=${{ env.DATABASE_URL }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
