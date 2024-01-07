@@ -26,7 +26,7 @@ pub async fn count_emails_by_target_id(
         })?;
 
     tracing::info!("count_emails_by_target_id: {:?}", start.elapsed());
-    return Ok(Response::new(Count { count }));
+    Ok(Response::new(Count { count }))
 }
 
 pub async fn get_emails_by_target_id(

@@ -26,7 +26,7 @@ async fn connect_to_bucket(env: &Env) -> Result<s3::Bucket> {
 
 pub async fn get_file_buffer(env: &Env, file_id: &str, file_name: &str) -> Result<Vec<u8>> {
     let file_path = format!("{}/{}", &file_id, &file_name);
-    let bucket = connect_to_bucket(&env).await?;
+    let bucket = connect_to_bucket(env).await?;
     let buffer = bucket.get_object(file_path).await?.into();
     Ok(buffer)
 }
@@ -38,14 +38,14 @@ pub async fn upload_file(
     file_buffer: Vec<u8>,
 ) -> Result<()> {
     let file_path = format!("{}/{}", &file_id, &file_name);
-    let bucket = connect_to_bucket(&env).await?;
+    let bucket = connect_to_bucket(env).await?;
     bucket.put_object(file_path, &file_buffer).await?;
     Ok(())
 }
 
 pub async fn delete_file(env: &Env, file_id: &str, file_name: &str) -> Result<()> {
     let file_path = format!("{}/{}", &file_id, &file_name);
-    let bucket = connect_to_bucket(&env).await?;
+    let bucket = connect_to_bucket(env).await?;
     bucket.delete_object(file_path).await?;
     Ok(())
 }

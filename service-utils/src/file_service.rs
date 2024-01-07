@@ -23,7 +23,7 @@ pub async fn count_files_by_target_id(
         })?;
 
     tracing::info!("count_files_by_target_id: {:?}", start.elapsed());
-    return Ok(Response::new(Count { count }));
+    Ok(Response::new(Count { count }))
 }
 
 pub async fn get_files_by_target_id(
@@ -108,7 +108,7 @@ pub async fn get_file_by_id(
             Status::internal("Failed to get file by id")
         })?;
 
-    let file_buffer = crate::file_utils::get_file_buffer(&env, &file.id, &file.file_name)
+    let file_buffer = crate::file_utils::get_file_buffer(env, &file.id, &file.file_name)
         .await
         .map_err(|e| {
             tracing::error!("Failed to get file buffer: {:?}", e);
@@ -170,7 +170,7 @@ pub async fn upload_file(
             Status::internal("Failed to create file")
         })?;
 
-    crate::file_utils::upload_file(&env, &file.id, &file.file_name, buffer)
+    crate::file_utils::upload_file(env, &file.id, &file.file_name, buffer)
         .await
         .map_err(|e| {
             tracing::error!("Failed to upload file: {:?}", e);
@@ -216,7 +216,7 @@ pub async fn delete_file_by_id(
             Status::internal("Failed to delete file")
         })?;
 
-    crate::file_utils::delete_file(&env, &file.id, &file.file_name)
+    crate::file_utils::delete_file(env, &file.id, &file.file_name)
         .await
         .map_err(|e| {
             tracing::error!("Failed to delete file: {:?}", e);

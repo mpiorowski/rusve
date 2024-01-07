@@ -86,7 +86,7 @@ pub async fn insert_email(
     email: &Email,
 ) -> Result<Email> {
     let id = Uuid::now_v7();
-    let target_id = Uuid::parse_str(&target_id)?;
+    let target_id = Uuid::parse_str(target_id)?;
     let email = conn
         .query_one(
             "insert into emails (id, target_id, email_to, email_from, email_from_name, email_subject, email_body) values ($1, $2, $3, $4, $5, $6, $7) returning *",

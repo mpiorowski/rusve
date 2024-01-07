@@ -101,7 +101,7 @@ export const actions = {
                 file_name: file.name,
                 file_size: String(file.size),
                 file_type: file.type,
-                file_target: FileTarget.FILE_DOCUMENT,
+                file_target: FileTarget.DOCUMENT,
                 file_buffer: chunk,
             };
             const res = safe(() => stream.write(message));

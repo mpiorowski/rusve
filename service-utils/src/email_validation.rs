@@ -18,7 +18,7 @@ impl Validation for crate::proto::Email {
             });
         }
         // check if to is valid email
-        if !self.email_to.contains("@") {
+        if !self.email_to.contains('@') {
             validators.push(Validator {
                 field: "email_to",
                 tag: "email",
@@ -33,7 +33,7 @@ impl Validation for crate::proto::Email {
         if (self.email_from_name.is_empty()
             || self.email_from_name.len() < 3
             || self.email_from_name.len() > 1000)
-            && !self.email_from_name.contains("@")
+            && !self.email_from_name.contains('@')
         {
             validators.push(Validator {
                 field: "email_from_name",

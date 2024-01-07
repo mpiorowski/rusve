@@ -7,7 +7,7 @@ pub async fn create_user(
 ) -> Result<Response<crate::proto::Id>, tonic::Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let oauth_user = rusve_users::decode_oauth_token(metadata, &env)?;
+    let oauth_user = rusve_users::decode_oauth_token(metadata, env)?;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -97,7 +97,7 @@ pub async fn auth(
     }
 
     // check if user is subscribed
-    let subscribed = crate::stripe_service::check_subscription(&conn, &env, &user)
+    let subscribed = crate::stripe_service::check_subscription(&conn, env, &user)
         .await
         .map_err(|e| {
             tracing::error!("Failed to update subscription: {:?}", e);
