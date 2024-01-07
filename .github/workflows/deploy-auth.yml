@@ -26,7 +26,6 @@ env:
   DATABASE: rusve-db
   REGION: europe-north1
   SERVICE: auth
-  ENV: production
   RUST_LOG: info
   SERVER_URL: https://auth-cdb5ecy4ia-lz.a.run.app
   CLIENT_URL: https://www.rusve.app
@@ -71,7 +70,6 @@ jobs:
           region: ${{ env.REGION }}
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
           env_vars: |
-            ENV=${{ env.ENV }}
             RUST_LOG=${{ env.RUST_LOG }}
             CLIENT_URL=${{ env.CLIENT_URL }}
             SERVER_URL=${{ env.SERVER_URL }}

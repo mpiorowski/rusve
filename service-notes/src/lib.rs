@@ -15,9 +15,9 @@ pub struct Env {
 
 pub fn init_envs() -> Result<Env> {
     Ok(Env {
-        port: std::env::var("PORT")?,
-        rust_log: std::env::var("RUST_LOG")?,
-        database_url: std::env::var("DATABASE_URL")?,
+        port: std::env::var("PORT").context("PORT is not set")?,
+        rust_log: std::env::var("RUST_LOG").context("RUST_LOG is not set")?,
+        database_url: std::env::var("DATABASE_URL").context("DATABASE_URL is not set")?,
     })
 }
 

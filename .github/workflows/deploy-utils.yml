@@ -25,7 +25,6 @@ env:
   DATABASE: rusve-db
   REGION: europe-north1
   SERVICE: utils
-  ENV: production
   RUST_LOG: info
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=utils
   SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}

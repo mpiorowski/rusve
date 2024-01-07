@@ -18,7 +18,7 @@ env:
   DATABASE: rusve-db
   REGION: europe-north1
   SERVICE: notes
-  ENV: production
+  RUST_LOG: info
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=notes
   # DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
 
@@ -60,7 +60,7 @@ jobs:
           region: ${{ env.REGION }}
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
           env_vars: |
-            ENV=${{ env.ENV }}
+            RUST_LOG=${{ env.RUST_LOG }}
             DATABASE_URL=${{ env.DATABASE_URL }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

@@ -21,16 +21,20 @@ pub struct Env {
 
 pub fn init_envs() -> Result<Env> {
     Ok(Env {
-        port: std::env::var("PORT")?,
-        rust_log: std::env::var("RUST_LOG")?,
-        database_url: std::env::var("DATABASE_URL")?,
-        server_url: std::env::var("SERVER_URL")?,
-        client_url: std::env::var("CLIENT_URL")?,
-        google_client_id: std::env::var("GOOGLE_CLIENT_ID")?,
-        google_client_secret: std::env::var("GOOGLE_CLIENT_SECRET")?,
-        github_client_id: std::env::var("GITHUB_CLIENT_ID")?,
-        github_client_secret: std::env::var("GITHUB_CLIENT_SECRET")?,
-        jwt_secret: std::env::var("JWT_SECRET")?,
+        port: std::env::var("PORT").context("PORT is not set")?,
+        rust_log: std::env::var("RUST_LOG").context("RUST_LOG is not set")?,
+        database_url: std::env::var("DATABASE_URL").context("DATABASE_URL is not set")?,
+        server_url: std::env::var("SERVER_URL").context("SERVER_URL is not set")?,
+        client_url: std::env::var("CLIENT_URL").context("CLIENT_URL is not set")?,
+        google_client_id: std::env::var("GOOGLE_CLIENT_ID")
+            .context("GOOGLE_CLIENT_ID is not set")?,
+        google_client_secret: std::env::var("GOOGLE_CLIENT_SECRET")
+            .context("GOOGLE_CLIENT_SECRET is not set")?,
+        github_client_id: std::env::var("GITHUB_CLIENT_ID")
+            .context("GITHUB_CLIENT_ID is not set")?,
+        github_client_secret: std::env::var("GITHUB_CLIENT_SECRET")
+            .context("GITHUB_CLIENT_SECRET is not set")?,
+        jwt_secret: std::env::var("JWT_SECRET").context("JWT_SECRET is not set")?,
     })
 }
 
@@ -53,4 +57,3 @@ pub fn connect_to_db(env: &Env) -> Result<deadpool_postgres::Pool> {
     let pool = Pool::builder(mgr).build()?;
     Ok(pool)
 }
-
