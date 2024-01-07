@@ -20,20 +20,26 @@
     /** @type {File} */
     let newFile = new File([], "");
 
+    $: if (form?.fileBuffer) {
+        download(form.fileBuffer, form.fileName, form.fileType);
+    }
+
     /**
      * Download a base64 encoded file
-     * @param {import("$lib/proto/proto/File").File__Output} file
+     * @param {number[]} file_buffer
+     * @param {string} file_name
+     * @param {string} file_type
      * @returns {Promise<void>}
      */
-    async function onDownload(file) {
+    async function download(file_buffer, file_name, file_type) {
         try {
-            const blob = new Blob([new Uint8Array(file.file_buffer)], {
-                type: file.file_type,
+            const blob = new Blob([new Uint8Array(file_buffer)], {
+                type: file_type,
             });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = file.file_name;
+            link.download = file_name;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -172,15 +178,21 @@
                             <td
                                 class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                             >
-                                <button
-                                    class="mr-4 text-indigo-600 hover:text-indigo-900"
-                                    on:click={() => onDownload(file)}
-                                >
-                                    Download
-                                    <span class="sr-only">
-                                        , {file.file_name}
-                                    </span>
-                                </button>
+                                <form action="?/downloadFile" method="post" use:enhance>
+                                    <input
+                                        type="hidden"
+                                        name="id"
+                                        value={file.id}
+                                    />
+                                    <button
+                                        class="mr-4 text-indigo-600 hover:text-indigo-900"
+                                    >
+                                        Download
+                                        <span class="sr-only">
+                                            , {file.file_name}
+                                        </span>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     {/each}

@@ -58,8 +58,11 @@ service UtilsService {
     rpc SendEmail(Email) returns (Email) {}
 
     rpc CountFilesByTargetId(Empty) returns (Count) {}
+    // Returns stream of files metadata without content
     rpc GetFilesByTargetId(Page) returns (stream File) {}
-    rpc GetFileById(Id) returns (File) {}
+    // Returns single file with content as stream
+    rpc GetFileById(Id) returns (stream File) {}
+    // Send single file with content as stream
     rpc UploadFile(stream File) returns (stream File) {}
     rpc DeleteFileById(Id) returns (Empty) {}
 }

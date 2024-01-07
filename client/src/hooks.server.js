@@ -7,7 +7,7 @@ import { redirect } from "@sveltejs/kit";
 
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
-    const end = perf("Auth");
+    const end = perf("auth");
     event.locals.user = {
         id: "",
         created: "",
@@ -17,10 +17,10 @@ export async function handle({ event, resolve }) {
         sub: "",
         role: 0,
         avatar: "",
-        subscriptionId: "",
-        subscriptionEnd: "-infinity",
-        subscriptionCheck: "-infinity",
-        subscriptionActive: false,
+        subscription_id: "",
+        subscription_end: "-infinity",
+        subscription_check: "-infinity",
+        subscription_active: false,
     };
 
     if (event.url.pathname === "/auth") {

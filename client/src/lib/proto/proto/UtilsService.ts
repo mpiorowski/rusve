@@ -42,14 +42,10 @@ export interface UtilsServiceClient extends grpc.Client {
   getEmailsByTargetId(argument: _proto_Page, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Email__Output>;
   getEmailsByTargetId(argument: _proto_Page, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_Email__Output>;
   
-  GetFileById(argument: _proto_Id, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  GetFileById(argument: _proto_Id, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  GetFileById(argument: _proto_Id, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  GetFileById(argument: _proto_Id, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  getFileById(argument: _proto_Id, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  getFileById(argument: _proto_Id, metadata: grpc.Metadata, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  getFileById(argument: _proto_Id, options: grpc.CallOptions, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
-  getFileById(argument: _proto_Id, callback: grpc.requestCallback<_proto_File__Output>): grpc.ClientUnaryCall;
+  GetFileById(argument: _proto_Id, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  GetFileById(argument: _proto_Id, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  getFileById(argument: _proto_Id, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
+  getFileById(argument: _proto_Id, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
   
   GetFilesByTargetId(argument: _proto_Page, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
   GetFilesByTargetId(argument: _proto_Page, options?: grpc.CallOptions): grpc.ClientReadableStream<_proto_File__Output>;
@@ -81,7 +77,7 @@ export interface UtilsServiceHandlers extends grpc.UntypedServiceImplementation 
   
   GetEmailsByTargetId: grpc.handleServerStreamingCall<_proto_Page__Output, _proto_Email>;
   
-  GetFileById: grpc.handleUnaryCall<_proto_Id__Output, _proto_File>;
+  GetFileById: grpc.handleServerStreamingCall<_proto_Id__Output, _proto_File>;
   
   GetFilesByTargetId: grpc.handleServerStreamingCall<_proto_Page__Output, _proto_File>;
   

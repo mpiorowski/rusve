@@ -826,6 +826,7 @@ pub mod utils_service_client {
                 .insert(GrpcMethod::new("proto.UtilsService", "CountFilesByTargetId"));
             self.inner.unary(req, path, codec).await
         }
+        /// Returns stream of files metadata without content
         pub async fn get_files_by_target_id(
             &mut self,
             request: impl tonic::IntoRequest<super::Page>,
@@ -851,10 +852,14 @@ pub mod utils_service_client {
                 .insert(GrpcMethod::new("proto.UtilsService", "GetFilesByTargetId"));
             self.inner.server_streaming(req, path, codec).await
         }
+        /// Returns single file with content as stream
         pub async fn get_file_by_id(
             &mut self,
             request: impl tonic::IntoRequest<super::Id>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status> {
+        ) -> std::result::Result<
+            tonic::Response<tonic::codec::Streaming<super::File>>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -871,8 +876,9 @@ pub mod utils_service_client {
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(GrpcMethod::new("proto.UtilsService", "GetFileById"));
-            self.inner.unary(req, path, codec).await
+            self.inner.server_streaming(req, path, codec).await
         }
+        /// Send single file with content as stream
         pub async fn upload_file(
             &mut self,
             request: impl tonic::IntoStreamingRequest<Message = super::File>,
@@ -1756,6 +1762,7 @@ pub mod utils_service_server {
             >
             + Send
             + 'static;
+        /// Returns stream of files metadata without content
         async fn get_files_by_target_id(
             &self,
             request: tonic::Request<super::Page>,
@@ -1763,16 +1770,27 @@ pub mod utils_service_server {
             tonic::Response<Self::GetFilesByTargetIdStream>,
             tonic::Status,
         >;
+        /// Server streaming response type for the GetFileById method.
+        type GetFileByIdStream: futures_core::Stream<
+                Item = std::result::Result<super::File, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        /// Returns single file with content as stream
         async fn get_file_by_id(
             &self,
             request: tonic::Request<super::Id>,
-        ) -> std::result::Result<tonic::Response<super::File>, tonic::Status>;
+        ) -> std::result::Result<
+            tonic::Response<Self::GetFileByIdStream>,
+            tonic::Status,
+        >;
         /// Server streaming response type for the UploadFile method.
         type UploadFileStream: futures_core::Stream<
                 Item = std::result::Result<super::File, tonic::Status>,
             >
             + Send
             + 'static;
+        /// Send single file with content as stream
         async fn upload_file(
             &self,
             request: tonic::Request<tonic::Streaming<super::File>>,
@@ -2088,11 +2106,14 @@ pub mod utils_service_server {
                 "/proto.UtilsService/GetFileById" => {
                     #[allow(non_camel_case_types)]
                     struct GetFileByIdSvc<T: UtilsService>(pub Arc<T>);
-                    impl<T: UtilsService> tonic::server::UnaryService<super::Id>
+                    impl<
+                        T: UtilsService,
+                    > tonic::server::ServerStreamingService<super::Id>
                     for GetFileByIdSvc<T> {
                         type Response = super::File;
+                        type ResponseStream = T::GetFileByIdStream;
                         type Future = BoxFuture<
-                            tonic::Response<Self::Response>,
+                            tonic::Response<Self::ResponseStream>,
                             tonic::Status,
                         >;
                         fn call(
@@ -2124,7 +2145,7 @@ pub mod utils_service_server {
                                 max_decoding_message_size,
                                 max_encoding_message_size,
                             );
-                        let res = grpc.unary(method, req).await;
+                        let res = grpc.server_streaming(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)

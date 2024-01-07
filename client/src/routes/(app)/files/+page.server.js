@@ -5,6 +5,7 @@ import { createMetadata } from "$lib/server/metadata";
 import { fail } from "@sveltejs/kit";
 import { safe } from "$lib/safe";
 import { FileTarget } from "$lib/proto/proto/FileTarget";
+import { getFormValue } from "$lib/utils";
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals, url }) {
@@ -61,7 +62,7 @@ export async function load({ locals, url }) {
             )
             .map((f) => ({
                 ...f,
-                file_buffer: Array.from(f.file_buffer),
+                file_buffer: [],
             })),
         total: Number(d1.data.count),
         pageSize: limit,
@@ -130,6 +131,44 @@ export const actions = {
                 ...s.data,
                 file_buffer: [],
             },
+        };
+    },
+    downloadFile: async ({ locals, request }) => {
+        const end = perf("download_file");
+        const form = await request.formData();
+        const id = getFormValue(form, "id");
+
+        const metadata = createMetadata(locals.user.id);
+        const stream = utilsService.GetFileById({ id }, metadata);
+
+        /** @type {import("$lib/proto/proto/File").File__Output} */
+        let file;
+        /** @type {Buffer[]} */
+        const chunks = [];
+        /** @type {Promise<import("$lib/proto/proto/File").File__Output>} */
+        const p = new Promise((res, rej) => {
+            stream.on("error", (err) => rej(err));
+            stream.on(
+                "data",
+                /** @param {import("$lib/proto/proto/File").File__Output} data */ (
+                    data,
+                ) => {
+                    chunks.push(data.file_buffer);
+                    file = data;
+                },
+            );
+            stream.on("end", () => res(file));
+        });
+        const s = await safe(p);
+        if (s.error) {
+            return fail(500, { error: s.msg });
+        }
+
+        end();
+        return {
+            fileName: s.data.file_name,
+            fileType: s.data.file_type,
+            fileBuffer: Array.from(Buffer.concat(chunks)),
         };
     },
 };

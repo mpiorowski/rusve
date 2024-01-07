@@ -90,7 +90,7 @@ pub async fn get_file_by_id(
     env: &rusve_utils::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<Id>,
-) -> Result<Response<File>, Status> {
+) -> Result<Response<ReceiverStream<Result<File, Status>>>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
     let target_id = rusve_utils::auth(metadata)?.id;
@@ -101,7 +101,7 @@ pub async fn get_file_by_id(
     })?;
 
     let request = request.into_inner();
-    let mut file = crate::file_db::get_file_by_id(&conn, &request.id, &target_id)
+    let file = crate::file_db::get_file_by_id(&conn, &request.id, &target_id)
         .await
         .map_err(|e| {
             tracing::error!("Failed to get file by id: {:?}", e);
@@ -115,10 +115,20 @@ pub async fn get_file_by_id(
             Status::internal("Failed to get file buffer")
         })?;
 
-    file.file_buffer = file_buffer;
+    let (tx, rx) = tokio::sync::mpsc::channel(128);
+    // Chunk size is 64KB
+    let chunk_size = 1024 * 64;
+    for chunk in file_buffer.chunks(chunk_size) {
+        let mut file = file.clone();
+        file.file_buffer = chunk.to_vec();
+        if let Err(e) = tx.send(Ok(file)).await {
+            tracing::error!("Failed to send file: {:?}", e);
+            break;
+        }
+    }
 
     tracing::info!("get_file_by_id: {:?}", start.elapsed());
-    Ok(Response::new(file))
+    Ok(Response::new(ReceiverStream::new(rx)))
 }
 
 pub async fn upload_file(
