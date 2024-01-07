@@ -137,7 +137,7 @@ pub async fn oauth_callback(
      * Here we are connecting to the users service via gRPC server-server and creating a new user.
      * The users service will return a token id that we can use to authenticate the user.
      */
-    let mut client = UsersServiceClient::connect("http://service-users:443")
+    let mut client = UsersServiceClient::connect(state.env.users_url.clone())
         .await
         .map_err(|err| {
             tracing::error!("Failed to connect to users service: {:?}", err);
