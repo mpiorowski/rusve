@@ -35,9 +35,12 @@ jobs:
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-        # deploy-utils:
-        #   uses: ./.github/workflows/deploy-utils.yml
-        #   secrets:
-        #     GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-        #     DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-        #     SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+  deploy-utils:
+    uses: ./.github/workflows/deploy-utils.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+      S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+      S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
