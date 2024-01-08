@@ -105,7 +105,6 @@ pub async fn auth(
             Status::internal("Failed to insert token")
         })?;
 
-    tracing::info!("before subs: {:?}", start.elapsed());
     // check if user is subscribed
     let subscribed = crate::stripe_service::check_subscription(&conn, env, &user)
         .await
