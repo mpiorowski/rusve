@@ -80,7 +80,7 @@ pub async fn auth(
         })?;
 
     // check if token has expired, 7 days
-    if token.updated + time::Duration::days(7) < time::OffsetDateTime::now_utc() {
+    if token.created + time::Duration::days(7) < time::OffsetDateTime::now_utc() {
         tracing::error!("Token has expired");
         return Err(Status::unauthenticated("Unauthenticated"));
     }
@@ -98,13 +98,12 @@ pub async fn auth(
     }
 
     // create new token
-    let token_id =
-        crate::token_db::update_token_id(&conn, &token.id, &user.id)
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to update token: {:?}", e);
-                Status::internal("Failed to update token")
-            })?;
+    let token_id = crate::token_db::insert_token(&conn, &user.id)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to insert token: {:?}", e);
+            Status::internal("Failed to insert token")
+        })?;
 
     // check if user is subscribed
     let subscribed = crate::stripe_service::check_subscription(&conn, env, &user)
@@ -114,6 +113,13 @@ pub async fn auth(
             Status::internal("Failed to update subscription")
         })?;
     user.subscription_active = subscribed;
+
+    // Delete old tokens. If this fails, it's not a big deal.
+    tokio::spawn(async move {
+        if let Err(err) = crate::token_db::delete_old_tokens(&conn).await {
+            tracing::error!("Failed to delete old tokens: {:?}", err);
+        }
+    });
 
     tracing::info!("auth: {:?}", start.elapsed());
     Ok(Response::new(crate::proto::AuthResponse {

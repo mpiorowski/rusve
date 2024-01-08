@@ -33,6 +33,17 @@ pub async fn select_token_by_id(conn: &Object, token_id: &str) -> Result<Token> 
     Ok(token)
 }
 
+pub async fn insert_token(conn: &Object, user_id: &str) -> Result<Uuid> {
+    let id: Uuid = Uuid::now_v7();
+    let user_id = Uuid::from_str(user_id)?;
+    conn.execute(
+        "insert into tokens (id, user_id) values ($1, $2)",
+        &[&id, &user_id],
+    )
+    .await?;
+    Ok(id)
+}
+
 pub async fn update_token_id(conn: &Object, old_id: &Uuid, new_user_id: &str) -> Result<Uuid> {
     let new_id: Uuid = Uuid::now_v7();
     let user_id = Uuid::from_str(new_user_id)?;
