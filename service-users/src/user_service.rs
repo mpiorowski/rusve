@@ -1,34 +1,44 @@
 use tonic::{Request, Response, Status};
 
+use crate::user_db::StringOrUuid;
+
 pub async fn create_user(
-    env: &rusve_users::Env,
     pool: &deadpool_postgres::Pool,
-    request: Request<crate::proto::Empty>,
+    request: Request<crate::proto::CreateUserRequest>,
 ) -> Result<Response<crate::proto::Id>, tonic::Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let oauth_user = rusve_users::decode_oauth_token(metadata, env)?;
+    let token_id = rusve_users::decode_token(metadata)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
         Status::internal("Failed to get connection")
     })?;
 
+    let token = crate::token_db::select_token_by_id(&conn, &token_id)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to auth token: {:?}", e);
+            Status::unauthenticated("Failed to auth token")
+        })?;
+
+    // Check if token has expired, 10 minutes.
+    if token.created + time::Duration::minutes(10) < time::OffsetDateTime::now_utc() {
+        tracing::error!("Token has expired");
+        return Err(Status::unauthenticated("Unauthenticated"));
+    }
+
     // Create a new user if one doesn't exist, otherwise update the existing user.
-    let user = crate::user_db::create_user(
-        &conn,
-        &oauth_user.sub,
-        &oauth_user.email,
-        &oauth_user.avatar,
-    )
-    .await
-    .map_err(|e| {
-        tracing::error!("Failed to create user: {:?}", e);
-        Status::internal("Failed to create user")
-    })?;
+    let request = request.into_inner();
+    let user = crate::user_db::create_user(&conn, &request.email, &request.sub, &request.avatar)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to create user: {:?}", e);
+            Status::internal("Failed to create user")
+        })?;
 
     // Create a new token.
-    let token = crate::token_db::create_token(&conn, &user.id)
+    let token = crate::token_db::update_token_id(&conn, &token.id, &user.id)
         .await
         .map_err(|e| {
             tracing::error!("Failed to create token: {:?}", e);
@@ -44,7 +54,7 @@ pub async fn create_user(
 
     tracing::info!("CreateUser: {:?}", start.elapsed());
     Ok(Response::new(crate::proto::Id {
-        id: token.id.to_string(),
+        id: token.to_string(),
     }))
 }
 
@@ -70,31 +80,31 @@ pub async fn auth(
         })?;
 
     // check if token has expired, 7 days
-    if token.created + time::Duration::days(7) < time::OffsetDateTime::now_utc() {
+    if token.updated + time::Duration::days(7) < time::OffsetDateTime::now_utc() {
         tracing::error!("Token has expired");
         return Err(Status::unauthenticated("Unauthenticated"));
     }
 
-    // create new token
-    let token_id = crate::token_db::update_token_id(&conn, &token.id)
+    // get user
+    let mut user = crate::user_db::select_user_by_id(&conn, StringOrUuid::Uuid(token.user_id))
         .await
         .map_err(|e| {
-            tracing::error!("Failed to update token: {:?}", e);
-            Status::internal("Failed to update token")
+            tracing::error!("Failed to auth user: {:?}", e);
+            Status::unauthenticated("Failed to auth user")
         })?;
-
-    // get user
-    let mut user =
-        crate::user_db::select_user_by_id(&conn, crate::user_db::StringOrUuid::Uuid(token.user_id))
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to auth user: {:?}", e);
-                Status::unauthenticated("Failed to auth user")
-            })?;
     if user.deleted != "infinity" {
         tracing::error!("User is deleted");
         return Err(Status::unauthenticated("Unauthenticated"));
     }
+
+    // create new token
+    let token_id =
+        crate::token_db::update_token_id(&conn, &token.id, &user.id)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to update token: {:?}", e);
+                Status::internal("Failed to update token")
+            })?;
 
     // check if user is subscribed
     let subscribed = crate::stripe_service::check_subscription(&conn, env, &user)

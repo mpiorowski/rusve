@@ -96,28 +96,3 @@ pub fn decode_token(metadata: &tonic::metadata::MetadataMap) -> Result<Claims, t
 
     Ok(token_message.claims)
 }
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub struct OAuthUser {
-    pub sub: String,
-    pub email: String,
-    pub avatar: String,
-    pub exp: i64,
-}
-pub fn decode_oauth_token(
-    metadata: &tonic::metadata::MetadataMap,
-    env: &Env,
-) -> Result<OAuthUser, tonic::Status> {
-    let token = extract_token(metadata)?;
-    let token_message = jsonwebtoken::decode::<OAuthUser>(
-        token,
-        &jsonwebtoken::DecodingKey::from_secret(env.jwt_secret.as_bytes()),
-        &jsonwebtoken::Validation::default(),
-    )
-    .map_err(|e| {
-        tracing::error!("Failed to decode authorization token: {:?}", e);
-        tonic::Status::unauthenticated("Invalid authorization token")
-    })?;
-
-    Ok(token_message.claims)
-}

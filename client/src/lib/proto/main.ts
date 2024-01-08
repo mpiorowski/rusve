@@ -13,6 +13,7 @@ export interface ProtoGrpcType {
   proto: {
     AuthResponse: MessageTypeDefinition
     Count: MessageTypeDefinition
+    CreateUserRequest: MessageTypeDefinition
     Email: MessageTypeDefinition
     Empty: MessageTypeDefinition
     File: MessageTypeDefinition

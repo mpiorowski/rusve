@@ -24,6 +24,12 @@ message Count {
     int64 count = 1;
 }
 
+message CreateUserRequest {
+    string email = 1;
+    string sub = 2;
+    string avatar = 3;
+}
+
 message AuthResponse {
     string token = 1;
     User user = 2;
@@ -34,7 +40,7 @@ message StripeUrlResponse {
 }
 
 service UsersService {
-    rpc CreateUser(Empty) returns (Id) {}
+    rpc CreateUser(CreateUserRequest) returns (Id) {}
     rpc Auth(Empty) returns (AuthResponse) {}
 
     rpc GetProfileByUserId(Empty) returns (Profile) {}

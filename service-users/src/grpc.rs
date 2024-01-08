@@ -1,13 +1,16 @@
 use crate::proto::users_service_server::UsersService;
-use crate::proto::{AuthResponse, Empty, Id, Profile};
+use crate::proto::{AuthResponse, CreateUserRequest, Empty, Id, Profile};
 use crate::MyService;
 use anyhow::Result;
 use tonic::{Request, Response, Status};
 
 #[tonic::async_trait]
 impl UsersService for MyService {
-    async fn create_user(&self, request: Request<Empty>) -> Result<Response<Id>, Status> {
-        crate::user_service::create_user(&self.env, &self.pool, request).await
+    async fn create_user(
+        &self,
+        request: Request<CreateUserRequest>,
+    ) -> Result<Response<Id>, Status> {
+        crate::user_service::create_user(&self.pool, request).await
     }
 
     async fn auth(&self, request: Request<Empty>) -> Result<Response<AuthResponse>, Status> {

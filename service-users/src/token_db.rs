@@ -6,14 +6,17 @@ use uuid::Uuid;
 pub struct Token {
     pub id: Uuid,
     pub created: time::OffsetDateTime,
+    pub updated: time::OffsetDateTime,
     pub user_id: Uuid,
 }
+
 impl TryFrom<tokio_postgres::Row> for Token {
     type Error = anyhow::Error;
     fn try_from(value: tokio_postgres::Row) -> std::result::Result<Self, Self::Error> {
         Ok(Token {
             id: value.try_get("id")?,
             created: value.try_get("created")?,
+            updated: value.try_get("updated")?,
             user_id: value.try_get("user_id")?,
         })
     }
@@ -30,23 +33,12 @@ pub async fn select_token_by_id(conn: &Object, token_id: &str) -> Result<Token> 
     Ok(token)
 }
 
-pub async fn create_token(client: &Object, user_id: &str) -> Result<Token> {
-    let id = Uuid::now_v7();
-    let user_id = Uuid::parse_str(user_id)?;
-    let row = client
-        .query_one(
-            "insert into tokens (id, user_id) values ($1, $2) returning *",
-            &[&id, &user_id],
-        )
-        .await?;
-    Token::try_from(row)
-}
-
-pub async fn update_token_id(conn: &Object, old_id: &Uuid) -> Result<Uuid> {
+pub async fn update_token_id(conn: &Object, old_id: &Uuid, new_user_id: &str) -> Result<Uuid> {
     let new_id: Uuid = Uuid::now_v7();
+    let user_id = Uuid::from_str(new_user_id)?;
     conn.execute(
-        "update tokens set id = $1, created = now() where id = $2",
-        &[&new_id, &old_id],
+        "update tokens set id = $1, user_id = $2 where id = $3",
+        &[&new_id, &user_id, &old_id],
     )
     .await?;
     Ok(new_id)
