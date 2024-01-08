@@ -18,6 +18,8 @@ on:
         required: true
       GITHUB_CLIENT_ID:
         required: true
+      JWT_SECRET:
+        required: true
 
 env:
   GAR_LOCATION: europe-north1
@@ -26,11 +28,12 @@ env:
   DATABASE: rusve-db
   REGION: europe-north1
   SERVICE: auth
-  ENV: production
   RUST_LOG: info
-  SERVER_URL: https://auth-cdb5ecy4ia-lz.a.run.app
+  AUTH_URL: https://auth-cdb5ecy4ia-lz.a.run.app
+  USERS_URL: https://users-cdb5ecy4ia-lz.a.run.app
   CLIENT_URL: https://www.rusve.app
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
   # DATABASE_URL=postgresql:///?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}&dbname=users
 
 permissions:
@@ -71,14 +74,15 @@ jobs:
           region: ${{ env.REGION }}
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
           env_vars: |
-            ENV=${{ env.ENV }}
             RUST_LOG=${{ env.RUST_LOG }}
             CLIENT_URL=${{ env.CLIENT_URL }}
-            SERVER_URL=${{ env.SERVER_URL }}
+            AUTH_URL=${{ env.AUTH_URL }}
+            USERS_URL=${{ env.USERS_URL }}
             DATABASE_URL=${{ env.DATABASE_URL }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}
             GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}
+            JWT_SECRET=${{ env.JWT_SECRET }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

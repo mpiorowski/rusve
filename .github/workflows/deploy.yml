@@ -14,13 +14,6 @@ jobs:
     uses: ./.github/workflows/deploy-client.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-  deploy-users:
-    uses: ./.github/workflows/deploy-users.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-      STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
-      STRIPE_PRICE_ID: ${{ secrets.STRIPE_PRICE_ID }}
   deploy-auth:
     uses: ./.github/workflows/deploy-auth.yml
     secrets:
@@ -30,14 +23,26 @@ jobs:
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
       GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
       GITHUB_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  deploy-users:
+    uses: ./.github/workflows/deploy-users.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
+      STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
+      STRIPE_PRICE_ID: ${{ secrets.STRIPE_PRICE_ID }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
   deploy-notes:
     uses: ./.github/workflows/deploy-notes.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-        # deploy-utils:
-        #   uses: ./.github/workflows/deploy-utils.yml
-        #   secrets:
-        #     GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-        #     DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-        #     SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+  deploy-utils:
+    uses: ./.github/workflows/deploy-utils.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+      S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+      S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}

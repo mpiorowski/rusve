@@ -17,8 +17,11 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) -> Result<()> {
             create table if not exists tokens (
                 id uuid primary key,
                 created timestamptz not null default now(),
+                updated timestamptz not null default now(),
                 user_id uuid not null
             );
+            drop trigger if exists set_timestamp on tokens;
+            create trigger set_timestamp before update on tokens for each row execute procedure trigger_set_timestamp();
 
             create table if not exists users (
                 id uuid primary key,

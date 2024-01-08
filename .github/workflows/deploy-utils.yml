@@ -12,7 +12,12 @@ on:
         required: true
       SENDGRID_API_KEY:
         required: true
-
+      S3_ACCESS_KEY:
+        required: true
+      S3_SECRET_KEY:
+        required: true
+      S3_ENDPOINT:
+        required: true
 env:
   GAR_LOCATION: europe-north1
   PROJECT_ID: rusve-384620
@@ -20,10 +25,13 @@ env:
   DATABASE: rusve-db
   REGION: europe-north1
   SERVICE: utils
-  ENV: production
+  RUST_LOG: info
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=utils
-  BUCKET: rusve-bucket
   SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+  S3_BUCKET_NAME: rusve
+  S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+  S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+  S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
 
 permissions:
   contents: read
@@ -63,9 +71,12 @@ jobs:
           region: ${{ env.REGION }}
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
           env_vars: |
-            ENV=${{ env.ENV }}
+            RUST_LOG=${{ env.RUST_LOG }}
             DATABASE_URL=${{ env.DATABASE_URL }}
             SENDGRID_API_KEY=${{ env.SENDGRID_API_KEY }}
-            BUCKET=${{ env.BUCKET }}
+            S3_BUCKET_NAME=${{ env.S3_BUCKET_NAME }}
+            S3_ACCESS_KEY=${{ env.S3_ACCESS_KEY }}
+            S3_SECRET_KEY=${{ env.S3_SECRET_KEY }}
+            S3_ENDPOINT=${{ env.S3_ENDPOINT }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

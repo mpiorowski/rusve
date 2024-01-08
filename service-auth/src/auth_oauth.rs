@@ -2,7 +2,6 @@ use anyhow::Result;
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 use rusve_auth::Env;
 use serde::{Deserialize, Serialize};
-use tonic::metadata::{Ascii, MetadataValue};
 
 pub enum OAuthProvider {
     Google,
@@ -23,7 +22,6 @@ pub trait OAuth {
         Self: Sized;
     fn build_oauth_client(&self) -> BasicClient;
     async fn get_user_info(&self, token: &str) -> Result<OAuthUser>;
-    async fn generate_jwt(&self, user: OAuthUser) -> Result<MetadataValue<Ascii>>;
 }
 
 pub struct OAuthConfig {
@@ -35,7 +33,6 @@ pub struct OAuthConfig {
     redirect_url: String,
     pub scopes: Vec<String>,
     user_info_url: String,
-    jwt_secret: String,
 }
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
@@ -62,10 +59,9 @@ impl OAuth for OAuthConfig {
                 client_secret: env.google_client_secret,
                 auth_url: "https://accounts.google.com/o/oauth2/v2/auth".to_string(),
                 token_url: "https://www.googleapis.com/oauth2/v3/token".to_string(),
-                redirect_url: format!("{}/oauth-callback/google", env.server_url),
+                redirect_url: format!("{}/oauth-callback/google", env.auth_url),
                 user_info_url: "https://www.googleapis.com/oauth2/v3/userinfo".to_string(),
                 scopes: vec!["email".to_string(), "openid".to_string()],
-                jwt_secret: env.jwt_secret,
             }),
             "github" => Ok(Self {
                 provider: OAuthProvider::Github,
@@ -73,10 +69,9 @@ impl OAuth for OAuthConfig {
                 client_secret: env.github_client_secret,
                 auth_url: "https://github.com/login/oauth/authorize".to_string(),
                 token_url: "https://github.com/login/oauth/access_token".to_string(),
-                redirect_url: format!("{}/oauth-callback/github", env.server_url),
+                redirect_url: format!("{}/oauth-callback/github", env.auth_url),
                 user_info_url: "https://api.github.com/user".to_string(),
                 scopes: vec!["user:email".to_string()],
-                jwt_secret: env.jwt_secret,
             }),
             _ => Err(anyhow::anyhow!(format!(
                 "Invalid OAuth provider: {}",
@@ -139,16 +134,5 @@ impl OAuth for OAuthConfig {
                 })
             }
         }
-    }
-
-    async fn generate_jwt(&self, user: OAuthUser) -> Result<MetadataValue<Ascii>> {
-        let token = jsonwebtoken::encode(
-            &jsonwebtoken::Header::default(),
-            &user,
-            &jsonwebtoken::EncodingKey::from_secret(self.jwt_secret.as_bytes()),
-        )?;
-        let token = format!("bearer {}", token);
-        let token: MetadataValue<Ascii> = token.parse()?;
-        Ok(token)
     }
 }

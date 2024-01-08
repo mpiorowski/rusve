@@ -19,13 +19,13 @@ pub struct Env {
 
 pub fn init_envs() -> Result<Env> {
     Ok(Env {
-        port: std::env::var("PORT")?,
-        rust_log: std::env::var("RUST_LOG")?,
-        database_url: std::env::var("DATABASE_URL")?,
-        client_url: std::env::var("CLIENT_URL")?,
-        stripe_api_key: std::env::var("STRIPE_API_KEY")?,
-        stripe_price_id: std::env::var("STRIPE_PRICE_ID")?,
-        jwt_secret: std::env::var("JWT_SECRET")?,
+        port: std::env::var("PORT").context("PORT is not set")?,
+        rust_log: std::env::var("RUST_LOG").context("RUST_LOG is not set")?,
+        database_url: std::env::var("DATABASE_URL").context("DATABASE_URL is not set")?,
+        client_url: std::env::var("CLIENT_URL").context("CLIENT_URL is not set")?,
+        stripe_api_key: std::env::var("STRIPE_API_KEY").context("STRIPE_API_KEY is not set")?,
+        stripe_price_id: std::env::var("STRIPE_PRICE_ID").context("STRIPE_PRICE_ID is not set")?,
+        jwt_secret: std::env::var("JWT_SECRET").context("JWT_SECRET is not set")?,
     })
 }
 
@@ -48,7 +48,6 @@ pub fn connect_to_db(env: &Env) -> Result<deadpool_postgres::Pool> {
     let pool = Pool::builder(mgr).build()?;
     Ok(pool)
 }
-
 
 pub fn extract_token(metadata: &tonic::metadata::MetadataMap) -> Result<&str, tonic::Status> {
     let token = match metadata.get("x-authorization") {
@@ -89,28 +88,6 @@ pub fn decode_token(metadata: &tonic::metadata::MetadataMap) -> Result<Claims, t
         token,
         &decoding_key,
         &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::RS256),
-    )
-    .map_err(|e| {
-        tracing::error!("Failed to decode authorization token: {:?}", e);
-        tonic::Status::unauthenticated("Invalid authorization token")
-    })?;
-
-    Ok(token_message.claims)
-}
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub struct OAuthUser {
-    pub sub: String,
-    pub email: String,
-    pub avatar: String,
-    pub exp: i64,
-}
-pub fn decode_oauth_token(metadata: &tonic::metadata::MetadataMap, env: &Env) -> Result<OAuthUser, tonic::Status> {
-    let token = extract_token(metadata)?;
-    let token_message = jsonwebtoken::decode::<OAuthUser>(
-        token,
-        &jsonwebtoken::DecodingKey::from_secret(env.jwt_secret.as_bytes()),
-        &jsonwebtoken::Validation::default(),
     )
     .map_err(|e| {
         tracing::error!("Failed to decode authorization token: {:?}", e);

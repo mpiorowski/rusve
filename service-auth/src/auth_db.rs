@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use anyhow::Result;
 use deadpool_postgres::{GenericClient, Object};
 use time::OffsetDateTime;
@@ -24,6 +26,23 @@ impl TryFrom<tokio_postgres::Row> for Verifier {
             created,
             csrf_token,
             pkce_verifier,
+        })
+    }
+}
+
+pub struct Token {
+    pub id: Uuid,
+    pub created: time::OffsetDateTime,
+    pub user_id: Uuid,
+}
+
+impl TryFrom<tokio_postgres::Row> for Token {
+    type Error = anyhow::Error;
+    fn try_from(value: tokio_postgres::Row) -> std::result::Result<Self, Self::Error> {
+        Ok(Token {
+            id: value.try_get("id")?,
+            created: value.try_get("created")?,
+            user_id: value.try_get("user_id")?,
         })
     }
 }
@@ -68,4 +87,16 @@ pub async fn delete_old_verifiers(client: &Object) -> Result<()> {
         )
         .await?;
     Ok(())
+}
+
+pub async fn insert_token(client: &Object) -> Result<Token> {
+    let id = Uuid::now_v7();
+    let user_id = Uuid::from_str("00000000-0000-0000-0000-000000000000")?;
+    let row = client
+        .query_one(
+            "insert into tokens (id, user_id) values ($1, $2) returning *",
+            &[&id, &user_id],
+        )
+        .await?;
+    Token::try_from(row)
 }

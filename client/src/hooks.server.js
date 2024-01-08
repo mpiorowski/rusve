@@ -31,15 +31,38 @@ export async function handle({ event, resolve }) {
         });
         return await resolve(event);
     }
+
+    /**
+     * Check if the user is coming from the oauth flow
+     * If so, create a user and redirect to the dashboard
+     */
     const queryToken = event.url.searchParams.get("token");
-    if (queryToken) {
-        event.cookies.set("token", queryToken, {
+    const queryEmail = event.url.searchParams.get("email");
+    const querySub = event.url.searchParams.get("sub");
+    const queryAvatar = event.url.searchParams.get("avatar");
+    if (queryToken && queryEmail && querySub && queryAvatar) {
+        const metadata = createMetadata(queryToken);
+        /** @type {import("$lib/proto/proto/CreateUserRequest").CreateUserRequest} */
+        const request = {
+            email: queryEmail,
+            sub: querySub,
+            avatar: queryAvatar,
+        };
+        /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Id").Id__Output>} */
+        const token = await new Promise((res) => {
+            usersService.CreateUser(request, metadata, grpcSafe(res));
+        });
+        if (token.error) {
+            redirect(302, "/auth?error=1");
+        }
+        event.cookies.set("token", token.data.id, {
             domain: COOKIE_DOMAIN,
             path: "/",
             maxAge: 10,
         });
         throw redirect(302, "/dashboard");
     }
+
     if (event.url.pathname === "/") {
         throw redirect(302, "/dashboard");
     }

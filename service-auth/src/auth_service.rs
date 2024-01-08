@@ -1,6 +1,6 @@
 use crate::{
+    auth_db,
     auth_oauth::{OAuth, OAuthConfig},
-    proto::users_service_client::UsersServiceClient,
     AppState,
 };
 use anyhow::Result;
@@ -123,35 +123,16 @@ pub async fn oauth_callback(
             Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
         })?;
 
-    // Generate a JWT token.
-    let jwt_token = oauth_config
-        .generate_jwt(user_profile)
-        .await
-        .map_err(|err| {
-            tracing::error!("Failed to generate JWT token: {:?}", err);
-            Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
-        })?;
-
     /*
      * This is where you implement you own logic to create or update a user in your database.
-     * Here we are connecting to the users service via gRPC server-server and creating a new user.
-     * The users service will return a token id that we can use to authenticate the user.
+     * Here we are inserting a new token in the database.
+     * The token id is returned to the client and will be used to authenticate the user.
+     * The user service will then check if the token is valid and create a new user if needed.
      */
-    let mut client = UsersServiceClient::connect("http://service-users:443")
-        .await
-        .map_err(|err| {
-            tracing::error!("Failed to connect to users service: {:?}", err);
-            Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
-        })?;
-    let mut request = tonic::Request::new(crate::proto::Empty {});
-    let metadata = request.metadata_mut();
-    metadata.insert("x-authorization", jwt_token);
-    let token = client.create_user(request).await.map_err(|err| {
-        tracing::error!("Failed to authenticate user: {:?}", err);
-        Redirect::to(&format!("{}/auth?error=invalid_user", state.env.client_url))
+    let token = auth_db::insert_token(&conn).await.map_err(|err| {
+        tracing::error!("Failed to insert token: {:?}", err);
+        Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
     })?;
-    let token = token.into_inner();
-
     // Delete old verifiers asynchronously. If this fails, it's not a big deal.
     tokio::spawn(async move {
         if let Err(err) = crate::auth_db::delete_old_verifiers(&conn).await {
@@ -161,7 +142,7 @@ pub async fn oauth_callback(
 
     tracing::info!("User authenticated");
     Ok(Redirect::to(&format!(
-        "{}/?token={}",
-        state.env.client_url, token.id
+        "{}/?token={}&email={}&sub={}&avatar={}",
+        state.env.client_url, token.id, user_profile.email, user_profile.sub, user_profile.avatar
     )))
 }

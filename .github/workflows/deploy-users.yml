@@ -14,6 +14,8 @@ on:
         required: true
       STRIPE_PRICE_ID:
         required: true
+      JWT_SECRET:
+        required: true
 
 env:
   GAR_LOCATION: europe-north1
@@ -22,8 +24,10 @@ env:
   DATABASE: rusve-db
   REGION: europe-north1
   SERVICE: users
-  ENV: production
+  RUST_LOG: info
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
+  CLIENT_URL: https://client-cdb5ecy4ia-lz.a.run.app
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
   # DATABASE_URL=postgresql:///?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}&dbname=users
 
 permissions:
@@ -64,9 +68,11 @@ jobs:
           region: ${{ env.REGION }}
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
           env_vars: |
-            ENV=${{ env.ENV }}
+            RUST_LOG=${{ env.RUST_LOG }}
             DATABASE_URL=${{ env.DATABASE_URL }}
             STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}
             STRIPE_PRICE_ID=${{ secrets.STRIPE_PRICE_ID }}
+            CLIENT_URL=${{ env.CLIENT_URL }}
+            JWT_SECRET=${{ env.JWT_SECRET }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
