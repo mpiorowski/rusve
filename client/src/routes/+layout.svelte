@@ -12,7 +12,7 @@
     $: if ($navigating) {
         t = setTimeout(() => {
             isNavigating = true;
-        }, 1000);
+        }, 500);
     } else {
         clearTimeout(t);
         isNavigating = false;
