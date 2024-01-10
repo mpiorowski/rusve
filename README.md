@@ -39,7 +39,7 @@ As an example, developers from my team who were familiar with NextJS were able t
 ![image](https://github.com/mpiorowski/rusve/assets/26543876/cc882b0a-e3ba-4dd0-85aa-ffe7598440ea)
  
 ## Additional features
-- **[Stripe Subscription](https://stripe.com)** - Fully working subscription flow.
+- **Stripe Subscription** - Fully working subscription flow.
 - **S3 file storage** - Functionality for storing, deleting, and downloading files from any S3-compatible API.
 - **SendGrid email sending** - Email sending with just one SendGrid API key.
 - **No TypeScript Build, Fully Typed with JSDocs** - Despite the absence of a TypeScript build, the code remains fully typed using JSDocs. While this approach may be somewhat controversial due to requiring more lines of code, the more I work with pure JSDocs, the more I appreciate its versatility.
