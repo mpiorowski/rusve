@@ -56,64 +56,62 @@ It supports features like Enums, as const, and even Zod's z.infer<typeof User>, 
 ## Aria and PWA with offline service workers
 ![image](https://user-images.githubusercontent.com/26543876/236647026-0db54439-b841-4e69-8a2f-6976e423b453.png)
 
-## Dev deployment
+## Proto
 
-1. Client setup
-```
-cp client/.env.example client/.env
-npm i --prefix client
-```
-
-2. Run proto generation
-Be sure to have `protoc`, `protoc-gen-go` and `protoc-gen-go-grpc` libs installed.
+Whenever You change proto definitions, always remember to generate new types:
 ```
 sh proto.sh
 ```
+## Deployment
 
-3. Fill in missing firebase secrets in `client/.env`
-- STRIPE_API_KEY
-- PUBLIC_API_KEY
-- PUBLIC_AUTH_DOMAIN
-- SERVICE_ACCOUNT
+The only prerequisites are `Docker` and `Docker Compose`. 
 
-Getting the `SERVICE_ACCOUNT` key is a bit [tricky](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments).
+Afterward, the only task remaining is to configure environment variables according to the deployment. No need for .env files or tedious copy/pasting — just straightforward environment variables, either configured on the system or written inline.
 
+### Development
 
-4. Start databases:
+1. Start databases:
 ```
-sh start.sh db
+docker compose -f docker-compose.db.yml up 
 ```
 
-5. Start app:
+2. Start client + services:
 ```
-sh start.sh app up --build
+JWT_SECRET=JWT_SECRET \
+GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID \
+GOOGLE_CLIENT_SECRET=GOOGLE_CLIENT_SECRET \
+GITHUB_CLIENT_ID=GITHUB_CLIENT_ID \
+GITHUB_CLIENT_SECRET=GITHUB_CLIENT_SECRET \
+SENDGRID_API_KEY=SENDGRID_API_KEY \
+UPSEND_KEY=UPSEND_KEY \
+STRIPE_API_KEY=STRIPE_API_KEY \
+STRIPE_PRICE_ID=STRIPE_PRICE_ID \
+S3_ACCESS_KEY=S3_ACCESS_KEY \
+S3_SECRET_KEY=S3_SECRET_KEY \
+S3_ENDPOINT=S3_ENDPOINT \
+docker compose -f docker-compose.app.yml up 
 ```
-
-6. Access:
-
-Application - http://localhost:3000  
-CMS         - http://localhost:8055 | Login: `admin@example.com` | Password: `d1r3ctu5` 
 
 ## Production deployment
 
 1. Go through each `deploy-***.yml` and change `env` acording to Your project.
 
 2. Add secrets to github
-- GCP_CREDENTIALS 
+- JWT_SECRET
+- GCP_CREDENTIALS
+- GH_CLIENT_ID
+- GH_CLIENT_SECRET
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+- JWT_SECRET
 - POSTGRES_DATABASE_URL
-- STRIPE_API_KEY
+- S3_ACCESS_KEY
+- S3_ENDPOINT
+- S3_SECRET_KEY
 - SENDGRID_API_KEY
-- PUBLIC_API_KEY
-- PUBLIC_AUTH_DOMAIN
-- SERVICE_ACCOUNT
+- STRIPE_API_KEY
+- STRIPE_PRICE_ID
 
 3. Add proper IAM permissions
 
 ![image](https://user-images.githubusercontent.com/26543876/235579498-ce5d296e-3f14-4cb5-b6cd-d27419f4fc47.png)
-
-
-## Bonus: Three ways to shows notes. Not implemented in application, but all the code is there to try it.
-This project shows how flexible the gRPC + SvelteKit setup is, using the newest SvelteKit `streamed` feature. There are three ways to display notes:
-1. `svelte server` calls `notes service` -> `notes service` selects all notes -> for each note it calls `users service` for user -> the note with the user is returned as stream
-2. `svelte server` calls `notes service` -> `notes service` selects all notes and return them -> for each note `svelte server` calls `users service` for user -> not waiting for users to resolve, he dispaly the notes, and after that await users as `streamed` data
-3. `svelte server` calls `notes service` -> `notes service` selects all notes and return them -> for each note `svelte server` add userId to set -> then, in one request he calls `users service` for all users -> not waiting for users to resolve, he displays notes and after that await users as `streamed` data
