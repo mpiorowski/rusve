@@ -14,7 +14,7 @@ declare global {
         }
         interface PageState {
             open: boolean;
-            noteDrawer: { email: string; profile: Profile__Output, note: Note__Output };
+            noteDrawer: { email: string; avatar: string; profile: Profile__Output, note: Note__Output };
         }
         // interface PageData {}
         // interface Platform {}

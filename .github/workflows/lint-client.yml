@@ -23,5 +23,6 @@ jobs:
       - run: npm i
       - run: npm run build
       - run: npm run lint
+        # TODO
         # Disable till grpc fix their generation: https://github.com/grpc/grpc-node/issues/2617
         # - run: npm run check

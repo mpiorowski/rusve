@@ -7,7 +7,7 @@ import { fail, redirect } from "@sveltejs/kit";
 /** @type {import('./$types').PageServerLoad} */
 export function load({ locals }) {
     return {
-        subscriptionActive: locals.user.subscriptionActive,
+        subscriptionActive: locals.user.subscription_active,
     };
 }
 
