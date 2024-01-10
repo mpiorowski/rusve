@@ -23,10 +23,10 @@ If you need something a little more simple (Go, SQLite, server deployment), feel
 https://www.rusve.app
 
 ## Architecture
-- **[SvelteKit](https://kit.svelte.dev/)** - Svelte currently is what I believe the best frontend framework. If you've never worked with it, don't worry; it's super easy to pick up.
-As an example, developers from my team who were familiar with NextJS were able to grasp it in just one week and start coding web apps. Trust me, once you try it, it's hard to go back to anything else.
 - **[Rust](https://www.rust-lang.org/)** - Amazing language, not easy to pick up, but one that can give one of the best performance and safety on the market.
 - **Modules** - Some people might call them microservices. Splitted into smaller parts, very easy to scale, and allows using any combination of languages and databases.
+- **[SvelteKit](https://kit.svelte.dev/)** - Svelte currently is what I believe the best frontend framework. If you've never worked with it, don't worry; it's super easy to pick up.
+As an example, developers from my team who were familiar with NextJS were able to grasp it in just one week and start coding web apps. Trust me, once you try it, it's hard to go back to anything else.
 - **[gRPC](https://grpc.io/)** - Connection between services using gRPC, which is very fast and gives an option for bi-directional streaming:
     - **[Typesafety](https://protobuf.dev/)** - Thanks to protobuf, there is amazing type safety across the whole project, regardless of the language (not only for TypeScript, hi tRPC). Trust me; this is phenomenal.
   If you add one "field" to your User object, both JavaScript and Rust will lint, pointing out exactly where you need to take care of it. Adding a new language like Java or Go? Type safety for them as well.
@@ -49,7 +49,6 @@ It supports features like Enums, as const, and even Zod's z.infer<typeof User>, 
 - **GitHub Actions for Automated Workflow** - Implement GitHub Actions to automate linting, code checks, and seamless deployments to the server. Streamline the development pipeline by integrating these actions, ensuring code quality and facilitating efficient, automatic updates to the production environment.
 - **Client side streaming** - Thanks to SvelteKit's newest feature, we can load and render crucial data first. Subsequently, all remaining data is returned as promises and rendered when they resolve.
 - **Files, Images and Emails** - A little bit of self promotion, this application is using my another dead simple service (free) for managing files, images and emails - [UpSend](https://www.upsend.app)
-
 
 ## Github action deployment
 ![image](https://github.com/mpiorowski/rusve/assets/26543876/cc5022a0-446c-4a79-b985-42f8102271da)
