@@ -10,9 +10,7 @@ It is a attempt to find the best way to build **fast** and **scalable** web appl
 
 Feel free to ask questions, throw new ideas and propose changes. Any contribution is also welcome, especially some ux/ui redesigns.
 
-Also, a little bit of self-promotion, i am building an application using this stack. Its goal is to take care of **files**, **images**, and **emails** for you. Feel free to give it a try, as it's free :)
-
-https://www.upsend.app
+Also, a little bit of self-promotion, i am building an [application](https://www.upsend.app) using this stack. Its goal is to take care of **files**, **images**, and **emails** for you. Feel free to give it a try, as it's free :)
 
 ## Alternative
 If you need something a little more simple (Go, SQLite, server deployment), feel free to check out the second project I am running:
@@ -20,21 +18,16 @@ If you need something a little more simple (Go, SQLite, server deployment), feel
 
 ## Currently working on...
 - Telemetry
-- Markdown
-- TESTS!
-- Build in gRPC auth
 - Comment whole codebase
+- TESTS!
 - **Any other feature You will request :)**
 
 ## Application
 https://www.rusve.app
-## CMS
-https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5` 
 
 ## Features
 - **Backend**
   - **Modules** - Some people might call them microservices. Splitted into smaller parts, very easy to scale, and allows using any combination of languages and databases.
-  - **[Go](https://go.dev/)** - Very easy to work with while still having an amazing performance. Out of the box support for gRPC. Recommended to start with.
   - **[Rust](https://www.rust-lang.org/)** - For more complex services use Rust, hard but amazing language. Almost impossible to write code that will not start.
   - **[gRPC](https://grpc.io/)** - Connection between services using gRPC, which is very fast and gives an option for bi-directional streaming. For Rust using great **[Tonic](https://docs.rs/tonic/latest/tonic/)** create, with first class support of async/await.
   - **[Typesafety](https://protobuf.dev/)** - Thanks to protobuf, amazing typesafety across the whole project, no matter the language (not only for TS, hi tRPC).
@@ -44,7 +37,6 @@ https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5`
   - **Security** - In addition to the default GCP auth flow, connections are also secured by an additional layer: bearer token validation. This allows for securing connections between services outside of GCP as well.
 - **Frontend**
   - **[SvelteKit](https://kit.svelte.dev/)** - Once You try it, it's hard to go back to any other framework.
-  - **[Typescript](https://www.typescriptlang.org/)** - Fully written in typescript with the [strict](https://typescript-eslint.io/linting/configs#strict) rules enforced. No any or unknown in code.
   - **[Form actions](https://kit.svelte.dev/docs/form-actions)** - Forms are handled by server, which force You to seperate view and logic. This is a great pattern and makes the logic unaccesible by the browser. 
   - **[Zod validation](https://github.com/colinhacks/zod)** - Every data if validated. Errors are returned and used by client to view them on forms.
   - **[Streaming](https://kit.svelte.dev/docs/load#streaming-with-promises)** - Important data is loaded and rendered first, after that all the rest are returned as promises and rendered when they resolve.
@@ -64,17 +56,10 @@ https://directus-cms.fly.dev | Login: `admin@example.com` | Password: `d1r3ctu5`
   - **[WYSIWYG](https://tiptap.dev/)** - Wyswig text editor thanks to TipTap.
 
 ## Architecture
-![image](https://github.com/mpiorowski/rusve/assets/26543876/ce687350-a827-44d0-94d2-723001f44ad6)
-
-## Authorization
-![image](https://user-images.githubusercontent.com/26543876/235413978-93d49f92-e8bb-47ac-a46d-f0fc08cec350.png)
+![image](https://github.com/mpiorowski/rusve/assets/26543876/50f41ff8-48d8-498b-95c3-78cfecea1675)
 
 ## Github action deployment
-### Release all
-![image](https://github.com/mpiorowski/rusve/assets/26543876/6e601880-2f7f-4a08-9e68-f48b2d515e00)
-
-### Release single
-![image](https://github.com/mpiorowski/rusve/assets/26543876/360833a8-7283-46d8-b5ce-9864e8a2966f)
+![image](https://github.com/mpiorowski/rusve/assets/26543876/cc5022a0-446c-4a79-b985-42f8102271da)
 
 ## Aria and PWA with offline service workers
 ![image](https://user-images.githubusercontent.com/26543876/236647026-0db54439-b841-4e69-8a2f-6976e423b453.png)
