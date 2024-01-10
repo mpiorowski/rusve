@@ -1,8 +1,5 @@
-# Welcome to Rusve!
-
+# Rusve = Rust + Svelte
 https://www.rusve.app
-
-**BIG [UPDATE](https://github.com/mpiorowski/rusve/releases/tag/v1.0.0) DROPPED, README NEED SOME UPDATES, pls wait :)**
 
 ## What is Rusve? 
 
