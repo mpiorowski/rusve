@@ -10,6 +10,7 @@ ARG USERS_URI
 ARG NOTES_URI
 ARG UTILS_URI
 ARG UPSEND_KEY
+ARG JWT_SECRET
 RUN echo "ENV=${ENV}" >> .env
 RUN echo "COOKIE_DOMAIN=${COOKIE_DOMAIN}" >> .env
 RUN echo "PUBLIC_AUTH_URL=${PUBLIC_AUTH_URL}" >> .env
@@ -17,6 +18,7 @@ RUN echo "USERS_URI=${USERS_URI}" >> .env
 RUN echo "NOTES_URI=${NOTES_URI}" >> .env
 RUN echo "UTILS_URI=${UTILS_URI}" >> .env
 RUN echo "UPSEND_KEY=${UPSEND_KEY}" >> .env
+RUN echo "JWT_SECRET=${JWT_SECRET}" >> .env
 
 COPY package.json /client/package.json
 COPY package-lock.json /client/package-lock.json
@@ -37,6 +39,7 @@ ARG USERS_URI
 ARG NOTES_URI
 ARG UTILS_URI
 ARG UPSEND_KEY
+ARG JWT_SECRET
 RUN echo "ENV=${ENV}" >> .env
 RUN echo "COOKIE_DOMAIN=${COOKIE_DOMAIN}" >> .env
 RUN echo "PUBLIC_AUTH_URL=${PUBLIC_AUTH_URL}" >> .env
@@ -44,6 +47,7 @@ RUN echo "USERS_URI=${USERS_URI}" >> .env
 RUN echo "NOTES_URI=${NOTES_URI}" >> .env
 RUN echo "UTILS_URI=${UTILS_URI}" >> .env
 RUN echo "UPSEND_KEY=${UPSEND_KEY}" >> .env
+RUN echo "JWT_SECRET=${JWT_SECRET}" >> .env
 
 COPY . /client
 
@@ -60,7 +64,6 @@ RUN npm install --production
 
 COPY --from=build /client/build /client/build
 COPY --from=build /client/src/lib/proto/ /client/src/lib/proto/
-COPY --from=build /client/src/lib/server/private.key /client/src/lib/server/private.key
 
 CMD PORT=8080 node build
 

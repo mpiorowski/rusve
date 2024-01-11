@@ -69,7 +69,7 @@ pub async fn create_stripe_checkout(
 ) -> Result<Response<crate::proto::StripeUrlResponse>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let user_id = rusve_users::decode_token(metadata)?.id;
+    let user_id = rusve_users::decode_token(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -83,7 +83,7 @@ pub async fn create_stripe_checkout(
                 Status::unauthenticated("Failed to auth user")
             })?;
 
-    let url = crate::stripe_service::create_checkout(env, conn, user)
+    let url = crate::stripe_service::create_checkout(&env, conn, user)
         .await
         .map_err(|e| {
             tracing::error!("Failed to create checkout session: {:?}", e);
@@ -101,7 +101,7 @@ pub async fn create_stripe_portal(
 ) -> Result<Response<crate::proto::StripeUrlResponse>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let user_id = rusve_users::decode_token(metadata)?.id;
+    let user_id = rusve_users::decode_token(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -114,7 +114,7 @@ pub async fn create_stripe_portal(
             Status::unauthenticated("Failed to auth user")
         })?;
 
-    let url = crate::stripe_service::create_portal(&conn, env, user)
+    let url = crate::stripe_service::create_portal(&conn, &env, user)
         .await
         .map_err(|e| {
             tracing::error!("Failed to create portal session: {:?}", e);

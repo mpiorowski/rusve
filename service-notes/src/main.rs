@@ -8,6 +8,7 @@ use crate::proto::notes_service_server::NotesServiceServer;
 use anyhow::{Context, Result};
 
 pub struct MyService {
+    env: rusve_notes::Env,
     pool: deadpool_postgres::Pool,
 }
 
@@ -33,7 +34,7 @@ async fn main() -> Result<()> {
     // Run gRPC server
     let addr = format!("[::]:{}", env.port).parse()?;
     tracing::info!("gRPC server started on port: {:?}", env.port);
-    let server = MyService { pool };
+    let server = MyService { pool, env };
     let svc = NotesServiceServer::new(server);
     tonic::transport::Server::builder()
         .add_service(svc)

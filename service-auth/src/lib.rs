@@ -17,6 +17,7 @@ pub struct Env {
     pub google_client_secret: String,
     pub github_client_id: String,
     pub github_client_secret: String,
+    pub jwt_secret: String,
 }
 
 pub fn init_envs() -> Result<Env> {
@@ -35,6 +36,7 @@ pub fn init_envs() -> Result<Env> {
             .context("GITHUB_CLIENT_ID is not set")?,
         github_client_secret: std::env::var("GITHUB_CLIENT_SECRET")
             .context("GITHUB_CLIENT_SECRET is not set")?,
+        jwt_secret: std::env::var("JWT_SECRET").context("JWT_SECRET is not set")?,
     })
 }
 

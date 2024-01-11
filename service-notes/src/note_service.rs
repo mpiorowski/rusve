@@ -18,7 +18,7 @@ impl NotesService for MyService {
     ) -> Result<Response<Count>, Status> {
         let start = std::time::Instant::now();
         let metadata = request.metadata();
-        let user_id = rusve_notes::auth(metadata)?.id;
+        let user_id = rusve_notes::auth(metadata, &self.env.jwt_secret)?.id;
 
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
@@ -42,7 +42,7 @@ impl NotesService for MyService {
     ) -> Result<Response<Self::GetNotesByUserIdStream>, Status> {
         let start = std::time::Instant::now();
         let metadata = request.metadata();
-        let user_id = rusve_notes::auth(metadata)?.id;
+        let user_id = rusve_notes::auth(metadata, &self.env.jwt_secret)?.id;
 
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
@@ -113,7 +113,7 @@ impl NotesService for MyService {
     async fn get_note_by_id(&self, request: Request<Id>) -> Result<Response<Note>, Status> {
         let start = std::time::Instant::now();
         let metadata = request.metadata();
-        let user_id = rusve_notes::auth(metadata)?.id;
+        let user_id = rusve_notes::auth(metadata, &self.env.jwt_secret)?.id;
 
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);
@@ -135,7 +135,7 @@ impl NotesService for MyService {
     async fn create_note(&self, request: Request<Note>) -> Result<Response<Note>, Status> {
         let start = std::time::Instant::now();
         let metadata = request.metadata();
-        let user_id = rusve_notes::auth(metadata)?.id;
+        let user_id = rusve_notes::auth(metadata, &self.env.jwt_secret)?.id;
 
         let mut note = request.into_inner();
         crate::note_validation::Validation::validate(&note)?;
@@ -168,7 +168,7 @@ impl NotesService for MyService {
     async fn delete_note_by_id(&self, request: Request<Id>) -> Result<Response<Empty>, Status> {
         let start = std::time::Instant::now();
         let metadata = request.metadata();
-        let user_id = rusve_notes::auth(metadata)?.id;
+        let user_id = rusve_notes::auth(metadata, &self.env.jwt_secret)?.id;
 
         let conn = self.pool.get().await.map_err(|e| {
             tracing::error!("Failed to get connection: {:?}", e);

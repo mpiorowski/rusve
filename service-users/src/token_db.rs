@@ -44,17 +44,6 @@ pub async fn insert_token(conn: &Object, user_id: &str) -> Result<Uuid> {
     Ok(id)
 }
 
-pub async fn update_token_id(conn: &Object, old_id: &Uuid, new_user_id: &str) -> Result<Uuid> {
-    let new_id: Uuid = Uuid::now_v7();
-    let user_id = Uuid::from_str(new_user_id)?;
-    conn.execute(
-        "update tokens set id = $1, user_id = $2 where id = $3",
-        &[&new_id, &user_id, &old_id],
-    )
-    .await?;
-    Ok(new_id)
-}
-
 // 7 days
 pub async fn delete_old_tokens(client: &Object) -> Result<()> {
     client

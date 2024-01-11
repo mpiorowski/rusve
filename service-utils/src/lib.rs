@@ -9,10 +9,11 @@ pub struct Env {
     pub rust_log: String,
     pub database_url: String,
     pub sendgrid_api_key: String,
+    pub s3_bucket_name: String,
     pub s3_access_key: String,
     pub s3_secret_key: String,
     pub s3_endpoint: String,
-    pub s3_bucket_name: String,
+    pub jwt_secret: String,
 }
 
 pub fn init_envs() -> Result<Env> {
@@ -20,11 +21,13 @@ pub fn init_envs() -> Result<Env> {
         port: std::env::var("PORT").context("PORT is not set")?,
         rust_log: std::env::var("RUST_LOG").context("RUST_LOG is not set")?,
         database_url: std::env::var("DATABASE_URL").context("DATABASE_URL is not set")?,
-        sendgrid_api_key: std::env::var("SENDGRID_API_KEY").context("SENDGRID_API_KEY is not set")?,
+        sendgrid_api_key: std::env::var("SENDGRID_API_KEY")
+            .context("SENDGRID_API_KEY is not set")?,
+        s3_bucket_name: std::env::var("S3_BUCKET_NAME").context("S3_BUCKET_NAME is not set")?,
         s3_access_key: std::env::var("S3_ACCESS_KEY").context("S3_ACCESS_KEY is not set")?,
         s3_secret_key: std::env::var("S3_SECRET_KEY").context("S3_SECRET_KEY is not set")?,
         s3_endpoint: std::env::var("S3_ENDPOINT").context("S3_ENDPOINT is not set")?,
-        s3_bucket_name: std::env::var("S3_BUCKET_NAME").context("S3_BUCKET_NAME is not set")?,
+        jwt_secret: std::env::var("JWT_SECRET").context("JWT_SECRET is not set")?,
     })
 }
 
@@ -53,7 +56,10 @@ pub fn connect_to_db(env: &Env) -> Result<deadpool_postgres::Pool> {
 pub struct Claims {
     pub id: String,
 }
-pub fn auth(metadata: &tonic::metadata::MetadataMap) -> Result<Claims, tonic::Status> {
+pub fn auth(
+    metadata: &tonic::metadata::MetadataMap,
+    jwt_secret: &str,
+) -> Result<Claims, tonic::Status> {
     let token = match metadata.get("x-authorization") {
         Some(token) => token,
         None => {
@@ -75,15 +81,10 @@ pub fn auth(metadata: &tonic::metadata::MetadataMap) -> Result<Claims, tonic::St
             tonic::Status::unauthenticated("Invalid authorization token")
         })?;
 
-    let decoding_key = jsonwebtoken::DecodingKey::from_rsa_pem(include_bytes!("../public.key"))
-        .map_err(|e| {
-            tracing::error!("Failed to parse public key: {:?}", e);
-            tonic::Status::unauthenticated("Invalid authorization token")
-        })?;
     let token_message = jsonwebtoken::decode::<Claims>(
         token,
-        &decoding_key,
-        &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::RS256),
+        &jsonwebtoken::DecodingKey::from_secret(jwt_secret.as_ref()),
+        &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256),
     )
     .map_err(|e| {
         tracing::error!("Failed to decode authorization token: {:?}", e);

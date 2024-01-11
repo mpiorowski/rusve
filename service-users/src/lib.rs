@@ -74,20 +74,38 @@ pub fn extract_token(metadata: &tonic::metadata::MetadataMap) -> Result<&str, to
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct OAuthClaims {
+    pub email: String,
+    pub sub: String,
+    pub avatar: String,
+}
+pub fn decode_oauth_token(
+    metadata: &tonic::metadata::MetadataMap,
+    jwt_secret: &str,
+) -> Result<OAuthClaims, tonic::Status> {
+    let token = extract_token(metadata)?;
+    let token_message = jsonwebtoken::decode::<OAuthClaims>(
+        token,
+        &jsonwebtoken::DecodingKey::from_secret(jwt_secret.as_ref()),
+        &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256),
+    )
+    .map_err(|e| {
+        tracing::error!("Failed to decode authorization token: {:?}", e);
+        tonic::Status::unauthenticated("Invalid authorization token")
+    })?;
+    Ok(token_message.claims)
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Claims {
     pub id: String,
 }
-pub fn decode_token(metadata: &tonic::metadata::MetadataMap) -> Result<Claims, tonic::Status> {
+pub fn decode_token(metadata: &tonic::metadata::MetadataMap, jwt_secret: &str) -> Result<Claims, tonic::Status> {
     let token = extract_token(metadata)?;
-    let decoding_key = jsonwebtoken::DecodingKey::from_rsa_pem(include_bytes!("../public.key"))
-        .map_err(|e| {
-            tracing::error!("Failed to parse public key: {:?}", e);
-            tonic::Status::unauthenticated("Invalid authorization token")
-        })?;
     let token_message = jsonwebtoken::decode::<Claims>(
         token,
-        &decoding_key,
-        &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::RS256),
+        &jsonwebtoken::DecodingKey::from_secret(jwt_secret.as_ref()),
+        &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256),
     )
     .map_err(|e| {
         tracing::error!("Failed to decode authorization token: {:?}", e);
