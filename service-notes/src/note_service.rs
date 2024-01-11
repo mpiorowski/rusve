@@ -1,16 +1,19 @@
 use crate::{
-    proto::{notes_service_server::NotesService, Count, Empty, Id, Note, Page},
+    proto::{
+        notes_service_server::NotesService, users_service_client::UsersServiceClient, Count, Empty,
+        Id, Note, NoteResponse, Page,
+    },
     MyService,
 };
 use anyhow::Result;
 use futures_util::TryStreamExt;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
-use tonic::{Request, Response, Status};
+use tonic::{transport::Endpoint, Request, Response, Status};
 
 #[tonic::async_trait]
 impl NotesService for MyService {
-    type GetNotesByUserIdStream = ReceiverStream<Result<Note, Status>>;
+    type GetNotesByUserIdStream = ReceiverStream<Result<NoteResponse, Status>>;
 
     async fn count_notes_by_user_id(
         &self,
@@ -58,23 +61,60 @@ impl NotesService for MyService {
                     Status::internal("Failed to get notes")
                 })?;
 
+        // Showcase of how to connect to another service
+        let endpoint: Endpoint = self.env.users_url.parse().map_err(|err| {
+            tracing::error!("Failed to parse users url: {:?}", err);
+            Status::internal("Failed to parse users url")
+        })?;
+        let client = UsersServiceClient::connect(endpoint).await.map_err(|err| {
+            tracing::error!("Failed to connect to users service: {:?}", err);
+            Status::internal("Failed to connect to users service")
+        })?;
+
         let (tx, rx) = mpsc::channel(128);
+        // TODO: can we avoid cloning here?
+        let jwt_secret = self.env.jwt_secret.clone();
+        let shared_client = tokio::sync::Mutex::new(client);
         tokio::spawn(async move {
             futures_util::pin_mut!(notes_stream);
             while let Ok(Some(note)) = notes_stream.try_next().await {
                 let tx = tx.clone();
-                tokio::spawn(async move {
-                    let note: Note = match note.try_into() {
-                        Ok(note) => note,
-                        Err(e) => {
-                            tracing::error!("Failed to get note: {:?}", e);
-                            return;
-                        }
-                    };
-                    if let Err(e) = tx.send(Ok(note)).await {
-                        tracing::error!("Failed to send note: {:?}", e);
+                // tokio::spawn(async move {
+                let note: Note = match note.try_into() {
+                    Ok(note) => note,
+                    Err(e) => {
+                        tracing::error!("Failed to get note: {:?}", e);
+                        return;
                     }
-                });
+                };
+
+                // Totally overengineered way to get user profile
+                // This is to show how to connect to another service
+                // Using a shared client inside async block
+                let mut request = tonic::Request::new(crate::proto::Empty {});
+                let metadata = request.metadata_mut();
+                rusve_notes::generate_metadata(metadata, note.user_id.as_str(), &jwt_secret)
+                    .unwrap_or_else(|e| {
+                        tracing::error!("Failed to generate metadata: {:?}", e);
+                        return;
+                    });
+                let mut new_client = shared_client.lock().await;
+                let user_profile = match new_client.get_profile_by_user_id(request).await {
+                    Ok(response) => response.into_inner(),
+                    Err(e) => {
+                        tracing::error!("Failed to get user profile: {:?}", e);
+                        return;
+                    }
+                };
+
+                let note_response = NoteResponse {
+                    note: Some(note),
+                    profile: Some(user_profile),
+                };
+                if let Err(e) = tx.send(Ok(note_response)).await {
+                    tracing::error!("Failed to send note: {:?}", e);
+                }
+                //});
             }
             // loop {
             //     let note = match notes_stream.try_next().await {

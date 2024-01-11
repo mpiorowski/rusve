@@ -11,6 +11,7 @@ pub struct Env {
     pub port: String,
     pub rust_log: String,
     pub database_url: String,
+    pub users_url: String,
     pub jwt_secret: String,
 }
 
@@ -19,6 +20,7 @@ pub fn init_envs() -> Result<Env> {
         port: std::env::var("PORT").context("PORT is not set")?,
         rust_log: std::env::var("RUST_LOG").context("RUST_LOG is not set")?,
         database_url: std::env::var("DATABASE_URL").context("DATABASE_URL is not set")?,
+        users_url: std::env::var("USERS_URL").context("USERS_URL is not set")?,
         jwt_secret: std::env::var("JWT_SECRET").context("JWT_SECRET is not set")?,
     })
 }
@@ -46,6 +48,7 @@ pub fn connect_to_db(env: &Env) -> Result<deadpool_postgres::Pool> {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Claims {
     pub id: String,
+    pub exp: i64,
 }
 pub fn auth(
     metadata: &tonic::metadata::MetadataMap,
@@ -83,4 +86,28 @@ pub fn auth(
     })?;
 
     Ok(token_message.claims)
+}
+
+pub fn generate_metadata(
+    metadata: &mut tonic::metadata::MetadataMap,
+    user_id: &str,
+    jwt_secret: &str,
+) -> Result<()> {
+    let jwt_token = match jsonwebtoken::encode(
+        &jsonwebtoken::Header::new(jsonwebtoken::Algorithm::HS256),
+        &Claims {
+            id: user_id.to_string(),
+            // 10 minutes
+            exp: time::OffsetDateTime::now_utc().unix_timestamp() + 60 * 10,
+        },
+        &jsonwebtoken::EncodingKey::from_secret(jwt_secret.as_bytes()),
+    ) {
+        Ok(token) => token,
+        Err(e) => {
+            tracing::error!("Failed to encode jwt token: {:?}", e);
+            return Err(anyhow::anyhow!("Failed to encode jwt token"));
+        }
+    };
+    metadata.insert("x-authorization", format!("bearer {}", jwt_token).parse()?);
+    Ok(())
 }

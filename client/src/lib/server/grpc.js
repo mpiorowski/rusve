@@ -9,8 +9,6 @@ export const packageDefinition = protoLoader.loadSync(
         longs: String,
         defaults: true,
         oneofs: true,
-        arrays: true,
-        objects: true,
     },
 );
 

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "proto": "proto-loader-gen-types --keepCase --longs=String --defaults --oneofs --arays --objects --grpcLib=@grpc/grpc-js --outDir=../client/src/lib/proto ./*.proto && cp ./*.proto ../client/src/lib/proto/"
+    "proto": "proto-loader-gen-types --keepCase --longs=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=../client/src/lib/proto ./*.proto && cp ./*.proto ../client/src/lib/proto/"
   },
   "author": "",
   "license": "ISC",

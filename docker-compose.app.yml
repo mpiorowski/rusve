@@ -34,7 +34,6 @@ services:
       RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-users&user=postgres&password=12345&dbname=users
       AUTH_URL: http://127.0.0.1:8090
-      USERS_URL: http://service-users:443
       CLIENT_URL: http://127.0.0.1:3000
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
@@ -73,6 +72,7 @@ services:
       PORT: 443
       RUST_LOG: info
       DATABASE_URL: postgresql://?host=db-notes&user=postgres&password=12345&dbname=notes
+      USERS_URL: http://service-users:443
       JWT_SECRET: ${JWT_SECRET}
 
   service-utils:

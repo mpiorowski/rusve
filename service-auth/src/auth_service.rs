@@ -130,14 +130,9 @@ pub async fn oauth_callback(
 
     /*
      * This is where you implement you own logic to create or update a user in your database.
-     * Here we are inserting a new token in the database.
-     * The token id is returned to the client and will be used to authenticate the user.
-     * The user service will then check if the token is valid and create a new user if needed.
+     * Here we are creating the jwt token with the user data and sending it to the client.
+     * The client will act as a gateway to the other services and use it to create a new user.
      */
-    // let token = auth_db::insert_token(&conn).await.map_err(|err| {
-    //     tracing::error!("Failed to insert token: {:?}", err);
-    //     Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
-    // })?;
     let jwt_token = oauth_config.generate_jwt(user_profile).map_err(|err| {
         tracing::error!("Failed to generate JWT: {:?}", err);
         Redirect::to(&format!("{}/auth?error=2", state.env.client_url))

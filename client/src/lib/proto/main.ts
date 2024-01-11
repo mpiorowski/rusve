@@ -19,6 +19,7 @@ export interface ProtoGrpcType {
     FileTarget: EnumTypeDefinition
     Id: MessageTypeDefinition
     Note: MessageTypeDefinition
+    NoteResponse: MessageTypeDefinition
     NotesService: SubtypeConstructor<typeof grpc.Client, _proto_NotesServiceClient> & { service: _proto_NotesServiceDefinition }
     Page: MessageTypeDefinition
     Profile: MessageTypeDefinition

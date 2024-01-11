@@ -228,6 +228,15 @@ pub struct StripeUrlResponse {
     #[prost(string, tag = "1")]
     pub url: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NoteResponse {
+    #[prost(message, optional, tag = "1")]
+    pub note: ::core::option::Option<Note>,
+    #[prost(message, optional, tag = "2")]
+    pub profile: ::core::option::Option<Profile>,
+}
 /// Generated client implementations.
 pub mod users_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
@@ -561,7 +570,7 @@ pub mod notes_service_client {
             &mut self,
             request: impl tonic::IntoRequest<super::Page>,
         ) -> std::result::Result<
-            tonic::Response<tonic::codec::Streaming<super::Note>>,
+            tonic::Response<tonic::codec::Streaming<super::NoteResponse>>,
             tonic::Status,
         > {
             self.inner
@@ -1359,7 +1368,7 @@ pub mod notes_service_server {
         ) -> std::result::Result<tonic::Response<super::Count>, tonic::Status>;
         /// Server streaming response type for the GetNotesByUserId method.
         type GetNotesByUserIdStream: futures_core::Stream<
-                Item = std::result::Result<super::Note, tonic::Status>,
+                Item = std::result::Result<super::NoteResponse, tonic::Status>,
             >
             + Send
             + 'static;
@@ -1513,7 +1522,7 @@ pub mod notes_service_server {
                         T: NotesService,
                     > tonic::server::ServerStreamingService<super::Page>
                     for GetNotesByUserIdSvc<T> {
-                        type Response = super::Note;
+                        type Response = super::NoteResponse;
                         type ResponseStream = T::GetNotesByUserIdStream;
                         type Future = BoxFuture<
                             tonic::Response<Self::ResponseStream>,

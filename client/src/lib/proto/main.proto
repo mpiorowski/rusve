@@ -33,6 +33,11 @@ message StripeUrlResponse {
     string url = 1;
 }
 
+message NoteResponse {
+    Note note = 1;
+    Profile profile = 2;
+}
+
 service UsersService {
     rpc CreateUser(Empty) returns (Id) {}
     rpc Auth(Empty) returns (AuthResponse) {}
@@ -46,7 +51,7 @@ service UsersService {
 
 service NotesService {
     rpc CountNotesByUserId(Empty) returns (Count) {}
-    rpc GetNotesByUserId(Page) returns (stream Note) {}
+    rpc GetNotesByUserId(Page) returns (stream NoteResponse) {}
     rpc GetNoteById(Id) returns (Note) {}
     rpc CreateNote(Note) returns (Note) {}
     rpc DeleteNoteById(Id) returns (Empty) {}
