@@ -14,6 +14,8 @@ jobs:
     uses: ./.github/workflows/deploy-client.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      UPSEND_KEY: ${{ secrets.UPSEND_KEY }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
   deploy-auth:
     uses: ./.github/workflows/deploy-auth.yml
     secrets:
@@ -37,6 +39,7 @@ jobs:
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
   deploy-utils:
     uses: ./.github/workflows/deploy-utils.yml
     secrets:
@@ -46,3 +49,4 @@ jobs:
       S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
       S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
       S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}

@@ -8,6 +8,10 @@ on:
     secrets:
       GCP_CREDENTIALS:
         required: true
+      UPSEND_KEY:
+        required: true
+      JWT_SECRET:
+        required: true
 
 env:
   GAR_LOCATION: europe-north1
@@ -21,7 +25,8 @@ env:
   USERS_URI: users-cdb5ecy4ia-lz.a.run.app
   NOTES_URI: notes-cdb5ecy4ia-lz.a.run.app
   UTILS_URI: utils-cdb5ecy4ia-lz.a.run.app
-  UPSEND_KEY: UPSEND_KEY
+  UPSEND_KEY: ${{ secrets.UPSEND_KEY }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
 permissions:
   contents: write
@@ -60,6 +65,7 @@ jobs:
           --build-arg NOTES_URI=${{ env.NOTES_URI }} \
           --build-arg UTILS_URI=${{ env.UTILS_URI }} \
           --build-arg UPSEND_KEY=${{ env.UPSEND_KEY }}
+          --build-arg JWT_SECRET=${{ env.JWT_SECRET }}
 
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
       - name: Deploy to Cloud Run

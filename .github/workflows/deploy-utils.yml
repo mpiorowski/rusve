@@ -18,6 +18,8 @@ on:
         required: true
       S3_ENDPOINT:
         required: true
+      JWT_SECRET:
+        required: true
 env:
   GAR_LOCATION: europe-north1
   PROJECT_ID: rusve-384620
@@ -32,6 +34,7 @@ env:
   S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
   S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
   S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
 permissions:
   contents: read
@@ -78,5 +81,6 @@ jobs:
             S3_ACCESS_KEY=${{ env.S3_ACCESS_KEY }}
             S3_SECRET_KEY=${{ env.S3_SECRET_KEY }}
             S3_ENDPOINT=${{ env.S3_ENDPOINT }}
+            JWT_SECRET=${{ env.JWT_SECRET }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

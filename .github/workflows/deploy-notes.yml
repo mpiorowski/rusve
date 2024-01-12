@@ -10,6 +10,8 @@ on:
         required: true
       DATABASE_URL:
         required: true
+      JWT_SECRET:
+        required: true
 
 env:
   GAR_LOCATION: europe-north1
@@ -20,6 +22,8 @@ env:
   SERVICE: notes
   RUST_LOG: info
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=notes
+  USERS_URL: https://users-cdb5ecy4ia-lz.a.run.app
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
   # DATABASE_URL=postgresql:///?dbname=${{ env.SERVICE }}&host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}
 
 permissions:
@@ -62,5 +66,7 @@ jobs:
           env_vars: |
             RUST_LOG=${{ env.RUST_LOG }}
             DATABASE_URL=${{ env.DATABASE_URL }}
+            USERS_URL=${{ env.USERS_URL }}
+            JWT_SECRET=${{ env.JWT_SECRET }}
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
