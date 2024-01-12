@@ -39,7 +39,7 @@ pub async fn create_user(
         }
     });
 
-    tracing::info!("CreateUser: {:?}", start.elapsed());
+    tracing::info!("create_user: {:?}", start.elapsed());
     Ok(Response::new(crate::proto::Id {
         id: token.to_string(),
     }))

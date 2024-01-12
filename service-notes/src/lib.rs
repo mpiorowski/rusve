@@ -4,6 +4,7 @@ use rustls::RootCertStore;
 use rustls_native_certs::load_native_certs;
 use std::str::FromStr;
 use tokio_postgres_rustls::MakeRustlsConnect;
+use tonic::metadata::{Ascii, MetadataValue};
 mod proto;
 
 #[derive(Clone)]
@@ -88,11 +89,7 @@ pub fn auth(
     Ok(token_message.claims)
 }
 
-pub fn generate_metadata(
-    metadata: &mut tonic::metadata::MetadataMap,
-    user_id: &str,
-    jwt_secret: &str,
-) -> Result<()> {
+pub fn generate_jwt_token(jwt_secret: &str, user_id: &str) -> Result<MetadataValue<Ascii>> {
     let jwt_token = match jsonwebtoken::encode(
         &jsonwebtoken::Header::new(jsonwebtoken::Algorithm::HS256),
         &Claims {
@@ -100,7 +97,7 @@ pub fn generate_metadata(
             // 10 minutes
             exp: time::OffsetDateTime::now_utc().unix_timestamp() + 60 * 10,
         },
-        &jsonwebtoken::EncodingKey::from_secret(jwt_secret.as_bytes()),
+        &jsonwebtoken::EncodingKey::from_secret(jwt_secret.as_ref()),
     ) {
         Ok(token) => token,
         Err(e) => {
@@ -108,6 +105,5 @@ pub fn generate_metadata(
             return Err(anyhow::anyhow!("Failed to encode jwt token"));
         }
     };
-    metadata.insert("x-authorization", format!("bearer {}", jwt_token).parse()?);
-    Ok(())
+    Ok(format!("bearer {}", jwt_token).parse()?)
 }

@@ -21,7 +21,7 @@ pub async fn get_profile_by_user_id(
             Status::internal("Failed to get profile")
         })?;
 
-    tracing::info!("GetProfileByUserId: {:?}", start.elapsed());
+    tracing::info!("get_profile_by_user_id: {:?}", start.elapsed());
     Ok(Response::new(profile.unwrap_or_default()))
 }
 
@@ -58,6 +58,6 @@ pub async fn create_profile(
             })?;
     }
 
-    tracing::info!("UpdateUser: {:?}", start.elapsed());
+    tracing::info!("update_user: {:?}", start.elapsed());
     Ok(Response::new(profile))
 }

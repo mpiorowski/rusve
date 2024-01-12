@@ -90,7 +90,7 @@ pub async fn create_stripe_checkout(
             Status::internal("Failed to create checkout session")
         })?;
 
-    tracing::info!("CreateStripeCheckout: {:?}", start.elapsed());
+    tracing::info!("create_stripe_checkout: {:?}", start.elapsed());
     Ok(Response::new(crate::proto::StripeUrlResponse { url }))
 }
 
@@ -121,7 +121,7 @@ pub async fn create_stripe_portal(
             Status::internal("Failed to create portal session")
         })?;
 
-    tracing::info!("CreateStripePortal: {:?}", start.elapsed());
+    tracing::info!("create_stripe_portal: {:?}", start.elapsed());
     Ok(Response::new(crate::proto::StripeUrlResponse { url }))
 }
 
