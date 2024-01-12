@@ -1,5 +1,4 @@
 use crate::{
-    auth_db,
     auth_oauth::{OAuth, OAuthConfig},
     AppState,
 };
@@ -87,9 +86,15 @@ pub async fn oauth_callback(
         }
     };
 
-    // check if the `created` field is older than 10 minutes
-    let diff = time::OffsetDateTime::now_utc() - verifiers.created;
-    if diff.whole_minutes() > 10 {
+    // Delete old verifiers asynchronously. If this fails, it's not a big deal.
+    tokio::spawn(async move {
+        if let Err(err) = crate::auth_db::delete_old_verifiers(&conn).await {
+            tracing::error!("Failed to delete old verifiers: {:?}", err);
+        }
+    });
+
+    // Check if the CSRF token is valid.
+    if verifiers.created + time::Duration::minutes(10) < time::OffsetDateTime::now_utc() {
         return Err(Redirect::to(&format!(
             "{}/auth?error=2",
             state.env.client_url
@@ -125,24 +130,17 @@ pub async fn oauth_callback(
 
     /*
      * This is where you implement you own logic to create or update a user in your database.
-     * Here we are inserting a new token in the database.
-     * The token id is returned to the client and will be used to authenticate the user.
-     * The user service will then check if the token is valid and create a new user if needed.
+     * Here we are creating the jwt token with the user data and sending it to the client.
+     * The client will act as a gateway to the other services and use it to create a new user.
      */
-    let token = auth_db::insert_token(&conn).await.map_err(|err| {
-        tracing::error!("Failed to insert token: {:?}", err);
+    let jwt_token = oauth_config.generate_jwt(user_profile).map_err(|err| {
+        tracing::error!("Failed to generate JWT: {:?}", err);
         Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
     })?;
-    // Delete old verifiers asynchronously. If this fails, it's not a big deal.
-    tokio::spawn(async move {
-        if let Err(err) = crate::auth_db::delete_old_verifiers(&conn).await {
-            tracing::error!("Failed to delete old verifiers: {:?}", err);
-        }
-    });
 
     tracing::info!("User authenticated");
     Ok(Redirect::to(&format!(
-        "{}/?token={}&email={}&sub={}&avatar={}",
-        state.env.client_url, token.id, user_profile.email, user_profile.sub, user_profile.avatar
+        "{}/?oauth_token={}",
+        state.env.client_url, jwt_token
     )))
 }

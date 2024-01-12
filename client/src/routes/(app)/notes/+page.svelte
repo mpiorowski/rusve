@@ -151,6 +151,12 @@
                             scope="col"
                             class="px-3 py-3 text-left text-xs uppercase tracking-wide text-gray-500"
                         >
+                            Profile name
+                        </th>
+                        <th
+                            scope="col"
+                            class="px-3 py-3 text-left text-xs uppercase tracking-wide text-gray-500"
+                        >
                             Created
                         </th>
                         <th
@@ -166,42 +172,58 @@
                 </thead>
                 <tbody class="divide-y divide-gray-600 bg-gray-900">
                     {#each data.notes as note}
-                        <tr>
-                            <td
-                                class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-50 sm:pl-0"
-                            >
-                                {note.title}
-                            </td>
-                            <td
-                                class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
-                            >
-                                {note.content}
-                            </td>
-                            <td
-                                class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
-                            >
-                                {note.created}
-                            </td>
-                            <td
-                                class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
-                            >
-                                {note.updated}
-                            </td>
-                            <td
-                                class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
-                            >
-                                <a
-                                    href="/notes/{note.id}"
-                                    class="mr-4 text-indigo-600 hover:text-indigo-900"
-                                    on:click={(e) => onDetails(e)}
+                        {#if note.note === null}
+                            <tr>
+                                <td
+                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-50 sm:pl-0"
+                                    colspan="5"
                                 >
-                                    Edit
-                                    <span class="sr-only">
-                                        , {note.title}
-                                    </span>
-                                </a>
-                            </td>
-                        </tr>
+                                    No notes found
+                                </td>
+                            </tr>
+                        {:else}
+                            <tr>
+                                <td
+                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-50 sm:pl-0"
+                                >
+                                    {note.note.title}
+                                </td>
+                                <td
+                                    class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
+                                >
+                                    {note.note.content}
+                                </td>
+                                <td
+                                    class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
+                                >
+                                    {note.profile?.name || "Unknown"}
+                                </td>
+                                <td
+                                    class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
+                                >
+                                    {note.note.created}
+                                </td>
+                                <td
+                                    class="whitespace-nowrap px-3 py-4 text-sm text-gray-200"
+                                >
+                                    {note.note.updated}
+                                </td>
+                                <td
+                                    class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
+                                >
+                                    <a
+                                        href="/notes/{note.note.id}"
+                                        class="mr-4 text-indigo-600 hover:text-indigo-900"
+                                        on:click={(e) => onDetails(e)}
+                                    >
+                                        Edit
+                                        <span class="sr-only">
+                                            , {note.note.title}
+                                        </span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {/if}
                     {/each}
 
                     <!-- More people... -->

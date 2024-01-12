@@ -24,12 +24,6 @@ message Count {
     int64 count = 1;
 }
 
-message CreateUserRequest {
-    string email = 1;
-    string sub = 2;
-    string avatar = 3;
-}
-
 message AuthResponse {
     string token = 1;
     User user = 2;
@@ -39,8 +33,13 @@ message StripeUrlResponse {
     string url = 1;
 }
 
+message NoteResponse {
+    Note note = 1;
+    Profile profile = 2;
+}
+
 service UsersService {
-    rpc CreateUser(CreateUserRequest) returns (Id) {}
+    rpc CreateUser(Empty) returns (Id) {}
     rpc Auth(Empty) returns (AuthResponse) {}
 
     rpc GetProfileByUserId(Empty) returns (Profile) {}
@@ -52,7 +51,7 @@ service UsersService {
 
 service NotesService {
     rpc CountNotesByUserId(Empty) returns (Count) {}
-    rpc GetNotesByUserId(Page) returns (stream Note) {}
+    rpc GetNotesByUserId(Page) returns (stream NoteResponse) {}
     rpc GetNoteById(Id) returns (Note) {}
     rpc CreateNote(Note) returns (Note) {}
     rpc DeleteNoteById(Id) returns (Empty) {}

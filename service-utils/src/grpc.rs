@@ -16,14 +16,14 @@ impl UtilsService for MyService {
         &self,
         request: Request<Empty>,
     ) -> Result<Response<Count>, Status> {
-        crate::email_service::count_emails_by_target_id(&self.pool, request).await
+        crate::email_service::count_emails_by_target_id(&self.env, &self.pool, request).await
     }
 
     async fn get_emails_by_target_id(
         &self,
         request: Request<Page>,
     ) -> Result<Response<Self::GetEmailsByTargetIdStream>, Status> {
-        crate::email_service::get_emails_by_target_id(&self.pool, request).await
+        crate::email_service::get_emails_by_target_id(&self.env, &self.pool, request).await
     }
 
     async fn send_email(&self, request: Request<Email>) -> Result<Response<Email>, Status> {
@@ -34,14 +34,14 @@ impl UtilsService for MyService {
         &self,
         request: Request<Empty>,
     ) -> Result<Response<Count>, Status> {
-        crate::file_service::count_files_by_target_id(&self.pool, request).await
+        crate::file_service::count_files_by_target_id(&self.env, &self.pool, request).await
     }
 
     async fn get_files_by_target_id(
         &self,
         request: Request<Page>,
     ) -> Result<Response<Self::GetFilesByTargetIdStream>, Status> {
-        crate::file_service::get_files_by_target_id(&self.pool, request).await
+        crate::file_service::get_files_by_target_id(&self.env, &self.pool, request).await
     }
 
     async fn get_file_by_id(

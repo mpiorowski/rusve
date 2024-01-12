@@ -13,13 +13,13 @@ export interface ProtoGrpcType {
   proto: {
     AuthResponse: MessageTypeDefinition
     Count: MessageTypeDefinition
-    CreateUserRequest: MessageTypeDefinition
     Email: MessageTypeDefinition
     Empty: MessageTypeDefinition
     File: MessageTypeDefinition
     FileTarget: EnumTypeDefinition
     Id: MessageTypeDefinition
     Note: MessageTypeDefinition
+    NoteResponse: MessageTypeDefinition
     NotesService: SubtypeConstructor<typeof grpc.Client, _proto_NotesServiceClient> & { service: _proto_NotesServiceDefinition }
     Page: MessageTypeDefinition
     Profile: MessageTypeDefinition

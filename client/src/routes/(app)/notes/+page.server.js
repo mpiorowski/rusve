@@ -22,7 +22,10 @@ export async function load({ locals, url }) {
      * Get notes
      */
     const offset = Number(url.searchParams.get("p") ?? 1) - 1;
-    const limit = 1;
+    const limit = 10;
+
+    /** @typedef {import("$lib/proto/proto/NoteResponse").NoteResponse__Output} Note */
+    /** @type {import("@grpc/grpc-js").ClientReadableStream<Note>} */
     const notesStream = notesService.GetNotesByUserId(
         {
             offset: offset * limit,
@@ -30,11 +33,11 @@ export async function load({ locals, url }) {
         },
         metadata,
     );
-    /** @type {Promise<import("$lib/proto/proto/Note").Note__Output[]>} */
+    /** @type {Promise<Note[]>} */
     const p2 = new Promise((res, rej) => {
-        /** @type {import("$lib/proto/proto/Note").Note__Output[]} */
+        /** @type {Note[]} */
         const notes = [];
-        notesStream.on("data", (data) => notes.push(data));
+        notesStream.on("data", (note) => notes.push(note));
         notesStream.on("error", (err) => rej(err));
         notesStream.on("end", () => res(notes));
     });
@@ -64,7 +67,8 @@ export async function load({ locals, url }) {
     return {
         notes: d2.data.sort(
             (a, b) =>
-                new Date(b.created).getTime() - new Date(a.created).getTime(),
+                new Date(b.note?.created ?? 0).getTime() -
+                new Date(a.note?.created ?? 0).getTime(),
         ),
         total: Number(d1.data.count),
         pageSize: limit,

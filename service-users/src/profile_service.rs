@@ -1,12 +1,13 @@
 use tonic::{Request, Response, Status};
 
 pub async fn get_profile_by_user_id(
-    pool: deadpool_postgres::Pool,
+    env: &rusve_users::Env,
+    pool: &deadpool_postgres::Pool,
     request: Request<crate::proto::Empty>,
 ) -> Result<Response<crate::proto::Profile>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let user_id = rusve_users::decode_token(metadata)?.id;
+    let user_id = rusve_users::decode_token(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -20,17 +21,18 @@ pub async fn get_profile_by_user_id(
             Status::internal("Failed to get profile")
         })?;
 
-    tracing::info!("GetProfileByUserId: {:?}", start.elapsed());
+    tracing::info!("get_profile_by_user_id: {:?}", start.elapsed());
     Ok(Response::new(profile.unwrap_or_default()))
 }
 
 pub async fn create_profile(
-    pool: deadpool_postgres::Pool,
+    env: &rusve_users::Env,
+    pool: &deadpool_postgres::Pool,
     request: Request<crate::proto::Profile>,
 ) -> Result<Response<crate::proto::Profile>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let user_id = rusve_users::decode_token(metadata)?.id;
+    let user_id = rusve_users::decode_token(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -56,6 +58,6 @@ pub async fn create_profile(
             })?;
     }
 
-    tracing::info!("UpdateUser: {:?}", start.elapsed());
+    tracing::info!("update_user: {:?}", start.elapsed());
     Ok(Response::new(profile))
 }

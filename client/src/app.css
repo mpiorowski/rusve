@@ -41,6 +41,10 @@
     }
 }
 
+* {
+    min-width: 0;
+}
+
 html {
     @apply h-full antialiased;
 }
@@ -50,15 +54,15 @@ body {
 }
 
 h1 {
-    @apply text-3xl font-semibold font-poppins;
+    @apply font-poppins text-3xl font-semibold;
 }
 
 h2 {
-    @apply text-2xl font-semibold font-poppins;
+    @apply font-poppins text-2xl font-semibold;
 }
 
 h3 {
-    @apply text-xl font-semibold font-poppins;
+    @apply font-poppins text-xl font-semibold;
 }
 
 :focus {

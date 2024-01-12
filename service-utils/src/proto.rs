@@ -215,17 +215,6 @@ pub struct Count {
 #[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct CreateUserRequest {
-    #[prost(string, tag = "1")]
-    pub email: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub sub: ::prost::alloc::string::String,
-    #[prost(string, tag = "3")]
-    pub avatar: ::prost::alloc::string::String,
-}
-#[derive(serde::Serialize, serde::Deserialize)]
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct AuthResponse {
     #[prost(string, tag = "1")]
     pub token: ::prost::alloc::string::String,
@@ -238,6 +227,15 @@ pub struct AuthResponse {
 pub struct StripeUrlResponse {
     #[prost(string, tag = "1")]
     pub url: ::prost::alloc::string::String,
+}
+#[derive(serde::Serialize, serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NoteResponse {
+    #[prost(message, optional, tag = "1")]
+    pub note: ::core::option::Option<Note>,
+    #[prost(message, optional, tag = "2")]
+    pub profile: ::core::option::Option<Profile>,
 }
 /// Generated client implementations.
 pub mod users_service_client {
@@ -326,7 +324,7 @@ pub mod users_service_client {
         }
         pub async fn create_user(
             &mut self,
-            request: impl tonic::IntoRequest<super::CreateUserRequest>,
+            request: impl tonic::IntoRequest<super::Empty>,
         ) -> std::result::Result<tonic::Response<super::Id>, tonic::Status> {
             self.inner
                 .ready()
@@ -572,7 +570,7 @@ pub mod notes_service_client {
             &mut self,
             request: impl tonic::IntoRequest<super::Page>,
         ) -> std::result::Result<
-            tonic::Response<tonic::codec::Streaming<super::Note>>,
+            tonic::Response<tonic::codec::Streaming<super::NoteResponse>>,
             tonic::Status,
         > {
             self.inner
@@ -948,7 +946,7 @@ pub mod users_service_server {
     pub trait UsersService: Send + Sync + 'static {
         async fn create_user(
             &self,
-            request: tonic::Request<super::CreateUserRequest>,
+            request: tonic::Request<super::Empty>,
         ) -> std::result::Result<tonic::Response<super::Id>, tonic::Status>;
         async fn auth(
             &self,
@@ -1059,9 +1057,7 @@ pub mod users_service_server {
                 "/proto.UsersService/CreateUser" => {
                     #[allow(non_camel_case_types)]
                     struct CreateUserSvc<T: UsersService>(pub Arc<T>);
-                    impl<
-                        T: UsersService,
-                    > tonic::server::UnaryService<super::CreateUserRequest>
+                    impl<T: UsersService> tonic::server::UnaryService<super::Empty>
                     for CreateUserSvc<T> {
                         type Response = super::Id;
                         type Future = BoxFuture<
@@ -1070,7 +1066,7 @@ pub mod users_service_server {
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::CreateUserRequest>,
+                            request: tonic::Request<super::Empty>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).create_user(request).await };
@@ -1372,7 +1368,7 @@ pub mod notes_service_server {
         ) -> std::result::Result<tonic::Response<super::Count>, tonic::Status>;
         /// Server streaming response type for the GetNotesByUserId method.
         type GetNotesByUserIdStream: futures_core::Stream<
-                Item = std::result::Result<super::Note, tonic::Status>,
+                Item = std::result::Result<super::NoteResponse, tonic::Status>,
             >
             + Send
             + 'static;
@@ -1526,7 +1522,7 @@ pub mod notes_service_server {
                         T: NotesService,
                     > tonic::server::ServerStreamingService<super::Page>
                     for GetNotesByUserIdSvc<T> {
-                        type Response = super::Note;
+                        type Response = super::NoteResponse;
                         type ResponseStream = T::GetNotesByUserIdStream;
                         type Future = BoxFuture<
                             tonic::Response<Self::ResponseStream>,

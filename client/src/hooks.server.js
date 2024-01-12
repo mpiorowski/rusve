@@ -3,6 +3,7 @@ import { grpcSafe } from "$lib/safe";
 import { usersService } from "$lib/server/grpc";
 import { logger, perf } from "$lib/server/logger";
 import { createMetadata } from "$lib/server/metadata";
+import { Metadata } from "@grpc/grpc-js";
 import { redirect } from "@sveltejs/kit";
 
 /** @type {import('@sveltejs/kit').Handle} */
@@ -34,30 +35,24 @@ export async function handle({ event, resolve }) {
 
     /**
      * Check if the user is coming from the oauth flow
-     * If so, create a user and redirect to the dashboard
+     * If so, send the token to the backend to create a user
      */
-    const queryToken = event.url.searchParams.get("token");
-    const queryEmail = event.url.searchParams.get("email");
-    const querySub = event.url.searchParams.get("sub");
-    const queryAvatar = event.url.searchParams.get("avatar");
-    if (queryToken && queryEmail && querySub && queryAvatar) {
-        const metadata = createMetadata(queryToken);
-        /** @type {import("$lib/proto/proto/CreateUserRequest").CreateUserRequest} */
-        const request = {
-            email: queryEmail,
-            sub: querySub,
-            avatar: queryAvatar,
-        };
+    const oauth_token = event.url.searchParams.get("oauth_token");
+    if (oauth_token) {
+        const metadata = new Metadata();
+        metadata.add("x-authorization", `bearer ${oauth_token}`);
         /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Id").Id__Output>} */
         const token = await new Promise((res) => {
-            usersService.CreateUser(request, metadata, grpcSafe(res));
+            usersService.CreateUser({}, metadata, grpcSafe(res));
         });
         if (token.error) {
-            redirect(302, "/auth?error=1");
+            throw redirect(302, "/auth?error=1");
         }
         event.cookies.set("token", token.data.id, {
             domain: COOKIE_DOMAIN,
             path: "/",
+            // 10 seconds, it's just to create the user and redirect to the dashboard
+            // after that the token will be refreshed with 7 days max age
             maxAge: 10,
         });
         throw redirect(302, "/dashboard");
