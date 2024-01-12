@@ -9,8 +9,8 @@ use tonic::{Request, Response, Status};
 use crate::stripe_db::remove_user_subscription_check;
 
 pub async fn check_subscription(
-    conn: &deadpool_postgres::Object,
     env: &rusve_users::Env,
+    conn: &deadpool_postgres::Object,
     user: &crate::proto::User,
 ) -> Result<bool> {
     if user.subscription_id.is_empty() {
@@ -83,7 +83,7 @@ pub async fn create_stripe_checkout(
                 Status::unauthenticated("Failed to auth user")
             })?;
 
-    let url = crate::stripe_service::create_checkout(&env, conn, user)
+    let url = crate::stripe_service::create_checkout(env, conn, user)
         .await
         .map_err(|e| {
             tracing::error!("Failed to create checkout session: {:?}", e);
@@ -114,7 +114,7 @@ pub async fn create_stripe_portal(
             Status::unauthenticated("Failed to auth user")
         })?;
 
-    let url = crate::stripe_service::create_portal(&conn, &env, user)
+    let url = crate::stripe_service::create_portal(env, &conn, user)
         .await
         .map_err(|e| {
             tracing::error!("Failed to create portal session: {:?}", e);
@@ -177,8 +177,8 @@ async fn create_customer(client: &Client, email: &str) -> Result<String> {
 }
 
 async fn create_portal(
-    conn: &deadpool_postgres::Object,
     env: &rusve_users::Env,
+    conn: &deadpool_postgres::Object,
     user: crate::proto::User,
 ) -> Result<String> {
     let secret_key = env.stripe_api_key.clone();

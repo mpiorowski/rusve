@@ -93,7 +93,7 @@ pub async fn auth(
         })?;
 
     // check if user is subscribed
-    let subscribed = crate::stripe_service::check_subscription(&conn, &env, &user)
+    let subscribed = crate::stripe_service::check_subscription(env, &conn, &user)
         .await
         .map_err(|e| {
             tracing::error!("Failed to update subscription: {:?}", e);
