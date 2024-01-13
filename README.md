@@ -33,7 +33,7 @@ As an example, developers from my team who were familiar with NextJS were able t
     - **[Streaming](https://grpc.io/docs/what-is-grpc/core-concepts/#server-streaming-rpc)** - gRPC allows streaming data, which, for larger datasets, offers incredible performance.
 - **[Google Cloud Run](https://cloud.google.com/run)** - Thanks to dockerized application, it's very easy to deploy. Scaling done automatically, can set the min. instances to 1 to reduce cold start.
 
-![image](https://github.com/mpiorowski/rusve/assets/26543876/cc882b0a-e3ba-4dd0-85aa-ffe7598440ea)
+![image](https://github.com/mpiorowski/rusve/assets/26543876/aa648032-8bf5-4039-ad88-15780ac36fea)
  
 ## Additional features
 - **Stripe Subscription** - Fully working subscription flow.
