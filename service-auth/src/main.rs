@@ -1,8 +1,8 @@
-mod proto;
 mod auth_db;
 mod auth_oauth;
 mod auth_service;
 mod migrations;
+mod proto;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -10,10 +10,11 @@ use axum::http::StatusCode;
 use axum::Json;
 use axum::{routing::get, Router};
 use http::header::{AUTHORIZATION, CONTENT_TYPE};
+use http::HeaderValue;
 use http::Method;
 use std::sync::Arc;
 use tower::ServiceBuilder;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 
 struct AppState {
     env: rusve_auth::Env,
@@ -45,11 +46,10 @@ async fn main() -> Result<()> {
         env: env.clone(),
     });
 
-    // TODO - Add origin for production
     let cors = CorsLayer::new()
         .allow_methods([Method::GET, Method::POST, Method::DELETE])
         .allow_headers([AUTHORIZATION, CONTENT_TYPE])
-        .allow_origin(Any);
+        .allow_origin(env.client_url.parse::<HeaderValue>()?);
 
     let app = Router::new()
         .route("/", get(root))
