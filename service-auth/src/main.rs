@@ -1,3 +1,4 @@
+mod proto;
 mod auth_db;
 mod auth_oauth;
 mod auth_service;

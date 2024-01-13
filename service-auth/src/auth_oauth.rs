@@ -2,6 +2,7 @@ use anyhow::Result;
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 use rusve_auth::Env;
 use serde::{Deserialize, Serialize};
+use tonic::metadata::{Ascii, MetadataValue};
 
 pub enum OAuthProvider {
     Google,
@@ -22,7 +23,7 @@ pub trait OAuth {
         Self: Sized;
     fn build_oauth_client(&self) -> BasicClient;
     async fn get_user_info(&self, token: &str) -> Result<OAuthUser>;
-    fn generate_jwt(&self, user: OAuthUser) -> Result<String>;
+    fn generate_jwt(&self, user: OAuthUser) -> Result<MetadataValue<Ascii>>;
 }
 
 pub struct OAuthConfig {
@@ -140,12 +141,12 @@ impl OAuth for OAuthConfig {
         }
     }
 
-    fn generate_jwt(&self, user: OAuthUser) -> Result<String> {
+    fn generate_jwt(&self, user: OAuthUser) -> Result<MetadataValue<Ascii>> {
         let token = jsonwebtoken::encode(
             &jsonwebtoken::Header::new(jsonwebtoken::Algorithm::HS256),
             &user,
             &jsonwebtoken::EncodingKey::from_secret(self.jwt_secret.as_bytes()),
         )?;
-        Ok(token)
+        Ok(format!("bearer {}", token).parse()?)
     }
 }

@@ -3,7 +3,6 @@ import { grpcSafe } from "$lib/safe";
 import { usersService } from "$lib/server/grpc";
 import { logger, perf } from "$lib/server/logger";
 import { createMetadata } from "$lib/server/metadata";
-import { Metadata } from "@grpc/grpc-js";
 import { redirect } from "@sveltejs/kit";
 
 /** @type {import('@sveltejs/kit').Handle} */
@@ -35,37 +34,28 @@ export async function handle({ event, resolve }) {
 
     /**
      * Check if the user is coming from the oauth flow
-     * If so, send the token to the backend to create a user
+     * If so, set a temporary cookie with the token
+     * On the next request, the new token will be used
      */
-    const oauth_token = event.url.searchParams.get("oauth_token");
-    if (oauth_token) {
-        const metadata = new Metadata();
-        metadata.add("x-authorization", `bearer ${oauth_token}`);
-        /** @type {import("$lib/safe").Safe<import("$lib/proto/proto/Id").Id__Output>} */
-        const token = await new Promise((res) => {
-            usersService.CreateUser({}, metadata, grpcSafe(res));
-        });
-        if (token.error) {
-            throw redirect(302, "/auth?error=1");
-        }
-        event.cookies.set("token", token.data.id, {
+    let token = event.url.searchParams.get("token");
+    if (token) {
+        event.cookies.set("token", token, {
             domain: COOKIE_DOMAIN,
             path: "/",
-            // 10 seconds, it's just to create the user and redirect to the dashboard
-            // after that the token will be refreshed with 7 days max age
+            // 10 seconds, it should be enough to be read by the backend on the next request
             maxAge: 10,
         });
         throw redirect(302, "/dashboard");
     }
 
-    if (event.url.pathname === "/") {
-        throw redirect(302, "/dashboard");
-    }
-
-    const token = event.cookies.get("token") ?? "";
+    token = event.cookies.get("token") ?? "";
     if (!token) {
         logger.info("No token");
         throw redirect(302, "/auth");
+    }
+
+    if (event.url.pathname === "/") {
+        throw redirect(302, "/dashboard");
     }
 
     const metadata = createMetadata(token);

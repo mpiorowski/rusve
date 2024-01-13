@@ -9,7 +9,7 @@ use anyhow::Result;
 use futures_util::TryStreamExt;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
-use tonic::{transport::Endpoint, Request, Response, Status};
+use tonic::{Request, Response, Status};
 
 #[tonic::async_trait]
 impl NotesService for MyService {
@@ -61,17 +61,13 @@ impl NotesService for MyService {
                     Status::internal("Failed to get notes")
                 })?;
 
-        let endpoint: Endpoint = self.env.users_url.parse().map_err(|err| {
-            tracing::error!("Failed to parse users url: {:?}", err);
-            Status::internal("Failed to parse users url")
-        })?;
         let jwt_token =
             rusve_notes::generate_jwt_token(&self.env.jwt_secret, &user_id).map_err(|err| {
                 tracing::error!("Failed to generate jwt token: {:?}", err);
                 Status::internal("Failed to generate jwt token")
             })?;
 
-        let client = match UsersServiceClient::connect(endpoint).await {
+        let client = match UsersServiceClient::connect(self.env.users_url.to_owned()).await {
             Ok(client) => client,
             Err(e) => {
                 tracing::error!("Failed to connect to users service: {:?}", e);

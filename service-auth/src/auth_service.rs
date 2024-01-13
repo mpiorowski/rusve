@@ -1,5 +1,6 @@
 use crate::{
     auth_oauth::{OAuth, OAuthConfig},
+    proto::users_service_client::UsersServiceClient,
     AppState,
 };
 use anyhow::Result;
@@ -130,17 +131,34 @@ pub async fn oauth_callback(
 
     /*
      * This is where you implement you own logic to create or update a user in your database.
-     * Here we are creating the jwt token with the user data and sending it to the client.
-     * The client will act as a gateway to the other services and use it to create a new user.
+     * Here we are calling the users service to create a new user.
+     * It returns an id token that we can use to authenticate the user.
      */
     let jwt_token = oauth_config.generate_jwt(user_profile).map_err(|err| {
         tracing::error!("Failed to generate JWT: {:?}", err);
         Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
     })?;
+    let client = UsersServiceClient::connect(state.env.users_url.to_owned())
+        .await
+        .map_err(|err| {
+            tracing::error!("Failed to connect to users service: {:?}", err);
+            Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
+        });
+    let mut request = tonic::Request::new(crate::proto::Empty {});
+    let metadata = request.metadata_mut();
+    metadata.insert("x-authorization", jwt_token);
+    let token = client?
+        .create_user(request)
+        .await
+        .map_err(|err| {
+            tracing::error!("Failed to create user: {:?}", err);
+            Redirect::to(&format!("{}/auth?error=2", state.env.client_url))
+        })?
+        .into_inner();
 
     tracing::info!("User authenticated");
     Ok(Redirect::to(&format!(
-        "{}/?oauth_token={}",
-        state.env.client_url, jwt_token
+        "{}/?token={}",
+        state.env.client_url, token.id
     )))
 }

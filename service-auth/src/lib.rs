@@ -12,6 +12,7 @@ pub struct Env {
     pub database_url: String,
     pub auth_url: String,
     pub client_url: String,
+    pub users_url: String,
     pub google_client_id: String,
     pub google_client_secret: String,
     pub github_client_id: String,
@@ -26,6 +27,7 @@ pub fn init_envs() -> Result<Env> {
         database_url: std::env::var("DATABASE_URL").context("DATABASE_URL is not set")?,
         auth_url: std::env::var("AUTH_URL").context("AUTH_URL is not set")?,
         client_url: std::env::var("CLIENT_URL").context("CLIENT_URL is not set")?,
+        users_url: std::env::var("USERS_URL").context("USERS_URL is not set")?,
         google_client_id: std::env::var("GOOGLE_CLIENT_ID")
             .context("GOOGLE_CLIENT_ID is not set")?,
         google_client_secret: std::env::var("GOOGLE_CLIENT_SECRET")
