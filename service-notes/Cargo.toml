@@ -1,5 +1,5 @@
 [package]
-name = "rusve-notes"
+name = "service-notes"
 version = "0.1.0"
 edition = "2021"
 

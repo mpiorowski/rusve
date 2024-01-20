@@ -1550,37 +1550,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ffc183a10b4478d04cbbbfc96d0873219d962dd5accaff2ffbd4ceb7df837f4"
 
 [[package]]
-name = "rusve-auth"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum 0.7.2",
- "deadpool-postgres",
- "futures-core",
- "futures-util",
- "http 1.0.0",
- "jsonwebtoken",
- "oauth2",
- "prost",
- "reqwest",
- "rustls",
- "rustls-native-certs",
- "serde",
- "serde_json",
- "time",
- "tokio",
- "tokio-postgres",
- "tokio-postgres-rustls",
- "tokio-stream",
- "tonic",
- "tower",
- "tower-http",
- "tracing",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
 name = "ryu"
 version = "1.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1685,6 +1654,37 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "service-auth"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum 0.7.2",
+ "deadpool-postgres",
+ "futures-core",
+ "futures-util",
+ "http 1.0.0",
+ "jsonwebtoken",
+ "oauth2",
+ "prost",
+ "reqwest",
+ "rustls",
+ "rustls-native-certs",
+ "serde",
+ "serde_json",
+ "time",
+ "tokio",
+ "tokio-postgres",
+ "tokio-postgres-rustls",
+ "tokio-stream",
+ "tonic",
+ "tower",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]

@@ -17,21 +17,21 @@ use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 
 struct AppState {
-    env: rusve_auth::Env,
+    env: service_auth::Env,
     pool: deadpool_postgres::Pool,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initalize environment variables
-    let env: rusve_auth::Env = rusve_auth::init_envs()?;
+    let env: service_auth::Env = service_auth::init_envs()?;
 
     // Initialize tracing
     let filter = &env.rust_log;
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
     // Connect to database
-    let pool = rusve_auth::connect_to_db(&env).context("Failed to connect to database")?;
+    let pool = service_auth::connect_to_db(&env).context("Failed to connect to database")?;
     tracing::info!("Connected to database");
 
     // Run migrations

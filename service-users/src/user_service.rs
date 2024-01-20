@@ -3,13 +3,13 @@ use tonic::{Request, Response, Status};
 use crate::user_db::StringOrUuid;
 
 pub async fn create_user(
-    env: &rusve_users::Env,
+    env: &service_users::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<crate::proto::Empty>,
 ) -> Result<Response<crate::proto::Id>, tonic::Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let user = rusve_users::decode_oauth_token(metadata, &env.jwt_secret)?;
+    let user = service_users::decode_oauth_token(metadata, &env.jwt_secret)?;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -46,13 +46,13 @@ pub async fn create_user(
 }
 
 pub async fn auth(
-    env: &rusve_users::Env,
+    env: &service_users::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<crate::proto::Empty>,
 ) -> Result<Response<crate::proto::AuthResponse>, tonic::Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let token = rusve_users::decode_token(metadata, &env.jwt_secret)?.id;
+    let token = service_users::decode_token(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);

@@ -1307,32 +1307,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5583e89e108996506031660fe09baa5011b9dd0341b89029313006d1fb508d70"
 
 [[package]]
-name = "rusve-users"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-stripe",
- "deadpool-postgres",
- "futures-core",
- "futures-util",
- "jsonwebtoken",
- "prost",
- "rustls",
- "rustls-native-certs",
- "serde",
- "serde_json",
- "time",
- "tokio",
- "tokio-postgres",
- "tokio-postgres-rustls",
- "tokio-stream",
- "tonic",
- "tracing",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
 name = "ryu"
 version = "1.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1459,6 +1433,32 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "service-users"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-stripe",
+ "deadpool-postgres",
+ "futures-core",
+ "futures-util",
+ "jsonwebtoken",
+ "prost",
+ "rustls",
+ "rustls-native-certs",
+ "serde",
+ "serde_json",
+ "time",
+ "tokio",
+ "tokio-postgres",
+ "tokio-postgres-rustls",
+ "tokio-stream",
+ "tonic",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]

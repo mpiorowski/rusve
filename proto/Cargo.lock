@@ -241,6 +241,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "proto"
+version = "0.1.0"
+dependencies = [
+ "tonic-build",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -298,13 +305,6 @@ dependencies = [
  "libc",
  "linux-raw-sys",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "rusve-proto"
-version = "0.1.0"
-dependencies = [
- "tonic-build",
 ]
 
 [[package]]

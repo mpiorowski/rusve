@@ -87,11 +87,11 @@ pub async fn select_user_by_id(conn: &Object, user_id: StringOrUuid) -> Result<U
     Ok(user)
 }
 
-pub async fn create_user(conn: &Object, sub: &str, email: &str, avatar: &str) -> Result<User> {
+pub async fn create_user(conn: &Object, email: &str, sub: &str, avatar: &str) -> Result<User> {
     let row = conn
         .query_opt(
-            "select * from users where sub = $1 and email = $2",
-            &[&sub, &email],
+            "select * from users where email = $1 and sub = $2 and deleted = 'infinity'",
+            &[&email, &sub],
         )
         .await?;
     let user = match row {

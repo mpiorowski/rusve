@@ -9,7 +9,7 @@ use tonic::{Request, Response, Status};
 use crate::stripe_db::remove_user_subscription_check;
 
 pub async fn check_subscription(
-    env: &rusve_users::Env,
+    env: &service_users::Env,
     conn: &deadpool_postgres::Object,
     user: &crate::proto::User,
 ) -> Result<bool> {
@@ -63,13 +63,13 @@ pub async fn check_subscription(
 }
 
 pub async fn create_stripe_checkout(
-    env: &rusve_users::Env,
+    env: &service_users::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<crate::proto::Empty>,
 ) -> Result<Response<crate::proto::StripeUrlResponse>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let user_id = rusve_users::decode_token(metadata, &env.jwt_secret)?.id;
+    let user_id = service_users::decode_token(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -95,13 +95,13 @@ pub async fn create_stripe_checkout(
 }
 
 pub async fn create_stripe_portal(
-    env: &rusve_users::Env,
+    env: &service_users::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<crate::proto::Empty>,
 ) -> Result<Response<crate::proto::StripeUrlResponse>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let user_id = rusve_users::decode_token(metadata, &env.jwt_secret)?.id;
+    let user_id = service_users::decode_token(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -126,7 +126,7 @@ pub async fn create_stripe_portal(
 }
 
 async fn create_checkout(
-    env: &rusve_users::Env,
+    env: &service_users::Env,
     conn: deadpool_postgres::Object,
     user: crate::proto::User,
 ) -> Result<String> {
@@ -177,7 +177,7 @@ async fn create_customer(client: &Client, email: &str) -> Result<String> {
 }
 
 async fn create_portal(
-    env: &rusve_users::Env,
+    env: &service_users::Env,
     conn: &deadpool_postgres::Object,
     user: crate::proto::User,
 ) -> Result<String> {

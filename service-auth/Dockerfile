@@ -7,7 +7,7 @@ COPY src /app/src
 COPY Cargo.toml /app/Cargo.toml
 COPY Cargo.lock /app/Cargo.lock
 
-CMD ["cargo", "run"]
+CMD cargo run
 
 # Build
 FROM rust:bookworm as build
