@@ -77,7 +77,7 @@ export async function handle({ event, resolve }) {
     // max age is 7 days
     response.headers.append(
         "set-cookie",
-        `token=${auth.data.token}; HttpOnly; SameSite=Strict; Secure; Max-Age=604800; Domain=${COOKIE_DOMAIN}; Path=/`,
+        `token=${auth.data.token}; HttpOnly; SameSite=Lax; Secure; Max-Age=604800; Domain=${COOKIE_DOMAIN}; Path=/`,
     );
     return response;
 }

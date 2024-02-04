@@ -6,8 +6,6 @@ use stripe::{
 };
 use tonic::{Request, Response, Status};
 
-use crate::stripe_db::remove_user_subscription_check;
-
 pub async fn check_subscription(
     env: &service_users::Env,
     conn: &deadpool_postgres::Object,
@@ -83,7 +81,7 @@ pub async fn create_stripe_checkout(
                 Status::unauthenticated("Failed to auth user")
             })?;
 
-    let url = crate::stripe_service::create_checkout(env, conn, user)
+    let url = create_checkout(env, conn, user)
         .await
         .map_err(|e| {
             tracing::error!("Failed to create checkout session: {:?}", e);
@@ -107,19 +105,18 @@ pub async fn create_stripe_portal(
         tracing::error!("Failed to get connection: {:?}", e);
         Status::internal("Failed to get connection")
     })?;
-    let user = crate::user_db::select_user_by_id(&conn, crate::user_db::StringOrUuid::String(user_id))
-        .await
-        .map_err(|e| {
-            tracing::error!("Failed to auth user: {:?}", e);
-            Status::unauthenticated("Failed to auth user")
-        })?;
+    let user =
+        crate::user_db::select_user_by_id(&conn, crate::user_db::StringOrUuid::String(user_id))
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to auth user: {:?}", e);
+                Status::unauthenticated("Failed to auth user")
+            })?;
 
-    let url = crate::stripe_service::create_portal(env, &conn, user)
-        .await
-        .map_err(|e| {
-            tracing::error!("Failed to create portal session: {:?}", e);
-            Status::internal("Failed to create portal session")
-        })?;
+    let url = create_portal(env, &conn, user).await.map_err(|e| {
+        tracing::error!("Failed to create portal session: {:?}", e);
+        Status::internal("Failed to create portal session")
+    })?;
 
     tracing::info!("create_stripe_portal: {:?}", start.elapsed());
     Ok(Response::new(crate::proto::StripeUrlResponse { url }))
@@ -163,7 +160,7 @@ async fn create_checkout(
         .url
         .ok_or_else(|| anyhow::anyhow!("Missing session url"))?;
 
-    let _ = remove_user_subscription_check(&conn, &user.id).await?;
+    let _ = crate::stripe_db::remove_user_subscription_check(&conn, &user.id).await?;
 
     Ok(session_url)
 }
