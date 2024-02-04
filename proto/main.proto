@@ -1,8 +1,5 @@
 syntax = "proto3";
-
 package proto;
-
-option go_package = "rusve/proto";
 
 import "users.proto";
 import "profile.proto";
@@ -33,11 +30,6 @@ message StripeUrlResponse {
     string url = 1;
 }
 
-message NoteResponse {
-    Note note = 1;
-    Profile profile = 2;
-}
-
 service UsersService {
     rpc CreateUser(Empty) returns (Id) {}
     rpc Auth(Empty) returns (AuthResponse) {}
@@ -47,6 +39,11 @@ service UsersService {
 
     rpc CreateStripeCheckout(Empty) returns (StripeUrlResponse) {}
     rpc CreateStripePortal(Empty) returns (StripeUrlResponse) {}
+}
+
+message NoteResponse {
+    Note note = 1;
+    Profile profile = 2;
 }
 
 service NotesService {

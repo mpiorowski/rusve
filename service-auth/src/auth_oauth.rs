@@ -1,6 +1,6 @@
 use anyhow::Result;
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
-use rusve_auth::Env;
+use service_auth::Env;
 use serde::{Deserialize, Serialize};
 use tonic::metadata::{Ascii, MetadataValue};
 

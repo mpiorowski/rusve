@@ -6,13 +6,13 @@ use tonic::{Request, Response, Status};
 use crate::proto::{Count, Email, Empty, Page};
 
 pub async fn count_emails_by_target_id(
-    env: &rusve_utils::Env,
+    env: &service_utils::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<Empty>,
 ) -> Result<Response<Count>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let target_id = rusve_utils::auth(metadata, &env.jwt_secret)?.id;
+    let target_id = service_utils::auth(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -31,13 +31,13 @@ pub async fn count_emails_by_target_id(
 }
 
 pub async fn get_emails_by_target_id(
-    env: &rusve_utils::Env,
+    env: &service_utils::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<Page>,
 ) -> Result<Response<ReceiverStream<Result<crate::proto::Email, Status>>>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let target_id = rusve_utils::auth(metadata, &env.jwt_secret)?.id;
+    let target_id = service_utils::auth(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -79,13 +79,13 @@ pub async fn get_emails_by_target_id(
 }
 
 pub async fn send_email(
-    env: &rusve_utils::Env,
+    env: &service_utils::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<Email>,
 ) -> Result<Response<Email>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let target_id = rusve_utils::auth(metadata, &env.jwt_secret)?.id;
+    let target_id = service_utils::auth(metadata, &env.jwt_secret)?.id;
 
     let email = request.into_inner();
     crate::email_validation::Validation::validate(&email)?;

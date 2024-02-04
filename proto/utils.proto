@@ -1,8 +1,5 @@
 syntax = "proto3";
-
 package proto;
-
-option go_package = "rusve/proto";
 
 enum FileTarget {
     FILE_UNSET = 0;

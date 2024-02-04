@@ -3,13 +3,13 @@ use tokio_stream::{wrappers::ReceiverStream, StreamExt};
 use tonic::{Request, Response, Status};
 
 pub async fn count_files_by_target_id(
-    env: &rusve_utils::Env,
+    env: &service_utils::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<Empty>,
 ) -> Result<Response<Count>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let target_id = rusve_utils::auth(metadata, &env.jwt_secret)?.id;
+    let target_id = service_utils::auth(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -28,13 +28,13 @@ pub async fn count_files_by_target_id(
 }
 
 pub async fn get_files_by_target_id(
-    env: &rusve_utils::Env,
+    env: &service_utils::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<Page>,
 ) -> Result<Response<ReceiverStream<Result<File, Status>>>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let target_id = rusve_utils::auth(metadata, &env.jwt_secret)?.id;
+    let target_id = service_utils::auth(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection from pool: {:?}", e);
@@ -89,13 +89,13 @@ pub async fn get_files_by_target_id(
 }
 
 pub async fn get_file_by_id(
-    env: &rusve_utils::Env,
+    env: &service_utils::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<Id>,
 ) -> Result<Response<ReceiverStream<Result<File, Status>>>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let target_id = rusve_utils::auth(metadata, &env.jwt_secret)?.id;
+    let target_id = service_utils::auth(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection from pool: {:?}", e);
@@ -134,13 +134,13 @@ pub async fn get_file_by_id(
 }
 
 pub async fn upload_file(
-    env: &rusve_utils::Env,
+    env: &service_utils::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<tonic::Streaming<File>>,
 ) -> Result<Response<ReceiverStream<Result<File, Status>>>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let target_id = rusve_utils::auth(metadata, &env.jwt_secret)?.id;
+    let target_id = service_utils::auth(metadata, &env.jwt_secret)?.id;
 
     let mut conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection from pool: {:?}", e);
@@ -193,13 +193,13 @@ pub async fn upload_file(
 }
 
 pub async fn delete_file_by_id(
-    env: &rusve_utils::Env,
+    env: &service_utils::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<Id>,
 ) -> Result<Response<Empty>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let target_id = rusve_utils::auth(metadata, &env.jwt_secret)?.id;
+    let target_id = service_utils::auth(metadata, &env.jwt_secret)?.id;
 
     let mut conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection from pool: {:?}", e);

@@ -1,13 +1,13 @@
 use tonic::{Request, Response, Status};
 
 pub async fn get_profile_by_user_id(
-    env: &rusve_users::Env,
+    env: &service_users::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<crate::proto::Empty>,
 ) -> Result<Response<crate::proto::Profile>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let user_id = rusve_users::decode_token(metadata, &env.jwt_secret)?.id;
+    let user_id = service_users::decode_token(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);
@@ -26,13 +26,13 @@ pub async fn get_profile_by_user_id(
 }
 
 pub async fn create_profile(
-    env: &rusve_users::Env,
+    env: &service_users::Env,
     pool: &deadpool_postgres::Pool,
     request: Request<crate::proto::Profile>,
 ) -> Result<Response<crate::proto::Profile>, Status> {
     let start = std::time::Instant::now();
     let metadata = request.metadata();
-    let user_id = rusve_users::decode_token(metadata, &env.jwt_secret)?.id;
+    let user_id = service_users::decode_token(metadata, &env.jwt_secret)?.id;
 
     let conn = pool.get().await.map_err(|e| {
         tracing::error!("Failed to get connection: {:?}", e);

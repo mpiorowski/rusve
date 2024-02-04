@@ -1,5 +1,5 @@
 use anyhow::Result;
-use rusve_utils::Env;
+use service_utils::Env;
 
 async fn connect_to_bucket(env: &Env) -> Result<s3::Bucket> {
     let s3_access_key = env.s3_access_key.clone();
