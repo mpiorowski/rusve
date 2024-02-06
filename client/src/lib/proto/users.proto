@@ -1,13 +1,10 @@
 syntax = "proto3";
-
 package proto;
-
-option go_package = "sgsg/proto";
 
 enum UserRole {
     ROLE_UNSET = 0;
-    USER = 1;
-    ADMIN = 2;
+    ROLE_USER = 1;
+    ROLE_ADMIN = 2;
 }
 
 message User {
