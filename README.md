@@ -1,4 +1,4 @@
-# Rusve = Rust + Svelte
+# Rusve = Rust + Svelte + PostgreSQL + gRPC
 https://www.rusve.app
 
 ## What is Rusve? 
