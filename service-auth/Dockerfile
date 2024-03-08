@@ -28,5 +28,5 @@ COPY --from=build /app/target/release /app
 
 RUN apt-get update && apt-get install -y openssl ca-certificates libssl-dev # libpq-dev 
 
-CMD ["/app/rusve-auth"]
+CMD ["/app/service-auth"]
 
