@@ -1,13 +1,13 @@
 // Original file: users.proto
 
 export const UserRole = {
-  ROLE_UNSET: 0,
+  UNSET: 0,
   USER: 1,
   ADMIN: 2,
 } as const;
 
 export type UserRole =
-  | 'ROLE_UNSET'
+  | 'UNSET'
   | 0
   | 'USER'
   | 1
