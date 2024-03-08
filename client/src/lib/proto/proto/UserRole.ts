@@ -1,17 +1,17 @@
 // Original file: users.proto
 
 export const UserRole = {
-  ROLE_UNSET: 0,
-  ROLE_USER: 1,
-  ROLE_ADMIN: 2,
+  UNSET: 0,
+  USER: 1,
+  ADMIN: 2,
 } as const;
 
 export type UserRole =
-  | 'ROLE_UNSET'
+  | 'UNSET'
   | 0
-  | 'ROLE_USER'
+  | 'USER'
   | 1
-  | 'ROLE_ADMIN'
+  | 'ADMIN'
   | 2
 
 export type UserRole__Output = typeof UserRole[keyof typeof UserRole]
