@@ -25,7 +25,7 @@ futures-core = "0.3.29"
 # Database
 tokio-postgres = { version = "0.7.8", features = ["with-uuid-1", "with-time-0_3", "array-impls"] }
 tokio-postgres-rustls = "0.10.0"
-rustls = "0.21.5"
+rustls = "0.21.11"
 rustls-native-certs = "0.6.3"
 deadpool-postgres = "0.10.5"
 
