@@ -4,9 +4,9 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub struct Verifier {
-    pub id: Uuid,
+    id: Uuid,
     pub created: OffsetDateTime,
-    pub csrf_token: String,
+    csrf_token: String,
     pub pkce_verifier: String,
 }
 
