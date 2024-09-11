@@ -5,40 +5,40 @@ edition = "2021"
 
 [dependencies]
 # Main
-anyhow = "1.0.72"
-time = "0.3.20"
-uuid = { version = "1.3.2", features = ["default", "v7"] }
-serde = { version = "1.0.126", features = ["derive"] }
-serde_json = "1.0.96"
-jsonwebtoken = "8.3.0"
+anyhow = "1.0"
+time = "0.3"
+uuid = { version = "1.3", features = ["default", "v7"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+jsonwebtoken = "8.3"
 
 # Trace
-tracing = "0.1.37"
-tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Async
-tokio = { version = "1.27.0", features = ["rt-multi-thread", "macros", "sync" ] }
-tokio-stream = "0.1.12"
-futures-util = "0.3.28"
-futures-core = "0.3.29"
+tokio = { version = "1.27", features = ["rt-multi-thread", "macros", "sync" ] }
+tokio-stream = "0.1"
+futures-util = "0.3"
+futures-core = "0.3"
 
 # Database
-tokio-postgres = { version = "0.7.8", features = ["with-uuid-1", "with-time-0_3", "array-impls"] }
-tokio-postgres-rustls = "0.10.0"
-rustls = "0.21.5"
-rustls-native-certs = "0.6.3"
-deadpool-postgres = "0.10.5"
+tokio-postgres = { version = "0.7", features = ["with-uuid-1", "with-time-0_3", "array-impls"] }
+tokio-postgres-rustls = "0.10"
+rustls = "0.21"
+rustls-native-certs = "0.6"
+deadpool-postgres = "0.10"
 
 # gRPC
-prost = "0.11.9"
-tonic = { version = "0.9.2", features = ["tls", "tls-roots"] }
+prost = "0.11"
+tonic = { version = "0.9", features = ["tls", "tls-roots"] }
 
 # Http
-axum = "0.7.2"
-tower = "0.4.13"
-tower-http = { version = "0.5.0", features = ["cors"] }
-http = "1.0.0"
-reqwest = { version = "0.11.22", features = ["default", "json"] }
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors"] }
+http = "1.0"
+reqwest = { version = "0.11", features = ["default", "json"] }
 
 # OAuth
-oauth2 = "4.4.2"
+oauth2 = "4.4"
