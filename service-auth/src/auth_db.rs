@@ -4,9 +4,7 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub struct Verifier {
-    id: Uuid,
     pub created: OffsetDateTime,
-    csrf_token: String,
     pub pkce_verifier: String,
 }
 
@@ -20,9 +18,7 @@ impl TryFrom<tokio_postgres::Row> for Verifier {
         let pkce_verifier: String = value.try_get("pkce_verifier")?;
 
         Ok(Verifier {
-            id,
             created,
-            csrf_token,
             pkce_verifier,
         })
     }
