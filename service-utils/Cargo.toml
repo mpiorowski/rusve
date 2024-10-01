@@ -31,7 +31,7 @@ deadpool-postgres = "0.10"
 
 # gRPC
 prost = "0.11"
-tonic = "0.9"
+tonic = "0.12"
 
 # S3
 rust-s3 = "0.33"
