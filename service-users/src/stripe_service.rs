@@ -142,7 +142,8 @@ async fn create_checkout(
     let success_url = format!("{}/subscription?success", client_url);
     let cancel_url = format!("{}/subscription?cancel", client_url);
 
-    let mut params = stripe::CreateCheckoutSession::new(&success_url);
+    let mut params = stripe::CreateCheckoutSession::new();
+    params.success_url = Some(&success_url);
     params.customer = Some(CustomerId::from_str(&customer_id)?);
     params.cancel_url = Some(&cancel_url);
     params.line_items = Some(vec![stripe::CreateCheckoutSessionLineItems {

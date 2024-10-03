@@ -12,9 +12,9 @@ impl TryFrom<tokio_postgres::Row> for Verifier {
     type Error = anyhow::Error;
 
     fn try_from(value: tokio_postgres::Row) -> std::result::Result<Self, Self::Error> {
-        let id: Uuid = value.try_get("id")?;
+        let _: Uuid = value.try_get("id")?;
         let created: OffsetDateTime = value.try_get("created")?;
-        let csrf_token: String = value.try_get("csrf_token")?;
+        let _: String = value.try_get("csrf_token")?;
         let pkce_verifier: String = value.try_get("pkce_verifier")?;
 
         Ok(Verifier {
