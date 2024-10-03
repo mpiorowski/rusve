@@ -26,7 +26,7 @@ env:
   SERVICE: users
   RUST_LOG: info
   DATABASE_URL: ${{ secrets.DATABASE_URL }}&dbname=users
-  CLIENT_URL: https://client-cdb5ecy4ia-lz.a.run.app
+  CLIENT_URL: https://www.rusve.app
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   # DATABASE_URL=postgresql:///?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DATABASE }}&user=postgres&password=${{ secrets.DB_PASS }}&dbname=users
 
