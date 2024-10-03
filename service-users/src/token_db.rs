@@ -4,9 +4,7 @@ use std::str::FromStr;
 use uuid::Uuid;
 
 pub struct Token {
-    pub id: Uuid,
     pub created: time::OffsetDateTime,
-    pub updated: time::OffsetDateTime,
     pub user_id: Uuid,
 }
 
@@ -14,9 +12,7 @@ impl TryFrom<tokio_postgres::Row> for Token {
     type Error = anyhow::Error;
     fn try_from(value: tokio_postgres::Row) -> std::result::Result<Self, Self::Error> {
         Ok(Token {
-            id: value.try_get("id")?,
             created: value.try_get("created")?,
-            updated: value.try_get("updated")?,
             user_id: value.try_get("user_id")?,
         })
     }
