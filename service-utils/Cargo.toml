@@ -31,7 +31,7 @@ deadpool-postgres = "0.10"
 
 # gRPC
 prost = "0.11"
-tonic = "0.12"
+tonic = { version = "0.9", features = ["tls", "tls-roots"] }
 
 # S3
 rust-s3 = "0.33"
