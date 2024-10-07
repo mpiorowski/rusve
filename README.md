@@ -19,9 +19,6 @@ If you need something a little more simple (Go, SQLite, server deployment), feel
 - TESTS!
 - **Any other feature You will request :)**
 
-## Application
-https://www.rusve.app
-
 ## Architecture
 - **[Rust](https://www.rust-lang.org/)** - Amazing language, not easy to pick up, but one that can give one of the best performance and safety on the market.
 - **Modules** - Some people might call them microservices. Splitted into smaller parts, very easy to scale, and allows using any combination of languages and databases.
